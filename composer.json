@@ -1,6 +1,6 @@
 {
-    "name": "simplesamlphp/openid-tools",
-    "description": "OpenID Tools Library",
+    "name": "simplesamlphp/openid",
+    "description": "OpenID Library",
     "type": "library",
     "license": "LGPL-2.1",
     "authors": [
@@ -12,12 +12,12 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "SimpleSAML\\OIDT\\": "src/"
+            "SimpleSAML\\OpenID\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SimpleSAML\\Test\\OIDT\\": "tests/src/"
+            "SimpleSAML\\Test\\OpenID\\": "tests/src/"
         }
     },
     "require": {
@@ -25,7 +25,9 @@
         "guzzlehttp/guzzle": "^7.8",
         "psr/http-client": "^1",
         "psr/http-message": "^2",
-        "psr/log": "^3"
+        "psr/log": "^3",
+        "psr/simple-cache": "^3",
+        "web-token/jwt-library": "^3.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^10",

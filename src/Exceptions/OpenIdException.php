@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OIDT\Exceptions;
+namespace SimpleSAML\OpenID\Exceptions;
 
 use Exception;
 

@@ -2,44 +2,44 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OIDT\Federation;
+namespace SimpleSAML\OpenID\Federation;
 
-use GuzzleHttp\Client;
-use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OIDT\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Exceptions\TrustChainException;
 
 class TrustChainFetcher
 {
     public function __construct(
-        private ClientInterface $httpClient = new Client(),
-        private ?LoggerInterface $logger = null,
+        private readonly EntityStatementFetcher $entityStatementFetcher,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
     /**
-     * @param string $leafEntityId
-     * @param array<string> $validTrustAnchorIds
+     * @param non-empty-string $leafEntityId
+     * @param non-empty-array<string> $validTrustAnchorIds
      * @return array
-     * @throws \SimpleSAML\OIDT\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
     public function for(string $leafEntityId, array $validTrustAnchorIds): array
     {
-        $this->validateBeginning($leafEntityId, $validTrustAnchorIds);
+        $this->validateStart($leafEntityId, $validTrustAnchorIds);
 
         $this->logger?->info(
             "Trust chain fetch started for leaf entity ID $leafEntityId with valid Trust Anchor IDs being " .
             implode(', ', $validTrustAnchorIds),
         );
 
+        // Fetch leaf entity configuration and find authority_hints
+        $leafEntityConfiguration = $this->entityStatementFetcher->forWellKnown($leafEntityId);
 
-        return [];
+        return [$leafEntityConfiguration];
     }
 
     /**
-     * @throws \SimpleSAML\OIDT\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
-    private function validateBeginning(string $leafEntityId, array $validTrustAnchorIds)
+    private function validateStart(string $leafEntityId, array $validTrustAnchorIds): void
     {
         $errors = [];
 

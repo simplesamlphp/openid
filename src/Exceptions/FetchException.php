@@ -6,6 +6,6 @@ namespace SimpleSAML\OpenID\Exceptions;
 
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
-class TrustChainException extends OpenIdException
+class FetchException extends OpenIdException
 {
 }

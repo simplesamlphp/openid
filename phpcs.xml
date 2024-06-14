@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="SimpleSAMLphp OIDT module ruleset">
+<ruleset name="SimpleSAMLphp OpenID module ruleset">
 
     <config name="show_progress" value="1"/>
     <config name="ignore_warnings_on_exit" value="0"/>
