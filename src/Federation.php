@@ -6,35 +6,49 @@ namespace SimpleSAML\OpenID;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Federation\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
+use SimpleSAML\OpenID\Federation\TrustChainFetcher;
 
 class Federation
 {
-    private static ?EntityStatementFetcher $entityStatementFetcher = null;
+    const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
+    protected static ?EntityStatementFetcher $entityStatementFetcher = null;
+    protected static ?TrustChainFetcher $trustChainFetcher = null;
 
     public function __construct(
-        private readonly \DateInterval $maxEntityStatementCacheDuration = new \DateInterval('PT6H'),
-        private readonly ?CacheInterface $cache = null,
-        private readonly ?LoggerInterface $logger = null,
-        private readonly ClientInterface $httpClient = new Client(),
-        private readonly RequestFactoryInterface $requestFactory = new HttpFactory(),
-        private readonly Helpers $helpers = new Helpers(),
+        protected readonly \DateInterval $maxEntityStatementCacheDuration = new \DateInterval('PT6H'),
+        protected readonly ?CacheInterface $cache = null,
+        protected readonly ?LoggerInterface $logger = null,
+        protected readonly Client $httpClient = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG),
+        protected readonly RequestFactoryInterface $requestFactory = new HttpFactory(),
+        protected readonly Helpers $helpers = new Helpers(),
+        protected readonly EntityStatementFactory $entityStatementFactory = new EntityStatementFactory(),
     ) {
     }
 
     public function entityStatementFetcher(): EntityStatementFetcher
     {
         return self::$entityStatementFetcher ??= new EntityStatementFetcher(
+            $this->httpClient,
             $this->maxEntityStatementCacheDuration,
             $this->cache,
             $this->logger,
-            $this->httpClient,
-            $this->requestFactory,
             $this->helpers,
+            $this->entityStatementFactory,
+        );
+    }
+
+    public function trustChainFetcher(): TrustChainFetcher
+    {
+        return self::$trustChainFetcher ??= new TrustChainFetcher(
+            $this->entityStatementFetcher(),
+            $this->logger
         );
     }
 }
