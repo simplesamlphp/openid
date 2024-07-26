@@ -6,18 +6,17 @@ namespace SimpleSAML\OpenID\Federation;
 
 use DateInterval;
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
-use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\Module\oidc\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
+use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Exceptions\FetchException;
+use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
 use Throwable;
 
@@ -34,57 +33,106 @@ class EntityStatementFetcher
     }
 
     /**
+     * Fetch entity statement from a well-known URI. By default, this will be openid-federation (entity configuration).
+     * Fetch will first check if the entity statement is available in cache. If not, it will do a network fetch.
+     *
      * @param non-empty-string $entityId
      * @param \SimpleSAML\OpenID\Codebooks\WellKnownEnum $wellKnownEnum
      * @return \SimpleSAML\OpenID\Federation\EntityStatement
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function forWellKnown(
+    public function fromCacheOrWellKnownEndpoint(
         string $entityId,
         WellKnownEnum $wellKnownEnum = WellKnownEnum::OpenIdFederation,
     ): EntityStatement {
         $wellKnownUri = $wellKnownEnum->uriFor($entityId);
         $this->logger?->debug(
-            'Entity statement fetch initiated.',
+            'Entity statement fetch from cache or well-known endpoint.',
             compact('entityId', 'wellKnownUri', 'wellKnownEnum'),
         );
-        $jws = null;
-        $cacheKey = $this->helpers->cache()->keyFor($wellKnownUri);
-        try {
-            /** @var ?string $jws */
-            $jws = $this->cache?->get($cacheKey);
-            $jws = is_string($jws) ? $jws : null;
-        } catch (Throwable $exception) {
-            $this->logger?->error(
-                'Error trying to get entity statement from cache: ' . $exception->getMessage(),
-                compact('wellKnownUri', 'cacheKey'),
-            );
-        }
 
-        if (!is_string($jws)) {
-            $this->logger?->debug(
-                'Entity statement not cached, proceeding with network fetch.',
-                compact('entityId', 'wellKnownUri'),
-            );
-            $jws = $this->fromNetwork($wellKnownUri);
-        }
-
-        // TODO mivanci Important Validate header, iat, exp.
-        $entityStatement = $this->entityStatementFactory->fromToken($jws);
-
-        $expiration = (int)($entityStatement->getPayloadClaim(ClaimNamesEnum::ExpirationTime->value) ?? 0);
-        $duration = $this->helpers->cache()->maxDuration($this->maxCacheDuration, $expiration);
-
-        $this->logger?->debug('Fetched entity statement.', compact('wellKnownUri', 'jws'));
-        $this->cache?->set($cacheKey, $jws, $duration);
-
-        return $entityStatement;
+        return $this->fromCacheOrNetwork($wellKnownUri);
     }
 
     /**
+     * @param string $entityId
+     * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the fetch
+     * endpoint (issuer).
+     * @return \SimpleSAML\OpenID\Federation\EntityStatement
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromNetwork(string $uri): string
+    public function fromCacheOrFetchEndpoint(
+        string $entityId,
+        EntityStatement $entityConfiguration,
+    ): EntityStatement
+    {
+        $entityConfigurationPayload = $entityConfiguration->getPayload();
+
+        $fetchEndpointUri = (string)($entityConfigurationPayload[EntityTypeEnum::FederationEntity->value]
+            [ClaimNamesEnum::FederationFetchEndpoint->value] ??
+            throw new JwsException('No fetch endpoint found in entity configuration.'));
+        $issuer = (string)($entityConfigurationPayload[ClaimNamesEnum::Issuer->value] ??
+            throw new JwsException('No issuer claim found in entity configuration.'));
+
+        $this->logger?->debug(
+            'Entity statement fetch from cache or fetch endpoint.',
+            compact('entityId', 'fetchEndpointUri', 'issuer'),
+        );
+
+        return $this->fromCacheOrNetwork(
+            $this->helpers->url()->withParams(
+                $fetchEndpointUri,
+                [
+                    ClaimNamesEnum::Subject->value => $entityId,
+                    ClaimNamesEnum::Issuer->value => $issuer,
+                ]
+            ),
+        );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     */
+    public function fromCacheOrNetwork(string $uri): EntityStatement
+    {
+        return $this->fromCache($uri) ?? $this->fromNetwork($uri);
+    }
+
+    /**
+     * Fetch entity statement from cache, if available. URI is used as cache key.
+     *
+     * @param string $uri
+     * @return \SimpleSAML\OpenID\Federation\EntityStatement|null
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function fromCache(string $uri): ?EntityStatement
+    {
+        $cacheKey = $this->helpers->cache()->keyFor($uri);
+
+        try {
+            /** @var ?string $jws */
+            $jws = $this->cache?->get($cacheKey);
+        } catch (Throwable $exception) {
+            $this->logger?->error(
+                'Error trying to get entity statement from cache: ' . $exception->getMessage(),
+                compact('uri', 'cacheKey'),
+            );
+            return null;
+        }
+
+        return is_string($jws) ? $this->prepareEntityStatement($jws) : null;
+    }
+
+    /**
+     * Fetch entity statement from network. Each successful fetch will be cached, with URI being used as a cache key.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function fromNetwork(string $uri): EntityStatement
     {
         try {
             $response = $this->httpClient->request(HttpMethodsEnum::GET->value, $uri);
@@ -124,7 +172,33 @@ class EntityStatementFetcher
             throw new FetchException($message);
         }
 
-        $this->logger?->info('Successful HTTP response for entity statement fetch to: ' . $uri);
-        return $response->getBody()->getContents();
+        $jws = $response->getBody()->getContents();
+        $this->logger?->info('Successful HTTP response for entity statement fetch.', compact('uri', 'jws'));
+
+        $entityStatement = $this->entityStatementFactory->fromToken($jws);
+
+        // Cache it
+        $expiration = (int)($entityStatement->getPayloadClaim(ClaimNamesEnum::ExpirationTime->value) ?? 0);
+        $duration = $this->helpers->cache()->maxDuration($this->maxCacheDuration, $expiration);
+        $cacheKey = $this->helpers->cache()->keyFor($uri);
+        try {
+            $this->cache?->set($cacheKey, $jws, $duration);
+        } catch (Throwable $exception) {
+            $this->logger?->error(
+                'Error setting entity statement to cache: ' . $exception->getMessage(),
+                compact('uri', 'cacheKey'),
+            );
+        }
+
+        return $entityStatement;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    protected function prepareEntityStatement(string $jws): EntityStatement
+    {
+        // TODO mivanci Important Validate header, iat, exp.
+        return $this->entityStatementFactory->fromToken($jws);
     }
 }

@@ -5,21 +5,15 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
-use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use Throwable;
 
 class JwsParser
 {
-    protected JWSSerializerManager $serializerManager;
-
     public function __construct(
-        JWSSerializerManager $serializerManager = null,
+        protected readonly JWSSerializerManager $serializerManager,
     ) {
-        $this->serializerManager = $serializerManager ?? new JWSSerializerManager([
-            new CompactSerializer(),
-        ]);
     }
 
     /**

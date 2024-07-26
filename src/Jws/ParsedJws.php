@@ -6,7 +6,9 @@ namespace SimpleSAML\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
 use JsonException;
+use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Factories\JwksFactory;
 use Throwable;
 
 class ParsedJws
@@ -20,9 +22,11 @@ class ParsedJws
      */
     public function __construct(
         protected readonly string $token,
-        protected readonly JwsParser $parser = new JwsParser(),
+        protected readonly JwsParser $jwsParser,
+        protected readonly JwsVerifier $jwsVerifier,
+        protected readonly JwksFactory $jwksFactory,
     ) {
-        $this->jws = $this->parser->parse($this->token);
+        $this->jws = $this->jwsParser->parse($this->token);
     }
 
     /**

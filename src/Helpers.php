@@ -5,27 +5,20 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID;
 
 use SimpleSAML\OpenID\Helpers\Cache;
-use SimpleSAML\OpenID\Helpers\Http;
-use SimpleSAML\OpenID\Helpers\Uri;
+use SimpleSAML\OpenID\Helpers\Url;
 
 class Helpers
 {
-    protected static ?Uri $uri = null;
+    protected static ?Url $url = null;
     protected static ?Cache $cache = null;
-    protected static ?Http $http = null;
 
-    public function uri(): Uri
+    public function url(): Url
     {
-        return self::$uri ??= new Uri();
+        return self::$url ??= new Url();
     }
 
     public function cache(): Cache
     {
         return self::$cache ??= new Cache();
-    }
-
-    public function http(): Http
-    {
-        return self::$http ??= new Http();
     }
 }
