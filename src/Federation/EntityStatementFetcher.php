@@ -56,7 +56,7 @@ class EntityStatementFetcher
     }
 
     /**
-     * @param string $entityId
+     * @param string $subjectId
      * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the fetch
      * endpoint (issuer).
      * @return \SimpleSAML\OpenID\Federation\EntityStatement
@@ -64,28 +64,28 @@ class EntityStatementFetcher
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
     public function fromCacheOrFetchEndpoint(
-        string $entityId,
+        string $subjectId,
         EntityStatement $entityConfiguration,
     ): EntityStatement
     {
         $entityConfigurationPayload = $entityConfiguration->getPayload();
 
-        $fetchEndpointUri = (string)($entityConfigurationPayload[EntityTypeEnum::FederationEntity->value]
+        $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimNamesEnum::Metadata->value]
+            [EntityTypeEnum::FederationEntity->value]
             [ClaimNamesEnum::FederationFetchEndpoint->value] ??
             throw new JwsException('No fetch endpoint found in entity configuration.'));
-        $issuer = (string)($entityConfigurationPayload[ClaimNamesEnum::Issuer->value] ??
-            throw new JwsException('No issuer claim found in entity configuration.'));
+        $issuer = $entityConfiguration->getIssuer();
 
         $this->logger?->debug(
             'Entity statement fetch from cache or fetch endpoint.',
-            compact('entityId', 'fetchEndpointUri', 'issuer'),
+            compact('subjectId', 'fetchEndpointUri', 'issuer'),
         );
 
         return $this->fromCacheOrNetwork(
             $this->helpers->url()->withParams(
                 $fetchEndpointUri,
                 [
-                    ClaimNamesEnum::Subject->value => $entityId,
+                    ClaimNamesEnum::Subject->value => $subjectId,
                     ClaimNamesEnum::Issuer->value => $issuer,
                 ]
             ),

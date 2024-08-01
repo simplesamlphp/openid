@@ -6,7 +6,6 @@ namespace SimpleSAML\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
 use JsonException;
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\JwksFactory;
 use Throwable;

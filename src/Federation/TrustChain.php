@@ -10,7 +10,7 @@ use SimpleSAML\OpenID\Exceptions\TrustChainException;
 
 class TrustChain
 {
-    /** @var array Entities which belong to the trust chain. */
+    /** @var \SimpleSAML\OpenID\Federation\EntityStatement[] Entities which belong to the trust chain. */
     protected array $entities = [];
 
     /** @var bool Indication the chain is resolved up to the trust anchor. */
@@ -77,7 +77,7 @@ class TrustChain
     protected function validateIsEmpty(): void
     {
         empty($this->entities) ||
-        throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
+        throw new TrustChainException('Trust Chain is expected to be empty at this point.');
     }
 
     /**
@@ -86,7 +86,7 @@ class TrustChain
     protected function validateIsNotEmpty(): void
     {
         !empty($this->entities) ||
-        throw new TrustChainException('Trust Chain is expected to be empty at this point.');
+        throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
     }
 
     /**
@@ -95,21 +95,33 @@ class TrustChain
      */
     protected function validateConfigurationStatement(EntityStatement $entityStatement): void
     {
-        $issuer = $entityStatement->getPayloadClaim(ClaimNamesEnum::Issuer->value) ??
-            throw new JwsException('No issuer claim present in entity statement.');
-        $subject = $entityStatement->getPayloadClaim(ClaimNamesEnum::Subject->value) ??
-            throw new JwsException('No subject claim present in entity statement.');
-
         // This must be entity configuration (statement about itself).
-        if ($issuer !== $subject) {
+        if (!$entityStatement->isConfiguration()) {
             throw new JwsException('Leaf entity statement issuer does not match subject.');
         }
 
+        // Verify with own keys from configuration.
         $entityStatement->verifyWithKeySet();
     }
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
     protected function validateSubordinateStatement(EntityStatement $entityStatement)
     {
-        // TODO mivanci
+        // This must not be configuration
+        if ($entityStatement->isConfiguration()) {
+            throw new JwsException('Subordinate statement issuer is not expected to match subject.');
+        }
+
+        // Check if the subject is the issuer of the last statement in the chain.
+        $previousStatement = end($this->entities);
+        reset($this->entities);
+        if ($entityStatement->getSubject() !== $previousStatement->getIssuer()) {
+            throw new JwsException('Subordinate statement subject does not match issuer in previous statement.');
+        }
+
+        // Verify previous statement using the keys in subordinate statement.
+        $previousStatement->verifyWithKeySet($entityStatement->getJwks());
     }
 }

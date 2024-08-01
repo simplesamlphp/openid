@@ -7,7 +7,6 @@ namespace SimpleSAML\OpenID\Federation;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Exceptions\FetchException;
-use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Factories\TrustChainFactory;
 
@@ -17,7 +16,7 @@ class TrustChainFetcher
 
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
-        protected readonly TrustChainFactory $trustChainFactory = new TrustChainFactory(),
+        protected readonly TrustChainFactory $trustChainFactory,
         protected readonly ?LoggerInterface $logger = null,
         int $maxConfigurationChainDepth = 9,
     ) {
@@ -41,84 +40,100 @@ class TrustChainFetcher
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
-        $trustChainBag = new TrustChainBag();
+        // Fetch leaf entity configuration and find authority_hints
+        $leafEntityConfiguration = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($leafEntityId);
+        /** @var ?non-empty-string[] $leafEntityAuthorityHints This is expected, validate if necessary. */
+        $leafEntityAuthorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
 
-         $this->fetch(
+        if (!is_array($leafEntityAuthorityHints) || empty($leafEntityAuthorityHints)) {
+            $message = 'No authority hints defined in leaf entity configuraiton.';
+            $this->logger?->error($message, compact('leafEntityId'));
+            throw new TrustChainException($message);
+        }
+
+        $fetchedConfigurations = [$leafEntityId => $leafEntityConfiguration];
+        $resolvedChains = [];
+
+        $this->resolve(
             $leafEntityId,
+            $leafEntityConfiguration,
+            $leafEntityAuthorityHints,
             $validTrustAnchorIds,
-            $trustChainBag
+            $fetchedConfigurations,
+            $resolvedChains,
         );
 
-        if (empty($trustChainBag->getAll())) {
-            $message = 'Could not resolve configuration chains or no common trust anchors found.';
+        if (empty($resolvedChains)) {
+            $message = 'Could not resolve trust chains or no common trust anchors found.';
             $this->logger?->error($message, compact('leafEntityId', 'validTrustAnchorIds'));
             throw new TrustChainException($message);
         }
 
         $this->logger?->debug(
-            'Resolved configuration chains.',
+            'Trust chains resolved.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
+        // Order the chains from shortest to longest one.
+        usort($resolvedChains, function (array $a, array $b) {
+            return count($a) - count($b);
+        });
+
+        ($shortestChain = reset($resolvedChains)) || throw new TrustChainException('Invalid trust chain.');
+
+        $trustChain = $this->trustChainFactory->fromStatements(...$shortestChain);
+        dd($trustChain);
+
+        // TODO mivanci trust chain expiration check
+        // TODO mivanci cache trust chain (and check if in cache before resolving)
+        // TODO mivanci validate iat, exp in entity statements
+
 
         // TODO mivanci Adapt, as this is returned for testing.
-        return [$leafEntityId, $trustChainBag];
+        return [$leafEntityId, $resolvedChains,];
     }
 
     /**
      * Recursively resolve all possible trust chains, up to the valid trust anchors.
      *
      * @param string $subordinateEntityId
-     * @param non-empty-string[] $validTrustAnchorIds Entity IDs of Trust Anchors that are considered valid.
+     * @param \SimpleSAML\OpenID\Federation\EntityStatement $subordinateStatement
      * @param non-empty-string[] $authorityHints Entity IDs of authorities for which to resolve the configuration chain.
+     * @param non-empty-string[] $validTrustAnchorIds Entity IDs of Trust Anchors that are considered valid.
      * @param array<string,\SimpleSAML\OpenID\Federation\EntityStatement> &$fetchedConfigurations Array which will be
      * populated with fetched entity configurations, with the  key being the entity ID, and value being entity
      * configuration statement.
-     * @param array $resolvedConfigurationChains Array which will be populated with resolved configuration chains.
+     * @param array $resolvedChains Array which will be populated with resolved configuration chains.
      * Empty array means that no common trust anchors have been found.
      * @param array $chainElements Elements of each chain, recursively populated during processing.
-     * @param int $depth Depth of the chain, recursively populated during processing.
      * @param int $chainId Chain ID, recursively populated during processing.
-     * @return \SimpleSAML\OpenID\Federation\TrustChainBag
+     * @param int $depth Depth of the chain, recursively populated during processing.
+     * @return void
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
-    public function fetch(
+    protected function resolve(
         string $subordinateEntityId,
+        EntityStatement $subordinateStatement,
+        array $authorityHints,
         array $validTrustAnchorIds,
-        TrustChainBag $trustChainBag,
-        array $authorityHints = [],
-        array $fetchedConfigurations = [],
-        TrustChain $trustChain = new TrustChain(),
+        array &$fetchedConfigurations,
+        array &$resolvedChains,
+        array $chainElements = [],
+        int $chainId = 0,
         int $depth = 0,
-    ): void
-    {
+    ): void {
         $this->logger?->debug(
-            'Fetch start.',
-            compact('subordinateEntityId', 'authorityHints', 'depth'),
+            'Fetching configuration statements for authorities.',
+            compact('authorityHints', 'depth'),
         );
         if ($depth > $this->getMaxConfigurationChainDepth()) {
             $this->logger?->warning('Maximum allowed depth reached.', compact('depth'));
             return;
         }
 
-        if ($trustChain->isEmpty()) {
-            // We are just starting, fetch entity configuration for the subject.
-            // Fetch leaf entity configuration and find authority_hints
-            $leafEntityConfiguration = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($subordinateEntityId);
-            /** @var ?non-empty-string[] $authorityHints This is expected, validate if necessary. */
-            $authorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
-
-            if (!is_array($authorityHints) || empty($authorityHints)) {
-                $message = 'No authority hints defined in leaf entity configuration, refusing to continue.';
-                $this->logger?->error($message, compact('subordinateEntityId'));
-                throw new TrustChainException($message);
-            }
-
-            $trustChain->addLeaf($leafEntityConfiguration);
-
-            $fetchedConfigurations = [$subordinateEntityId => $leafEntityConfiguration];
-        }
+        // Prepare / ensure array for chain elements.
+        isset($chainElements[$chainId]) && is_array($chainElements[$chainId]) ?: $chainElements[$chainId] = [];
+        $chainElements[$chainId][] = $subordinateStatement;
 
         foreach ($authorityHints as $authorityHint) {
             if (array_key_exists($authorityHint, $fetchedConfigurations)) {
@@ -134,44 +149,25 @@ class TrustChainFetcher
                 return;
             }
 
-            if (in_array($authorityHint, $validTrustAnchorIds)) {
-                $this->logger?->info('Common trust anchor found.', compact('authorityHint'));
-                try {
-                    $trustChain->addTrustAnchor($authorityConfiguration);
-                    $trustChainBag->add($trustChain);
-                } catch (TrustChainException $exception) {
-                    $this->logger?->error(
-                        'Could not add trust anchor to chain: ' . $exception->getMessage(),
-                        compact('authorityHint')
-                    );
-                    return;
-                }
-                // This is common trust anchor, we don't have to bother with its authorities.
-                return;
-            }
-
-            // TODO mivanci add fetch endpoints to test entities
-            // This is intermediate, fetch subordinate entity statements from fetch endpoint.
             try {
-                $subordinateEntityStatement = $this->entityStatementFetcher->fromCacheOrFetchEndpoint(
+                $subordinateStatement = $this->entityStatementFetcher->fromCacheOrFetchEndpoint(
                     $subordinateEntityId,
                     $authorityConfiguration,
                 );
-            } catch (\Throwable $exception) {
+            } catch (\Throwable) {
                 $this->logger?->error(
-                    'Unable to fetch subordinate statement: ' . $exception->getMessage(),
-                    compact('subordinateEntityId', 'authorityHint'),
-                );
+                    'Could not fetch subordinate statement.',
+                    compact('subordinateEntityId', 'authorityHint'));
                 return;
             }
 
-            try {
-                $trustChain->addSubordinate($subordinateEntityStatement);
-            } catch (TrustChainException $exception) {
-                $this->logger?->error(
-                    'Could not add subordinate entity statement to chain: ' . $exception->getMessage(),
-                    compact('subordinateEntityId', 'authorityHint')
-                );
+            if (in_array($authorityHint, $validTrustAnchorIds)) {
+                $this->logger?->info('Common trust anchor found.', compact('authorityHint'));
+                /** @psalm-suppress MixedAssignment */
+                $chainElements[$chainId][] = $subordinateStatement;
+                $chainElements[$chainId][] = $authorityConfiguration;
+                $resolvedChains[] = $chainElements[$chainId];
+                // This is common trust anchor, we don't have to bother with its authorities.
                 return;
             }
 
@@ -189,18 +185,22 @@ class TrustChainFetcher
                 compact('authorityHint', 'authorityAuthorityHints'),
             );
 
-            $this->fetch(
+            $this->resolve(
                 $authorityHint,
-                $validTrustAnchorIds,
-                $trustChainBag,
+                $subordinateStatement,
                 $authorityAuthorityHints,
+                $validTrustAnchorIds,
                 $fetchedConfigurations,
-                $trustChain,
+                $resolvedChains,
+                $chainElements,
+                $chainId,
                 $depth + 1,
             );
 
             // Each authority at single level means a new chain.
-            $trustChain = clone $trustChain;
+            $newChain = $chainElements[$chainId];
+            $chainId++;
+            $chainElements[$chainId] = $newChain;
         }
     }
 
