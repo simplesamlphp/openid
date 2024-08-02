@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 
@@ -35,7 +34,7 @@ class TrustChain
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException|\SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function addSubordinate(EntityStatement $entityStatement): void
     {

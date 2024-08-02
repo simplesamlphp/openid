@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Factories\TrustChainFactory;
+use Throwable;
 
 class TrustChainFetcher
 {
@@ -127,7 +128,7 @@ class TrustChainFetcher
             compact('authorityHints', 'depth'),
         );
         if ($depth > $this->getMaxConfigurationChainDepth()) {
-            $this->logger?->warning('Maximum allowed depth reached.', compact('depth'));
+            $this->logger?->error('Maximum allowed depth reached.', compact('depth'));
             return;
         }
 
@@ -144,8 +145,11 @@ class TrustChainFetcher
             try {
                 $authorityConfiguration = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($authorityHint);
                 $fetchedConfigurations[$authorityHint] = $authorityConfiguration;
-            } catch (FetchException) {
-                $this->logger?->info('Unable to fetch configuration.', compact('authorityHint'));
+            } catch (Throwable $exception) {
+                $this->logger?->info(
+                    'Unable to fetch configuration: ' . $exception->getMessage(),
+                    compact('authorityHint')
+                );
                 return;
             }
 
@@ -154,9 +158,9 @@ class TrustChainFetcher
                     $subordinateEntityId,
                     $authorityConfiguration,
                 );
-            } catch (\Throwable) {
+            } catch (Throwable $exception) {
                 $this->logger?->error(
-                    'Could not fetch subordinate statement.',
+                    'Unable to fetch subordinate statement: ' . $exception->getMessage(),
                     compact('subordinateEntityId', 'authorityHint'));
                 return;
             }
@@ -235,7 +239,7 @@ class TrustChainFetcher
                     }
 
                 }
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 $this->logger?->error($exception->getMessage(), compact('resolvedConfigurationChain', 'leafEntityId'));
             }
         }

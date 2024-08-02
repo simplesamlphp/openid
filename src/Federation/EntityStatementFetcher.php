@@ -8,7 +8,7 @@ use DateInterval;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
-use SimpleSAML\Module\oidc\Codebooks\HttpHeaderValues\ContentTypeEnum;
+use SimpleSAML\OpenID\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
@@ -178,7 +178,7 @@ class EntityStatementFetcher
         $entityStatement = $this->entityStatementFactory->fromToken($jws);
 
         // Cache it
-        $expiration = (int)($entityStatement->getPayloadClaim(ClaimNamesEnum::ExpirationTime->value) ?? 0);
+        $expiration = $entityStatement->getExpirationTime();
         $duration = $this->helpers->cache()->maxDuration($this->maxCacheDuration, $expiration);
         $cacheKey = $this->helpers->cache()->keyFor($uri);
         try {
