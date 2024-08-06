@@ -27,16 +27,16 @@ namespace Your\Super\App;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\SupportedAlgorithms;
-use Your\Super\App\LoggerService;
-use Your\Super\App\CacheService;
+use Psr\SimpleCache\CacheInterface;
+use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Federation;
 use Symfony\Component\HttpFoundation\Response;
 
 class Test
 {
     public function __construct(
-        protected CacheService $cacheService, // \Psr\SimpleCache\CacheInterface
-        protected LoggerService $loggerService, // \Psr\Log\LoggerInterface
+        protected CacheInterface $cache,
+        protected LoggerInterface $logger,
     ) {
     }
     
@@ -44,30 +44,29 @@ class Test
     {
         // Instantiation example by using default options.
         // * 'RS256' as supported algorithm
-        // * no caching support
+        // * no caching support (not recommended for production environment)
         // * no logging support
-        // Since there is no caching support, this is not recommended for production environment.
         $federationTools = new Federation();
         
         // Instantiation example by injecting some of the dependencies 
-        // Define the supported algorithms:
+        // Define the supported signature algorithms:
         $supportedAlgorithms = new SupportedAlgorithms(
             new SignatureAlgorithmBag(
                 SignatureAlgorithmEnum::RS256,
-                // ... add other supported algorithms here
+                // ... if needed, add other supported signature algorithms here
             )
         );
         
-        // Define the maximum cache TTL for entity statements. This will be used together with 'exp' claim to resolve
-        // the maximum time for entity statement caching.
+        // Define the maximum cache TTL for entity statements. This will be used together with 'exp'
+        // claim to resolve the maximum time for entity statement caching.
         $maxEntityStatementCacheDuration = new DateInterval('PT6H');
         
-        // Instantiate by injecting own options:
+        // Instantiate by injecting own options / dependencies:
         $federationTools = new Federation(
             supportedAlgorithms: $supportedAlgorithms,
             maxEntityStatementCacheDuration: $maxEntityStatementCacheDuration,
-            cache: $this->cacheService, // \Psr\SimpleCache\CacheInterface
-            logger: $this->loggerService, // \Psr\Log\LoggerInterface
+            cache: $this->cache, // \Psr\SimpleCache\CacheInterface
+            logger: $this->logger, // \Psr\Log\LoggerInterface
         );
         
         // Continue with using available tools ...
@@ -88,6 +87,8 @@ for given leaf entity (subject) and trusted anchors:
 // ... 
 
 try {
+    /** @var \SimpleSAML\OpenID\Federation $federationTools */
+    /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
     $trustChain = $federationTools->trustChainFetcher()->for(
         'https://leaf-entity-id.example.org/', // Trust chain subject (leaf entity).
         [
