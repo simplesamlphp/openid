@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID\Algorithms;
 
 class SignatureAlgorithmBag
 {
+    /** @var \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]  */
     protected array $algorithms;
 
     public function __construct(SignatureAlgorithmEnum ...$algorithms)
@@ -26,7 +27,9 @@ class SignatureAlgorithmBag
         return $this->algorithms;
     }
 
-
+    /**
+     * @return \Jose\Component\Signature\Algorithm\SignatureAlgorithm[]
+     */
     public function getAllInstances(): array
     {
         return array_map(

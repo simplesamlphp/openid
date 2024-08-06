@@ -14,7 +14,7 @@ enum SignatureAlgorithmEnum: string
 
     public function instance(): SignatureAlgorithm
     {
-        return match($this) {
+        return match ($this) {
             self::RS256 => new RS256(),
         };
     }

@@ -10,7 +10,9 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 class SupportedAlgorithms
 {
     public function __construct(
-        protected SignatureAlgorithmBag $signatureAlgorithmBag = new SignatureAlgorithmBag(SignatureAlgorithmEnum::RS256),
+        protected SignatureAlgorithmBag $signatureAlgorithmBag = new SignatureAlgorithmBag(
+            SignatureAlgorithmEnum::RS256,
+        ),
     ) {
     }
 

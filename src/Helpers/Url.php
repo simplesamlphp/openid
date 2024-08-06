@@ -36,10 +36,10 @@ class Url
         $newQueryString = http_build_query($queryParams);
 
         return (isset($parsedUri['scheme']) ? $parsedUri['scheme'] . '://' : '') .
-            ($parsedUri['host'] ?? '') .
-            (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') .
-            ($parsedUri['path'] ?? '') .
-            '?' . $newQueryString .
-            (isset($parsedUri['fragment']) ? '#' . $parsedUri['fragment'] : '');
+        ($parsedUri['host'] ?? '') .
+        (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') .
+        ($parsedUri['path'] ?? '') .
+        '?' . $newQueryString .
+        (isset($parsedUri['fragment']) ? '#' . $parsedUri['fragment'] : '');
     }
 }

@@ -8,10 +8,10 @@ use DateInterval;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
-use SimpleSAML\OpenID\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
+use SimpleSAML\OpenID\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Exceptions\FetchException;
@@ -24,11 +24,11 @@ class EntityStatementFetcher
 {
     public function __construct(
         protected readonly Client $httpClient,
+        protected readonly EntityStatementFactory $entityStatementFactory,
         protected readonly DateInterval $maxCacheDuration = new DateInterval('PT6H'),
         protected readonly ?CacheInterface $cache = null,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly Helpers $helpers = new Helpers(),
-        protected readonly EntityStatementFactory $entityStatementFactory = new EntityStatementFactory(),
     ) {
     }
 
@@ -66,8 +66,7 @@ class EntityStatementFetcher
     public function fromCacheOrFetchEndpoint(
         string $subjectId,
         EntityStatement $entityConfiguration,
-    ): EntityStatement
-    {
+    ): EntityStatement {
         $entityConfigurationPayload = $entityConfiguration->getPayload();
 
         $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimNamesEnum::Metadata->value]
@@ -87,7 +86,7 @@ class EntityStatementFetcher
                 [
                     ClaimNamesEnum::Subject->value => $subjectId,
                     ClaimNamesEnum::Issuer->value => $issuer,
-                ]
+                ],
             ),
         );
     }

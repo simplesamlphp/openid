@@ -6,7 +6,6 @@ namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
-use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Factories\TrustChainFactory;
 use Throwable;
@@ -25,14 +24,14 @@ class TrustChainFetcher
     }
 
     /**
-     * @param non-empty-string $leafEntityId
-     * @param non-empty-array<non-empty-string> $validTrustAnchorIds
-     * @return array
+     * @param non-empty-string $leafEntityId ID of the leaf (subject) entity for which to resolve the trust chain.
+     * @param non-empty-array<non-empty-string> $validTrustAnchorIds IDs of the valid trust anchors.
+     * @return \SimpleSAML\OpenID\Federation\TrustChain
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
-    public function for(string $leafEntityId, array $validTrustAnchorIds): array
+    public function for(string $leafEntityId, array $validTrustAnchorIds): TrustChain
     {
         $this->validateStart($leafEntityId, $validTrustAnchorIds);
 
@@ -47,7 +46,7 @@ class TrustChainFetcher
         $leafEntityAuthorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
 
         if (!is_array($leafEntityAuthorityHints) || empty($leafEntityAuthorityHints)) {
-            $message = 'No authority hints defined in leaf entity configuraiton.';
+            $message = 'No authority hints defined in leaf entity configuration.';
             $this->logger?->error($message, compact('leafEntityId'));
             throw new TrustChainException($message);
         }
@@ -82,32 +81,29 @@ class TrustChainFetcher
 
         ($shortestChain = reset($resolvedChains)) || throw new TrustChainException('Invalid trust chain.');
 
-        $trustChain = $this->trustChainFactory->fromStatements(...$shortestChain);
-        dd($trustChain);
 
         // TODO mivanci trust chain expiration check
         // TODO mivanci cache trust chain (and check if in cache before resolving)
-        // TODO mivanci validate iat, exp in entity statements
-
-
-        // TODO mivanci Adapt, as this is returned for testing.
-        return [$leafEntityId, $resolvedChains,];
+        return $this->trustChainFactory->fromStatements(...$shortestChain);
     }
 
     /**
-     * Recursively resolve all possible trust chains, up to the valid trust anchors.
+     * Recursively resolve all possible trust chains.
      *
-     * @param string $subordinateEntityId
-     * @param \SimpleSAML\OpenID\Federation\EntityStatement $subordinateStatement
-     * @param non-empty-string[] $authorityHints Entity IDs of authorities for which to resolve the configuration chain.
+     * @param string $subordinateEntityId ID of starting subordinate entity.
+     * @param \SimpleSAML\OpenID\Federation\EntityStatement $subordinateStatement Entity statement of starting
+     * subordinate entity.
+     * @param non-empty-string[] $authorityHints Entity IDs of current authorities for which to resolve the chains.
      * @param non-empty-string[] $validTrustAnchorIds Entity IDs of Trust Anchors that are considered valid.
      * @param array<string,\SimpleSAML\OpenID\Federation\EntityStatement> &$fetchedConfigurations Array which will be
      * populated with fetched entity configurations, with the  key being the entity ID, and value being entity
      * configuration statement.
-     * @param array $resolvedChains Array which will be populated with resolved configuration chains.
-     * Empty array means that no common trust anchors have been found.
-     * @param array $chainElements Elements of each chain, recursively populated during processing.
-     * @param int $chainId Chain ID, recursively populated during processing.
+     * @param array<int, array<int,\SimpleSAML\OpenID\Federation\EntityStatement>> $resolvedChains Array which will be
+     * populated with resolved configuration chains. Empty array means that no common trust anchors have been found
+     * or there were problems in entity statements.
+     * @param array<int, array<int,\SimpleSAML\OpenID\Federation\EntityStatement>> $chainElements Elements of each
+     * possible chain, recursively populated during processing.
+     * @param int $chainId ID of particular chain, recursively defined during processing.
      * @param int $depth Depth of the chain, recursively populated during processing.
      * @return void
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -124,16 +120,19 @@ class TrustChainFetcher
         int $depth = 0,
     ): void {
         $this->logger?->debug(
-            'Fetching configuration statements for authorities.',
-            compact('authorityHints', 'depth'),
+            'Resolving chain.',
+            compact('subordinateEntityId', 'authorityHints', 'chainId', 'depth'),
         );
         if ($depth > $this->getMaxConfigurationChainDepth()) {
-            $this->logger?->error('Maximum allowed depth reached.', compact('depth'));
+            $this->logger?->error(
+                'Maximum allowed depth reached.',
+                compact('subordinateEntityId', 'authorityHints', 'chainId', 'depth'),
+            );
             return;
         }
 
         // Prepare / ensure array for chain elements.
-        isset($chainElements[$chainId]) && is_array($chainElements[$chainId]) ?: $chainElements[$chainId] = [];
+        isset($chainElements[$chainId]) ?: $chainElements[$chainId] = [];
         $chainElements[$chainId][] = $subordinateStatement;
 
         foreach ($authorityHints as $authorityHint) {
@@ -148,7 +147,7 @@ class TrustChainFetcher
             } catch (Throwable $exception) {
                 $this->logger?->info(
                     'Unable to fetch configuration: ' . $exception->getMessage(),
-                    compact('authorityHint')
+                    compact('authorityHint'),
                 );
                 return;
             }
@@ -161,7 +160,8 @@ class TrustChainFetcher
             } catch (Throwable $exception) {
                 $this->logger?->error(
                     'Unable to fetch subordinate statement: ' . $exception->getMessage(),
-                    compact('subordinateEntityId', 'authorityHint'));
+                    compact('subordinateEntityId', 'authorityHint'),
+                );
                 return;
             }
 
@@ -206,45 +206,6 @@ class TrustChainFetcher
             $chainId++;
             $chainElements[$chainId] = $newChain;
         }
-    }
-
-    public function fetchEntityStatementChains(
-        string $leafEntityId,
-        array $resolvedConfigurationChains,
-        array $fetchedConfigurations,
-        array $validTrustAnchorIds,
-    ): array {
-        // Order the chains from shortest to longest one.
-        usort($resolvedConfigurationChains, function (array $a, array $b) {
-            return count($a) - count($b);
-        });
-
-        $resolvedEntityStatementChains = [];
-
-        foreach ($resolvedConfigurationChains as $resolvedConfigurationChain) {
-            $currentEntityStatementChain = [];
-            try {
-                foreach ($resolvedConfigurationChain as $resolvedConfigurationChainItem) {
-                    // For leafs and trust anchors, we store their configuration statement
-                    if (
-                        ($resolvedConfigurationChainItem === $leafEntityId) ||
-                        in_array($resolvedConfigurationChainItem, $validTrustAnchorIds)
-                    ) {
-                        $currentEntityStatementChain[] = $fetchedConfigurations[$resolvedConfigurationChainItem] ??
-                            throw new TrustChainException(
-                                "No configuration statement found for entity ID $resolvedConfigurationChainItem"
-                            );
-                    } else {
-                        // For others we fetch
-                    }
-
-                }
-            } catch (Throwable $exception) {
-                $this->logger?->error($exception->getMessage(), compact('resolvedConfigurationChain', 'leafEntityId'));
-            }
-        }
-
-        return $resolvedEntityStatementChains;
     }
 
     /**

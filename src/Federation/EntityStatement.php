@@ -15,7 +15,6 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 
 class EntityStatement extends ParsedJws
 {
-
     public function __construct(
         string $token,
         JwsParser $jwsParser,
@@ -80,6 +79,7 @@ class EntityStatement extends ParsedJws
      */
     public function getJwks(): array
     {
+        /** @psalm-suppress MixedAssignment We check the type manually. */
         $jwks = $this->getPayloadClaim(ClaimNamesEnum::JsonWebKeySet->value);
 
         if (is_array($jwks) && (!empty($jwks))) {

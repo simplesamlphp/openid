@@ -106,7 +106,7 @@ class TrustChain
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    protected function validateSubordinateStatement(EntityStatement $entityStatement)
+    protected function validateSubordinateStatement(EntityStatement $entityStatement): void
     {
         // This must not be configuration
         if ($entityStatement->isConfiguration()) {

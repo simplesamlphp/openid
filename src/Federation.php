@@ -53,11 +53,11 @@ class Federation
     {
         return self::$entityStatementFetcher ??= new EntityStatementFetcher(
             $this->httpClient,
+            $this->entityStatementFactory,
             $this->maxEntityStatementCacheDuration,
             $this->cache,
             $this->logger,
             $this->helpers,
-            $this->entityStatementFactory,
         );
     }
 

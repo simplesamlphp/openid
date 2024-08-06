@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Factories;
 
-use Jose\Component\Signature\JWS;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;

@@ -1,6 +1,6 @@
 {
     "name": "simplesamlphp/openid",
-    "description": "OpenID Library",
+    "description": "OpenID Tools Library",
     "type": "library",
     "license": "LGPL-2.1",
     "authors": [
