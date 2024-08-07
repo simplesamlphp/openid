@@ -6,9 +6,7 @@ namespace SimpleSAML\OpenID;
 
 use DateInterval;
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\RequestOptions;
-use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
@@ -33,7 +31,6 @@ class Federation
         protected readonly ?CacheInterface $cache = null,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly Client $httpClient = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG),
-        protected readonly RequestFactoryInterface $requestFactory = new HttpFactory(),
         protected readonly Helpers $helpers = new Helpers(),
         AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
