@@ -6,20 +6,27 @@ namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimValues\TypeEnum;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use Throwable;
 
 class EntityStatement extends ParsedJws
 {
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
     public function __construct(
         string $token,
         JwsParser $jwsParser,
         JwsVerifier $jwsVerifier,
         JwksFactory $jwksFactory,
+        protected readonly DateIntervalDecorator $timestampValidationLeeway,
     ) {
         parent::__construct($token, $jwsParser, $jwsVerifier, $jwksFactory);
 
@@ -55,7 +62,8 @@ class EntityStatement extends ParsedJws
         $iat = (int)($this->getPayloadClaim(ClaimNamesEnum::IssuedAt->value) ??
             throw new EntityStatementException('No Issued At claim found.'));
 
-        ($iat <= time()) || throw new EntityStatementException('Issued At claim is greater than current time.');
+        ($iat - $this->timestampValidationLeeway->inSeconds <= time()) ||
+        throw new EntityStatementException("Issued At claim ($iat) is greater than current time.");
 
         return $iat;
     }
@@ -69,7 +77,8 @@ class EntityStatement extends ParsedJws
         $exp = (int)($this->getPayloadClaim(ClaimNamesEnum::ExpirationTime->value) ??
             throw new EntityStatementException('No Expiration Time claim found.'));
 
-        ($exp >= time()) || throw new EntityStatementException('Expiration Time claim is greater than current time.');
+        ($exp + $this->timestampValidationLeeway->inSeconds >= time()) ||
+        throw new EntityStatementException("Expiration Time claim ($exp) is lesser than current time.");
 
         return $exp;
     }
@@ -159,7 +168,7 @@ class EntityStatement extends ParsedJws
         foreach ($calls as $call) {
             try {
                 call_user_func($call);
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 $errors[] = $exception->getMessage();
             }
         }

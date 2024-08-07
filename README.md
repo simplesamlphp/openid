@@ -76,10 +76,10 @@ class Test
 }
 ```
 
-### Trust chain fetcher
+### Trust chain resolver
 
 Once you have a `\SimpleSAML\OpenID\Federation` instantiated, you can continue with using available tools. The first
-tool we will take a look at is trust chain fetcher. This tool can be used to try and resolve the (shortest) trust chain
+tool we will take a look at is trust chain resolver. This tool can be used to try and resolve the (shortest) trust chain
 for given leaf entity (subject) and trusted anchors:
 
 ```php
@@ -89,7 +89,7 @@ for given leaf entity (subject) and trusted anchors:
 try {
     /** @var \SimpleSAML\OpenID\Federation $federationTools */
     /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
-    $trustChain = $federationTools->trustChainFetcher()->for(
+    $trustChain = $federationTools->trustChainResolver()->for(
         'https://leaf-entity-id.example.org/', // Trust chain subject (leaf entity).
         [
             'https://trust-achor-id.example.org/', // List of valid trust anchors.

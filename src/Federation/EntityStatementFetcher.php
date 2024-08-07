@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
-use DateInterval;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
+use SimpleSAML\OpenID\Decorators\CacheDecorator;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\EntityStatementFactory;
@@ -25,8 +25,8 @@ class EntityStatementFetcher
     public function __construct(
         protected readonly Client $httpClient,
         protected readonly EntityStatementFactory $entityStatementFactory,
-        protected readonly DateInterval $maxCacheDuration = new DateInterval('PT6H'),
-        protected readonly ?CacheInterface $cache = null,
+        protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly Helpers $helpers = new Helpers(),
     ) {
@@ -109,20 +109,32 @@ class EntityStatementFetcher
      */
     public function fromCache(string $uri): ?EntityStatement
     {
-        $cacheKey = $this->helpers->cache()->keyFor($uri);
+        $this->logger?->error(
+            'Trying to get entity statement token from cache',
+            compact('uri'),
+        );
 
         try {
             /** @var ?string $jws */
-            $jws = $this->cache?->get($cacheKey);
+            $jws = $this->cacheDecorator?->get(null, $uri);
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error trying to get entity statement from cache: ' . $exception->getMessage(),
-                compact('uri', 'cacheKey'),
+                compact('uri'),
             );
             return null;
         }
 
-        return is_string($jws) ? $this->prepareEntityStatement($jws) : null;
+        if (is_string($jws)) {
+            $this->logger?->error(
+                'Entity statement token found in cache, trying to build instance.',
+                compact('uri'),
+            );
+
+            return $this->prepareEntityStatement($jws);
+        }
+
+        return null;
     }
 
     /**
@@ -171,21 +183,22 @@ class EntityStatementFetcher
             throw new FetchException($message);
         }
 
-        $jws = $response->getBody()->getContents();
-        $this->logger?->info('Successful HTTP response for entity statement fetch.', compact('uri', 'jws'));
+        $token = $response->getBody()->getContents();
+        $this->logger?->info('Successful HTTP response for entity statement fetch.', compact('uri', 'token'));
 
-        $entityStatement = $this->entityStatementFactory->fromToken($jws);
+        $entityStatement = $this->entityStatementFactory->fromToken($token);
 
         // Cache it
-        $expiration = $entityStatement->getExpirationTime();
-        $duration = $this->helpers->cache()->maxDuration($this->maxCacheDuration, $expiration);
-        $cacheKey = $this->helpers->cache()->keyFor($uri);
         try {
-            $this->cache?->set($cacheKey, $jws, $duration);
+            $this->cacheDecorator?->set(
+                $token,
+                $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($entityStatement->getExpirationTime()),
+                $uri,
+            );
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting entity statement to cache: ' . $exception->getMessage(),
-                compact('uri', 'cacheKey'),
+                compact('uri'),
             );
         }
 
@@ -197,7 +210,6 @@ class EntityStatementFetcher
      */
     protected function prepareEntityStatement(string $jws): EntityStatement
     {
-        // TODO mivanci Important Validate header, iat, exp.
         return $this->entityStatementFactory->fromToken($jws);
     }
 }

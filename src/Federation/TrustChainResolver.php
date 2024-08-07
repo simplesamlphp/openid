@@ -6,37 +6,77 @@ namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
+use SimpleSAML\OpenID\Decorators\CacheDecorator;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Factories\TrustChainFactory;
 use Throwable;
 
-class TrustChainFetcher
+class TrustChainResolver
 {
-    protected int $maxConfigurationChainDepth;
+    protected int $maxTrustChainDepth;
 
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
         protected readonly TrustChainFactory $trustChainFactory,
+        protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
-        int $maxConfigurationChainDepth = 9,
+        int $maxTrustChainDepth = 9,
     ) {
-        $this->maxConfigurationChainDepth = min(20, max(1, $maxConfigurationChainDepth));
+        $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
     }
 
     /**
      * @param non-empty-string $leafEntityId ID of the leaf (subject) entity for which to resolve the trust chain.
      * @param non-empty-array<non-empty-string> $validTrustAnchorIds IDs of the valid trust anchors.
      * @return \SimpleSAML\OpenID\Federation\TrustChain
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function for(string $leafEntityId, array $validTrustAnchorIds): TrustChain
     {
         $this->validateStart($leafEntityId, $validTrustAnchorIds);
 
-        $this->logger?->info(
-            "Trust chain fetch started.",
+        $this->logger?->debug(
+            "Trust chain resolving started.",
+            compact('leafEntityId', 'validTrustAnchorIds'),
+        );
+
+        foreach ($validTrustAnchorIds as $validTrustAnchorId) {
+            $this->logger?->debug(
+                'Checking if the trust chain exists in cache.',
+                compact('leafEntityId', 'validTrustAnchorId'),
+            );
+            try {
+                /** @var ?array $tokens */
+                $tokens = $this->cacheDecorator?->get(null, $leafEntityId, $validTrustAnchorId);
+                if (is_array($tokens)) {
+                    $this->logger?->debug(
+                        'Found JWS tokens in cache, trying to build trust chain.',
+                        compact('leafEntityId', 'validTrustAnchorId', 'tokens'),
+                    );
+                    /** @var string[] $tokens */
+                    $trustChain = $this->trustChainFactory->fromTokens(...$tokens);
+                    $this->logger?->debug(
+                        'Trust chain resolved from cache, returning.',
+                        compact('leafEntityId', 'validTrustAnchorId'),
+                    );
+                    return $trustChain;
+                }
+            } catch (Throwable $exception) {
+                $this->logger?->warning(
+                    'Error while trying to get trust chain from cache: ' . $exception->getMessage(),
+                    compact('leafEntityId', 'validTrustAnchorId'),
+                );
+            }
+        }
+
+        $this->logger?->debug(
+            'Trust chain is not available in cache, continuing with standard resolving.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
@@ -70,7 +110,7 @@ class TrustChainFetcher
         }
 
         $this->logger?->debug(
-            'Trust chains resolved.',
+            'Common trust anchors exist. Finding the shortest chain path.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
@@ -78,13 +118,25 @@ class TrustChainFetcher
         usort($resolvedChains, function (array $a, array $b) {
             return count($a) - count($b);
         });
-
         ($shortestChain = reset($resolvedChains)) || throw new TrustChainException('Invalid trust chain.');
+        $trustChain = $this->trustChainFactory->fromStatements(...$shortestChain);
 
+        $resolvedTrustAnchorId = $trustChain->getResolvedTrustAnchor()->getIssuer();
+        $chainTokens = $trustChain->jsonSerialize();
 
-        // TODO mivanci trust chain expiration check
-        // TODO mivanci cache trust chain (and check if in cache before resolving)
-        return $this->trustChainFactory->fromStatements(...$shortestChain);
+        $this->logger?->debug(
+            'Trust chain has been resolved. Setting it in cache.',
+            compact('leafEntityId', 'resolvedTrustAnchorId', 'chainTokens'),
+        );
+
+        $this->cacheDecorator?->set(
+            $chainTokens,
+            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($trustChain->getResolvedExpirationTime()),
+            $trustChain->getResolvedLeaf()->getIssuer(),
+            $resolvedTrustAnchorId,
+        );
+
+        return $trustChain;
     }
 
     /**
@@ -123,7 +175,7 @@ class TrustChainFetcher
             'Resolving chain.',
             compact('subordinateEntityId', 'authorityHints', 'chainId', 'depth'),
         );
-        if ($depth > $this->getMaxConfigurationChainDepth()) {
+        if ($depth > $this->getMaxTrustChainDepth()) {
             $this->logger?->error(
                 'Maximum allowed depth reached.',
                 compact('subordinateEntityId', 'authorityHints', 'chainId', 'depth'),
@@ -230,8 +282,8 @@ class TrustChainFetcher
         }
     }
 
-    public function getMaxConfigurationChainDepth(): int
+    public function getMaxTrustChainDepth(): int
     {
-        return $this->maxConfigurationChainDepth;
+        return $this->maxTrustChainDepth;
     }
 }
