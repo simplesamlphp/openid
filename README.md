@@ -97,8 +97,40 @@ try {
     );
 } catch (\Throwable $exception) {
     $this->loggerService->error('Could not resolve trust chain: ' . $exception->getMessage())
+    return;
 }
 
 ```
 
-If the trust chain is successfully resolved, this will return an instance of `\SimpleSAML\OpenID\Federation\TrustChain`. 
+If the trust chain is successfully resolved, this will return an instance of `\SimpleSAML\OpenID\Federation\TrustChain`.
+Otherwise, exception will be thrown.
+
+### Additional verification of signatures
+
+The whole trust chain (each entity statement) has been verified using public keys from JWKS claims in configuration /
+subordinate statements. As per specification recommendation, you can also validate the signature of the Trust Chain
+Configuration Statement by using the Trust Anchor public keys (JWKS) that you have acquired in some secure out-of-band
+way (so to not only rely on TLS protection while fetching Trust Anchor Configuration Statement):
+
+```php
+
+// ... 
+
+// Get entity statement for the resolved Trust Anchor:
+/** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
+$trustAnchorConfigurationStatement = $trustChain->getResolvedTrustAnchor();
+// Get data that you need to prepare appropriate public keys, for example, the entity ID:
+$trustAnchorEntityId = $trustAnchorConfigurationStatement->getIssuer();
+
+// Prepare JWKS array containing Trust Anchor public keys that you have acquired in secure out-of-band way ...
+/** @var array $trustAnchorJwks */
+
+try {    
+    $trustAnchorConfigurationStatement->verifyWithKeySet($trustAnchorJwks);
+} catch (\Throwable $exception) {
+    $this->loggerService->error('Could not verify trust anchor configuration statement signature: ' .
+    $exception->getMessage());
+    return;
+}
+
+```

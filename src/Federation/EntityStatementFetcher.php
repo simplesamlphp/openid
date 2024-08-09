@@ -110,7 +110,7 @@ class EntityStatementFetcher
     public function fromCache(string $uri): ?EntityStatement
     {
         $this->logger?->error(
-            'Trying to get entity statement token from cache',
+            'Trying to get entity statement token from cache.',
             compact('uri'),
         );
 

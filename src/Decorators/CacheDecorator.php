@@ -16,21 +16,21 @@ readonly class CacheDecorator
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get(mixed $default = null, string ...$keyElements): mixed
+    public function get(mixed $default, string $keyElement, string ...$keyElements): mixed
     {
-        return $this->cache->get(self::keyFor(...$keyElements), $default);
+        return $this->cache->get(self::keyFor($keyElement, ...$keyElements), $default);
     }
 
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function set(mixed $value, int|DateInterval $ttl, string ...$keyElements): void
+    public function set(mixed $value, int|DateInterval $ttl, string $keyElement, string ...$keyElements): void
     {
-        $this->cache->set(self::keyFor(...$keyElements), $value, $ttl);
+        $this->cache->set(self::keyFor($keyElement, ...$keyElements), $value, $ttl);
     }
 
-    public static function keyFor(string ...$elements): string
+    public static function keyFor(string $element, string ...$elements): string
     {
-        return hash('sha256', implode('-', $elements));
+        return hash('sha256', implode('-', [$element, ...$elements]));
     }
 }

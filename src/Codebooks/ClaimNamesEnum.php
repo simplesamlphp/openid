@@ -23,6 +23,8 @@ enum ClaimNamesEnum: string
     case KeyId = 'kid';
     case LogoUri = 'logo_uri';
     case Metadata = 'metadata';
+    case MetadataPolicy = 'metadata_policy';
+    case MetadataPolicyCritical = 'metadata_policy_crit';
     case OrganizationName = 'organization_name';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';

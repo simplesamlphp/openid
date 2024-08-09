@@ -56,7 +56,7 @@ class TrustChainResolver
                 $tokens = $this->cacheDecorator?->get(null, $leafEntityId, $validTrustAnchorId);
                 if (is_array($tokens)) {
                     $this->logger?->debug(
-                        'Found JWS tokens in cache, trying to build trust chain.',
+                        'Found trust chain tokens in cache, using it to build trust chain.',
                         compact('leafEntityId', 'validTrustAnchorId', 'tokens'),
                     );
                     /** @var string[] $tokens */
@@ -79,8 +79,8 @@ class TrustChainResolver
             'Trust chain is not available in cache, continuing with standard resolving.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
+        $this->logger?->debug('Fetching leaf entity configuration.', compact('leafEntityId'));
 
-        // Fetch leaf entity configuration and find authority_hints
         $leafEntityConfiguration = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($leafEntityId);
         /** @var ?non-empty-string[] $leafEntityAuthorityHints This is expected, validate if necessary. */
         $leafEntityAuthorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
@@ -90,6 +90,11 @@ class TrustChainResolver
             $this->logger?->error($message, compact('leafEntityId'));
             throw new TrustChainException($message);
         }
+
+        $this->logger?->debug(
+            'Leaf entity configuration fetched, found its authority hints.',
+            compact('leafEntityId', 'leafEntityAuthorityHints'),
+        );
 
         $fetchedConfigurations = [$leafEntityId => $leafEntityConfiguration];
         $resolvedChains = [];
@@ -110,7 +115,7 @@ class TrustChainResolver
         }
 
         $this->logger?->debug(
-            'Common trust anchors exist. Finding the shortest chain path.',
+            'Trust chains exist, finding the shortest one.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
