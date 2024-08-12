@@ -359,6 +359,7 @@ class TrustChain implements JsonSerializable
         $supportedOperators = MetadataPolicyOperatorsEnum::values();
 
         foreach ($this->metadataPolicies as $metadataPolicy) {
+            /** @psalm-suppress MixedAssignment We'll check if $nextPolicy is array type. */
             if (
                 (!array_key_exists($entityTypeEnum->value, $metadataPolicy)) ||
                 (!is_array($nextPolicy = $metadataPolicy[$entityTypeEnum->value]))
@@ -384,21 +385,29 @@ class TrustChain implements JsonSerializable
             );
 
             // Go over each metadata parameter and resolve the policy.
+            /** @psalm-suppress MixedAssignment We'll check if $nextPolicyParameterOperations is array type. */
             foreach ($nextPolicy as $nextPolicyParameter => $nextPolicyParameterOperations) {
+                (is_array($nextPolicyParameterOperations)) || throw new MetadataPolicyException(
+                    sprintf(
+                        'Invalid format for metadata policy operations encountered: %s',
+                        var_export($nextPolicyParameterOperations, true),
+                    ),
+                );
                 $nextPolicyParameterOperatorKeys = array_keys($nextPolicyParameterOperations);
                 // Order of operators is important, per specification. Method cases() will return as cases are defined.
+                // Common checks - operator value types and operator combinations must be allowed.
                 foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
                     if (in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
+                        /** @psalm-suppress MixedAssignment */
                         $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
-                        $operatorValueType = gettype($operatorValue);
                         // Check common policy resolving rules for each supported operator.
                         // If operator value type is not supported, throw.
-                        $metadataPolicyOperatorEnum->isOperatorValueTypeSupported($operatorValueType) ||
+                        $metadataPolicyOperatorEnum->isOperatorValueTypeSupported($operatorValue) ||
                         throw new MetadataPolicyException(
                             sprintf(
-                                'Unsupported operator type encountered for %s: %s',
+                                'Unsupported operator value type (or contained value type) encountered for %s: %s',
                                 $metadataPolicyOperatorEnum->value,
-                                $operatorValueType,
+                                var_export($operatorValue, true),
                             ),
                         );
                         // If operator combination is not allowed, throw.
@@ -410,11 +419,18 @@ class TrustChain implements JsonSerializable
                                 implode(', ', $nextPolicyParameterOperatorKeys),
                             ),
                         );
+                    }
+                }
 
-                        // Check specific policy resolving rules for each supported operator.
-                        // If everything is ok, set is as / merge it with current policy.
+                // Check specific policy resolving rules for each supported operator.
+                // If everything is ok, set it as is / merge it with current policy.
+                foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
+                    if (in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
+                        /** @psalm-suppress MixedAssignment */
+                        $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
+
                         if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value) {
-                            // No special resolving rules, we can try and merge it.
+                            // No special resolving rules for 'value', we can try and merge it.
                             if (!isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value])) {
                                 // It doesn't exist yet, so we can simply add it.
                                 $this->ensureArrayDepth(
@@ -422,8 +438,9 @@ class TrustChain implements JsonSerializable
                                     $nextPolicyParameter,
                                     $metadataPolicyOperatorEnum->value,
                                 );
+                                /** @psalm-suppress MixedAssignment, MixedArrayAssignment We ensured this is array. */
                                 $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                                $operatorValue;
+                                    $operatorValue;
                             } elseif (
                                 $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] !==
                                 $operatorValue
@@ -433,13 +450,53 @@ class TrustChain implements JsonSerializable
                                     sprintf(
                                         'Different operator values encountered for operator %s: %s !== %s.',
                                         $metadataPolicyOperatorEnum->value,
-                                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                                        $operatorValue,
+                                        var_export(
+                                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                            true,
+                                        ),
+                                        var_export($operatorValue, true),
                                     ),
                                 );
                             }
                         } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {
-                            // TODO mivanci continue
+                            // If add is combined with subset_of, the values of add MUST be a subset of the values of
+                            // subset_of.
+                            if (
+                                in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $nextPolicyParameterOperatorKeys)
+                            ) {
+                                $subsetOfValue = (array)$nextPolicyParameterOperations[
+                                MetadataPolicyOperatorsEnum::SubsetOf->value
+                                ];
+                                (MetadataPolicyOperatorsEnum::Add->isValueSubsetOf($operatorValue, $subsetOfValue)) ||
+                                throw new MetadataPolicyException(
+                                    sprintf(
+                                        'Operator %s, value %s is not subset of %s.',
+                                        $metadataPolicyOperatorEnum->value,
+                                        var_export($operatorValue, true),
+                                        var_export($subsetOfValue, true),
+                                    ),
+                                );
+                            }
+                            // If add is combined with superset_of, the values of add MUST be a superset of the values
+                            // of superset_of.
+                            if (
+                                in_array(MetadataPolicyOperatorsEnum::SupersetOf->value, $nextPolicyParameterOperatorKeys)
+                            ) {
+                                $supersetOfValue = (array)$nextPolicyParameterOperations[
+                                MetadataPolicyOperatorsEnum::SupersetOf->value
+                                ];
+                                (MetadataPolicyOperatorsEnum::Add->isValueSupersetOf($operatorValue, $supersetOfValue))
+                                || throw new MetadataPolicyException(
+                                    sprintf(
+                                        'Operator %s, value %s is not superset of %s.',
+                                        $metadataPolicyOperatorEnum->value,
+                                        var_export($operatorValue, true),
+                                        var_export($supersetOfValue, true),
+                                    ),
+                                );
+                            }
+
+                            // TODO mivanci merge add
                         }
 
                         // TODO For enforcing:
@@ -448,6 +505,7 @@ class TrustChain implements JsonSerializable
                     }
                 }
             }
+
 
             // TODO
         }
@@ -464,9 +522,9 @@ class TrustChain implements JsonSerializable
             throw new TrustChainException('Refusing to recurse to given depth.');
         }
 
-        /** @var int|string|null $key */
         $key = array_shift($keys);
 
+        /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (!$key) {
             return;
         }

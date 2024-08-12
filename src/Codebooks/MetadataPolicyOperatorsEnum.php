@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Codebooks;
 
+use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
+
 enum MetadataPolicyOperatorsEnum: string
 {
     /**
@@ -27,34 +29,84 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return match ($this) {
             self::Value => [
-                PrimitiveTypesEnum::String->value,
-                PrimitiveTypesEnum::Integer->value,
-                PrimitiveTypesEnum::Double->value,
-                PrimitiveTypesEnum::Boolean->value,
-                PrimitiveTypesEnum::Object->value,
-                PrimitiveTypesEnum::Array->value,
-                PrimitiveTypesEnum::Null->value,
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+                BasicTypesEnum::Boolean->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
+                BasicTypesEnum::Null->value,
             ],
             self::Add, self::OneOf, self::SubsetOf, self::SupersetOf => [
-                PrimitiveTypesEnum::Array->value,
+                BasicTypesEnum::Array->value,
             ],
             self::Default => [
-                PrimitiveTypesEnum::String->value,
-                PrimitiveTypesEnum::Integer->value,
-                PrimitiveTypesEnum::Double->value,
-                PrimitiveTypesEnum::Boolean->value,
-                PrimitiveTypesEnum::Object->value,
-                PrimitiveTypesEnum::Array->value,
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+                BasicTypesEnum::Boolean->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
             ],
             self::Essential => [
-                PrimitiveTypesEnum::Boolean->value,
+                BasicTypesEnum::Boolean->value,
             ],
         };
     }
 
-    public function isOperatorValueTypeSupported(string $operatorValueType): bool
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     */
+    public function getSupportedOperatorContainedValueTypes(): array
     {
-        return in_array($operatorValueType, $this->getSupportedOperatorValueTypes());
+        return match ($this) {
+            self::Add, self::OneOf, self::SubsetOf, self::SupersetOf => [
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+            ],
+            self::Value, self::Default, self::Essential => throw new MetadataPolicyException('Not implemented.'),
+        };
+    }
+
+    public function isValueSubsetOf(mixed $value, array $subset): bool
+    {
+        $value = is_array($value) ? $value : [$value];
+
+        return empty(array_diff($value, $subset));
+    }
+
+    public function isValueSupersetOf(mixed $value, array $superset): bool
+    {
+        $value = is_array($value) ? $value : [$value];
+
+        // Like subset, but from different perspective.
+        return empty(array_diff($superset, $value));
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     */
+    public function isOperatorValueTypeSupported(mixed $operatorValue): bool
+    {
+        $operatorValueType = gettype($operatorValue);
+
+        if (! in_array($operatorValueType, $this->getSupportedOperatorValueTypes())) {
+            return false;
+        }
+
+        // Check contained values for declared types.
+        if (in_array($this, [self::Add, self::OneOf, self::SubsetOf, self::SupersetOf])) {
+            /** @psalm-suppress MixedAssignment We'll check the type of $containedValue. */
+            foreach ((array)$operatorValue as $containedValue) {
+                $containedValueType = gettype($containedValue);
+                if (! in_array($containedValueType, $this->getSupportedOperatorContainedValueTypes())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public function getSupportedOperatorCombinations(): array
