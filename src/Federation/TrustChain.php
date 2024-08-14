@@ -52,7 +52,7 @@ class TrustChain implements JsonSerializable
     /**
      * Resolved metadata (after applying resolved policy) per entity type.
      *
-     * @var array
+     * @var array<string,null|array>
      */
     protected array $resolvedMetadata = [];
 
@@ -89,9 +89,22 @@ class TrustChain implements JsonSerializable
         $this->validateIsResolved();
 
         ($leaf = reset($this->entities)) ||
-        throw new TrustChainException('Empty entity statement encountered.');
+        throw new TrustChainException('Empty leaf statement encountered.');
 
         return $leaf;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     */
+    public function getResolvedImmediateSuperior(): EntityStatement
+    {
+        $this->validateIsResolved();
+
+        ($immediateSuperior = $this->entities[1] ?? null)  ||
+        throw new TrustChainException('Empty immediate superior statement encountered.');
+
+        return $immediateSuperior;
     }
 
     /**
@@ -111,29 +124,24 @@ class TrustChain implements JsonSerializable
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getResolvedMetadata(EntityTypeEnum $entityTypeEnum): ?array
     {
         $this->validateIsResolved();
 
         // If we have already resolved the metadata for the given entity type, return it.
-        if (
-            array_key_exists($entityTypeEnum->value, $this->resolvedMetadata) &&
-            is_array($this->resolvedMetadata[$entityTypeEnum->value])
-        ) {
+        if (array_key_exists($entityTypeEnum->value, $this->resolvedMetadata)) {
             return $this->resolvedMetadata[$entityTypeEnum->value];
         }
 
-        // In order to be able to resolve metadata, we need to have resolved metadata policy.
-        if (!array_key_exists($entityTypeEnum->value, $this->resolvedMetadataPolicy)) {
-            $this->resolveMetadataPolicyFor($entityTypeEnum);
-        }
+        $this->resolveMetadataFor($entityTypeEnum);
 
-        dd($this->resolvedMetadataPolicy);
+        dd($this->resolvedMetadataPolicy, $this->resolvedMetadata);
 
         // TODO mivanci Resolve metadata
 
-        return $this->resolvedMetadata[$entityTypeEnum->value] ?? null;
+        return $this->resolvedMetadata[$entityTypeEnum->value];
     }
 
     /**
@@ -393,121 +401,139 @@ class TrustChain implements JsonSerializable
                         var_export($nextPolicyParameterOperations, true),
                     ),
                 );
+
+                MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules($nextPolicyParameterOperations);
+                MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules($nextPolicyParameterOperations);
+
+                // Check special merging rules, if any. If everything is ok, set it as is / merge with current policy.
                 $nextPolicyParameterOperatorKeys = array_keys($nextPolicyParameterOperations);
-                // Order of operators is important, per specification. Method cases() will return as cases are defined.
-                // Common checks - operator value types and operator combinations must be allowed.
                 foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
-                    if (in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
-                        /** @psalm-suppress MixedAssignment */
-                        $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
-                        // Check common policy resolving rules for each supported operator.
-                        // If operator value type is not supported, throw.
-                        $metadataPolicyOperatorEnum->isOperatorValueTypeSupported($operatorValue) ||
-                        throw new MetadataPolicyException(
+                    if (!in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
+                        continue;
+                    }
+
+                    /** @psalm-suppress MixedAssignment */
+                    $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
+
+                    // If it doesn't exist, we can simply set it as is.
+                    if (
+                        !isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value])
+                    ) {
+                        $this->ensureArrayDepth(
+                            $currentPolicy,
+                            $nextPolicyParameter,
+                            $metadataPolicyOperatorEnum->value,
+                        );
+                        /** @psalm-suppress MixedAssignment, MixedArrayAssignment We ensured this is array. */
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                        $operatorValue;
+
+                        // It exists, so we have to check special cases for merging.
+                    } elseif (
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value ||
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Default
+                    ) {
+                        // These must have the same value in different policies.
+                        /** @psalm-suppress MixedArrayAccess We ensured this is array. */
+                        if (
+                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] !==
+                            $operatorValue
+                        ) {
+                            // The values are different, we have to throw.
+                            throw new MetadataPolicyException(
+                                sprintf(
+                                    'Different operator values encountered for operator %s: %s !== %s.',
+                                    $metadataPolicyOperatorEnum->value,
+                                    var_export(
+                                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                        true,
+                                    ),
+                                    var_export($operatorValue, true),
+                                ),
+                            );
+                        }
+                        // Values are the same, so it's ok. We can continue.
+                    } elseif (
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add ||
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SupersetOf
+                    ) {
+                        // We merge with existing values.
+                        /** @var array $operatorValue We ensured this is array. */
+                        /** @psalm-suppress MixedAssignment, MixedArgument, MixedArrayAssignment, MixedArrayAccess We ensured this is array. */
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                        array_unique(
+                            array_merge(
+                                $operatorValue,
+                                $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                            ),
+                        );
+                    } elseif (
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf ||
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf
+                    ) {
+                        // The result of merging the values of two operators is the intersection of the
+                        // operator values. If the intersection is empty, this MUST result in a policy error.
+                        /** @var array $operatorValue We ensured this is array. */
+                        /** @psalm-suppress MixedArgument, MixedArrayAccess We ensured this is array. */
+                        $intersection = array_intersect(
+                            $operatorValue,
+                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                        );
+
+                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
+                        (!empty($intersection)) || throw new MetadataPolicyException(
                             sprintf(
-                                'Unsupported operator value type (or contained value type) encountered for %s: %s',
+                                'Empty intersection encountered for operator %s: %s | %s.',
                                 $metadataPolicyOperatorEnum->value,
+                                var_export(
+                                    $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                    true,
+                                ),
                                 var_export($operatorValue, true),
                             ),
                         );
-                        // If operator combination is not allowed, throw.
-                        $metadataPolicyOperatorEnum->isOperatorCombinationSupported($nextPolicyParameterOperatorKeys) ||
-                        throw new MetadataPolicyException(
-                            sprintf(
-                                'Unsupported operator combination encountered for %s: %s',
-                                $metadataPolicyOperatorEnum->value,
-                                implode(', ', $nextPolicyParameterOperatorKeys),
-                            ),
-                        );
+
+                        // We have values in intersection, so set it as new operator value.
+                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                        $intersection;
+                    } else {
+                        // This is operator essential.
+                        // If a Superior has specified essential=true, then a Subordinate MUST NOT change that.
+                        // If a Superior has specified essential=false, then a Subordinate is allowed to change
+                        // that to essential=true.
+                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
+                        if ($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] === false) {
+                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                            (bool)$operatorValue;
+                        } elseif ($operatorValue !== true) {
+                            throw new MetadataPolicyException(
+                            /** @psalm-suppress MixedArrayAccess We ensured this is array. */
+                                sprintf(
+                                    'Invalid change of value for operator %s: %s -> %s.',
+                                    $metadataPolicyOperatorEnum->value,
+                                    var_export(
+                                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                        true,
+                                    ),
+                                    var_export($operatorValue, true),
+                                ),
+                            );
+                        }
                     }
                 }
 
-                // Check specific policy resolving rules for each supported operator.
-                // If everything is ok, set it as is / merge it with current policy.
-                foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
-                    if (in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
-                        /** @psalm-suppress MixedAssignment */
-                        $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
-
-                        if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value) {
-                            // No special resolving rules for 'value', we can try and merge it.
-                            if (!isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value])) {
-                                // It doesn't exist yet, so we can simply add it.
-                                $this->ensureArrayDepth(
-                                    $currentPolicy,
-                                    $nextPolicyParameter,
-                                    $metadataPolicyOperatorEnum->value,
-                                );
-                                /** @psalm-suppress MixedAssignment, MixedArrayAssignment We ensured this is array. */
-                                $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                                    $operatorValue;
-                            } elseif (
-                                $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] !==
-                                $operatorValue
-                            ) {
-                                // The values can only be the same, otherwise we have to throw.
-                                throw new MetadataPolicyException(
-                                    sprintf(
-                                        'Different operator values encountered for operator %s: %s !== %s.',
-                                        $metadataPolicyOperatorEnum->value,
-                                        var_export(
-                                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                                            true,
-                                        ),
-                                        var_export($operatorValue, true),
-                                    ),
-                                );
-                            }
-                        } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {
-                            // If add is combined with subset_of, the values of add MUST be a subset of the values of
-                            // subset_of.
-                            if (
-                                in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $nextPolicyParameterOperatorKeys)
-                            ) {
-                                $subsetOfValue = (array)$nextPolicyParameterOperations[
-                                MetadataPolicyOperatorsEnum::SubsetOf->value
-                                ];
-                                (MetadataPolicyOperatorsEnum::Add->isValueSubsetOf($operatorValue, $subsetOfValue)) ||
-                                throw new MetadataPolicyException(
-                                    sprintf(
-                                        'Operator %s, value %s is not subset of %s.',
-                                        $metadataPolicyOperatorEnum->value,
-                                        var_export($operatorValue, true),
-                                        var_export($subsetOfValue, true),
-                                    ),
-                                );
-                            }
-                            // If add is combined with superset_of, the values of add MUST be a superset of the values
-                            // of superset_of.
-                            if (
-                                in_array(MetadataPolicyOperatorsEnum::SupersetOf->value, $nextPolicyParameterOperatorKeys)
-                            ) {
-                                $supersetOfValue = (array)$nextPolicyParameterOperations[
-                                MetadataPolicyOperatorsEnum::SupersetOf->value
-                                ];
-                                (MetadataPolicyOperatorsEnum::Add->isValueSupersetOf($operatorValue, $supersetOfValue))
-                                || throw new MetadataPolicyException(
-                                    sprintf(
-                                        'Operator %s, value %s is not superset of %s.',
-                                        $metadataPolicyOperatorEnum->value,
-                                        var_export($operatorValue, true),
-                                        var_export($supersetOfValue, true),
-                                    ),
-                                );
-                            }
-
-                            // TODO mivanci merge add
-                        }
-
-                        // TODO For enforcing:
-                        // TODO If param is defined but type is not supported, throw (when enforcing)
-                        // TODO special case for scope parameter (when enforcing)
-                    }
+                // Check if the current policy is in valid state after merge.
+                /** @var array $currentPolicyParameterOperations We ensured this is array. */
+                foreach ($currentPolicy as $currentPolicyParameterOperations) {
+                    MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules(
+                        $currentPolicyParameterOperations,
+                    );
+                    MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
+                        $currentPolicyParameterOperations,
+                    );
                 }
             }
-
-
-            // TODO
         }
 
         $this->resolvedMetadataPolicy[$entityTypeEnum->value] = $currentPolicy;
@@ -516,7 +542,7 @@ class TrustChain implements JsonSerializable
     /**
      * TODO mivanci move to Arr helper method, inject helpers
      */
-    protected function ensureArrayDepth(array &$array, int|string ...$keys,): void
+    protected function ensureArrayDepth(array &$array, int|string ...$keys): void
     {
         if (count($keys) > 99) {
             throw new TrustChainException('Refusing to recurse to given depth.');
@@ -534,5 +560,75 @@ class TrustChain implements JsonSerializable
         }
 
         $this->ensureArrayDepth($array[$key], ...$keys);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    protected function resolveMetadataFor(EntityTypeEnum $entityTypeEnum): void
+    {
+        // In order to be able to resolve metadata, we need to have resolved metadata policy.
+        if (!array_key_exists($entityTypeEnum->value, $this->resolvedMetadataPolicy)) {
+            $this->resolveMetadataPolicyFor($entityTypeEnum);
+        }
+
+        // When an Entity participates in a federation or federations with one or more Entity Types, its Entity
+        // Configuration MUST contain a metadata claim with JSON object values for each of the corresponding
+        // Entity Type Identifiers, even if the values are the empty JSON object {} (when the Entity Type
+        // has no associated metadata or Immediate Superiors supply any needed metadata).
+        $leafMetadata = $this->getResolvedLeaf()->getPayloadClaim(ClaimNamesEnum::Metadata->value);
+        if (
+            (!is_array($leafMetadata)) || // Claim 'metadata' is optional.
+            (!isset($leafMetadata[$entityTypeEnum->value])) || // If no metadata for given entity type
+            (!is_array($leafMetadata[$entityTypeEnum->value])) // Unexpected value
+        ) {
+            $this->resolvedMetadata[$entityTypeEnum->value] = null;
+            return;
+        }
+
+        $leafEntityTypeMetadata = $leafMetadata[$entityTypeEnum->value];
+
+        // An Immediate Superior MAY provide selected or all metadata parameters for an Immediate Subordinate, by using
+        // the metadata claim in a Subordinate Statement. When metadata is used in a Subordinate Statement, it applies
+        // only to those Entity Types that are present in the subject's Entity Configuration. Furthermore, the
+        // metadata applies only to the subject of the Subordinate Statement and has no effect on the
+        // subject's Subordinates. Metadata parameters in a Subordinate Statement have precedence
+        // and override identically named parameters under the same Entity Type in the
+        // subject's Entity Configuration. If both metadata and metadata_policy
+        // appear in a Subordinate Statement, then the stated metadata MUST
+        // be applied before the metadata_policy.
+        /** @psalm-suppress MixedAssignment We check type manually. */
+        $immediateSuperiorMetadata = $this->getResolvedImmediateSuperior()
+            ->getPayloadClaim(ClaimNamesEnum::Metadata->value);
+        if (
+            is_array($immediateSuperiorMetadata) &&
+            isset($immediateSuperiorMetadata[$entityTypeEnum->value]) &&
+            is_array($immediateSuperiorMetadata[$entityTypeEnum->value])
+        ) {
+            $leafEntityTypeMetadata = array_merge(
+                $leafEntityTypeMetadata,
+                $immediateSuperiorMetadata[$entityTypeEnum->value],
+            );
+        }
+
+        // If the process described in Section 6.1.4.1 found no Subordinate Statements in the Trust Chain with a
+        // metadata_policy claim, the metadata of the Trust Chain subject resolves simply to the metadata found
+        // in its Entity Configuration, with any metadata parameters provided by the Immediate Superior applied
+        // to it.
+        /** @psalm-suppress RiskyTruthyFalsyComparison */
+        if (empty($this->resolvedMetadataPolicy[$entityTypeEnum->value])) {
+            $this->resolvedMetadata[$entityTypeEnum->value] = $leafEntityTypeMetadata;
+            return;
+        }
+        /**
+         * @var string $parameter
+         * @var array<string,mixed> $operations
+         */
+        foreach ($this->resolvedMetadataPolicy[$entityTypeEnum->value] as $parameter => $operations) {
+            // TODO mivanci continue
+            dd($parameter, $operations);
+        }
     }
 }
