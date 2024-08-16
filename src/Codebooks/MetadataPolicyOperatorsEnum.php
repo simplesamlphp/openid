@@ -54,6 +54,30 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+    public function getSupportedParameterValueTypes(): array
+    {
+        return match ($this) {
+            self::Value, self::Default, self::Essential => [
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+                BasicTypesEnum::Boolean->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
+            ],
+            self::Add, self::SubsetOf, self::SupersetOf => [
+                BasicTypesEnum::Array->value,
+            ],
+            self::OneOf => [
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
+            ],
+        };
+    }
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
@@ -64,8 +88,28 @@ enum MetadataPolicyOperatorsEnum: string
                 BasicTypesEnum::String->value,
                 BasicTypesEnum::Integer->value,
                 BasicTypesEnum::Double->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
             ],
             self::Value, self::Default, self::Essential => throw new MetadataPolicyException('Not implemented.'),
+        };
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     */
+    public function getSupportedParameterContainedValueTypes(): array
+    {
+        return match ($this) {
+            self::Add, self::SubsetOf, self::SupersetOf => [
+                BasicTypesEnum::String->value,
+                BasicTypesEnum::Integer->value,
+                BasicTypesEnum::Double->value,
+                BasicTypesEnum::Object->value,
+                BasicTypesEnum::Array->value,
+            ],
+            self::Value, self::Default, self::OneOf, self::Essential =>
+            throw new MetadataPolicyException('Not implemented.'),
         };
     }
 
@@ -91,16 +135,41 @@ enum MetadataPolicyOperatorsEnum: string
     {
         $operatorValueType = gettype($operatorValue);
 
-        if (! in_array($operatorValueType, $this->getSupportedOperatorValueTypes())) {
+        if (! in_array($operatorValueType, $this->getSupportedOperatorValueTypes(), true)) {
             return false;
         }
 
         // Check contained values for declared types.
-        if (in_array($this, [self::Add, self::OneOf, self::SubsetOf, self::SupersetOf])) {
+        if (in_array($this, [self::Add, self::OneOf, self::SubsetOf, self::SupersetOf], true)) {
             /** @psalm-suppress MixedAssignment We'll check the type of $containedValue. */
             foreach ((array)$operatorValue as $containedValue) {
                 $containedValueType = gettype($containedValue);
-                if (! in_array($containedValueType, $this->getSupportedOperatorContainedValueTypes())) {
+                if (! in_array($containedValueType, $this->getSupportedOperatorContainedValueTypes(), true)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     */
+    public function isParameterValueTypeSupported(mixed $parameterValue): bool
+    {
+        $parameterValueType = gettype($parameterValue);
+
+        if (! in_array($parameterValueType, $this->getSupportedParameterValueTypes(), true)) {
+            return false;
+        }
+
+        // Check contained values for declared types.
+        if (in_array($this, [self::Add, self::SubsetOf, self::SupersetOf], true)) {
+            /** @psalm-suppress MixedAssignment We'll check the type of $containedValue. */
+            foreach ((array)$parameterValue as $containedValue) {
+                $containedValueType = gettype($containedValue);
+                if (! in_array($containedValueType, $this->getSupportedParameterContainedValueTypes(), true)) {
                     return false;
                 }
             }
@@ -176,7 +245,7 @@ enum MetadataPolicyOperatorsEnum: string
         // Order of operators is important, per specification. Method cases() will return as cases are defined.
         // Common checks - operator value types and operator combinations must be allowed.
         foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorsEnum) {
-            if (!in_array($metadataPolicyOperatorsEnum->value, $parameterOperatorKeys)) {
+            if (!in_array($metadataPolicyOperatorsEnum->value, $parameterOperatorKeys, true)) {
                 continue;
             }
 
@@ -213,7 +282,7 @@ enum MetadataPolicyOperatorsEnum: string
 
         // Check specific policy resolving rules for each supported operator.
         foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
-            if (!in_array($metadataPolicyOperatorEnum->value, $parameterOperatorKeys)) {
+            if (!in_array($metadataPolicyOperatorEnum->value, $parameterOperatorKeys, true)) {
                 continue;
             }
 
@@ -226,7 +295,7 @@ enum MetadataPolicyOperatorsEnum: string
                 // If add is combined with subset_of, the values of add MUST be a subset of the values of
                 // subset_of.
                 if (
-                    in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys)
+                    in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
                     /** @var array $superset We ensured this is array. */
                     $superset = $parameterOperations[
@@ -248,6 +317,7 @@ enum MetadataPolicyOperatorsEnum: string
                     in_array(
                         MetadataPolicyOperatorsEnum::SupersetOf->value,
                         $parameterOperatorKeys,
+                        true,
                     )
                 ) {
                     /** @var array $subset We ensured this is array. */
@@ -267,7 +337,7 @@ enum MetadataPolicyOperatorsEnum: string
             } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Default) {
                 // If default is combined with one_of, the default value MUST be among the one_of values.
                 if (
-                    in_array(MetadataPolicyOperatorsEnum::OneOf->value, $parameterOperatorKeys)
+                    in_array(MetadataPolicyOperatorsEnum::OneOf->value, $parameterOperatorKeys, true)
                 ) {
                     /** @var array $superset We ensured this is array. */
                     $superset = $parameterOperations[
@@ -286,7 +356,7 @@ enum MetadataPolicyOperatorsEnum: string
                 // If default is combined with subset_of, the value of default MUST be a subset of the
                 // values of subset_of.
                 if (
-                    in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys)
+                    in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
                     /** @var array $superset We ensured this is array. */
                     $superset = $parameterOperations[
@@ -308,6 +378,7 @@ enum MetadataPolicyOperatorsEnum: string
                     in_array(
                         MetadataPolicyOperatorsEnum::SupersetOf->value,
                         $parameterOperatorKeys,
+                        true,
                     )
                 ) {
                     /** @var array $subset We ensured this is array. */
@@ -336,6 +407,7 @@ enum MetadataPolicyOperatorsEnum: string
                     in_array(
                         MetadataPolicyOperatorsEnum::SupersetOf->value,
                         $parameterOperatorKeys,
+                        true,
                     )
                 ) {
                     /** @var array $subset We ensured this is array. */
@@ -358,5 +430,21 @@ enum MetadataPolicyOperatorsEnum: string
                 // We can continue with merging.
             }
         }
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     */
+    public function validateMetadataParameterValueType(mixed $parameterValue, string $parameterName): void
+    {
+        $this->isParameterValueTypeSupported($parameterValue) ||
+        throw new MetadataPolicyException(
+            sprintf(
+                'Unsupported parameter %s value type (or contained value type) encountered for %s: %s',
+                $parameterName,
+                $this->value,
+                var_export($parameterValue, true),
+            ),
+        );
     }
 }

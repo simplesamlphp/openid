@@ -408,7 +408,7 @@ class TrustChain implements JsonSerializable
                 // Check special merging rules, if any. If everything is ok, set it as is / merge with current policy.
                 $nextPolicyParameterOperatorKeys = array_keys($nextPolicyParameterOperations);
                 foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
-                    if (!in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys)) {
+                    if (!in_array($metadataPolicyOperatorEnum->value, $nextPolicyParameterOperatorKeys, true)) {
                         continue;
                     }
 
@@ -588,7 +588,7 @@ class TrustChain implements JsonSerializable
             return;
         }
 
-        $leafEntityTypeMetadata = $leafMetadata[$entityTypeEnum->value];
+        $leafMetadataEntityType = $leafMetadata[$entityTypeEnum->value];
 
         // An Immediate Superior MAY provide selected or all metadata parameters for an Immediate Subordinate, by using
         // the metadata claim in a Subordinate Statement. When metadata is used in a Subordinate Statement, it applies
@@ -607,8 +607,8 @@ class TrustChain implements JsonSerializable
             isset($immediateSuperiorMetadata[$entityTypeEnum->value]) &&
             is_array($immediateSuperiorMetadata[$entityTypeEnum->value])
         ) {
-            $leafEntityTypeMetadata = array_merge(
-                $leafEntityTypeMetadata,
+            $leafMetadataEntityType = array_merge(
+                $leafMetadataEntityType,
                 $immediateSuperiorMetadata[$entityTypeEnum->value],
             );
         }
@@ -619,16 +619,195 @@ class TrustChain implements JsonSerializable
         // to it.
         /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (empty($this->resolvedMetadataPolicy[$entityTypeEnum->value])) {
-            $this->resolvedMetadata[$entityTypeEnum->value] = $leafEntityTypeMetadata;
+            $this->resolvedMetadata[$entityTypeEnum->value] = $leafMetadataEntityType;
             return;
         }
+
+        // Policy application to leaf metadata.
         /**
-         * @var string $parameter
-         * @var array<string,mixed> $operations
+         * @var string $policyParameterName
+         * @var array<string,mixed> $policyOperations
          */
-        foreach ($this->resolvedMetadataPolicy[$entityTypeEnum->value] as $parameter => $operations) {
-            // TODO mivanci continue
-            dd($parameter, $operations);
+        foreach ($this->resolvedMetadataPolicy[$entityTypeEnum->value] as $policyParameterName => $policyOperations) {
+            /** @psalm-suppress MixedAssignment */
+            $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
+                $leafMetadataEntityType,
+                $policyParameterName,
+            );
+
+            foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
+                if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
+                    continue;
+                }
+                /** @psalm-suppress MixedAssignment */
+                $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
+
+                if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value) {
+                    // The metadata parameter MUST be assigned the value of the operator. When the value of the operator
+                    // is null, the metadata parameter MUST be removed.
+                    if (is_null($operatorValue)) {
+                        unset($leafMetadataEntityType[$policyParameterName]);
+                        continue;
+                    }
+                    $this->ensureArrayDepth($leafMetadataEntityType, $policyParameterName);
+                    /** @psalm-suppress MixedAssignment */
+                    $leafMetadataEntityType[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
+                        $operatorValue,
+                        $policyParameterName,
+                    );
+                } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {
+                    // The value or values of this operator MUST be added to the metadata parameter. Values that are
+                    // already present in the metadata parameter MUST NOT be added another time. If the metadata
+                    // parameter is absent, it MUST be initialized with the value of this operator.
+                    if (!isset($leafMetadataEntityType[$policyParameterName])) {
+                        /** @psalm-suppress MixedAssignment */
+                        $leafMetadataEntityType[$policyParameterName] = $operatorValue;
+                        continue;
+                    }
+
+                    $metadataPolicyOperatorEnum->validateMetadataParameterValueType(
+                        $metadataParameterValueBeforePolicy,
+                        $policyParameterName,
+                    );
+
+                    /** @psalm-suppress MixedArgument */
+                    $metadataParameterValue = array_unique(
+                        array_merge($metadataParameterValueBeforePolicy, $operatorValue),
+                    );
+
+                    /** @psalm-suppress MixedAssignment */
+                    $leafMetadataEntityType[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
+                        $metadataParameterValue,
+                        $policyParameterName,
+                    );
+                } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Default) {
+                    // If the metadata parameter is absent, it MUST be set to the value of the operator. If the metadata
+                    // parameter is present, this operator has no effect.
+                    if (!isset($leafMetadataEntityType[$policyParameterName])) {
+                        /** @psalm-suppress MixedAssignment */
+                        $leafMetadataEntityType[$policyParameterName] = $operatorValue;
+                    }
+                } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf) {
+                    // If the metadata parameter is present, its value MUST be one of those listed in the operator
+                    // value.
+                    if (!isset($leafMetadataEntityType[$policyParameterName])) {
+                        continue;
+                    }
+
+                    $metadataPolicyOperatorEnum->validateMetadataParameterValueType(
+                        $metadataParameterValueBeforePolicy,
+                        $policyParameterName,
+                    );
+
+                    /** @var array $operatorValue */
+                    (in_array($metadataParameterValueBeforePolicy, $operatorValue, true)) ||
+                    throw new MetadataPolicyException(
+                        sprintf(
+                            'Metadata parameter %s, value %s is not one of %s.',
+                            $policyParameterName,
+                            var_export($metadataParameterValueBeforePolicy, true),
+                            var_export($operatorValue, true),
+                        ),
+                    );
+                } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf) {
+                    // If the metadata parameter is present, this operator computes the intersection between the values
+                    // of the operator and the metadata parameter. If the intersection is non-empty, the metadata
+                    // parameter is set to the values in the intersection. If the intersection is empty, the
+                    // metadata parameter MUST be removed. Note that this behavior makes subset_of a
+                    // potential value modifier in addition to it being a value check.
+                    if (!isset($leafMetadataEntityType[$policyParameterName])) {
+                        continue;
+                    }
+
+                    $metadataPolicyOperatorEnum->validateMetadataParameterValueType(
+                        $metadataParameterValueBeforePolicy,
+                        $policyParameterName,
+                    );
+
+                    /** @psalm-suppress MixedArgument */
+                    $intersection = array_intersect(
+                        $metadataParameterValueBeforePolicy,
+                        $operatorValue,
+                    );
+
+                    if (empty($intersection)) {
+                        unset($leafMetadataEntityType[$policyParameterName]);
+                        continue;
+                    }
+                    /** @psalm-suppress MixedAssignment */
+                    $leafMetadataEntityType[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
+                        $intersection,
+                        $policyParameterName,
+                    );
+                } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SupersetOf) {
+                    // If the metadata parameter is present, its values MUST contain those specified in the operator
+                    // value. By mathematically defining supersets, equality is included.
+                    if (!isset($leafMetadataEntityType[$policyParameterName])) {
+                        continue;
+                    }
+
+                    $metadataPolicyOperatorEnum->validateMetadataParameterValueType(
+                        $metadataParameterValueBeforePolicy,
+                        $policyParameterName,
+                    );
+
+                    /** @var array $operatorValue */
+                    ($metadataPolicyOperatorEnum->isValueSupersetOf(
+                        $metadataParameterValueBeforePolicy,
+                        $operatorValue,
+                    )) || throw new MetadataPolicyException(
+                        sprintf(
+                            'Parameter %s, operator %s, value %s is not superset of %s.',
+                            $policyParameterName,
+                            $metadataPolicyOperatorEnum->value,
+                            var_export($metadataParameterValueBeforePolicy, true),
+                            var_export($operatorValue, true),
+                        ),
+                    );
+                } else {
+                    // This is operator 'essential'
+                    // If the value of this operator is true, then the metadata parameter MUST be present. If false,
+                    // the metadata parameter is voluntary and may be absent. If the essential operator is omitted,
+                    // this is equivalent to including it with a value of false.
+                    if (!$operatorValue) {
+                        continue;
+                    }
+
+                    isset($leafMetadataEntityType[$policyParameterName]) || throw new MetadataPolicyException(
+                        sprintf(
+                            'Parameter %s is marked as essential by policy, but not present in metadata.',
+                            $policyParameterName,
+                        ),
+                    );
+                }
+            }
         }
+
+        dd($this->resolvedMetadataPolicy[$entityTypeEnum->value], $leafMetadataEntityType);
+        $this->resolvedMetadata[$entityTypeEnum->value] = $leafMetadataEntityType;
+    }
+
+    protected function resolveParameterValueBeforePolicy(array $metadata, string $parameter): mixed
+    {
+        /** @psalm-suppress MixedAssignment */
+        $value = $metadata[$parameter] ?? null;
+
+        // Special case for 'scope' parameter, which needs to be converted to array before policy application.
+        if (($parameter === ClaimNamesEnum::Scope->value) && is_string($value)) {
+            $value = explode(' ', $value);
+        }
+
+        return $value;
+    }
+
+    protected function resolveParameterValueAfterPolicy(mixed $value, string $parameter): mixed
+    {
+        // Special case for 'scope' parameter, which needs to be converted to string after policy application.
+        if (($parameter === ClaimNamesEnum::Scope->value) && is_array($value)) {
+            /** @psalm-suppress MixedArgumentTypeCoercion */
+            $value = implode(' ', $value);
+        }
+
+        return $value;
     }
 }
