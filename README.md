@@ -105,6 +105,43 @@ try {
 If the trust chain is successfully resolved, this will return an instance of `\SimpleSAML\OpenID\Federation\TrustChain`.
 Otherwise, exception will be thrown.
 
+Once you have the Trust Chain, you can try and get the resolved metadata for particular entity type. Resolved metadata
+means that all metadata policies from all intermediates have been successfully applied. Here is one example for trying
+to get metadata for OpenID RP, which will return an array (or null if no metadata is available for given entity type):
+
+```php
+
+// ... 
+
+$entityType = \SimpleSAML\OpenID\Codebooks\EntityTypeEnum::OpenIdRelyingParty;
+
+try {
+    /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
+    $metadata = $trustChain->getResolvedMetadata($entityType);
+} catch (\Throwable $exception) {
+    $this->loggerService->error(
+        sprintf(
+            'Error resolving metadata for entity type %s. Error: %s.',
+            $entityType->value,
+            $exception->getMessage(),        
+        ),   
+    );
+    return;
+}
+
+if (is_null($metadata)) {
+    $this->loggerService->error(
+        sprintf(
+            'No metadata available for entity type %s.',
+            $entityType->value,      
+        ),
+    );
+    return;
+}
+
+```
+If getting metadata results in an exception, the metadata is considered invalid and is to be discarded.
+
 ### Additional verification of signatures
 
 The whole trust chain (each entity statement) has been verified using public keys from JWKS claims in configuration /

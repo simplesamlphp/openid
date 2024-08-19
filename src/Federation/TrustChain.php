@@ -137,11 +137,7 @@ class TrustChain implements JsonSerializable
 
         $this->resolveMetadataFor($entityTypeEnum);
 
-        dd($this->resolvedMetadataPolicy, $this->resolvedMetadata);
-
-        // TODO mivanci Resolve metadata
-
-        return $this->resolvedMetadata[$entityTypeEnum->value];
+        return $this->resolvedMetadata[$entityTypeEnum->value] ?? null;
     }
 
     /**
@@ -629,18 +625,17 @@ class TrustChain implements JsonSerializable
          * @var array<string,mixed> $policyOperations
          */
         foreach ($this->resolvedMetadataPolicy[$entityTypeEnum->value] as $policyParameterName => $policyOperations) {
-            /** @psalm-suppress MixedAssignment */
-            $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
-                $leafMetadataEntityType,
-                $policyParameterName,
-            );
-
             foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
                     continue;
                 }
                 /** @psalm-suppress MixedAssignment */
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
+                /** @psalm-suppress MixedAssignment */
+                $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
+                    $leafMetadataEntityType,
+                    $policyParameterName,
+                );
 
                 if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value) {
                     // The metadata parameter MUST be assigned the value of the operator. When the value of the operator
@@ -783,7 +778,6 @@ class TrustChain implements JsonSerializable
             }
         }
 
-        dd($this->resolvedMetadataPolicy[$entityTypeEnum->value], $leafMetadataEntityType);
         $this->resolvedMetadata[$entityTypeEnum->value] = $leafMetadataEntityType;
     }
 
