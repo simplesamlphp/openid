@@ -7,4 +7,5 @@ namespace SimpleSAML\OpenID\Codebooks;
 enum HttpMethodsEnum: string
 {
     case GET = 'GET';
+    case POST = 'POST';
 }

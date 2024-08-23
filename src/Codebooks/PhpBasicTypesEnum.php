@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Codebooks;
 
 /**
- * Primitive types with values as returned from function gettype($someValue)
+ * Primitive types with values as returned from PHP function gettype($someValue)
  */
-enum BasicTypesEnum: string
+enum PhpBasicTypesEnum: string
 {
     case Boolean = 'boolean';
     case Integer = 'integer';

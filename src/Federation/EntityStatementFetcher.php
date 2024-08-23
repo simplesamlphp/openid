@@ -6,10 +6,10 @@ namespace SimpleSAML\OpenID\Federation;
 
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
-use SimpleSAML\OpenID\Codebooks\HttpHeaderValues\ContentTypeEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
@@ -69,9 +69,9 @@ class EntityStatementFetcher
     ): EntityStatement {
         $entityConfigurationPayload = $entityConfiguration->getPayload();
 
-        $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimNamesEnum::Metadata->value]
+        $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimsEnum::Metadata->value]
             [EntityTypeEnum::FederationEntity->value]
-            [ClaimNamesEnum::FederationFetchEndpoint->value] ??
+            [ClaimsEnum::FederationFetchEndpoint->value] ??
             throw new JwsException('No fetch endpoint found in entity configuration.'));
         $issuer = $entityConfiguration->getIssuer();
 
@@ -84,8 +84,8 @@ class EntityStatementFetcher
             $this->helpers->url()->withParams(
                 $fetchEndpointUri,
                 [
-                    ClaimNamesEnum::Subject->value => $subjectId,
-                    ClaimNamesEnum::Issuer->value => $issuer,
+                    ClaimsEnum::Sub->value => $subjectId,
+                    ClaimsEnum::Iss->value => $issuer,
                 ],
             ),
         );

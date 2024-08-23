@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
-use SimpleSAML\OpenID\Codebooks\ClaimValues\TypeEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypeEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
@@ -39,7 +39,7 @@ class EntityStatement extends ParsedJws
      */
     public function getIssuer(): string
     {
-        return (string)($this->getPayloadClaim(ClaimNamesEnum::Issuer->value) ??
+        return (string)($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
             throw new EntityStatementException('No issuer claim found.'));
     }
 
@@ -49,7 +49,7 @@ class EntityStatement extends ParsedJws
      */
     public function getSubject(): string
     {
-        return (string)($this->getPayloadClaim(ClaimNamesEnum::Subject->value) ??
+        return (string)($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
             throw new EntityStatementException('No subject claim found.'));
     }
 
@@ -59,7 +59,7 @@ class EntityStatement extends ParsedJws
      */
     public function getIssuedAt(): int
     {
-        $iat = (int)($this->getPayloadClaim(ClaimNamesEnum::IssuedAt->value) ??
+        $iat = (int)($this->getPayloadClaim(ClaimsEnum::Iat->value) ??
             throw new EntityStatementException('No Issued At claim found.'));
 
         ($iat - $this->timestampValidationLeeway->inSeconds <= time()) ||
@@ -74,7 +74,7 @@ class EntityStatement extends ParsedJws
      */
     public function getExpirationTime(): int
     {
-        $exp = (int)($this->getPayloadClaim(ClaimNamesEnum::ExpirationTime->value) ??
+        $exp = (int)($this->getPayloadClaim(ClaimsEnum::Exp->value) ??
             throw new EntityStatementException('No Expiration Time claim found.'));
 
         ($exp + $this->timestampValidationLeeway->inSeconds >= time()) ||
@@ -89,7 +89,7 @@ class EntityStatement extends ParsedJws
     public function getJwks(): array
     {
         /** @psalm-suppress MixedAssignment We check the type manually. */
-        $jwks = $this->getPayloadClaim(ClaimNamesEnum::JsonWebKeySet->value);
+        $jwks = $this->getPayloadClaim(ClaimsEnum::Jwks->value);
 
         if (is_array($jwks) && (!empty($jwks))) {
             return $jwks;
@@ -104,10 +104,10 @@ class EntityStatement extends ParsedJws
      */
     public function getType(): string
     {
-        $typ = (string)($this->getHeaderClaim(ClaimNamesEnum::Type->value) ??
+        $typ = (string)($this->getHeaderClaim(ClaimsEnum::Typ->value) ??
             throw new EntityStatementException('No Type header claim found.'));
 
-        if ($typ !== TypeEnum::EntityStatementJwt->value) {
+        if ($typ !== JwtTypeEnum::EntityStatementJwt->value) {
             throw new EntityStatementException('Invalid type claim.');
         }
 
@@ -120,7 +120,7 @@ class EntityStatement extends ParsedJws
      */
     public function getKeyId(): string
     {
-        return (string)($this->getHeaderClaim(ClaimNamesEnum::KeyId->value) ??
+        return (string)($this->getHeaderClaim(ClaimsEnum::Kid->value) ??
             throw new EntityStatementException('No Key ID header claim found.'));
     }
 

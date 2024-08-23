@@ -29,27 +29,27 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return match ($this) {
             self::Value => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Boolean->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
-                BasicTypesEnum::Null->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Boolean->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::Null->value,
             ],
             self::Add, self::OneOf, self::SubsetOf, self::SupersetOf => [
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::Default => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Boolean->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Boolean->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::Essential => [
-                BasicTypesEnum::Boolean->value,
+                PhpBasicTypesEnum::Boolean->value,
             ],
         };
     }
@@ -58,22 +58,22 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return match ($this) {
             self::Value, self::Default, self::Essential => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Boolean->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Boolean->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::Add, self::SubsetOf, self::SupersetOf => [
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::OneOf => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
             ],
         };
     }
@@ -85,11 +85,11 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return match ($this) {
             self::Add, self::OneOf, self::SubsetOf, self::SupersetOf => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::Value, self::Default, self::Essential => throw new MetadataPolicyException('Not implemented.'),
         };
@@ -102,11 +102,11 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return match ($this) {
             self::Add, self::SubsetOf, self::SupersetOf => [
-                BasicTypesEnum::String->value,
-                BasicTypesEnum::Integer->value,
-                BasicTypesEnum::Double->value,
-                BasicTypesEnum::Object->value,
-                BasicTypesEnum::Array->value,
+                PhpBasicTypesEnum::String->value,
+                PhpBasicTypesEnum::Integer->value,
+                PhpBasicTypesEnum::Double->value,
+                PhpBasicTypesEnum::Object->value,
+                PhpBasicTypesEnum::Array->value,
             ],
             self::Value, self::Default, self::OneOf, self::Essential =>
             throw new MetadataPolicyException('Not implemented.'),

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Codebooks\HttpHeaderValues;
+namespace SimpleSAML\OpenID\Codebooks;
 
 enum ContentTypeEnum: string
 {

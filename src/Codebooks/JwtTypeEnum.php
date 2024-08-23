@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Codebooks\ClaimValues;
+namespace SimpleSAML\OpenID\Codebooks;
 
-enum TypeEnum: string
+enum JwtTypeEnum: string
 {
     case EntityStatementJwt = 'entity-statement+jwt';
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
@@ -83,7 +83,7 @@ class TrustChainResolver
 
         $leafEntityConfiguration = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($leafEntityId);
         /** @var ?non-empty-string[] $leafEntityAuthorityHints This is expected, validate if necessary. */
-        $leafEntityAuthorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
+        $leafEntityAuthorityHints = $leafEntityConfiguration->getPayloadClaim(ClaimsEnum::AuthorityHints->value);
 
         if (!is_array($leafEntityAuthorityHints) || empty($leafEntityAuthorityHints)) {
             $message = 'No authority hints defined in leaf entity configuration.';
@@ -233,7 +233,7 @@ class TrustChainResolver
             }
 
             /** @var ?array<non-empty-string> $authorityAuthorityHints */
-            $authorityAuthorityHints = $authorityConfiguration->getPayloadClaim(ClaimNamesEnum::AuthorityHints->value);
+            $authorityAuthorityHints = $authorityConfiguration->getPayloadClaim(ClaimsEnum::AuthorityHints->value);
 
             // If no authority hints, and this is no common trust anchor, disregard.
             if (!is_array($authorityAuthorityHints) || empty($authorityAuthorityHints)) {

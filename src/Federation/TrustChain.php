@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use JsonSerializable;
-use SimpleSAML\OpenID\Codebooks\ClaimNamesEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
@@ -331,7 +331,7 @@ class TrustChain implements JsonSerializable
      */
     protected function gatherCriticalMetadataPolicyOperators(EntityStatement $entityStatement): void
     {
-        $operators = (array)($entityStatement->getPayloadClaim(ClaimNamesEnum::MetadataPolicyCritical->value) ?? []);
+        $operators = (array)($entityStatement->getPayloadClaim(ClaimsEnum::MetadataPolicyCrit->value) ?? []);
         // Make sure we have strings only
         $operators = array_map(
             fn(mixed $value): string => (string)$value,
@@ -346,7 +346,7 @@ class TrustChain implements JsonSerializable
      */
     protected function gatherMetadataPolicies(EntityStatement $entityStatement): void
     {
-        $policy = (array)($entityStatement->getPayloadClaim(ClaimNamesEnum::MetadataPolicy->value) ?? []);
+        $policy = (array)($entityStatement->getPayloadClaim(ClaimsEnum::MetadataPolicy->value) ?? []);
 
         if (!empty($policy)) {
             array_unshift($this->metadataPolicies, $policy);
@@ -574,7 +574,7 @@ class TrustChain implements JsonSerializable
         // Configuration MUST contain a metadata claim with JSON object values for each of the corresponding
         // Entity Type Identifiers, even if the values are the empty JSON object {} (when the Entity Type
         // has no associated metadata or Immediate Superiors supply any needed metadata).
-        $leafMetadata = $this->getResolvedLeaf()->getPayloadClaim(ClaimNamesEnum::Metadata->value);
+        $leafMetadata = $this->getResolvedLeaf()->getPayloadClaim(ClaimsEnum::Metadata->value);
         if (
             (!is_array($leafMetadata)) || // Claim 'metadata' is optional.
             (!isset($leafMetadata[$entityTypeEnum->value])) || // If no metadata for given entity type
@@ -597,7 +597,7 @@ class TrustChain implements JsonSerializable
         // be applied before the metadata_policy.
         /** @psalm-suppress MixedAssignment We check type manually. */
         $immediateSuperiorMetadata = $this->getResolvedImmediateSuperior()
-            ->getPayloadClaim(ClaimNamesEnum::Metadata->value);
+            ->getPayloadClaim(ClaimsEnum::Metadata->value);
         if (
             is_array($immediateSuperiorMetadata) &&
             isset($immediateSuperiorMetadata[$entityTypeEnum->value]) &&
@@ -787,7 +787,7 @@ class TrustChain implements JsonSerializable
         $value = $metadata[$parameter] ?? null;
 
         // Special case for 'scope' parameter, which needs to be converted to array before policy application.
-        if (($parameter === ClaimNamesEnum::Scope->value) && is_string($value)) {
+        if (($parameter === ClaimsEnum::Scope->value) && is_string($value)) {
             $value = explode(' ', $value);
         }
 
@@ -797,7 +797,7 @@ class TrustChain implements JsonSerializable
     protected function resolveParameterValueAfterPolicy(mixed $value, string $parameter): mixed
     {
         // Special case for 'scope' parameter, which needs to be converted to string after policy application.
-        if (($parameter === ClaimNamesEnum::Scope->value) && is_array($value)) {
+        if (($parameter === ClaimsEnum::Scope->value) && is_array($value)) {
             /** @psalm-suppress MixedArgumentTypeCoercion */
             $value = implode(' ', $value);
         }
