@@ -9,7 +9,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
-use SimpleSAML\OpenID\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
 
 class TrustChainResolver

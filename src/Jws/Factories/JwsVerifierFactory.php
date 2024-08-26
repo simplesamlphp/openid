@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Factories;
+namespace SimpleSAML\OpenID\Jws\Factories;
 
 use SimpleSAML\OpenID\Algorithms\AlgorithmManager;
 use SimpleSAML\OpenID\Jws\JwsVerifier;

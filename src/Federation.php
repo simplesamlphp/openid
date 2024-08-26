@@ -12,13 +12,13 @@ use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
-use SimpleSAML\OpenID\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Factories\JwksFactory;
-use SimpleSAML\OpenID\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Factories\JwsVerifierFactory;
-use SimpleSAML\OpenID\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
+use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 
 class Federation
 {

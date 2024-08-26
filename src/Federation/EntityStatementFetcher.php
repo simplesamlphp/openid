@@ -16,7 +16,7 @@ use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Factories\EntityStatementFactory;
+use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
 use Throwable;
 

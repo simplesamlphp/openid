@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Factories;
+namespace SimpleSAML\OpenID\Federation\Factories;
 
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Federation\EntityStatement;
