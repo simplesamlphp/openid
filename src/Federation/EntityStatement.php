@@ -121,11 +121,7 @@ class EntityStatement extends ParsedJws
         // Verify with provided JWKS, otherwise use own JWKS.
         $jwks ??= $this->getJwks();
 
-        $this->jwsVerifier->verifyWithKeySet(
-            $this->jws,
-            $this->jwksFactory->fromKeyData($jwks),
-            $signatureIndex,
-        ) || throw new JwsException('Could not verify JWS signature.');
+        parent::verifyWithKeySet($jwks, $signatureIndex);
     }
 
     /**

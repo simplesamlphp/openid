@@ -6,6 +6,8 @@ namespace SimpleSAML\OpenID;
 
 use DateInterval;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
@@ -19,7 +21,12 @@ class Core
     protected RequestObjectFactory $requestObjectFactory;
 
     public function __construct(
-        protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
+        protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
+            new SignatureAlgorithmBag(
+                SignatureAlgorithmEnum::none,
+                SignatureAlgorithmEnum::RS256,
+            ),
+        ),
         DateInterval $timestampValidationLeeway = new DateInterval('PT1M'),
         protected readonly ?LoggerInterface $logger = null,
         protected readonly Helpers $helpers = new Helpers(),

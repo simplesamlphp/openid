@@ -93,4 +93,16 @@ class ParsedJws
             throw new JwsException('Unable to decode JWS payload.', $exception->getCode(), $exception);
         }
     }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function verifyWithKeySet(array $jwks, int $signatureIndex = 0): void
+    {
+        $this->jwsVerifier->verifyWithKeySet(
+            $this->jws,
+            $this->jwksFactory->fromKeyData($jwks),
+            $signatureIndex,
+        ) || throw new JwsException('Could not verify JWS signature.');
+    }
 }
