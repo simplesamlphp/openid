@@ -4,22 +4,11 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\Factories;
 
-use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Factories\JwksFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement;
-use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
-class EntityStatementFactory
+class EntityStatementFactory extends ParsedJwsFactory
 {
-    public function __construct(
-        protected readonly JwsParser $jwsParser,
-        protected readonly JwsVerifier $jwsVerifier,
-        protected readonly JwksFactory $jwksFactory,
-        protected readonly DateIntervalDecorator $timestampValidationLeeway,
-    ) {
-    }
-
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

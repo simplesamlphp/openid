@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
 use JsonException;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\JwksFactory;
 use Throwable;
@@ -24,8 +25,14 @@ class ParsedJws
         protected readonly JwsParser $jwsParser,
         protected readonly JwsVerifier $jwsVerifier,
         protected readonly JwksFactory $jwksFactory,
+        protected readonly DateIntervalDecorator $timestampValidationLeeway,
     ) {
         $this->jws = $this->jwsParser->parse($this->token);
+        $this->validate();
+    }
+
+    protected function validate(): void
+    {
     }
 
     /**

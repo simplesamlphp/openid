@@ -6,33 +6,13 @@ namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypeEnum;
-use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Factories\JwksFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use Throwable;
 
 class EntityStatement extends ParsedJws
 {
-    /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     */
-    public function __construct(
-        string $token,
-        JwsParser $jwsParser,
-        JwsVerifier $jwsVerifier,
-        JwksFactory $jwksFactory,
-        protected readonly DateIntervalDecorator $timestampValidationLeeway,
-    ) {
-        parent::__construct($token, $jwsParser, $jwsVerifier, $jwksFactory);
-
-        $this->validate();
-    }
-
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
