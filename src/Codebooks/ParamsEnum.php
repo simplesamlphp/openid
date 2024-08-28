@@ -18,6 +18,7 @@ enum ParamsEnum: string
     case LoginHint = 'login_hint';
     case MaxAge = 'max_age';
     case Nonce = 'nonce';
+    case PostLogoutRedirectUri = 'post_logout_redirect_uri';
     case Prompt = 'prompt';
     case RedirectUri = 'redirect_uri';
     case Request = 'request';
