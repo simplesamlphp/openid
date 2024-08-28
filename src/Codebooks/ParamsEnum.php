@@ -9,6 +9,8 @@ enum ParamsEnum: string
     case AcrValues = 'acr_values';
     case Claims = 'claims';
     case ClientId = 'client_id';
+    case CodeChallenge = 'code_challenge';
+    case CodeChallengeMethod = 'code_challenge_method';
     case Display = 'display';
     case Error = 'error';
     case ErrorDescription = 'error_description';
