@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws\Factories;
 
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -22,6 +22,9 @@ class ParsedJwsFactory
     ) {
     }
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
     public function fromToken(string $token): ParsedJws
     {
         return new ParsedJws(

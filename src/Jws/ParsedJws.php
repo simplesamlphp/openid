@@ -8,7 +8,7 @@ use Jose\Component\Signature\JWS;
 use JsonException;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 use Throwable;
@@ -108,7 +108,7 @@ class ParsedJws
     {
         $this->jwsVerifier->verifyWithKeySet(
             $this->jws,
-            $this->jwksFactory->fromKeyData($jwks),
+            $this->jwksFactory->fromKeyData($jwks)->jwks,
             $signatureIndex,
         ) || throw new JwsException('Could not verify JWS signature.');
     }

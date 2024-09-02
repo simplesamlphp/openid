@@ -11,8 +11,8 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
-use SimpleSAML\OpenID\Factories\JwksFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 

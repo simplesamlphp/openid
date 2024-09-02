@@ -109,7 +109,7 @@ class EntityStatementFetcher
      */
     public function fromCache(string $uri): ?EntityStatement
     {
-        $this->logger?->error(
+        $this->logger?->debug(
             'Trying to get entity statement token from cache.',
             compact('uri'),
         );
@@ -145,6 +145,7 @@ class EntityStatementFetcher
      */
     public function fromNetwork(string $uri): EntityStatement
     {
+        // TODO mivanci refactor to HttpClientDecorator
         try {
             $response = $this->httpClient->request(HttpMethodsEnum::GET->value, $uri);
         } catch (Throwable $e) {
