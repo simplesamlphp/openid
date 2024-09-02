@@ -64,7 +64,7 @@ class Test
         // Instantiate by injecting own options / dependencies:
         $federationTools = new Federation(
             supportedAlgorithms: $supportedAlgorithms,
-            maxEntityStatementCacheDuration: $maxEntityStatementCacheDuration,
+            maxCacheDuration: $maxEntityStatementCacheDuration,
             cache: $this->cache, // \Psr\SimpleCache\CacheInterface
             logger: $this->logger, // \Psr\Log\LoggerInterface
         );

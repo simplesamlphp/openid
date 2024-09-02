@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
 use SimpleSAML\OpenID\Factories\JwksFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 
@@ -27,21 +28,25 @@ class Core
                 SignatureAlgorithmEnum::RS256,
             ),
         ),
+        protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
         DateInterval $timestampValidationLeeway = new DateInterval('PT1M'),
         protected readonly ?LoggerInterface $logger = null,
         protected readonly Helpers $helpers = new Helpers(),
         AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
+        JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
         JwksFactory $jwksFactory = new JwksFactory(),
         RequestObjectFactory $requestObjectFactory = null,
     ) {
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
+        $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
 
         $this->requestObjectFactory = $requestObjectFactory ?? new RequestObjectFactory(
-            $jwsParserFactory->build(),
+            $jwsParserFactory->build($jwsSerializerManager),
             $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms)),
             $jwksFactory,
+            $jwsSerializerManager,
             $this->timestampValidationLeeway,
         );
     }

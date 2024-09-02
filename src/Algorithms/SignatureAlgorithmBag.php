@@ -9,9 +9,9 @@ class SignatureAlgorithmBag
     /** @var \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]  */
     protected array $algorithms;
 
-    public function __construct(SignatureAlgorithmEnum ...$algorithms)
+    public function __construct(SignatureAlgorithmEnum $algorithm, SignatureAlgorithmEnum ...$algorithms)
     {
-        $this->algorithms = $algorithms;
+        $this->algorithms = [$algorithm, ...$algorithms];
     }
 
     public function add(SignatureAlgorithmEnum $algorithm): void

@@ -9,6 +9,8 @@ use JsonException;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\JwksFactory;
+use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 use Throwable;
 
 class ParsedJws
@@ -17,17 +19,16 @@ class ParsedJws
     protected ?array $header = null;
     protected ?array $payload = null;
 
-    /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     */
+    protected ?string $token = null;
+
     public function __construct(
-        protected readonly string $token,
-        protected readonly JwsParser $jwsParser,
+        JwsDecorator $jwsDecorator,
         protected readonly JwsVerifier $jwsVerifier,
         protected readonly JwksFactory $jwksFactory,
+        protected readonly JwsSerializerManager $jwsSerializerManager,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
     ) {
-        $this->jws = $this->jwsParser->parse($this->token);
+        $this->jws = $jwsDecorator->jws;
         $this->validate();
     }
 
@@ -38,10 +39,10 @@ class ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function getHeader(): array
+    public function getHeader(int $signatureId = 0): array
     {
         try {
-            return $this->header ??= $this->jws->getSignature(0)->getProtectedHeader();
+            return $this->header ??= $this->jws->getSignature($signatureId)->getProtectedHeader();
         } catch (Throwable $exception) {
             throw new JwsException('Unable to get protected header.', (int)$exception->getCode(), $exception);
         }
@@ -65,9 +66,15 @@ class ParsedJws
         return $this->getPayload()[$key] ?? null;
     }
 
-    public function getToken(): string
-    {
-        return $this->token;
+    public function getToken(
+        JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
+        ?int $signatureIndex = null,
+    ): string {
+        return $this->token ??= $this->jwsSerializerManager->serialize(
+            $jwsSerializerEnum->value,
+            $this->jws,
+            $signatureIndex,
+        );
     }
 
     /**

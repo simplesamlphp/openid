@@ -16,10 +16,10 @@ class EntityStatementFactory extends ParsedJwsFactory
     public function fromToken(string $token): EntityStatement
     {
         return new EntityStatement(
-            $token,
-            $this->jwsParser,
+            $this->jwsParser->parse($token),
             $this->jwsVerifier,
             $this->jwksFactory,
+            $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
         );
     }

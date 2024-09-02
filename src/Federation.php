@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
 use SimpleSAML\OpenID\Factories\JwksFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
@@ -34,6 +35,7 @@ class Federation
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
+        protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
         DateInterval $maxCacheDuration = new DateInterval('PT6H'),
         DateInterval $timestampValidationLeeway = new DateInterval('PT1M'),
         int $maxTrustChainDepth = 9,
@@ -42,6 +44,7 @@ class Federation
         protected readonly Client $httpClient = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG),
         protected readonly Helpers $helpers = new Helpers(),
         AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
+        JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
         EntityStatementFactory $entityStatementFactory = null,
@@ -53,10 +56,13 @@ class Federation
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
         $this->cacheDecorator = is_null($cache) ? null : new CacheDecorator($cache);
 
+        $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
+
         $this->entityStatementFactory = $entityStatementFactory ?? new EntityStatementFactory(
-            $jwsParserFactory->build(),
+            $jwsParserFactory->build($jwsSerializerManager),
             $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms)),
             $jwksFactory,
+            $jwsSerializerManager,
             $this->timestampValidationLeeway,
         );
 

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Jws\Factories;
 
-use Jose\Component\Signature\Serializer\CompactSerializer;
-use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 class JwsParserFactory
 {
-    public function build(): JwsParser
+    public function build(JwsSerializerManager $jwsSerializerManager): JwsParser
     {
-        return new JwsParser(new JWSSerializerManager([new CompactSerializer(),]));
+        return new JwsParser($jwsSerializerManager);
     }
 }

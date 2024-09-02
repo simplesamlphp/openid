@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
+/**
+ * Supported signature (and in the future encryption) algorithms.
+ */
 class SupportedAlgorithms
 {
     public function __construct(
