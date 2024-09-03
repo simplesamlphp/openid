@@ -194,7 +194,7 @@ readonly class JwksFetcher
             $cacheTtl = is_null($signedJwksExpirationTime) ?
             $this->maxCacheDuration->inSeconds :
             $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($signedJwksExpirationTime);
-            $this->cacheDecorator?->set($token, $cacheTtl, $uri);
+            $this->cacheDecorator?->set($jwksJson, $cacheTtl, $uri);
             $this->logger?->debug('Signed JWKS JSON successfully cached.', compact('uri', 'jwksJson'));
         } catch (Throwable $exception) {
             $this->logger?->error(
