@@ -17,7 +17,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
      */
     public function getKeys(): array
     {
-        $keys = $this->getPayloadClaim(ClaimsEnum::Iss->value) ??
+        $keys = $this->getPayloadClaim(ClaimsEnum::Keys->value) ??
         throw new SignedJwksException('No keys claim found.');
 
         if ((!is_array($keys)) || empty($keys)) {
