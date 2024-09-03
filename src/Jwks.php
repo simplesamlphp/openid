@@ -60,7 +60,7 @@ class Jwks
         );
     }
 
-    public function getJwksFetcher(): JwksFetcher
+    public function jwksFetcher(): JwksFetcher
     {
         return $this->jwksFetcher ??= new JwksFetcher(
             $this->httpClientDecorator,

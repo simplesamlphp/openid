@@ -51,7 +51,7 @@ class Core
         );
     }
 
-    public function getRequestObjectFactory(): RequestObjectFactory
+    public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory;
     }
