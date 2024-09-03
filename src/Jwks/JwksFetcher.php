@@ -185,11 +185,11 @@ readonly class JwksFetcher
         );
 
         $signedJwks->verifyWithKeySet($federationJwks);
-
-        $this->logger?->debug('Signed JWKS signature verified, saving its JSON to cache.', compact('uri', 'token'));
+        $this->logger?->debug('Signed JWKS signature verified.', compact('uri', 'token'));
 
         try {
             $jwksJson = $this->helpers->json()->encode($signedJwks->jsonSerialize());
+            $this->logger?->debug('Signed JWKS JSON decoded, saving it to cache.', compact('uri', 'jwksJson'));
             $signedJwksExpirationTime = $signedJwks->getExpirationTime();
             $cacheTtl = is_null($signedJwksExpirationTime) ?
             $this->maxCacheDuration->inSeconds :
