@@ -8,6 +8,8 @@ enum ClaimsEnum: string
 {
     // Algorithm
     case Alg = 'alg';
+    // Audience
+    case Aud = 'aud';
     case AuthorityHints = 'authority_hints';
     case AuthorizationEndpoint = 'authorization_endpoint';
     case BackChannelLogoutUri = 'backchannel_logout_uri';
@@ -24,6 +26,8 @@ enum ClaimsEnum: string
     case Iat = 'iat';
     // Issuer
     case Iss = 'iss';
+    // JWT ID
+    case Jti = 'jti';
     // JsonWebKeySet
     case Jwks = 'jwks';
     // KeyId
@@ -47,4 +51,5 @@ enum ClaimsEnum: string
     case Sub = 'sub';
     // Type
     case Typ = 'typ';
+    case TrustChain = 'trust_chain';
 }
