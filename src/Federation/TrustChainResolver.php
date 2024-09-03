@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
 
+// TODO mivanci add option for max number of leaf authorities to process.
 class TrustChainResolver
 {
     protected int $maxTrustChainDepth;

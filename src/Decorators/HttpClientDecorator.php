@@ -13,9 +13,12 @@ use Throwable;
 
 class HttpClientDecorator
 {
-    protected const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
-    public function __construct(public readonly Client $client = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG))
+    public const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
+    public readonly Client $client;
+
+    public function __construct(Client $client = null)
     {
+        $this->client = $client ?? new Client(self::DEFAULT_HTTP_CLIENT_CONFIG);
     }
 
     /**
@@ -36,7 +39,8 @@ class HttpClientDecorator
 
         if ($response->getStatusCode() !== 200) {
             $message = sprintf(
-                'Unexpected HTTP response for entity statement fetch, status code: %s, reason: %s.',
+                'Unexpected HTTP response for URI %s. Status code: %s, reason: %s.',
+                $uri,
                 $response->getStatusCode(),
                 $response->getReasonPhrase(),
             );

@@ -28,6 +28,7 @@ enum ClaimsEnum: string
     case Jwks = 'jwks';
     // KeyId
     case Kid = 'kid';
+    case Keys = 'keys';
     case LogoUri = 'logo_uri';
     case Metadata = 'metadata';
     case MetadataPolicy = 'metadata_policy';

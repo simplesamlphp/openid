@@ -186,8 +186,10 @@ class EntityStatementFetcher
 
         $token = $response->getBody()->getContents();
         $this->logger?->info('Successful HTTP response for entity statement fetch.', compact('uri', 'token'));
+        $this->logger?->debug('Proceeding to EntityStatement instance building.');
 
         $entityStatement = $this->entityStatementFactory->fromToken($token);
+        $this->logger?->debug('Entity Statement instance built, saving its token to cache.', compact('uri', 'token'));
 
         // Cache it
         try {
@@ -196,6 +198,7 @@ class EntityStatementFetcher
                 $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($entityStatement->getExpirationTime()),
                 $uri,
             );
+            $this->logger?->debug('Entity Statement token successfully cached.', compact('uri', 'token'));
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting entity statement to cache: ' . $exception->getMessage(),
@@ -203,6 +206,7 @@ class EntityStatementFetcher
             );
         }
 
+        $this->logger?->debug('Returning built Entity Statement instance.', compact('uri', 'token'));
         return $entityStatement;
     }
 
