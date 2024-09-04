@@ -15,6 +15,7 @@ use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
+use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
@@ -32,6 +33,7 @@ class Federation
     protected DateIntervalDecorator $timestampValidationLeeway;
     protected int $maxTrustChainDepth;
     protected ?CacheDecorator $cacheDecorator;
+    protected RequestObjectFactory $requestObjectFactory;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -50,6 +52,7 @@ class Federation
         EntityStatementFactory $entityStatementFactory = null,
         JwksFactory $jwksFactory = new JwksFactory(),
         TrustChainFactory $trustChainFactory = null,
+        RequestObjectFactory $requestObjectFactory = null,
     ) {
         $this->maxCacheDuration = new DateIntervalDecorator($maxCacheDuration);
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
@@ -57,10 +60,20 @@ class Federation
         $this->cacheDecorator = is_null($cache) ? null : new CacheDecorator($cache);
 
         $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
+        $jwsParser = $jwsParserFactory->build($jwsSerializerManager);
+        $jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
 
         $this->entityStatementFactory = $entityStatementFactory ?? new EntityStatementFactory(
-            $jwsParserFactory->build($jwsSerializerManager),
-            $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms)),
+            $jwsParser,
+            $jwsVerifier,
+            $jwksFactory,
+            $jwsSerializerManager,
+            $this->timestampValidationLeeway,
+        );
+
+        $this->requestObjectFactory = $requestObjectFactory ?? new RequestObjectFactory(
+            $jwsParser,
+            $jwsVerifier,
             $jwksFactory,
             $jwsSerializerManager,
             $this->timestampValidationLeeway,
@@ -94,5 +107,15 @@ class Federation
             $this->logger,
             $this->maxTrustChainDepth,
         );
+    }
+
+    public function entityStatementFactory(): EntityStatementFactory
+    {
+        return $this->entityStatementFactory;
+    }
+
+    public function requestObjectFactory(): RequestObjectFactory
+    {
+        return $this->requestObjectFactory;
     }
 }

@@ -16,8 +16,9 @@ class RequestObject extends ParsedJws
      */
     public function getAudience(): array
     {
+        /** @psalm-suppress MixedAssignment */
         $aud = $this->getPayloadClaim(ClaimsEnum::Aud->value) ??
-            throw new RequestObjectException('No audience claim found.');
+        throw new RequestObjectException('No audience claim found.');
 
         if (is_array($aud)) {
             return $aud;
@@ -46,10 +47,12 @@ class RequestObject extends ParsedJws
      */
     protected function validateSubject(): void
     {
-        if (array_key_exists(
-            ClaimsEnum::Sub->value,
-            $this->getPayload(),
-        )) {
+        if (
+            array_key_exists(
+                ClaimsEnum::Sub->value,
+                $this->getPayload(),
+            )
+        ) {
             throw new RequestObjectException('Subject claim must not be present.');
         }
     }
@@ -106,6 +109,7 @@ class RequestObject extends ParsedJws
      */
     public function getTrustChain(): ?array
     {
+        /** @psalm-suppress MixedAssignment */
         $trustChain = $this->getPayloadClaim(ClaimsEnum::TrustChain->value) ?? null;
 
         if (is_null($trustChain)) {
@@ -116,7 +120,9 @@ class RequestObject extends ParsedJws
             return $trustChain;
         }
 
-        throw new RequestObjectException(sprintf('Unexpected trust chain claim format: %s', var_export($trustChain, true)));
+        throw new RequestObjectException(
+            sprintf('Unexpected trust chain claim format: %s', var_export($trustChain, true)),
+        );
     }
 
 
