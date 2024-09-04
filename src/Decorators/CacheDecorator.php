@@ -29,6 +29,22 @@ readonly class CacheDecorator
         $this->cache->set(self::keyFor($keyElement, ...$keyElements), $value, $ttl);
     }
 
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function has(string $keyElement, string ...$keyElements): bool
+    {
+        return $this->cache->has(self::keyFor($keyElement, ...$keyElements));
+    }
+
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function delete(string $keyElement, string ...$keyElements): bool
+    {
+        return $this->cache->delete(self::keyFor($keyElement, ...$keyElements));
+    }
+
     public static function keyFor(string $element, string ...$elements): string
     {
         return hash('sha256', implode('-', [$element, ...$elements]));

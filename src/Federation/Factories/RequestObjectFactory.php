@@ -11,6 +11,7 @@ class RequestObjectFactory extends ParsedJwsFactory
 {
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
      */
     public function fromToken(string $token): RequestObject
     {
