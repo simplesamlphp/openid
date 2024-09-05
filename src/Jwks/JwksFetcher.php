@@ -17,16 +17,16 @@ use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use Throwable;
 
-readonly class JwksFetcher
+class JwksFetcher
 {
     public function __construct(
-        protected HttpClientDecorator $httpClientDecorator,
-        protected JwksFactory $jwksFactory,
-        protected SignedJwksFactory $signedJwksFactory,
-        protected DateIntervalDecorator $maxCacheDuration,
-        protected ?CacheDecorator $cacheDecorator = null,
-        protected ?LoggerInterface $logger = null,
-        protected Helpers $helpers = new Helpers(),
+        protected readonly HttpClientDecorator $httpClientDecorator,
+        protected readonly JwksFactory $jwksFactory,
+        protected readonly SignedJwksFactory $signedJwksFactory,
+        protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly ?CacheDecorator $cacheDecorator = null,
+        protected readonly ?LoggerInterface $logger = null,
+        protected readonly Helpers $helpers = new Helpers(),
     ) {
     }
 

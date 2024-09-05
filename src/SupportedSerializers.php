@@ -7,10 +7,10 @@ namespace SimpleSAML\OpenID;
 use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 
-readonly class SupportedSerializers
+class SupportedSerializers
 {
     public function __construct(
-        protected JwsSerializerBag $jwsSerializerBag = new JwsSerializerBag(
+        protected readonly JwsSerializerBag $jwsSerializerBag = new JwsSerializerBag(
             JwsSerializerEnum::Compact,
         ),
     ) {

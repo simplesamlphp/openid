@@ -6,9 +6,9 @@ namespace SimpleSAML\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
 
-readonly class JwsDecorator
+class JwsDecorator
 {
-    public function __construct(public JWS $jws)
+    public function __construct(public readonly JWS $jws)
     {
     }
 }

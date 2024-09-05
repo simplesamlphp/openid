@@ -7,9 +7,9 @@ namespace SimpleSAML\OpenID\Jwks;
 use Jose\Component\Core\JWKSet;
 use JsonSerializable;
 
-readonly class JwksDecorator implements JsonSerializable
+class JwksDecorator implements JsonSerializable
 {
-    public function __construct(public JWKSet $jwks)
+    public function __construct(public readonly JWKSet $jwks)
     {
     }
 

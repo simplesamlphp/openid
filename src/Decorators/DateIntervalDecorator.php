@@ -7,11 +7,11 @@ namespace SimpleSAML\OpenID\Decorators;
 use DateInterval;
 use DateTimeImmutable;
 
-readonly class DateIntervalDecorator
+class DateIntervalDecorator
 {
     public int $inSeconds;
 
-    public function __construct(public DateInterval $dateInterval)
+    public function __construct(public readonly DateInterval $dateInterval)
     {
         $this->inSeconds = self::toSeconds($this->dateInterval);
     }
