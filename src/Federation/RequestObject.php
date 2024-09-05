@@ -35,6 +35,7 @@ class RequestObject extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
+     * @return non-empty-string
      */
     public function getIssuer(): string
     {

@@ -106,6 +106,7 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
      */
     public function getKeyId(): string
     {

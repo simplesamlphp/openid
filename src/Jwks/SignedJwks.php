@@ -32,6 +32,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
+     * @return non-empty-string
      */
     public function getIssuer(): string
     {
@@ -45,6 +46,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
+     * @return non-empty-string
      */
     public function getSubject(): string
     {
