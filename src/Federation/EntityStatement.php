@@ -16,21 +16,29 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
      */
     public function getIssuer(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
-            throw new EntityStatementException('No issuer claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
+                throw new EntityStatementException('No issuer claim found.')),
+            ClaimsEnum::Iss->value,
+        );
     }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
      */
     public function getSubject(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
-            throw new EntityStatementException('No subject claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
+            throw new EntityStatementException('No subject claim found.')),
+            ClaimsEnum::Sub->value,
+        );
     }
 
     /**
@@ -81,6 +89,7 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
      */
     public function getType(): string
     {
@@ -100,8 +109,11 @@ class EntityStatement extends ParsedJws
      */
     public function getKeyId(): string
     {
-        return (string)($this->getHeaderClaim(ClaimsEnum::Kid->value) ??
-            throw new EntityStatementException('No Key ID header claim found.'));
+        return $this->ensureNonEmptyString(
+            (string)($this->getHeaderClaim(ClaimsEnum::Kid->value) ??
+            throw new EntityStatementException('No Key ID header claim found.')),
+            ClaimsEnum::Kid->value,
+        );
     }
 
     /**

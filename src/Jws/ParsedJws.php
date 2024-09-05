@@ -38,6 +38,22 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
+     */
+    protected function ensureNonEmptyString(mixed $value, string $description): string
+    {
+        $value = (string)$value;
+
+        if (empty($value)) {
+            $message = "Empty string value encountered: $description";
+            throw new JwsException($message);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getHeader(int $signatureId = 0): array
     {

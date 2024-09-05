@@ -13,6 +13,7 @@ class RequestObject extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
+     * @return string[]
      */
     public function getAudience(): array
     {
@@ -21,7 +22,7 @@ class RequestObject extends ParsedJws
         throw new RequestObjectException('No audience claim found.');
 
         if (is_array($aud)) {
-            return $aud;
+            return array_map(fn(mixed $val): string => (string)$val, $aud);
         }
 
         if (is_string($aud)) {
@@ -37,8 +38,11 @@ class RequestObject extends ParsedJws
      */
     public function getIssuer(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
-            throw new RequestObjectException('No issuer claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
+                throw new RequestObjectException('No issuer claim found.')),
+            ClaimsEnum::Iss->value,
+        );
     }
 
     /**
@@ -60,11 +64,15 @@ class RequestObject extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
+     * @return non-empty-string
      */
     public function getJwtId(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Jti->value) ??
-            throw new RequestObjectException('No JWT ID claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Jti->value) ??
+            throw new RequestObjectException('No JWT ID claim found.')),
+            ClaimsEnum::Jti->value,
+        );
     }
 
     /**

@@ -35,8 +35,11 @@ class SignedJwks extends ParsedJws implements JsonSerializable
      */
     public function getIssuer(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
-            throw new SignedJwksException('No issuer claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
+                throw new SignedJwksException('No issuer claim found.')),
+            ClaimsEnum::Iss->value,
+        );
     }
 
     /**
@@ -45,8 +48,11 @@ class SignedJwks extends ParsedJws implements JsonSerializable
      */
     public function getSubject(): string
     {
-        return (string)($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
-            throw new SignedJwksException('No subject claim found.'));
+        return $this->ensureNonEmptyString(
+            ($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
+                throw new SignedJwksException('No subject claim found.')),
+            ClaimsEnum::Sub->value,
+        );
     }
 
     /**
