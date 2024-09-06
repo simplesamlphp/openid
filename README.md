@@ -57,14 +57,14 @@ class Test
             )
         );
         
-        // Define the maximum cache TTL for entity statements. This will be used together with 'exp'
-        // claim to resolve the maximum time for entity statement caching.
-        $maxEntityStatementCacheDuration = new DateInterval('PT6H');
+        // Define the maximum cache TTL for federation artifacts. This will be used together with 'exp'
+        // claim to resolve the maximum cache time for trust chains, entity statements, etc.
+        $maxCacheDuration = new DateInterval('PT6H');
         
         // Instantiate by injecting own options / dependencies:
         $federationTools = new Federation(
             supportedAlgorithms: $supportedAlgorithms,
-            maxCacheDuration: $maxEntityStatementCacheDuration,
+            maxCacheDuration: $maxCacheDuration,
             cache: $this->cache, // \Psr\SimpleCache\CacheInterface
             logger: $this->logger, // \Psr\Log\LoggerInterface
         );
