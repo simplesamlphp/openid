@@ -8,6 +8,7 @@ enum ClaimsEnum: string
 {
     // Algorithm
     case Alg = 'alg';
+    case ApplicationType = 'application_type';
     // Audience
     case Aud = 'aud';
     case AuthorityHints = 'authority_hints';
