@@ -22,6 +22,7 @@ enum ClaimsEnum: string
     // ExpirationTime
     case Exp = 'exp';
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
+    case GrantTypes = 'grant_types';
     case HomepageUri = 'homepage_uri';
     // IssuedAt
     case Iat = 'iat';
@@ -47,6 +48,7 @@ enum ClaimsEnum: string
     case RedirectUris = 'redirect_uris';
     case RequestAuthenticationMethodsSupported = 'request_authentication_methods_supported';
     case RequestAuthenticationSigningAlgValuesSupported = 'request_authentication_signing_alg_values_supported';
+    case ResponseTypes = 'response_types';
     case Scope = 'scope';
     // Subject
     case Sub = 'sub';
