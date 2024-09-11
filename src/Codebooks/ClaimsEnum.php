@@ -32,6 +32,7 @@ enum ClaimsEnum: string
     case Jti = 'jti';
     // JsonWebKeySet
     case Jwks = 'jwks';
+    case JwksUri = 'jwks_uri';
     // KeyId
     case Kid = 'kid';
     case Keys = 'keys';
