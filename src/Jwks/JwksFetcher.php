@@ -108,7 +108,13 @@ class JwksFetcher
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     */
+    public function fromCacheOrJwksUri(string $uri): ?JwksDecorator
+    {
+        return $this->fromCache($uri) ?? $this->fromJwksUri($uri);
+    }
+
+    /**
      */
     public function fromJwksUri(string $uri): ?JwksDecorator
     {
@@ -156,6 +162,14 @@ class JwksFetcher
         $this->logger?->debug('Proceeding to instance building.', compact('uri', 'jwks'));
 
         return $this->jwksFactory->fromKeyData($jwks);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function fromCacheOrSignedJwksUri(string $uri, array $federationJwks): ?JwksDecorator
+    {
+        return $this->fromCache($uri) ?? $this->fromSignedJwksUri($uri, $federationJwks);
     }
 
     /**
