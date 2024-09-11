@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Jwks;
 
+use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use JsonSerializable;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
 class JwksDecorator implements JsonSerializable
 {
@@ -15,6 +17,11 @@ class JwksDecorator implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return $this->jwks->jsonSerialize();
+        return [
+            ClaimsEnum::Keys->value => array_map(
+                fn(JWK $jwk): array => $jwk->jsonSerialize(),
+                $this->jwks->all(),
+            ),
+        ];
     }
 }
