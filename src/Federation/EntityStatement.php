@@ -79,11 +79,16 @@ class EntityStatement extends ParsedJws
         /** @psalm-suppress MixedAssignment We check the type manually. */
         $jwks = $this->getPayloadClaim(ClaimsEnum::Jwks->value);
 
-        if (is_array($jwks) && (!empty($jwks))) {
-            return $jwks;
+        if (
+            !is_array($jwks) ||
+            !array_key_exists(ClaimsEnum::Keys->value, $jwks) ||
+            !is_array($jwks[ClaimsEnum::Keys->value]) ||
+            (empty($jwks[ClaimsEnum::Keys->value]))
+        ) {
+            throw new JwsException('Invalid JWKS encountered: ' . var_export($jwks, true));
         }
 
-        throw new JwsException('No jwks found.');
+        return $jwks;
     }
 
     /**
