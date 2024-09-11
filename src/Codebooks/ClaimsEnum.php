@@ -44,6 +44,7 @@ enum ClaimsEnum: string
     case OrganizationName = 'organization_name';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
+    case SignedJwksUri = 'signed_jwks_uri';
     // PublicKeyUse
     case Use = 'use';
     case RedirectUris = 'redirect_uris';
