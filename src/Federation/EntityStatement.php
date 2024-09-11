@@ -73,6 +73,8 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return array[]
+     * @psalm-suppress MixedReturnTypeCoercion
      */
     public function getJwks(): array
     {
