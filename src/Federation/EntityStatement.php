@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
-use SimpleSAML\OpenID\Codebooks\JwtTypeEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -103,7 +103,7 @@ class EntityStatement extends ParsedJws
         $typ = (string)($this->getHeaderClaim(ClaimsEnum::Typ->value) ??
             throw new EntityStatementException('No Type header claim found.'));
 
-        if ($typ !== JwtTypeEnum::EntityStatementJwt->value) {
+        if ($typ !== JwtTypesEnum::EntityStatementJwt->value) {
             throw new EntityStatementException('Invalid type claim.');
         }
 

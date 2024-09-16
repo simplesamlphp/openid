@@ -113,7 +113,7 @@ to get metadata for OpenID RP, which will return an array (or null if no metadat
 
 // ... 
 
-$entityType = \SimpleSAML\OpenID\Codebooks\EntityTypeEnum::OpenIdRelyingParty;
+$entityType = \SimpleSAML\OpenID\Codebooks\EntityTypesEnum::OpenIdRelyingParty;
 
 try {
     /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Codebooks;
 
-enum ApplicationTypeEnum: string
+enum ApplicationTypesEnum: string
 {
     case Web = 'web';
     case Native = 'native';

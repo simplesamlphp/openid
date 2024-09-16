@@ -6,7 +6,7 @@ namespace SimpleSAML\OpenID\Federation;
 
 use JsonSerializable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
-use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
+use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
@@ -126,7 +126,7 @@ class TrustChain implements JsonSerializable
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function getResolvedMetadata(EntityTypeEnum $entityTypeEnum): ?array
+    public function getResolvedMetadata(EntityTypesEnum $entityTypeEnum): ?array
     {
         $this->validateIsResolved();
 
@@ -357,7 +357,7 @@ class TrustChain implements JsonSerializable
      * // TODO mivanci move to metadata policy resolver, inject it.
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
-    protected function resolveMetadataPolicyFor(EntityTypeEnum $entityTypeEnum): void
+    protected function resolveMetadataPolicyFor(EntityTypesEnum $entityTypeEnum): void
     {
         $currentPolicy = [];
         $supportedOperators = MetadataPolicyOperatorsEnum::values();
@@ -563,7 +563,7 @@ class TrustChain implements JsonSerializable
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    protected function resolveMetadataFor(EntityTypeEnum $entityTypeEnum): void
+    protected function resolveMetadataFor(EntityTypesEnum $entityTypeEnum): void
     {
         // In order to be able to resolve metadata, we need to have resolved metadata policy.
         if (!array_key_exists($entityTypeEnum->value, $this->resolvedMetadataPolicy)) {

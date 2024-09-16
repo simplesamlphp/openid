@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Codebooks;
 
-enum EntityTypeEnum: string
+enum EntityTypesEnum: string
 {
     case FederationEntity = 'federation_entity';
     case OpenIdProvider = 'openid_provider';

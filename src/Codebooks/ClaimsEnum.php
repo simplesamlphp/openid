@@ -55,6 +55,7 @@ enum ClaimsEnum: string
     // Subject
     case Sub = 'sub';
     case TokenEndpointAuthMethod = 'token_endpoint_auth_method';
+    case TokenEndpointAuthMethodsSupported = 'token_endpoint_auth_methods_supported';
     // Type
     case Typ = 'typ';
     case TrustChain = 'trust_chain';

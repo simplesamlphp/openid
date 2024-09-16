@@ -7,7 +7,10 @@ namespace SimpleSAML\OpenID\Codebooks;
 enum ParamsEnum: string
 {
     case AcrValues = 'acr_values';
+    case Assertion = 'assertion';
     case Claims = 'claims';
+    case ClientAssertion = 'client_assertion';
+    case ClientAssertionType = 'client_assertion_type';
     case ClientId = 'client_id';
     case CodeChallenge = 'code_challenge';
     case CodeChallengeMethod = 'code_challenge_method';

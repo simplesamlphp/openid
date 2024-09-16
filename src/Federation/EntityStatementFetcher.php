@@ -7,8 +7,8 @@ namespace SimpleSAML\OpenID\Federation;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
-use SimpleSAML\OpenID\Codebooks\ContentTypeEnum;
-use SimpleSAML\OpenID\Codebooks\EntityTypeEnum;
+use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
+use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
@@ -70,7 +70,7 @@ class EntityStatementFetcher
         $entityConfigurationPayload = $entityConfiguration->getPayload();
 
         $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimsEnum::Metadata->value]
-            [EntityTypeEnum::FederationEntity->value]
+            [EntityTypesEnum::FederationEntity->value]
             [ClaimsEnum::FederationFetchEndpoint->value] ??
             throw new JwsException('No fetch endpoint found in entity configuration.'));
         $issuer = $entityConfiguration->getIssuer();
@@ -171,14 +171,14 @@ class EntityStatementFetcher
         /** @psalm-suppress InvalidLiteralArgument */
         if (
             !str_contains(
-                ContentTypeEnum::ApplicationEntityStatementJwt->value,
+                ContentTypesEnum::ApplicationEntityStatementJwt->value,
                 $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
             )
         ) {
             $message = sprintf(
                 'Unexpected content type in response for entity statement fetch: %s, expected: %s.',
                 $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
-                ContentTypeEnum::ApplicationEntityStatementJwt->value,
+                ContentTypesEnum::ApplicationEntityStatementJwt->value,
             );
             $this->logger?->error($message);
             throw new FetchException($message);

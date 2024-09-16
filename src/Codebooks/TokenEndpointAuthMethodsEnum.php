@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Codebooks;
 
-enum TokenEndpointAuthMethodEnum: string
+enum TokenEndpointAuthMethodsEnum: string
 {
     case ClientSecretPost = 'client_secret_post';
     case ClientSecretBasic = 'client_secret_basic';
