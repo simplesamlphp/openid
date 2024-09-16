@@ -9,7 +9,6 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use Throwable;
 
 class EntityStatement extends ParsedJws
 {
@@ -20,11 +19,7 @@ class EntityStatement extends ParsedJws
      */
     public function getIssuer(): string
     {
-        return $this->ensureNonEmptyString(
-            ($this->getPayloadClaim(ClaimsEnum::Iss->value) ??
-                throw new EntityStatementException('No issuer claim found.')),
-            ClaimsEnum::Iss->value,
-        );
+        return parent::getIssuer() ?? throw new EntityStatementException('No Issuer claim found.');
     }
 
     /**
@@ -34,11 +29,7 @@ class EntityStatement extends ParsedJws
      */
     public function getSubject(): string
     {
-        return $this->ensureNonEmptyString(
-            ($this->getPayloadClaim(ClaimsEnum::Sub->value) ??
-            throw new EntityStatementException('No subject claim found.')),
-            ClaimsEnum::Sub->value,
-        );
+        return parent::getSubject() ?? throw new EntityStatementException('No Subject claim found.');
     }
 
     /**
@@ -47,13 +38,7 @@ class EntityStatement extends ParsedJws
      */
     public function getIssuedAt(): int
     {
-        $iat = (int)($this->getPayloadClaim(ClaimsEnum::Iat->value) ??
-            throw new EntityStatementException('No Issued At claim found.'));
-
-        ($iat - $this->timestampValidationLeeway->inSeconds <= time()) ||
-        throw new EntityStatementException("Issued At claim ($iat) is greater than current time.");
-
-        return $iat;
+        return parent::getIssuedAt() ?? throw new EntityStatementException('No Issued At claim found.');
     }
 
     /**
@@ -62,13 +47,7 @@ class EntityStatement extends ParsedJws
      */
     public function getExpirationTime(): int
     {
-        $exp = (int)($this->getPayloadClaim(ClaimsEnum::Exp->value) ??
-            throw new EntityStatementException('No Expiration Time claim found.'));
-
-        ($exp + $this->timestampValidationLeeway->inSeconds >= time()) ||
-        throw new EntityStatementException("Expiration Time claim ($exp) is lesser than current time.");
-
-        return $exp;
+        return parent::getExpirationTime() ?? throw new EntityStatementException('No Expiration Time claim found.');
     }
 
     /**
@@ -145,11 +124,12 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     protected function validate(): void
     {
-        $calls = [
+        $this->validateByCallbacks(
             $this->getIssuer(...),
             $this->getSubject(...),
             $this->getIssuedAt(...),
@@ -157,20 +137,6 @@ class EntityStatement extends ParsedJws
             $this->getJwks(...),
             $this->getType(...),
             $this->getKeyId(...),
-        ];
-
-        $errors = [];
-
-        foreach ($calls as $call) {
-            try {
-                call_user_func($call);
-            } catch (Throwable $exception) {
-                $errors[] = $exception->getMessage();
-            }
-        }
-
-        if (!empty($errors)) {
-            throw new EntityStatementException('Entity statement not valid: ' . implode('; ', $errors));
-        }
+        );
     }
 }
