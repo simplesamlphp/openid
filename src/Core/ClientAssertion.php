@@ -22,6 +22,18 @@ class ClientAssertion extends ParsedJws
             $this->getJwtId(...),
             $this->getExpirationTime(...),
             $this->getIssuedAt(...),
+            $this->validateIssuerAndSubject(...),
+        );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
+     */
+    protected function validateIssuerAndSubject(): void
+    {
+        ($this->getIssuer() === $this->getSubject()) || throw new ClientAssertionException(
+            'Issuer claim is expected to be the same as Subject claim',
         );
     }
 
