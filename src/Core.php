@@ -8,6 +8,7 @@ use DateInterval;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
@@ -20,6 +21,7 @@ class Core
 {
     protected DateIntervalDecorator $timestampValidationLeeway;
     protected RequestObjectFactory $requestObjectFactory;
+    protected ClientAssertionFactory $clientAssertionFactory;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
@@ -38,13 +40,24 @@ class Core
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
         JwksFactory $jwksFactory = new JwksFactory(),
         RequestObjectFactory $requestObjectFactory = null,
+        ClientAssertionFactory $clientAssertionFactory = null,
     ) {
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
         $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
+        $jwsParser =  $jwsParserFactory->build($jwsSerializerManager);
+        $jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
 
         $this->requestObjectFactory = $requestObjectFactory ?? new RequestObjectFactory(
-            $jwsParserFactory->build($jwsSerializerManager),
-            $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms)),
+            $jwsParser,
+            $jwsVerifier,
+            $jwksFactory,
+            $jwsSerializerManager,
+            $this->timestampValidationLeeway,
+        );
+
+        $this->clientAssertionFactory = $clientAssertionFactory ?? new ClientAssertionFactory(
+            $jwsParser,
+            $jwsVerifier,
             $jwksFactory,
             $jwsSerializerManager,
             $this->timestampValidationLeeway,
@@ -54,5 +67,10 @@ class Core
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory;
+    }
+
+    public function clientAssertionFactory(): ClientAssertionFactory
+    {
+        return $this->clientAssertionFactory;
     }
 }
