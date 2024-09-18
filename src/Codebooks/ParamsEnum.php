@@ -12,6 +12,7 @@ enum ParamsEnum: string
     case ClientAssertion = 'client_assertion';
     case ClientAssertionType = 'client_assertion_type';
     case ClientId = 'client_id';
+    case ClientSecret = 'client_secret';
     case CodeChallenge = 'code_challenge';
     case CodeChallengeMethod = 'code_challenge_method';
     case Display = 'display';
