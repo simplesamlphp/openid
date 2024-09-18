@@ -15,6 +15,7 @@ enum ParamsEnum: string
     case ClientSecret = 'client_secret';
     case CodeChallenge = 'code_challenge';
     case CodeChallengeMethod = 'code_challenge_method';
+    case CodeVerifier = 'code_verifier';
     case Display = 'display';
     case Error = 'error';
     case ErrorDescription = 'error_description';
