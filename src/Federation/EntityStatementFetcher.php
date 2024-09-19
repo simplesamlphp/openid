@@ -73,11 +73,10 @@ class EntityStatementFetcher
             [EntityTypesEnum::FederationEntity->value]
             [ClaimsEnum::FederationFetchEndpoint->value] ??
             throw new JwsException('No fetch endpoint found in entity configuration.'));
-        $issuer = $entityConfiguration->getIssuer();
 
         $this->logger?->debug(
             'Entity statement fetch from cache or fetch endpoint.',
-            compact('subjectId', 'fetchEndpointUri', 'issuer'),
+            compact('subjectId', 'fetchEndpointUri'),
         );
 
         return $this->fromCacheOrNetwork(
@@ -85,7 +84,6 @@ class EntityStatementFetcher
                 $fetchEndpointUri,
                 [
                     ClaimsEnum::Sub->value => $subjectId,
-                    ClaimsEnum::Iss->value => $issuer,
                 ],
             ),
         );
