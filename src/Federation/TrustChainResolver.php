@@ -12,10 +12,10 @@ use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
 
-// TODO mivanci add option for max number of leaf authorities to process.
 class TrustChainResolver
 {
     protected int $maxTrustChainDepth;
+    protected int $maxLeafAuthoritiesToProcess;
 
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
@@ -23,9 +23,11 @@ class TrustChainResolver
         protected readonly DateIntervalDecorator $maxCacheDuration,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
-        int $maxTrustChainDepth = 9,
+        int $maxTrustChainDepth = 10,
+        int $maxLeafAuthoritiesToProcess = 6,
     ) {
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
+        $this->maxLeafAuthoritiesToProcess = min(12, max(1, $maxLeafAuthoritiesToProcess));
     }
 
     /**
@@ -96,6 +98,16 @@ class TrustChainResolver
             'Leaf entity configuration fetched, found its authority hints.',
             compact('leafEntityId', 'leafEntityAuthorityHints'),
         );
+
+        if (($leafEntityAuthorityHintsCount = count($leafEntityAuthorityHints)) > $this->maxLeafAuthoritiesToProcess) {
+            $message = sprintf(
+                'Encountered %s leaf entity authority hints, while %s is allowed, stopping.',
+                $leafEntityAuthorityHintsCount,
+                $this->maxLeafAuthoritiesToProcess,
+            );
+            $this->logger?->error($message, compact('leafEntityId'));
+            throw new TrustChainException($message);
+        }
 
         $fetchedConfigurations = [$leafEntityId => $leafEntityConfiguration];
         $resolvedChains = [];
