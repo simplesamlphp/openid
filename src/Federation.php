@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -36,6 +37,7 @@ class Federation
     protected ?CacheDecorator $cacheDecorator;
     protected RequestObjectFactory $requestObjectFactory;
     protected HttpClientDecorator $httpClientDecorator;
+    protected MetadataPolicyResolver $metadataPolicyResolver;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -55,6 +57,7 @@ class Federation
         JwksFactory $jwksFactory = new JwksFactory(),
         TrustChainFactory $trustChainFactory = null,
         RequestObjectFactory $requestObjectFactory = null,
+        MetadataPolicyResolver $metadataPolicyResolver = null,
     ) {
         $this->maxCacheDuration = new DateIntervalDecorator($maxCacheDuration);
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
@@ -82,10 +85,13 @@ class Federation
             $this->timestampValidationLeeway,
         );
 
+        $this->metadataPolicyResolver = $metadataPolicyResolver ?? new MetadataPolicyResolver($this->helpers);
+
         $this->trustChainFactory = $trustChainFactory ?? new TrustChainFactory(
             $this->entityStatementFactory,
             $this->timestampValidationLeeway,
             $this->helpers,
+            $this->metadataPolicyResolver,
         );
     }
 
