@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
@@ -34,6 +35,7 @@ class Federation
     protected int $maxTrustChainDepth;
     protected ?CacheDecorator $cacheDecorator;
     protected RequestObjectFactory $requestObjectFactory;
+    protected HttpClientDecorator $httpClientDecorator;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -43,7 +45,7 @@ class Federation
         int $maxTrustChainDepth = 9,
         CacheInterface $cache = null,
         protected readonly ?LoggerInterface $logger = null,
-        protected readonly Client $httpClient = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG),
+        Client $client = null,
         protected readonly Helpers $helpers = new Helpers(),
         AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
         JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
@@ -58,6 +60,7 @@ class Federation
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
         $this->cacheDecorator = is_null($cache) ? null : new CacheDecorator($cache);
+        $this->httpClientDecorator = new HttpClientDecorator($client);
 
         $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
         $jwsParser = $jwsParserFactory->build($jwsSerializerManager);
@@ -89,7 +92,7 @@ class Federation
     public function entityStatementFetcher(): EntityStatementFetcher
     {
         return self::$entityStatementFetcher ??= new EntityStatementFetcher(
-            $this->httpClient,
+            $this->httpClientDecorator,
             $this->entityStatementFactory,
             $this->maxCacheDuration,
             $this->cacheDecorator,

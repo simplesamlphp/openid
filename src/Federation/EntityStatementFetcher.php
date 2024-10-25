@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
-use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
@@ -14,6 +13,7 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
@@ -23,7 +23,7 @@ use Throwable;
 class EntityStatementFetcher
 {
     public function __construct(
-        protected readonly Client $httpClient,
+        protected readonly HttpClientDecorator $httpClientDecorator,
         protected readonly EntityStatementFactory $entityStatementFactory,
         protected readonly DateIntervalDecorator $maxCacheDuration,
         protected readonly ?CacheDecorator $cacheDecorator = null,
@@ -143,9 +143,8 @@ class EntityStatementFetcher
      */
     public function fromNetwork(string $uri): EntityStatement
     {
-        // TODO mivanci refactor to HttpClientDecorator
         try {
-            $response = $this->httpClient->request(HttpMethodsEnum::GET->value, $uri);
+            $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
         } catch (Throwable $e) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',
