@@ -7,18 +7,23 @@ namespace SimpleSAML\OpenID\Federation\Factories;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\TrustChain;
+use SimpleSAML\OpenID\Helpers;
 
 class TrustChainFactory
 {
     public function __construct(
         protected EntityStatementFactory $entityStatementFactory,
         protected DateIntervalDecorator $timestampValidationLeeway,
+        protected Helpers $helpers,
     ) {
     }
 
     public function empty(): TrustChain
     {
-        return new TrustChain($this->timestampValidationLeeway);
+        return new TrustChain(
+            $this->timestampValidationLeeway,
+            $this->helpers,
+        );
     }
 
     /**

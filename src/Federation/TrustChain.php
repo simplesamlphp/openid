@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Helpers;
 
 class TrustChain implements JsonSerializable
 {
@@ -56,8 +57,10 @@ class TrustChain implements JsonSerializable
      */
     protected array $resolvedMetadata = [];
 
-    public function __construct(protected DateIntervalDecorator $timestampValidationLeeway)
-    {
+    public function __construct(
+        protected DateIntervalDecorator $timestampValidationLeeway,
+        protected Helpers $helpers,
+    ) {
     }
 
     /**
@@ -415,7 +418,7 @@ class TrustChain implements JsonSerializable
                     if (
                         !isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value])
                     ) {
-                        $this->ensureArrayDepth(
+                        $this->helpers->arr()->ensureArrayDepth(
                             $currentPolicy,
                             $nextPolicyParameter,
                             $metadataPolicyOperatorEnum->value,
@@ -536,29 +539,6 @@ class TrustChain implements JsonSerializable
     }
 
     /**
-     * TODO mivanci move to Arr helper method, inject helpers
-     */
-    protected function ensureArrayDepth(array &$array, int|string ...$keys): void
-    {
-        if (count($keys) > 99) {
-            throw new TrustChainException('Refusing to recurse to given depth.');
-        }
-
-        $key = array_shift($keys);
-
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
-        if (!$key) {
-            return;
-        }
-
-        if (!isset($array[$key]) || !is_array($array[$key])) {
-            $array[$key] = [];
-        }
-
-        $this->ensureArrayDepth($array[$key], ...$keys);
-    }
-
-    /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -644,7 +624,7 @@ class TrustChain implements JsonSerializable
                         unset($leafMetadataEntityType[$policyParameterName]);
                         continue;
                     }
-                    $this->ensureArrayDepth($leafMetadataEntityType, $policyParameterName);
+                    $this->helpers->arr()->ensureArrayDepth($leafMetadataEntityType, $policyParameterName);
                     /** @psalm-suppress MixedAssignment */
                     $leafMetadataEntityType[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $operatorValue,

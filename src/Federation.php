@@ -82,6 +82,7 @@ class Federation
         $this->trustChainFactory = $trustChainFactory ?? new TrustChainFactory(
             $this->entityStatementFactory,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 
