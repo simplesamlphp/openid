@@ -192,7 +192,7 @@ class EntityStatementFetcher
         // Cache it
         try {
             $cacheTtl = $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
-                $entityStatement->getExpirationTime()
+                $entityStatement->getExpirationTime(),
             );
             $this->cacheDecorator?->set(
                 $token,

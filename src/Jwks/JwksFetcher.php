@@ -212,7 +212,7 @@ class JwksFetcher
             $this->cacheDecorator?->set($jwksJson, $cacheTtl, $uri);
             $this->logger?->debug(
                 'Signed JWKS JSON successfully cached.',
-                compact('uri', 'jwksJson', 'cacheTtl')
+                compact('uri', 'jwksJson', 'cacheTtl'),
             );
         } catch (Throwable $exception) {
             $this->logger?->error(

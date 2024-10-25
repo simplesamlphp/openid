@@ -72,6 +72,7 @@ enum ClaimsEnum: string
     case TokenEndpoint = 'token_endpoint';
     case TokenEndpointAuthMethod = 'token_endpoint_auth_method';
     case TokenEndpointAuthMethodsSupported = 'token_endpoint_auth_methods_supported';
+    case TokenEndpointAuthSigningAlgValuesSupported = 'token_endpoint_auth_signing_alg_values_supported';
     // Type
     case Typ = 'typ';
     case TrustChain = 'trust_chain';
