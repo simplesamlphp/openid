@@ -84,6 +84,7 @@ class JwksFetcher
         }
 
         if (!is_string($jwksJson)) {
+            $this->logger?->debug('JWKS JSON not fount in cache.', compact('uri'));
             return null;
         }
 
@@ -203,13 +204,16 @@ class JwksFetcher
 
         try {
             $jwksJson = $this->helpers->json()->encode($signedJwks->jsonSerialize());
-            $this->logger?->debug('Signed JWKS JSON decoded, saving it to cache.', compact('uri', 'jwksJson'));
+            $this->logger?->debug('Signed JWKS JSON decoded.', compact('uri', 'jwksJson'));
             $signedJwksExpirationTime = $signedJwks->getExpirationTime();
             $cacheTtl = is_null($signedJwksExpirationTime) ?
             $this->maxCacheDuration->inSeconds :
             $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($signedJwksExpirationTime);
             $this->cacheDecorator?->set($jwksJson, $cacheTtl, $uri);
-            $this->logger?->debug('Signed JWKS JSON successfully cached.', compact('uri', 'jwksJson'));
+            $this->logger?->debug(
+                'Signed JWKS JSON successfully cached.',
+                compact('uri', 'jwksJson', 'cacheTtl')
+            );
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting Signed JWKS JSON to cache: ' . $exception->getMessage(),

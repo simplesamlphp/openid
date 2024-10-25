@@ -123,16 +123,17 @@ class EntityStatementFetcher
             return null;
         }
 
-        if (is_string($jws)) {
-            $this->logger?->error(
-                'Entity statement token found in cache, trying to build instance.',
-                compact('uri'),
-            );
-
-            return $this->prepareEntityStatement($jws);
+        if (!is_string($jws)) {
+            $this->logger?->debug('Entity statement token not found in cache.', compact('uri'));
+            return null;
         }
 
-        return null;
+        $this->logger?->error(
+            'Entity statement token found in cache, trying to build instance.',
+            compact('uri'),
+        );
+
+        return $this->prepareEntityStatement($jws);
     }
 
     /**
@@ -190,12 +191,18 @@ class EntityStatementFetcher
 
         // Cache it
         try {
+            $cacheTtl = $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
+                $entityStatement->getExpirationTime()
+            );
             $this->cacheDecorator?->set(
                 $token,
-                $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($entityStatement->getExpirationTime()),
+                $cacheTtl,
                 $uri,
             );
-            $this->logger?->debug('Entity Statement token successfully cached.', compact('uri', 'token'));
+            $this->logger?->debug(
+                'Entity Statement token successfully cached.',
+                compact('uri', 'token', 'cacheTtl'),
+            );
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting entity statement to cache: ' . $exception->getMessage(),
