@@ -81,5 +81,7 @@ enum ClaimsEnum: string
     // Type
     case Typ = 'typ';
     case TrustChain = 'trust_chain';
+    case TrustMark = 'trust_mark';
+    case TrustMarks = 'trust_marks';
     case UserinfoEndpoint = 'userinfo_endpoint';
 }
