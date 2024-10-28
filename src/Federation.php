@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
@@ -38,6 +39,7 @@ class Federation
     protected RequestObjectFactory $requestObjectFactory;
     protected HttpClientDecorator $httpClientDecorator;
     protected MetadataPolicyResolver $metadataPolicyResolver;
+    protected TrustMarkFactory $trustMarkFactory;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -58,6 +60,7 @@ class Federation
         TrustChainFactory $trustChainFactory = null,
         RequestObjectFactory $requestObjectFactory = null,
         MetadataPolicyResolver $metadataPolicyResolver = null,
+        TrustMarkFactory $trustMarkFactory = null,
     ) {
         $this->maxCacheDuration = new DateIntervalDecorator($maxCacheDuration);
         $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
@@ -93,6 +96,14 @@ class Federation
             $this->helpers,
             $this->metadataPolicyResolver,
         );
+
+        $this->trustMarkFactory = $trustMarkFactory ?? new TrustMarkFactory(
+            $jwsParser,
+            $jwsVerifier,
+            $jwksFactory,
+            $jwsSerializerManager,
+            $this->timestampValidationLeeway,
+        );
     }
 
     public function entityStatementFetcher(): EntityStatementFetcher
@@ -127,5 +138,10 @@ class Federation
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory;
+    }
+
+    public function trustMarkFactory(): TrustMarkFactory
+    {
+        return $this->trustMarkFactory;
     }
 }

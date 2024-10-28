@@ -263,4 +263,20 @@ class ParsedJws
 
         return $iat;
     }
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getIdentifier(): ?string
+    {
+        /** @psalm-suppress MixedAssignment */
+        $id = $this->getPayloadClaim(ClaimsEnum::Id->value);
+
+        if (is_null($id)) {
+            return null;
+        }
+
+        return $this->ensureNonEmptyString($id, ClaimsEnum::Id->value);
+    }
 }

@@ -24,6 +24,7 @@ enum ClaimsEnum: string
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
+    case Delegation = 'delegation';
     case EndSessionEndpoint = 'end_session_endpoint';
     // ExpirationTime
     case Exp = 'exp';
@@ -33,6 +34,8 @@ enum ClaimsEnum: string
     case HomepageUri = 'homepage_uri';
     // IssuedAt
     case Iat = 'iat';
+    // Identifier
+    case Id = 'id';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
     // Issuer
     case Iss = 'iss';
@@ -53,6 +56,8 @@ enum ClaimsEnum: string
     case OrganizationName = 'organization_name';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
+    // Reference
+    case Ref = 'ref';
     case ScopesSupported = 'scopes_supported';
     case SignedJwksUri = 'signed_jwks_uri';
     // PublicKeyUse
