@@ -81,4 +81,39 @@ class TrustMark extends ParsedJws
 
         return $this->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
     }
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getDelegation(): ?string
+    {
+        /** @psalm-suppress MixedAssignment */
+        $delegation = $this->getPayloadClaim(ClaimsEnum::Delegation->value);
+
+        if (is_null($delegation)) {
+            return null;
+        }
+
+        return $this->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
+    public function validate(): void
+    {
+        $this->validateByCallbacks(
+            $this->getIssuer(...),
+            $this->getSubject(...),
+            $this->getIdentifier(...),
+            $this->getIssuedAt(...),
+            $this->getLogoUri(...),
+            $this->getExpirationTime(...),
+            $this->getReference(...),
+            $this->getDelegation(...),
+        );
+    }
 }
