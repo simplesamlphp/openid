@@ -301,7 +301,7 @@ class ParsedJws
         $claimKey = ClaimsEnum::Typ->value;
 
         /** @psalm-suppress MixedAssignment */
-        $typ = $this->getPayloadClaim($claimKey);
+        $typ = $this->getHeaderClaim($claimKey);
 
         return is_null($typ) ? null : $this->ensureNonEmptyString($typ, $claimKey);
     }
