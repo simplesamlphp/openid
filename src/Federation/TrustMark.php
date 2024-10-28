@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
@@ -108,6 +109,22 @@ class TrustMark extends ParsedJws
         return parent::getKeyId() ?? throw new TrustMarkException('No KeyId header claim found.');
     }
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
+     */
+    public function getType(): string
+    {
+        $typ = parent::getType() ??
+        throw new TrustMarkException('No Type header claim found.');
+
+        if ($typ !== JwtTypesEnum::TrustMarkJwt->value) {
+            throw new TrustMarkException('Invalid Type header claim.');
+        }
+
+        return $typ;
+    }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -125,6 +142,7 @@ class TrustMark extends ParsedJws
             $this->getReference(...),
             $this->getDelegation(...),
             $this->getKeyId(...),
+            $this->getType(...),
         );
     }
 }

@@ -79,11 +79,11 @@ class EntityStatement extends ParsedJws
      */
     public function getType(): string
     {
-        $typ = (string)($this->getHeaderClaim(ClaimsEnum::Typ->value) ??
-            throw new EntityStatementException('No Type header claim found.'));
+        $typ = parent::getType() ??
+        throw new EntityStatementException('No Type header claim found.');
 
         if ($typ !== JwtTypesEnum::EntityStatementJwt->value) {
-            throw new EntityStatementException('Invalid type claim.');
+            throw new EntityStatementException('Invalid Type header claim.');
         }
 
         return $typ;

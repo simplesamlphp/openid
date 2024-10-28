@@ -291,4 +291,18 @@ class ParsedJws
 
         return is_null($kid) ? null : $this->ensureNonEmptyString($kid, $claimKey);
     }
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getType(): ?string
+    {
+        $claimKey = ClaimsEnum::Typ->value;
+
+        /** @psalm-suppress MixedAssignment */
+        $typ = $this->getPayloadClaim($claimKey);
+
+        return is_null($typ) ? null : $this->ensureNonEmptyString($typ, $claimKey);
+    }
 }
