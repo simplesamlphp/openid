@@ -98,6 +98,16 @@ class TrustMark extends ParsedJws
         return $this->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
     }
 
+    /**
+     * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
+    public function getKeyId(): string
+    {
+        return parent::getKeyId() ?? throw new TrustMarkException('No KeyId header claim found.');
+    }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -114,6 +124,7 @@ class TrustMark extends ParsedJws
             $this->getExpirationTime(...),
             $this->getReference(...),
             $this->getDelegation(...),
+            $this->getKeyId(...),
         );
     }
 }

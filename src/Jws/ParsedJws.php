@@ -17,6 +17,9 @@ use Throwable;
 class ParsedJws
 {
     protected JWS $jws;
+    /**
+     * @var array<string,mixed>
+     */
     protected ?array $header = null;
     protected ?array $payload = null;
 
@@ -74,11 +77,14 @@ class ParsedJws
     }
 
     /**
+     * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @psalm-suppress MixedReturnStatement
      */
     public function getHeader(int $signatureId = 0): array
     {
         try {
+            /** @psalm-suppress MixedAssignment */
             return $this->header ??= $this->jws->getSignature($signatureId)->getProtectedHeader();
         } catch (Throwable $exception) {
             throw new JwsException('Unable to get protected header.', (int)$exception->getCode(), $exception);
@@ -278,5 +284,19 @@ class ParsedJws
         }
 
         return $this->ensureNonEmptyString($id, ClaimsEnum::Id->value);
+    }
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getKeyId(): ?string
+    {
+        $claimKey = ClaimsEnum::Kid->value;
+
+        /** @psalm-suppress MixedAssignment */
+        $kid = $this->getHeaderClaim($claimKey);
+
+        return is_null($kid) ? null : $this->ensureNonEmptyString($kid, $claimKey);
     }
 }

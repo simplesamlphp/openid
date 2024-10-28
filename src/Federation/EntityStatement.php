@@ -96,11 +96,7 @@ class EntityStatement extends ParsedJws
      */
     public function getKeyId(): string
     {
-        return $this->ensureNonEmptyString(
-            (string)($this->getHeaderClaim(ClaimsEnum::Kid->value) ??
-            throw new EntityStatementException('No Key ID header claim found.')),
-            ClaimsEnum::Kid->value,
-        );
+        return parent::getKeyId() ?? throw new EntityStatementException('No KeyId header claim found.');
     }
 
     /**
