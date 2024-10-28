@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID\Jwks;
 
 use JsonSerializable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\SignedJwksException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
@@ -50,6 +51,23 @@ class SignedJwks extends ParsedJws implements JsonSerializable
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
+     */
+    public function getType(): string
+    {
+        $typ = parent::getType() ??
+        throw new SignedJwksException('No Type header claim found.');
+
+        if ($typ !== JwtTypesEnum::JwkSetJwt->value) {
+            throw new SignedJwksException('Invalid Type header claim.');
+        }
+
+        return $typ;
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
      */
@@ -61,6 +79,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             $this->getSubject(...),
             $this->getIssuedAt(...),
             $this->getExpirationTime(...),
+            $this->getType(...),
         );
     }
 
