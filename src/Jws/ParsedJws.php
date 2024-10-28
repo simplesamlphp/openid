@@ -162,14 +162,12 @@ class ParsedJws
      */
     public function getIssuer(): ?string
     {
+        $claimKey = ClaimsEnum::Iss->value;
+
         /** @psalm-suppress MixedAssignment */
-        $iss = $this->getPayloadClaim(ClaimsEnum::Iss->value);
+        $iss = $this->getPayloadClaim($claimKey);
 
-        if (is_null($iss)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
+        return is_null($iss) ? null : $this->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
     }
 
     /**
@@ -178,14 +176,12 @@ class ParsedJws
      */
     public function getSubject(): ?string
     {
+        $claimKey = ClaimsEnum::Sub->value;
+
         /** @psalm-suppress MixedAssignment */
-        $sub = $this->getPayloadClaim(ClaimsEnum::Sub->value);
+        $sub = $this->getPayloadClaim($claimKey);
 
-        if (is_null($sub)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($sub, ClaimsEnum::Sub->value);
+        return is_null($sub) ? null : $this->ensureNonEmptyString($sub, $claimKey);
     }
 
     /**
@@ -220,14 +216,12 @@ class ParsedJws
      */
     public function getJwtId(): ?string
     {
+        $claimKey = ClaimsEnum::Jti->value;
+
         /** @psalm-suppress MixedAssignment */
-        $jti = $this->getPayloadClaim(ClaimsEnum::Jti->value);
+        $jti = $this->getPayloadClaim($claimKey);
 
-        if (is_null($jti)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($jti, ClaimsEnum::Jti->value);
+        return is_null($jti) ? null : $this->ensureNonEmptyString($jti, $claimKey);
     }
 
     /**
@@ -276,14 +270,12 @@ class ParsedJws
      */
     public function getIdentifier(): ?string
     {
+        $claimKey = ClaimsEnum::Id->value;
+
         /** @psalm-suppress MixedAssignment */
-        $id = $this->getPayloadClaim(ClaimsEnum::Id->value);
+        $id = $this->getPayloadClaim($claimKey);
 
-        if (is_null($id)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($id, ClaimsEnum::Id->value);
+        return is_null($id) ? null : $this->ensureNonEmptyString($id, $claimKey);
     }
 
     /**
