@@ -20,6 +20,6 @@ enum WellKnownEnum: string
 
     public function uriFor(string $entityId): string
     {
-        return rtrim($entityId, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . self::path();
+        return rtrim($entityId, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $this->path();
     }
 }
