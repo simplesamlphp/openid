@@ -21,7 +21,7 @@ class SignatureAlgorithmBagTest extends TestCase
         $this->signatureAlgorithmEnumRs256 = SignatureAlgorithmEnum::RS256;
     }
 
-    protected function mock(SignatureAlgorithmEnum ...$signatureAlgorithmEnums): SignatureAlgorithmBag
+    protected function sut(SignatureAlgorithmEnum ...$signatureAlgorithmEnums): SignatureAlgorithmBag
     {
         $signatureAlgorithmEnums = !empty($signatureAlgorithmEnums) ?
         $signatureAlgorithmEnums :
@@ -32,12 +32,12 @@ class SignatureAlgorithmBagTest extends TestCase
 
     public function testCanInstantiate(): void
     {
-        $this->assertInstanceOf(SignatureAlgorithmBag::class, $this->mock());
+        $this->assertInstanceOf(SignatureAlgorithmBag::class, $this->sut());
     }
 
     public function testCanAddAndGetAll(): void
     {
-        $signatureAlgorithmBag = $this->mock();
+        $signatureAlgorithmBag = $this->sut();
         $this->assertCount(1, $signatureAlgorithmBag->getAll());
 
         $signatureAlgorithmBag->add(SignatureAlgorithmEnum::RS384);
@@ -46,6 +46,6 @@ class SignatureAlgorithmBagTest extends TestCase
 
     public function testCanGetAllInstances()
     {
-        $this->assertNotEmpty($this->mock()->getAllInstances());
+        $this->assertNotEmpty($this->sut()->getAllInstances());
     }
 }

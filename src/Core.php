@@ -12,16 +12,21 @@ use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 class Core
 {
     protected DateIntervalDecorator $timestampValidationLeeway;
-    protected RequestObjectFactory $requestObjectFactory;
-    protected ClientAssertionFactory $clientAssertionFactory;
+    protected JwsSerializerManager $jwsSerializerManager;
+    protected JwsParser $jwsParser;
+    protected JwsVerifier $jwsVerifier;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
@@ -38,39 +43,36 @@ class Core
         JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
-        JwksFactory $jwksFactory = new JwksFactory(),
-        RequestObjectFactory $requestObjectFactory = null,
-        ClientAssertionFactory $clientAssertionFactory = null,
+        protected JwksFactory $jwksFactory = new JwksFactory(),
+        protected ?RequestObjectFactory $requestObjectFactory = null,
+        protected ?ClientAssertionFactory $clientAssertionFactory = null,
+        DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
     ) {
-        $this->timestampValidationLeeway = new DateIntervalDecorator($timestampValidationLeeway);
-        $jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
-        $jwsParser =  $jwsParserFactory->build($jwsSerializerManager);
-        $jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
-
-        $this->requestObjectFactory = $requestObjectFactory ?? new RequestObjectFactory(
-            $jwsParser,
-            $jwsVerifier,
-            $jwksFactory,
-            $jwsSerializerManager,
-            $this->timestampValidationLeeway,
-        );
-
-        $this->clientAssertionFactory = $clientAssertionFactory ?? new ClientAssertionFactory(
-            $jwsParser,
-            $jwsVerifier,
-            $jwksFactory,
-            $jwsSerializerManager,
-            $this->timestampValidationLeeway,
-        );
+        $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
+        $this->jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
+        $this->jwsParser =  $jwsParserFactory->build($this->jwsSerializerManager);
+        $this->jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
     }
 
     public function requestObjectFactory(): RequestObjectFactory
     {
-        return $this->requestObjectFactory;
+        return $this->requestObjectFactory ??= new RequestObjectFactory(
+            $this->jwsParser,
+            $this->jwsVerifier,
+            $this->jwksFactory,
+            $this->jwsSerializerManager,
+            $this->timestampValidationLeeway,
+        );
     }
 
     public function clientAssertionFactory(): ClientAssertionFactory
     {
-        return $this->clientAssertionFactory;
+        return $this->clientAssertionFactory ??= new ClientAssertionFactory(
+            $this->jwsParser,
+            $this->jwsVerifier,
+            $this->jwksFactory,
+            $this->jwsSerializerManager,
+            $this->timestampValidationLeeway,
+        );
     }
 }

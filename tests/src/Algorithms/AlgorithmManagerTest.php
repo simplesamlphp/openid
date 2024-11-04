@@ -23,7 +23,7 @@ class AlgorithmManagerTest extends TestCase
         $this->signatureAlgorithmMocks[] = $this->signatureAlgorithmMock;
     }
 
-    protected function mock(?array $signatureAlgorithms = null): AlgorithmManager
+    protected function sut(?array $signatureAlgorithms = null): AlgorithmManager
     {
         $signatureAlgorithms ??= $this->signatureAlgorithmMocks;
         return new AlgorithmManager($signatureAlgorithms);
@@ -31,6 +31,6 @@ class AlgorithmManagerTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(AlgorithmManager::class, $this->mock());
+        $this->assertInstanceOf(AlgorithmManager::class, $this->sut());
     }
 }
