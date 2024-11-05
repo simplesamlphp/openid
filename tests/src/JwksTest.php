@@ -5,118 +5,133 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID;
 
 use DateInterval;
+use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Core;
-use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
-use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
+use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
+use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwks;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
+use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
-#[CoversClass(Core::class)]
+#[CoversClass(Jwks::class)]
+#[UsesClass(JwksFactory::class)]
 #[UsesClass(ParsedJwsFactory::class)]
-#[UsesClass(RequestObjectFactory::class)]
-#[UsesClass(ClientAssertionFactory::class)]
-class CoreTest extends TestCase
+#[UsesClass(SignedJwksFactory::class)]
+#[UsesClass(JwksFetcher::class)]
+class JwksTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
-    protected MockObject $supportedSerializerMock;
-    protected MockObject $timestampValidationLeewayMock;
+    protected MockObject $supportedSerializersMock;
+    protected MockObject $maxCacheDurationMock;
+    protected MockObject $cacheMock;
+    protected MockObject $httpClientMock;
     protected MockObject $loggerMock;
     protected MockObject $helpersMock;
     protected MockObject $algorithmManagerFactoryMock;
     protected MockObject $jwsSerializerManagerFactoryMock;
     protected MockObject $jwsParserFactoryMock;
     protected MockObject $jwsVerifierFactoryMock;
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $timestampValidationLeewayMock;
     protected MockObject $dateIntervalDecoratorFactoryMock;
-
+    protected MockObject $cacheDecoratorFactoryMock;
+    protected MockObject $httpClientDecoratorFactoryMock;
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->supportedSerializerMock = $this->createMock(SupportedSerializers::class);
-        $this->timestampValidationLeewayMock = $this->createMock(DateInterval::class);
+        $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
+        $this->maxCacheDurationMock = $this->createMock(DateInterval::class);
+        $this->cacheMock = $this->createMock(CacheInterface::class);
+        $this->httpClientMock = $this->createMock(Client::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->algorithmManagerFactoryMock = $this->createMock(AlgorithmManagerFactory::class);
         $this->jwsSerializerManagerFactoryMock = $this->createMock(JwsSerializerManagerFactory::class);
         $this->jwsParserFactoryMock = $this->createMock(JwsParserFactory::class);
         $this->jwsVerifierFactoryMock = $this->createMock(JwsVerifierFactory::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->timestampValidationLeewayMock = $this->createMock(DateInterval::class);
         $this->dateIntervalDecoratorFactoryMock = $this->createMock(DateIntervalDecoratorFactory::class);
+        $this->cacheDecoratorFactoryMock = $this->createMock(CacheDecoratorFactory::class);
+        $this->httpClientDecoratorFactoryMock = $this->createMock(HttpClientDecoratorFactory::class);
     }
 
     protected function sut(
         ?SupportedAlgorithms $supportedAlgorithms = null,
         ?SupportedSerializers $supportedSerializers = null,
-        ?DateInterval $timestampValidationLeeway = null,
+        ?DateInterval $maxCacheDuration = null,
+        ?CacheInterface $cache = null,
+        ?Client $httpClient = null,
         ?LoggerInterface $logger = null,
         ?Helpers $helpers = null,
         ?AlgorithmManagerFactory $algorithmManagerFactory = null,
         ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null,
         ?JwsParserFactory $jwsParserFactory = null,
         ?JwsVerifierFactory $jwsVerifierFactory = null,
-        ?JwksFactory $jwksFactory = null,
+        ?DateInterval $timestampValidationLeeway = null,
         ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null,
-    ): Core {
+        ?CacheDecoratorFactory $cacheDecoratorFactory = null,
+        ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null,
+    ): Jwks {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
-        $supportedSerializers ??= $this->supportedSerializerMock;
-        $timestampValidationLeeway ??= $this->timestampValidationLeewayMock;
+        $supportedSerializers ??= $this->supportedSerializersMock;
+        $maxCacheDuration ??= $this->maxCacheDurationMock;
+        $cache ??= $this->cacheMock;
+        $httpClient ??= $this->httpClientMock;
         $logger ??= $this->loggerMock;
         $helpers ??= $this->helpersMock;
         $algorithmManagerFactory ??= $this->algorithmManagerFactoryMock;
         $jwsSerializerManagerFactory ??= $this->jwsSerializerManagerFactoryMock;
         $jwsParserFactory ??= $this->jwsParserFactoryMock;
         $jwsVerifierFactory ??= $this->jwsVerifierFactoryMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $timestampValidationLeeway ??= $this->timestampValidationLeewayMock;
         $dateIntervalDecoratorFactory ??= $this->dateIntervalDecoratorFactoryMock;
+        $cacheDecoratorFactory ??= $this->cacheDecoratorFactoryMock;
+        $httpClientDecoratorFactory ??= $this->httpClientDecoratorFactoryMock;
 
-        return new Core(
+        return new Jwks(
             $supportedAlgorithms,
             $supportedSerializers,
-            $timestampValidationLeeway,
+            $maxCacheDuration,
+            $cache,
+            $httpClient,
             $logger,
             $helpers,
             $algorithmManagerFactory,
             $jwsSerializerManagerFactory,
             $jwsParserFactory,
             $jwsVerifierFactory,
-            $jwksFactory,
+            $timestampValidationLeeway,
             $dateIntervalDecoratorFactory,
+            $cacheDecoratorFactory,
+            $httpClientDecoratorFactory,
         );
     }
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(
-            Core::class,
-            $this->sut(),
-        );
+        $this->assertInstanceOf(Jwks::class, $this->sut());
     }
 
     public function testCanBuildTools(): void
     {
         $sut = $this->sut();
 
-        $this->assertInstanceOf(
-            RequestObjectFactory::class,
-            $sut->requestObjectFactory(),
-        );
-
-        $this->assertInstanceOf(
-            ClientAssertionFactory::class,
-            $sut->clientAssertionFactory(),
-        );
+        $this->assertInstanceOf(JwksFactory::class, $sut->jwksFactory());
+        $this->assertInstanceOf(SignedJwksFactory::class, $sut->signedJwksFactory());
+        $this->assertInstanceOf(JwksFetcher::class, $sut->jwksFetcher());
     }
 }

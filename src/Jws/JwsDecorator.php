@@ -8,7 +8,12 @@ use Jose\Component\Signature\JWS;
 
 class JwsDecorator
 {
-    public function __construct(public readonly JWS $jws)
+    public function __construct(protected readonly JWS $jws)
     {
+    }
+
+    public function jws(): JWS
+    {
+        return $this->jws;
     }
 }

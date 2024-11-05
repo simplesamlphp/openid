@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID;
 use DateInterval;
 use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,10 +29,19 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
 #[CoversClass(Federation::class)]
+#[UsesClass(ParsedJwsFactory::class)]
+#[UsesClass(EntityStatementFetcher::class)]
+#[UsesClass(MetadataPolicyResolver::class)]
+#[UsesClass(TrustChainFactory::class)]
+#[UsesClass(TrustChainResolver::class)]
+#[UsesClass(EntityStatementFactory::class)]
+#[UsesClass(RequestObjectFactory::class)]
+#[UsesClass(TrustMarkFactory::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
@@ -47,14 +57,7 @@ class FederationTest extends TestCase
     protected MockObject $jwsSerializerManagerFactoryMock;
     protected MockObject $jwsParserFactoryMock;
     protected MockObject $jwsVerifierFactoryMock;
-    protected MockObject $entityStatementFactoryMock;
     protected MockObject $jwksFactoryMock;
-    protected MockObject $trustChainFactoryMock;
-    protected MockObject $requestObjectFactoryMock;
-    protected MockObject $metadataPolicyResolverMock;
-    protected MockObject $trustMarkFactoryMock;
-    protected MockObject $entityStatementFetcherMock;
-    protected MockObject $trustChainResolverMock;
     protected MockObject $dateIntervalDecoratorFactoryMock;
     protected MockObject $cacheDecoratorFactoryMock;
     protected MockObject $httpClientDecoratorFactoryMock;
@@ -74,44 +77,30 @@ class FederationTest extends TestCase
         $this->jwsSerializerManagerFactoryMock = $this->createMock(JwsSerializerManagerFactory::class);
         $this->jwsParserFactoryMock = $this->createMock(JwsParserFactory::class);
         $this->jwsVerifierFactoryMock = $this->createMock(JwsVerifierFactory::class);
-        $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->trustChainFactoryMock = $this->createMock(TrustChainFactory::class);
-        $this->requestObjectFactoryMock = $this->createMock(RequestObjectFactory::class);
-        $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
-        $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
-        $this->entityStatementFetcherMock = $this->createMock(EntityStatementFetcher::class);
-        $this->trustChainResolverMock = $this->createMock(TrustChainResolver::class);
         $this->dateIntervalDecoratorFactoryMock = $this->createMock(DateIntervalDecoratorFactory::class);
         $this->cacheDecoratorFactoryMock = $this->createMock(CacheDecoratorFactory::class);
         $this->httpClientDecoratorFactoryMock = $this->createMock(HttpClientDecoratorFactory::class);
     }
 
     protected function sut(
-        SupportedAlgorithms|MockObject|null $supportedAlgorithms = null,
-        SupportedSerializers|MockObject|null $supportedSerializers = null,
-        DateInterval|MockObject|null $maxCacheDuration = null,
-        DateInterval|MockObject|null $timestampValidationLeeway = null,
+        ?SupportedAlgorithms $supportedAlgorithms = null,
+        ?SupportedSerializers $supportedSerializers = null,
+        ?DateInterval $maxCacheDuration = null,
+        ?DateInterval $timestampValidationLeeway = null,
         ?int $maxTrustChainDepth = null,
-        CacheInterface|MockObject|null $cache = null,
-        LoggerInterface|MockObject|null $logger = null,
-        Client|MockObject|null $client = null,
-        Helpers|MockObject|null $helpers = null,
-        AlgorithmManagerFactory|MockObject|null $algorithmManagerFactory = null,
-        JwsSerializerManagerFactory|MockObject|null $jwsSerializerManagerFactory = null,
-        JwsParserFactory|MockObject|null $jwsParserFactory = null,
-        JwsVerifierFactory|MockObject|null $jwsVerifierFactory = null,
-        EntityStatementFactory|MockObject|null $entityStatementFactory = null,
-        JwksFactory|MockObject|null $jwksFactory = null,
-        TrustChainFactory|MockObject|null $trustChainFactory = null,
-        RequestObjectFactory|MockObject|null $requestObjectFactory = null,
-        MetadataPolicyResolver|MockObject|null $metadataPolicyResolver = null,
-        TrustMarkFactory|MockObject|null $trustMarkFactory = null,
-        EntityStatementFetcher|MockObject|null $entityStatementFetcher = null,
-        TrustChainResolver|MockObject|null $trustChainResolver = null,
-        DateIntervalDecoratorFactory|MockObject|null $dateIntervalDecoratorFactory = null,
-        CacheDecoratorFactory|MockObject|null $cacheDecoratorFactory = null,
-        HttpClientDecoratorFactory|MockObject|null $httpClientDecoratorFactory = null,
+        ?CacheInterface $cache = null,
+        ?LoggerInterface $logger = null,
+        ?Client $client = null,
+        ?Helpers $helpers = null,
+        ?AlgorithmManagerFactory $algorithmManagerFactory = null,
+        ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null,
+        ?JwsParserFactory $jwsParserFactory = null,
+        ?JwsVerifierFactory $jwsVerifierFactory = null,
+        ?JwksFactory $jwksFactory = null,
+        ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null,
+        ?CacheDecoratorFactory $cacheDecoratorFactory = null,
+        ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null,
     ): Federation {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
         $supportedSerializers ??= $this->supportedSerializersMock;
@@ -126,14 +115,7 @@ class FederationTest extends TestCase
         $jwsSerializerManagerFactory ??= $this->jwsSerializerManagerFactoryMock;
         $jwsParserFactory ??= $this->jwsParserFactoryMock;
         $jwsVerifierFactory ??= $this->jwsVerifierFactoryMock;
-        $entityStatementFactory ??= $this->entityStatementFactoryMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $trustChainFactory ??= $this->trustChainFactoryMock;
-        $requestObjectFactory ??= $this->requestObjectFactoryMock;
-        $metadataPolicyResolver ??= $this->metadataPolicyResolverMock;
-        $trustMarkFactory ??= $this->trustMarkFactoryMock;
-        $entityStatementFetcher ??= $this->entityStatementFetcherMock;
-        $trustChainResolver ??= $this->trustChainResolverMock;
         $dateIntervalDecoratorFactory ??= $this->dateIntervalDecoratorFactoryMock;
         $cacheDecoratorFactory ??= $this->cacheDecoratorFactoryMock;
         $httpClientDecoratorFactory ??= $this->httpClientDecoratorFactoryMock;
@@ -152,14 +134,7 @@ class FederationTest extends TestCase
             $jwsSerializerManagerFactory,
             $jwsParserFactory,
             $jwsVerifierFactory,
-            $entityStatementFactory,
             $jwksFactory,
-            $trustChainFactory,
-            $requestObjectFactory,
-            $metadataPolicyResolver,
-            $trustMarkFactory,
-            $entityStatementFetcher,
-            $trustChainResolver,
             $dateIntervalDecoratorFactory,
             $cacheDecoratorFactory,
             $httpClientDecoratorFactory,
@@ -171,12 +146,16 @@ class FederationTest extends TestCase
         $this->assertInstanceOf(Federation::class, $this->sut());
     }
 
-    public function testCanGetProperties(): void
+    public function testCanBuildTools(): void
     {
         $sut = $this->sut();
 
         $this->assertInstanceOf(EntityStatementFetcher::class, $sut->entityStatementFetcher());
-
-        // TODO mivanci continue checking properties.
+        $this->assertInstanceOf(MetadataPolicyResolver::class, $sut->metadataPolicyResolver());
+        $this->assertInstanceOf(TrustChainFactory::class, $sut->trustChainFactory());
+        $this->assertInstanceOf(TrustChainResolver::class, $sut->trustChainResolver());
+        $this->assertInstanceOf(EntityStatementFactory::class, $sut->entityStatementFactory());
+        $this->assertInstanceOf(RequestObjectFactory::class, $sut->requestObjectFactory());
+        $this->assertInstanceOf(TrustMarkFactory::class, $sut->trustMarkFactory());
     }
 }

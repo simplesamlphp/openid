@@ -27,6 +27,8 @@ class Core
     protected JwsSerializerManager $jwsSerializerManager;
     protected JwsParser $jwsParser;
     protected JwsVerifier $jwsVerifier;
+    protected ?RequestObjectFactory $requestObjectFactory = null;
+    protected ?ClientAssertionFactory $clientAssertionFactory = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
@@ -44,8 +46,6 @@ class Core
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
         protected JwksFactory $jwksFactory = new JwksFactory(),
-        protected ?RequestObjectFactory $requestObjectFactory = null,
-        protected ?ClientAssertionFactory $clientAssertionFactory = null,
         DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
     ) {
         $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
@@ -62,6 +62,7 @@ class Core
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 
@@ -73,6 +74,7 @@ class Core
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 }

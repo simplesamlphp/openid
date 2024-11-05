@@ -31,4 +31,9 @@ class DateIntervalDecorator
 
         return $endTime->getTimestamp() - $reference->getTimestamp();
     }
+
+    public function getInSeconds(): int
+    {
+        return $this->inSeconds;
+    }
 }

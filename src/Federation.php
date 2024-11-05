@@ -40,6 +40,13 @@ class Federation
     protected JwsSerializerManager $jwsSerializerManager;
     protected JwsParser $jwsParser;
     protected JwsVerifier $jwsVerifier;
+    protected ?EntityStatementFetcher $entityStatementFetcher = null;
+    protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
+    protected ?TrustChainFactory $trustChainFactory = null;
+    protected ?TrustChainResolver $trustChainResolver = null;
+    protected ?EntityStatementFactory $entityStatementFactory = null;
+    protected ?RequestObjectFactory $requestObjectFactory = null;
+    protected ?TrustMarkFactory $trustMarkFactory = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -55,14 +62,7 @@ class Federation
         JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
         JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
         JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
-        protected ?EntityStatementFactory $entityStatementFactory = null,
         protected JwksFactory $jwksFactory = new JwksFactory(),
-        protected ?TrustChainFactory $trustChainFactory = null,
-        protected ?RequestObjectFactory $requestObjectFactory = null,
-        protected ?MetadataPolicyResolver $metadataPolicyResolver = null,
-        protected ?TrustMarkFactory $trustMarkFactory = null,
-        protected ?EntityStatementFetcher $entityStatementFetcher = null,
-        protected ?TrustChainResolver $trustChainResolver = null,
         DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
         CacheDecoratorFactory $cacheDecoratorFactory = new CacheDecoratorFactory(),
         HttpClientDecoratorFactory $httpClientDecoratorFactory = new HttpClientDecoratorFactory(),
@@ -125,6 +125,7 @@ class Federation
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 
@@ -136,6 +137,7 @@ class Federation
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 
@@ -147,6 +149,7 @@ class Federation
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 }

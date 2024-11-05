@@ -9,6 +9,7 @@ use JsonException;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
@@ -31,8 +32,9 @@ class ParsedJws
         protected readonly JwksFactory $jwksFactory,
         protected readonly JwsSerializerManager $jwsSerializerManager,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
+        protected readonly Helpers $helpers,
     ) {
-        $this->jws = $jwsDecorator->jws;
+        $this->jws = $jwsDecorator->jws();
         $this->validate();
     }
 
@@ -137,7 +139,7 @@ class ParsedJws
 
         try {
             /** @var ?array $payload */
-            $payload = json_decode($payloadString, true, 512, JSON_THROW_ON_ERROR);
+            $payload = $this->helpers->json()->decode($payloadString);
             return $this->payload = is_array($payload) ? $payload : [];
         } catch (JsonException $exception) {
             throw new JwsException('Unable to decode JWS payload.', $exception->getCode(), $exception);
@@ -238,7 +240,7 @@ class ParsedJws
 
         $exp = (int)$exp;
 
-        ($exp + $this->timestampValidationLeeway->inSeconds >= time()) ||
+        ($exp + $this->timestampValidationLeeway->getInSeconds() >= time()) ||
         throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
 
         return $exp;
@@ -258,7 +260,7 @@ class ParsedJws
 
         $iat = (int)$iat;
 
-        ($iat - $this->timestampValidationLeeway->inSeconds <= time()) ||
+        ($iat - $this->timestampValidationLeeway->getInSeconds() <= time()) ||
         throw new JwsException("Issued At claim ($iat) is greater than current time.");
 
         return $iat;

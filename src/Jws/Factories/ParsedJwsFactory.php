@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws\Factories;
 
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
@@ -19,6 +20,7 @@ class ParsedJwsFactory
         protected readonly JwksFactory $jwksFactory,
         protected readonly JwsSerializerManager $jwsSerializerManager,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
+        protected readonly Helpers $helpers,
     ) {
     }
 
@@ -33,6 +35,7 @@ class ParsedJwsFactory
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 }

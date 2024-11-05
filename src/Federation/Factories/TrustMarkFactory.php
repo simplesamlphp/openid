@@ -17,6 +17,7 @@ class TrustMarkFactory extends ParsedJwsFactory
             $this->jwksFactory,
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
+            $this->helpers,
         );
     }
 }

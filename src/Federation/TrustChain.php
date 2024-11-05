@@ -225,7 +225,7 @@ class TrustChain implements JsonSerializable
             return;
         }
 
-        ($this->expirationTime + $this->timestampValidationLeeway->inSeconds >= time()) ||
+        ($this->expirationTime + $this->timestampValidationLeeway->getInSeconds() >= time()) ||
         throw new TrustChainException(
             "Trust Chain expiration time ($this->expirationTime) is lesser than current time.",
         );
