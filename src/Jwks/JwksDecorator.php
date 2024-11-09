@@ -11,8 +11,13 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
 class JwksDecorator implements JsonSerializable
 {
-    public function __construct(public readonly JWKSet $jwks)
+    public function __construct(protected readonly JWKSet $jwks)
     {
+    }
+
+    public function jwks(): JWKSet
+    {
+        return $this->jwks;
     }
 
     public function jsonSerialize(): array

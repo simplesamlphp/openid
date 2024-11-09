@@ -153,7 +153,7 @@ class ParsedJws
     {
         $this->jwsVerifier->verifyWithKeySet(
             $this->jws,
-            $this->jwksFactory->fromKeyData($jwks)->jwks,
+            $this->jwksFactory->fromKeyData($jwks)->jwks(),
             $signatureIndex,
         ) || throw new JwsException('Could not verify JWS signature.');
     }

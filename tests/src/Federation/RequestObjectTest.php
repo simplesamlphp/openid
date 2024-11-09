@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Core;
+namespace SimpleSAML\Test\OpenID\Federation;
 
 use Jose\Component\Signature\JWS;
+use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Core\ClientAssertion;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Federation\RequestObject;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -19,10 +20,11 @@ use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
-#[CoversClass(ClientAssertion::class)]
+#[CoversClass(RequestObject::class)]
 #[UsesClass(ParsedJws::class)]
-class ClientAssertionTest extends TestCase
+class RequestObjectTest extends TestCase
 {
+    protected MockObject $signatureMock;
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
     protected MockObject $jwsVerifierMock;
@@ -32,16 +34,14 @@ class ClientAssertionTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected array $expiredPayload = [
-        'iat' => 1730820687,
-        'nbf' => 1730820687,
-        'exp' => 1730820687,
+        'iat' => 1731178665,
+        'nbf' => 1731178665,
+        'exp' => 1731178665,
+        'aud' => [
+            'https://82-dap.localhost.markoivancic.from.hr',
+        ],
         'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
-        'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
-        'aud' =>
-            [
-                0 => 'https://82-dap.localhost.markoivancic.from.hr',
-            ],
-        'jti' => '1730820687',
+        'jti' => '1731178665',
         'client_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];
 
@@ -49,9 +49,12 @@ class ClientAssertionTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->signatureMock = $this->createMock(Signature::class);
+
         $this->jwsMock = $this->createMock(JWS::class);
         $this->jwsMock->method('getPayload')
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
+        $this->jwsMock->method('getSignature')->willReturn($this->signatureMock);
 
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
@@ -76,7 +79,7 @@ class ClientAssertionTest extends TestCase
         ?JwsSerializerManager $jwsSerializerManager = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
-    ): ClientAssertion {
+    ): RequestObject {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifier ??= $this->jwsVerifierMock;
         $jwksFactory ??= $this->jwksFactoryMock;
@@ -84,7 +87,7 @@ class ClientAssertionTest extends TestCase
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
-        return new ClientAssertion(
+        return new RequestObject(
             $jwsDecorator,
             $jwsVerifier,
             $jwksFactory,
@@ -97,36 +100,41 @@ class ClientAssertionTest extends TestCase
     public function testCanCreateInstance(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
-        $this->assertInstanceOf(ClientAssertion::class, $this->sut());
+
+        $this->assertInstanceOf(
+            RequestObject::class,
+            $this->sut(),
+        );
     }
 
-    public function testCanGetPayloadClaims(): void
+    public function testThrowsIfSubjectIsPresent(): void
     {
+        $this->validPayload['sub'] = 'sample';
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
-        $sut = $this->sut();
 
-        $this->assertSame($this->validPayload['iat'], $sut->getIssuedAt());
-        $this->assertSame($this->validPayload['iss'], $sut->getIssuer());
-    }
-
-    public function testThrowsOnExpiredJws(): void
-    {
-        $this->jsonHelperMock->method('decode')->willReturn($this->expiredPayload);
         $this->expectException(JwsException::class);
-        $this->expectExceptionMessage('Expiration');
+        $this->expectExceptionMessage('Subject');
+
         $this->sut();
     }
 
-    public function testThrowsOnNonSameIssuerAndSubject(): void
+    public function testCanGetTrustChain(): void
     {
-        $invalidPayload = $this->validPayload;
-        $invalidPayload['iss'] = 'other-entity-id';
+        $trustChain = ['token', 'token2'];
+        $this->validPayload['trust_chain'] = $trustChain;
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
-        $this->jsonHelperMock->method('decode')->willReturn($invalidPayload);
+        $this->assertSame($this->sut()->getTrustChain(), $trustChain);
+    }
+
+    public function testThrowsForInvalidTrustChainFormat(): void
+    {
+        $this->validPayload['trust_chain'] = 'invalid';
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
         $this->expectException(JwsException::class);
-        $this->expectExceptionMessage('Issuer');
+        $this->expectExceptionMessage('trust chain');
 
-        $this->sut();
+        $this->sut()->getTrustChain();
     }
 }
