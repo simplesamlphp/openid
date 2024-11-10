@@ -18,8 +18,9 @@ class SignedJwks extends ParsedJws implements JsonSerializable
      */
     public function getKeys(): array
     {
-        $keys = $this->getPayloadClaim(ClaimsEnum::Keys->value) ??
-        throw new SignedJwksException('No keys claim found.');
+        $keys = $this->getPayloadClaim(ClaimsEnum::Keys->value) ?? throw new SignedJwksException(
+            'No keys claim found.',
+        );
 
         if ((!is_array($keys)) || empty($keys)) {
             throw new SignedJwksException(
@@ -57,8 +58,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
      */
     public function getType(): string
     {
-        $typ = parent::getType() ??
-        throw new SignedJwksException('No Type header claim found.');
+        $typ = parent::getType() ?? throw new SignedJwksException('No Type header claim found.');
 
         if ($typ !== JwtTypesEnum::JwkSetJwt->value) {
             throw new SignedJwksException('Invalid Type header claim.');

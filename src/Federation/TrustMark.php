@@ -60,11 +60,7 @@ class TrustMark extends ParsedJws
         /** @psalm-suppress MixedAssignment */
         $logoUri = $this->getPayloadClaim(ClaimsEnum::LogoUri->value);
 
-        if (is_null($logoUri)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($logoUri, ClaimsEnum::LogoUri->value);
+        return is_null($logoUri) ? null : $this->ensureNonEmptyString($logoUri, ClaimsEnum::LogoUri->value);
     }
 
     /**
@@ -76,11 +72,7 @@ class TrustMark extends ParsedJws
         /** @psalm-suppress MixedAssignment */
         $ref = $this->getPayloadClaim(ClaimsEnum::Ref->value);
 
-        if (is_null($ref)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
+        return is_null($ref) ? null : $this->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
     }
 
     /**
@@ -92,11 +84,7 @@ class TrustMark extends ParsedJws
         /** @psalm-suppress MixedAssignment */
         $delegation = $this->getPayloadClaim(ClaimsEnum::Delegation->value);
 
-        if (is_null($delegation)) {
-            return null;
-        }
-
-        return $this->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
+        return is_null($delegation) ? null : $this->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
     }
 
     /**
@@ -116,8 +104,7 @@ class TrustMark extends ParsedJws
      */
     public function getType(): string
     {
-        $typ = parent::getType() ??
-        throw new TrustMarkException('No Type header claim found.');
+        $typ = parent::getType() ?? throw new TrustMarkException('No Type header claim found.');
 
         if ($typ !== JwtTypesEnum::TrustMarkJwt->value) {
             throw new TrustMarkException('Invalid Type header claim.');
