@@ -20,6 +20,7 @@
     <PropertyNotSetInConstructor errorLevel="suppress" />
     <InternalMethod errorLevel="suppress" />
     <PossiblyInvalidArgument errorLevel="suppress" />
+    <InvalidArgument errorLevel="suppress" />
     <!-- Ignore errors related to unused classes, methods... -->
     <UnusedClass errorLevel="suppress" />
     <PossiblyUnusedMethod errorLevel="suppress" />

@@ -44,7 +44,7 @@ class SignatureAlgorithmBagTest extends TestCase
         $this->assertCount(2, $signatureAlgorithmBag->getAll());
     }
 
-    public function testCanGetAllInstances()
+    public function testCanGetAllInstances(): void
     {
         $this->assertNotEmpty($this->sut()->getAllInstances());
     }
