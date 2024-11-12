@@ -15,11 +15,11 @@ enum WellKnownEnum: string
             return $this->value;
         }
 
-        return self::Prefix->value . DIRECTORY_SEPARATOR . $this->value;
+        return self::Prefix->value . '/' . $this->value;
     }
 
     public function uriFor(string $entityId): string
     {
-        return rtrim($entityId, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $this->path();
+        return rtrim($entityId, '/') . '/' . $this->path();
     }
 }

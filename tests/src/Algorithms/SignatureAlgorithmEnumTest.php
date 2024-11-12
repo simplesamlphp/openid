@@ -16,12 +16,14 @@ use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\Algorithm\RS384;
 use Jose\Component\Signature\Algorithm\RS512;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
 #[CoversClass(SignatureAlgorithmEnum::class)]
 class SignatureAlgorithmEnumTest extends TestCase
 {
+    #[RequiresPhpExtension('sodium')]
     public function testCanGetProperSignatureAlgorithmInstance(): void
     {
         $this->assertInstanceOf(
