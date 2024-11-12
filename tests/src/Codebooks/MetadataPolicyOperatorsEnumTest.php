@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Codebooks\PhpBasicTypesEnum;
 use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
+use stdClass;
 
 #[CoversClass(MetadataPolicyOperatorsEnum::class)]
 class MetadataPolicyOperatorsEnumTest extends TestCase
@@ -344,7 +345,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported(true));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported(new stdClass()));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isOperatorValueTypeSupported(null));
 
         $this->assertTrue(MetadataPolicyOperatorsEnum::Add->isOperatorValueTypeSupported([]));
@@ -357,7 +358,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isOperatorValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isOperatorValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isOperatorValueTypeSupported(true));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isOperatorValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isOperatorValueTypeSupported(new stdClass()));
 
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isOperatorValueTypeSupported(true));
 
@@ -373,16 +374,16 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
 
         // Assert contained values, true.
         $this->assertTrue(MetadataPolicyOperatorsEnum::Add->isOperatorValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
         $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isOperatorValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
         $this->assertTrue(MetadataPolicyOperatorsEnum::SubsetOf->isOperatorValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
         $this->assertTrue(MetadataPolicyOperatorsEnum::SupersetOf->isOperatorValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
 
         // Assert contained values, false.
@@ -408,21 +409,21 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isParameterValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isParameterValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isParameterValueTypeSupported(true));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isParameterValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::Value->isParameterValueTypeSupported(new stdClass()));
 
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported('a'));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(true));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(new stdClass()));
 
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported('a'));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported(1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported(true));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::Essential->isParameterValueTypeSupported(new stdClass()));
 
         $this->assertTrue(MetadataPolicyOperatorsEnum::Add->isParameterValueTypeSupported([]));
         $this->assertTrue(MetadataPolicyOperatorsEnum::SubsetOf->isParameterValueTypeSupported([]));
@@ -432,7 +433,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isParameterValueTypeSupported(1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isParameterValueTypeSupported(1.1));
         $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isParameterValueTypeSupported([]));
-        $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isParameterValueTypeSupported(new \StdClass()));
+        $this->assertTrue(MetadataPolicyOperatorsEnum::OneOf->isParameterValueTypeSupported(new stdClass()));
 
         // Assert false.
         $this->assertFalse(MetadataPolicyOperatorsEnum::Default->isParameterValueTypeSupported(null));
@@ -446,13 +447,13 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
 
         // Assert contained values, true.
         $this->assertTrue(MetadataPolicyOperatorsEnum::Add->isParameterValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
         $this->assertTrue(MetadataPolicyOperatorsEnum::SubsetOf->isParameterValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
         $this->assertTrue(MetadataPolicyOperatorsEnum::SupersetOf->isParameterValueTypeSupported(
-            ['a', 1, 1.1, [], new \StdClass()],
+            ['a', 1, 1.1, [], new stdClass()],
         ));
 
         // Assert contained values, false.
