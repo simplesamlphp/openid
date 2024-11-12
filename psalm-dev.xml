@@ -17,6 +17,9 @@
   </projectFiles>
 
   <issueHandlers>
+    <PropertyNotSetInConstructor errorLevel="suppress" />
+    <InternalMethod errorLevel="suppress" />
+    <PossiblyInvalidArgument errorLevel="suppress" />
     <!-- Ignore errors related to unused classes, methods... -->
     <UnusedClass errorLevel="suppress" />
     <PossiblyUnusedMethod errorLevel="suppress" />
