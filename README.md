@@ -113,7 +113,6 @@ means that all metadata policies from all intermediates have been successfully a
 to get metadata for OpenID RP, which will return an array (or null if no metadata is available for given entity type):
 
 ```php
-
 // ... 
 
 $entityType = \SimpleSAML\OpenID\Codebooks\EntityTypesEnum::OpenIdRelyingParty;
@@ -142,6 +141,7 @@ if (is_null($metadata)) {
     return;
 }
 ```
+
 If getting metadata results in an exception, the metadata is considered invalid and is to be discarded.
 
 ### Additional verification of signatures
