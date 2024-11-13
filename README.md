@@ -17,7 +17,7 @@ composer require simplesamlphp/openid
 
 ## OpenID Federation
 
-The initial functionality of the library revolves around the OpenID Federation specification. To use it, create an 
+The initial functionality of the library revolves around the OpenID Federation specification. To use it, create an
 instance of the class `\SimpleSAML\OpenID\Federation`
 
 ```php
@@ -141,7 +141,6 @@ if (is_null($metadata)) {
     );
     return;
 }
-
 ```
 If getting metadata results in an exception, the metadata is considered invalid and is to be discarded.
 
