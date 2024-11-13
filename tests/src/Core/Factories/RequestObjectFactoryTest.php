@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Core;
+namespace SimpleSAML\Test\OpenID\Core\Factories;
 
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
@@ -10,23 +10,27 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Core\RequestObject;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Exceptions\RequestObjectException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
+use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
-#[CoversClass(RequestObject::class)]
+#[CoversClass(RequestObjectFactory::class)]
+#[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
-class RequestObjectTest extends TestCase
+class RequestObjectFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
+    protected MockObject $jwsParserMock;
     protected MockObject $jwsVerifierMock;
     protected MockObject $jwksFactoryMock;
     protected MockObject $jwsSerializerManagerMock;
@@ -50,6 +54,9 @@ class RequestObjectTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
 
+        $this->jwsParserMock = $this->createMock(JwsParser::class);
+        $this->jwsParserMock->method('parse')->willReturn($this->jwsDecoratorMock);
+
         $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
         $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
@@ -61,22 +68,22 @@ class RequestObjectTest extends TestCase
     }
 
     protected function sut(
-        ?JwsDecorator $jwsDecorator = null,
+        ?JwsParser $jwsParser = null,
         ?JwsVerifier $jwsVerifier = null,
         ?JwksFactory $jwksFactory = null,
         ?JwsSerializerManager $jwsSerializerManager = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
-    ): RequestObject {
-        $jwsDecorator ??= $this->jwsDecoratorMock;
+    ): RequestObjectFactory {
+        $jwsParser ??= $this->jwsParserMock;
         $jwsVerifier ??= $this->jwsVerifierMock;
         $jwksFactory ??= $this->jwksFactoryMock;
         $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
-        return new RequestObject(
-            $jwsDecorator,
+        return new RequestObjectFactory(
+            $jwsParser,
             $jwsVerifier,
             $jwksFactory,
             $jwsSerializerManager,
@@ -87,37 +94,17 @@ class RequestObjectTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(RequestObject::class, $this->sut());
+        $this->assertInstanceOf(RequestObjectFactory::class, $this->sut());
     }
 
-    public function testCanCheckIsProtected(): void
+
+    public function testCanBuildFromToken(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
-        $this->assertTrue($this->sut()->isProtected());
-    }
-
-    public function testCanCheckIsNotProtected(): void
-    {
-        $header = $this->sampleHeader;
-        $header['alg'] = 'none';
-
-        $this->signatureMock->method('getProtectedHeader')->willReturn($header);
-
-        $this->assertFalse($this->sut()->isProtected());
-    }
-
-    public function testThrowsForNonExistingAlgHeader(): void
-    {
-
-        $header = $this->sampleHeader;
-        unset($header['alg']);
-
-        $this->signatureMock->method('getProtectedHeader')->willReturn($header);
-
-        $this->expectException(RequestObjectException::class);
-        $this->expectExceptionMessage('Alg');
-
-        $this->sut()->isProtected();
+        $this->assertInstanceOf(
+            RequestObject::class,
+            $this->sut()->fromToken('token'),
+        );
     }
 }
