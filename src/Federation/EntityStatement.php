@@ -110,7 +110,7 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function verifyWithKeySet(array $jwks = null, int $signatureIndex = 0): void
+    public function verifyWithKeySet(?array $jwks = null, int $signatureIndex = 0): void
     {
         // Verify with provided JWKS, otherwise use own JWKS.
         $jwks ??= $this->getJwks();
