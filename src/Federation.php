@@ -19,6 +19,7 @@ use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
@@ -66,6 +67,7 @@ class Federation
         DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
         CacheDecoratorFactory $cacheDecoratorFactory = new CacheDecoratorFactory(),
         HttpClientDecoratorFactory $httpClientDecoratorFactory = new HttpClientDecoratorFactory(),
+        protected readonly TrustChainBagFactory $trustChainBagFactory = new TrustChainBagFactory(),
     ) {
         $this->maxCacheDuration = $dateIntervalDecoratorFactory->build($maxCacheDuration);
         $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
@@ -110,6 +112,7 @@ class Federation
         return $this->trustChainResolver ??= new TrustChainResolver(
             $this->entityStatementFetcher(),
             $this->trustChainFactory(),
+            $this->trustChainBagFactory,
             $this->maxCacheDuration,
             $this->cacheDecorator,
             $this->logger,

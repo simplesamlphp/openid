@@ -91,11 +91,13 @@ for given leaf entity (subject) and trusted anchors:
 
 try {
     /** @var \SimpleSAML\OpenID\Federation $federationTools */
-    /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
-    $trustChain = $federationTools->trustChainResolver()->for(
+    /** @var \SimpleSAML\OpenID\Federation\TrustChainBag $trustChainBag */
+    $trustChainBag = $federationTools->trustChainResolver()->for(
         'https://leaf-entity-id.example.org/', // Trust chain subject (leaf entity).
-        [
-            'https://trust-achor-id.example.org/', // List of valid trust anchors.
+        [ 
+            // List of valid trust anchors.
+            'https://trust-achor-id.example.org/',
+            'https://other-trust-achor-id.example.org/',
         ],
     );
 } catch (\Throwable $exception) {
@@ -105,8 +107,30 @@ try {
 
 ```
 
-If the trust chain is successfully resolved, this will return an instance of `\SimpleSAML\OpenID\Federation\TrustChain`.
-Otherwise, exception will be thrown.
+If the trust chain is successfully resolved, this will return an instance of
+`\SimpleSAML\OpenID\Federation\TrustChainBag`. Otherwise, exception will be thrown.
+From the TrustChainBag you can get the TrustChain using several methods.
+
+```php
+
+// ... 
+
+try {
+    /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
+    /** @var \SimpleSAML\OpenID\Federation\TrustChainBag $trustChainBag */
+    // Simply get the shortest available chain.
+    $trustChain = $trustChainBag->getShortest();
+    // Get the shortest chain, but take into account the Trust Anchor priority.
+    $trustChain = $trustChainBag->getShortestByTrustAnchorPriority(
+        'https://other-trust-achor-id.example.org/', // Get chain for this Trust Anchor even if the chain is longer.
+        'https://trust-achor-id.example.org/',
+    );
+} catch (\Throwable $exception) {
+    $this->loggerService->error('Could not resolve trust chain: ' . $exception->getMessage())
+    return;
+}
+
+```
 
 Once you have the Trust Chain, you can try and get the resolved metadata for particular entity type. Resolved metadata
 means that all metadata policies from all intermediates have been successfully applied. Here is one example for trying

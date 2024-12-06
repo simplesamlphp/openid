@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
 
@@ -20,6 +21,7 @@ class TrustChainResolver
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
         protected readonly TrustChainFactory $trustChainFactory,
+        protected readonly TrustChainBagFactory $trustChainBagFactory,
         protected readonly DateIntervalDecorator $maxCacheDuration,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
@@ -33,14 +35,14 @@ class TrustChainResolver
     /**
      * @param non-empty-string $leafEntityId ID of the leaf (subject) entity for which to resolve the trust chain.
      * @param non-empty-array<non-empty-string> $validTrustAnchorIds IDs of the valid trust anchors.
-     * @return \SimpleSAML\OpenID\Federation\TrustChain
+     * @return \SimpleSAML\OpenID\Federation\TrustChainBag
      *
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function for(string $leafEntityId, array $validTrustAnchorIds): TrustChain
+    public function for(string $leafEntityId, array $validTrustAnchorIds): TrustChainBag
     {
         $this->validateStart($leafEntityId, $validTrustAnchorIds);
 
@@ -68,7 +70,7 @@ class TrustChainResolver
                         'Trust chain resolved from cache, returning.',
                         compact('leafEntityId', 'validTrustAnchorId'),
                     );
-                    return $trustChain;
+                    return $this->trustChainBagFactory->build($trustChain);
                 }
             } catch (Throwable $exception) {
                 $this->logger?->warning(
@@ -128,33 +130,17 @@ class TrustChainResolver
         }
 
         $this->logger?->debug(
-            'Trust chains exist, finding the shortest one.',
+            'Trust chains exist, building its bag.',
             compact('leafEntityId', 'validTrustAnchorIds'),
         );
 
-        // Order the chains from shortest to longest one.
-        usort($resolvedChains, function (array $a, array $b) {
-            return count($a) - count($b);
-        });
-        ($shortestChain = reset($resolvedChains)) || throw new TrustChainException('Invalid trust chain.');
-        $trustChain = $this->trustChainFactory->fromStatements(...$shortestChain);
+        $trustChainBag = $this->trustChainBagFactory->build($this->prepareTrustChain(array_pop($resolvedChains)));
 
-        $resolvedTrustAnchorId = $trustChain->getResolvedTrustAnchor()->getIssuer();
-        $chainTokens = $trustChain->jsonSerialize();
+        while ($chainStatements = array_pop($resolvedChains)) {
+            $trustChainBag->add($this->prepareTrustChain($chainStatements));
+        }
 
-        $this->logger?->debug(
-            'Trust chain has been resolved. Setting it in cache.',
-            compact('leafEntityId', 'resolvedTrustAnchorId', 'chainTokens'),
-        );
-
-        $this->cacheDecorator?->set(
-            $chainTokens,
-            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($trustChain->getResolvedExpirationTime()),
-            $trustChain->getResolvedLeaf()->getIssuer(),
-            $resolvedTrustAnchorId,
-        );
-
-        return $trustChain;
+        return $trustChainBag;
     }
 
     /**
@@ -303,5 +289,28 @@ class TrustChainResolver
     public function getMaxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
+    }
+
+    /**
+     * @param \SimpleSAML\OpenID\Federation\EntityStatement[] $chainStatements
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     */
+    public function prepareTrustChain(array $chainStatements): TrustChain
+    {
+        $trustChain = $this->trustChainFactory->fromStatements(...$chainStatements);
+        $resolvedTrustAnchorId = $trustChain->getResolvedTrustAnchor()->getIssuer();
+        $trustChainTokens = $trustChain->jsonSerialize();
+
+        $this->cacheDecorator?->set(
+            $trustChainTokens,
+            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($trustChain->getResolvedExpirationTime()),
+            $trustChain->getResolvedLeaf()->getIssuer(),
+            $resolvedTrustAnchorId,
+        );
+
+        return $trustChain;
     }
 }

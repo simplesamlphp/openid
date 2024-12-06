@@ -146,6 +146,19 @@ class TrustChain implements JsonSerializable
     }
 
     /**
+     * Get resolved chain length.
+     *
+     * @return int
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     */
+    public function getResolvedLength(): int
+    {
+        $this->validateIsResolved();
+
+        return count($this->entities);
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      *

@@ -21,6 +21,7 @@ use SimpleSAML\OpenID\Federation;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
@@ -61,6 +62,7 @@ class FederationTest extends TestCase
     protected MockObject $dateIntervalDecoratorFactoryMock;
     protected MockObject $cacheDecoratorFactoryMock;
     protected MockObject $httpClientDecoratorFactoryMock;
+    protected MockObject $trustChainBagFactoryMock;
 
     protected function setUp(): void
     {
@@ -81,6 +83,7 @@ class FederationTest extends TestCase
         $this->dateIntervalDecoratorFactoryMock = $this->createMock(DateIntervalDecoratorFactory::class);
         $this->cacheDecoratorFactoryMock = $this->createMock(CacheDecoratorFactory::class);
         $this->httpClientDecoratorFactoryMock = $this->createMock(HttpClientDecoratorFactory::class);
+        $this->trustChainBagFactoryMock = $this->createMock(TrustChainBagFactory::class);
     }
 
     protected function sut(
@@ -101,6 +104,7 @@ class FederationTest extends TestCase
         ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null,
         ?CacheDecoratorFactory $cacheDecoratorFactory = null,
         ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null,
+        ?TrustChainBagFactory $trustChainBagFactory = null,
     ): Federation {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
         $supportedSerializers ??= $this->supportedSerializersMock;
@@ -119,6 +123,7 @@ class FederationTest extends TestCase
         $dateIntervalDecoratorFactory ??= $this->dateIntervalDecoratorFactoryMock;
         $cacheDecoratorFactory ??= $this->cacheDecoratorFactoryMock;
         $httpClientDecoratorFactory ??= $this->httpClientDecoratorFactoryMock;
+        $trustChainBagFactory ??= $this->trustChainBagFactoryMock;
 
         return new Federation(
             $supportedAlgorithms,
@@ -138,6 +143,7 @@ class FederationTest extends TestCase
             $dateIntervalDecoratorFactory,
             $cacheDecoratorFactory,
             $httpClientDecoratorFactory,
+            $trustChainBagFactory,
         );
     }
 
