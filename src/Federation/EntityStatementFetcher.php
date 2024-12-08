@@ -158,9 +158,10 @@ class EntityStatementFetcher
 
         if ($response->getStatusCode() !== 200) {
             $message = sprintf(
-                'Unexpected HTTP response for entity statement fetch, status code: %s, reason: %s.',
+                'Unexpected HTTP response for entity statement fetch, status code: %s, reason: %s. URI %s',
                 $response->getStatusCode(),
                 $response->getReasonPhrase(),
+                $uri,
             );
             $this->logger?->error($message);
             throw new FetchException($message);
@@ -174,9 +175,10 @@ class EntityStatementFetcher
             )
         ) {
             $message = sprintf(
-                'Unexpected content type in response for entity statement fetch: %s, expected: %s.',
+                'Unexpected content type in response for entity statement fetch: %s, expected: %s. URI %s',
                 $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
                 ContentTypesEnum::ApplicationEntityStatementJwt->value,
+                $uri,
             );
             $this->logger?->error($message);
             throw new FetchException($message);
