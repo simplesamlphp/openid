@@ -128,7 +128,7 @@ class EntityStatementFetcher
             return null;
         }
 
-        $this->logger?->error(
+        $this->logger?->debug(
             'Entity statement token found in cache, trying to build instance.',
             compact('uri'),
         );
@@ -185,7 +185,7 @@ class EntityStatementFetcher
         }
 
         $token = $response->getBody()->getContents();
-        $this->logger?->info('Successful HTTP response for entity statement fetch.', compact('uri', 'token'));
+        $this->logger?->debug('Successful HTTP response for entity statement fetch.', compact('uri', 'token'));
         $this->logger?->debug('Proceeding to EntityStatement instance building.');
 
         $entityStatement = $this->entityStatementFactory->fromToken($token);
