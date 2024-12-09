@@ -29,7 +29,7 @@
         "psr/http-message": "^2",
         "psr/log": "^3",
         "psr/simple-cache": "^3",
-        "web-token/jwt-library": "^3.4"
+        "web-token/jwt-library": "^3.4 || ^4.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10",
