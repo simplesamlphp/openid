@@ -104,15 +104,15 @@ class TrustChainResolverTest extends TestCase
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
         $this->intermediateEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['t']);
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
         $this->trustAnchorEntityConfigurationMock
             ->expects($this->never())
-            ->method('getPayloadClaim');
+            ->method('getAuthorityHints');
 
         $configurationChains = $this->sut()->getConfigurationChains('l', ['t']);
 
@@ -142,11 +142,11 @@ class TrustChainResolverTest extends TestCase
             });
 
         $this->leafEntityConfigurationMock
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
         $this->intermediateEntityConfigurationMock
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['t']);
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
         $this->trustAnchorEntityConfigurationMock
             ->expects($this->never())
             ->method('getPayloadClaim');
@@ -168,8 +168,8 @@ class TrustChainResolverTest extends TestCase
             });
 
         $this->leafEntityConfigurationMock
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i', 'l']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i', 'l']);
 
         $this->loggerMock
             ->expects($this->atLeastOnce())
@@ -203,8 +203,8 @@ class TrustChainResolverTest extends TestCase
             ->with($this->stringContains('kuku'));
 
         $this->leafEntityConfigurationMock
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i', 'l']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i', 'l']);
 
         $this->assertEmpty($sut->getConfigurationChains('l', ['t']));
     }
@@ -219,15 +219,15 @@ class TrustChainResolverTest extends TestCase
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
         $this->intermediateEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['t']);
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
         $this->trustAnchorEntityConfigurationMock
             ->expects($this->never())
-            ->method('getPayloadClaim');
+            ->method('getAuthorityHints');
 
         $this->trustChainBagFactoryMock->expects($this->once())->method('build');
         $this->cacheDecoratorMock->expects($this->once())->method('set');
@@ -245,8 +245,8 @@ class TrustChainResolverTest extends TestCase
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i', 't']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i', 't']);
 
         $this->trustChainBagFactoryMock->expects($this->once())->method('build');
         $this->cacheDecoratorMock->expects($this->exactly(2))->method('set');
@@ -310,12 +310,12 @@ class TrustChainResolverTest extends TestCase
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
         $this->intermediateEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['t']);
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
 
         $this->loggerMock
             ->expects($this->atLeastOnce())
@@ -336,12 +336,12 @@ class TrustChainResolverTest extends TestCase
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['i']);
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
         $this->intermediateEntityConfigurationMock
             ->expects($this->once())
-            ->method('getPayloadClaim')
-            ->with(ClaimsEnum::AuthorityHints->value)->willReturn(['t']);
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
 
         $this->trustChainBagFactoryMock->expects($this->once())->method('build')
         ->willThrowException(new TrustChainException('Error'));

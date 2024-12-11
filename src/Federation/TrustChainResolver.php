@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
@@ -113,8 +112,7 @@ class TrustChainResolver
         }
 
         try {
-            /** @var ?array<non-empty-string> $entityAuthorityHints */
-            $entityAuthorityHints = $entityConfig->getPayloadClaim(ClaimsEnum::AuthorityHints->value);
+            $entityAuthorityHints = $entityConfig->getAuthorityHints();
 
             if ((!is_array($entityAuthorityHints)) || empty($entityAuthorityHints)) {
                 $this->logger?->info('No common trust anchor in this path.', $debugStartInfo);

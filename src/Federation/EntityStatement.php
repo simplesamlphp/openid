@@ -91,6 +91,41 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return null|non-empty-string[]
+     */
+    public function getAuthorityHints(): ?array
+    {
+        $claimKey = ClaimsEnum::AuthorityHints->value;
+        /** @psalm-suppress MixedAssignment */
+        $authorityHints = $this->getPayloadClaim($claimKey);
+
+        if (is_null($authorityHints)) {
+            return null;
+        }
+
+        // authority_hints
+        // OPTIONAL. An array of strings representing the Entity Identifiers of Intermediate Entities or Trust Anchors
+        // that are Immediate Superiors of the Entity.
+        if (!is_array($authorityHints)) {
+            throw new EntityStatementException('Invalid Authority Hints claim.');
+        }
+
+        // Its value MUST contain the Entity Identifiers of its Immediate Superiors and MUST NOT be the empty array []
+        if (empty($authorityHints)) {
+            throw new EntityStatementException('Empty Authority Hints claim encountered.');
+        }
+
+        // It MUST NOT be present in Subordinate Statements.
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Authority Hints claim encountered in non-configuration statement.');
+        }
+
+        return $this->ensureNonEmptyStrings($authorityHints, $claimKey);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return non-empty-string
      */
     public function getKeyId(): string
