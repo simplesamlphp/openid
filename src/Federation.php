@@ -91,9 +91,9 @@ class Federation
             $this->httpClientDecorator,
             $this->entityStatementFactory(),
             $this->maxCacheDuration,
+            $this->helpers,
             $this->cacheDecorator,
             $this->logger,
-            $this->helpers,
         );
     }
 

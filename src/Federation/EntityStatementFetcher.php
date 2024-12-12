@@ -26,9 +26,9 @@ class EntityStatementFetcher
         protected readonly HttpClientDecorator $httpClientDecorator,
         protected readonly EntityStatementFactory $entityStatementFactory,
         protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly Helpers $helpers,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
-        protected readonly Helpers $helpers = new Helpers(),
     ) {
     }
 

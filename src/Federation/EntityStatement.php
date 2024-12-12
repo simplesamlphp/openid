@@ -226,6 +226,8 @@ class EntityStatement extends ParsedJws
             $this->getJwks(...),
             $this->getType(...),
             $this->getKeyId(...),
+            $this->getAuthorityHints(...),
+            $this->getTrustMarks(...),
         );
     }
 }

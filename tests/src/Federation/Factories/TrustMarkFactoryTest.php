@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
-use SimpleSAML\OpenID\Federation\RequestObject;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -22,11 +22,11 @@ use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
-#[CoversClass(RequestObjectFactory::class)]
+#[CoversClass(TrustMarkFactory::class)]
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
-#[UsesClass(RequestObject::class)]
-class RequestObjectFactoryTest extends TestCase
+#[UsesClass(TrustMark::class)]
+class TrustMarkFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
     protected MockObject $jwsMock;
@@ -41,19 +41,17 @@ class RequestObjectFactoryTest extends TestCase
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
-        'typ' => 'jwt',
-        'kid' => 'LfgZECDYkSTHmbllBD5_Tkwvy3CtOpNYQ7-DfQawTww',
+        'typ' => 'trust-mark+jwt',
+        'kid' => 'fsQ45F0D916RdKEeTjta8DYWiodjthouHrVWgOXBrkk',
     ];
+
     protected array $expiredPayload = [
-        'iat' => 1734010504,
-        'nbf' => 1734010504,
-        'exp' => 1734010504,
-        'aud' => [
-            0 => 'https://82-dap.localhost.markoivancic.from.hr',
-        ],
-        'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
-        'jti' => '1734010504',
-        'client_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
+        'iat' => 1734016912,
+        'nbf' => 1734016912,
+        'exp' => 1734020512,
+        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
+        'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];
 
     protected array $validPayload;
@@ -93,7 +91,7 @@ class RequestObjectFactoryTest extends TestCase
         ?JwsSerializerManager $jwsSerializerManager = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
-    ): RequestObjectFactory {
+    ): TrustMarkFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifier ??= $this->jwsVerifierMock;
         $jwksFactory ??= $this->jwksFactoryMock;
@@ -101,7 +99,7 @@ class RequestObjectFactoryTest extends TestCase
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
-        return new RequestObjectFactory(
+        return new TrustMarkFactory(
             $jwsParser,
             $jwsVerifier,
             $jwksFactory,
@@ -113,16 +111,16 @@ class RequestObjectFactoryTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(RequestObjectFactory::class, $this->sut());
+        $this->assertInstanceOf(TrustMarkFactory::class, $this->sut());
     }
 
-    public function testCanBuildFromToken(): void
+    public function testCanBuild(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
         $this->assertInstanceOf(
-            RequestObject::class,
+            TrustMark::class,
             $this->sut()->fromToken('token'),
         );
     }

@@ -79,6 +79,13 @@ class EntityStatementTest extends TestCase
         'authority_hints' => [
             'https://08-dap.localhost.markoivancic.from.hr/openid/entities/AIntermediate/',
         ],
+        'trust_marks' => [
+            [
+                'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+                // phpcs:ignore
+                'trust_mark' => 'eyJhbGciOiJSUzI1NiIsInR5cCI6InRydXN0LW1hcmsrand0Iiwia2lkIjoiZnNRNDVGMEQ5MTZSZEtFZVRqdGE4RFlXaW9kanRob3VIclZXZ09YQnJrayJ9.eyJpYXQiOjE3MzQwMTcyMTcsIm5iZiI6MTczNDAxNzIxNywiZXhwIjoxNzM0MDIwODE3LCJpZCI6Imh0dHBzOlwvXC8wOC1kYXAubG9jYWxob3N0Lm1hcmtvaXZhbmNpYy5mcm9tLmhyXC9vcGVuaWRcL2VudGl0aWVzXC9BQlRydXN0QW5jaG9yXC90cnVzdC1tYXJrXC9tZW1iZXIiLCJpc3MiOiJodHRwczpcL1wvMDgtZGFwLmxvY2FsaG9zdC5tYXJrb2l2YW5jaWMuZnJvbS5oclwvb3BlbmlkXC9lbnRpdGllc1wvQUJUcnVzdEFuY2hvclwvIiwic3ViIjoiaHR0cHM6XC9cLzA4LWRhcC5sb2NhbGhvc3QubWFya29pdmFuY2ljLmZyb20uaHJcL29wZW5pZFwvZW50aXRpZXNcL0FMZWFmXC8ifQ.hbpq2-oPbn56WwDGLLcYaM7t8wZbipa_0FMlFT7nmRi6OZRibid5TGIBYs3Zk9nmNVZhzOCYO3inOIws6yJhpg6ogD32KpXet4oz8xeYftyw-xddb_sMf3gBPK5GChnqNsj71QJHZDYIUL3nILTySpnR2u7UK6gtmoosjxNINawM-teg0tIsOGaHuqDlAu9wSBI3PFxvXJJvi4mmMF3TosudexrpIHIBnNY_bvaSKJdzlmuSssWVAmIKp7O1IZLhn6eOzrhuktlGH5iltd77CnFxhdMyFjZrUOcT2MXIhZqWqpy-Uj-H2Bia63CwvmZ5DQa-WVYUSbxCEqJeeRqI0Q',
+            ],
+        ],
     ];
 
     protected array $sampleHeader = [
@@ -184,6 +191,8 @@ class EntityStatementTest extends TestCase
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $this->validPayload['iss'] = 'something-else';
+        // Authority hints should not be present if not configuration.
+        unset($this->validPayload['authority_hints']);
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
         $this->assertFalse($this->sut()->isConfiguration());
@@ -198,5 +207,83 @@ class EntityStatementTest extends TestCase
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
         $this->sut()->verifyWithKeySet();
+    }
+
+    public function testThrowsOnInvalidAuthorityHints(): void
+    {
+        $this->validPayload['authority_hints'] = 'invalid';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Invalid');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+    public function testThrowsOnEmptyAuthorityHints(): void
+    {
+        $this->validPayload['authority_hints'] = [];
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Empty');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+    public function testThrowsIfAuthorityHintsNotInConfigurationStatement(): void
+    {
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+    public function testTrustMarksAreOptional(): void
+    {
+        unset($this->validPayload['trust_marks']);
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->assertInstanceOf(
+            EntityStatement::class,
+            $this->sut(),
+        );
+    }
+
+    public function testThrowsOnInvalidTrustMarks(): void
+    {
+        $this->validPayload['trust_marks'] = 'invalid';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Invalid Trust Marks');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+    public function testThrowsOnInvalidTypeHeader(): void
+    {
+        $this->sampleHeader['typ'] = 'invalid';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Invalid Type header');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
     }
 }

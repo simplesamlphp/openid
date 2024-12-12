@@ -33,22 +33,18 @@ class TrustMarkTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected array $expiredPayload = [
-        'iat' => 1731178665,
-        'nbf' => 1731178665,
-        'exp' => 1731178665,
-        'iss' => 'https://82-dap.localhost.markoivancic.from.hr',
+        'iat' => 1734016912,
+        'nbf' => 1734016912,
+        'exp' => 1734020512,
+        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
         'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
-        'jti' => '1731178665',
-        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/trust-mark/relying-party',
-        'logo_uri' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/logo',
-        'ref' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/reference',
-        'delegation' => 'jwt',
     ];
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
         'typ' => 'trust-mark+jwt',
-        'kid' => 'LfgZECDYkSTHmbllBD5_Tkwvy3CtOpNYQ7-DfQawTww',
+        'kid' => 'fsQ45F0D916RdKEeTjta8DYWiodjthouHrVWgOXBrkk',
     ];
 
     protected array $validPayload;
