@@ -16,6 +16,8 @@ use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
+use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
@@ -48,7 +50,9 @@ class Federation
     protected ?EntityStatementFactory $entityStatementFactory = null;
     protected ?RequestObjectFactory $requestObjectFactory = null;
     protected ?TrustMarkFactory $trustMarkFactory = null;
+    protected ?TrustMarkClaimFactory $trustMarkClaimFactory = null;
 
+    // TODO mivanci Consolidate internal services usage as properties accessible through public methods.
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -68,6 +72,7 @@ class Federation
         CacheDecoratorFactory $cacheDecoratorFactory = new CacheDecoratorFactory(),
         HttpClientDecoratorFactory $httpClientDecoratorFactory = new HttpClientDecoratorFactory(),
         protected readonly TrustChainBagFactory $trustChainBagFactory = new TrustChainBagFactory(),
+        protected readonly TrustMarkClaimBagFactory $trustMarkClaimBagFactory = new TrustMarkClaimBagFactory(),
     ) {
         $this->maxCacheDuration = $dateIntervalDecoratorFactory->build($maxCacheDuration);
         $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
@@ -129,6 +134,8 @@ class Federation
             $this->jwsSerializerManager,
             $this->timestampValidationLeeway,
             $this->helpers,
+            $this->trustMarkClaimFactory(),
+            $this->trustMarkClaimBagFactory,
         );
     }
 
@@ -154,5 +161,10 @@ class Federation
             $this->timestampValidationLeeway,
             $this->helpers,
         );
+    }
+
+    public function trustMarkClaimFactory(): TrustMarkClaimFactory
+    {
+        return $this->trustMarkClaimFactory ??= new TrustMarkClaimFactory($this->trustMarkFactory());
     }
 }

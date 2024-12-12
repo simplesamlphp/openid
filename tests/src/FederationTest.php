@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
 use SimpleSAML\OpenID\Federation;
+use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
@@ -43,6 +44,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(EntityStatementFactory::class)]
 #[UsesClass(RequestObjectFactory::class)]
 #[UsesClass(TrustMarkFactory::class)]
+#[UsesClass(TrustMarkClaimFactory::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

@@ -9,7 +9,7 @@ use SimpleSAML\OpenID\Exceptions\TrustChainException;
 class TrustChainBag
 {
     /** @var \SimpleSAML\OpenID\Federation\TrustChain[] */
-    protected array $trustChains;
+    protected array $trustChains = [];
 
     public function __construct(TrustChain $trustChain, TrustChain ...$trustChains)
     {
@@ -19,7 +19,7 @@ class TrustChainBag
     public function add(TrustChain $trustChain, TrustChain ...$trustChains): void
     {
         $this->trustChains[] = $trustChain;
-        $this->trustChains += $trustChains;
+        $this->trustChains = array_merge($this->trustChains, $trustChains);
 
         // Order the chains from shortest to longest one.
         usort($this->trustChains, function (TrustChain $a, TrustChain $b) {
