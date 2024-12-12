@@ -6,12 +6,40 @@ namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
+use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
+use SimpleSAML\OpenID\Federation\EntityStatement\TrustMarkClaimBag;
+use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jws\JwsDecorator;
+use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 class EntityStatement extends ParsedJws
 {
+    public function __construct(
+        JwsDecorator $jwsDecorator,
+        JwsVerifier $jwsVerifier,
+        JwksFactory $jwksFactory,
+        JwsSerializerManager $jwsSerializerManager,
+        DateIntervalDecorator $timestampValidationLeeway,
+        Helpers $helpers,
+        protected readonly TrustMarkClaimFactory $trustMarkClaimFactory,
+        protected readonly TrustMarkClaimBagFactory $trustMarkClaimBagFactory,
+    ) {
+        parent::__construct(
+            $jwsDecorator,
+            $jwsVerifier,
+            $jwksFactory,
+            $jwsSerializerManager,
+            $timestampValidationLeeway,
+            $helpers,
+        );
+    }
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -121,6 +149,37 @@ class EntityStatement extends ParsedJws
         }
 
         return $this->ensureNonEmptyStrings($authorityHints, $claimKey);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getTrustMarks(): ?TrustMarkClaimBag
+    {
+        // trust_marks
+        // OPTIONAL. An array of JSON objects, each representing a Trust Mark.
+
+        $claimKey = ClaimsEnum::TrustMarks->value;
+        /** @psalm-suppress MixedAssignment */
+        $trustMarksClaims = $this->getPayloadClaim($claimKey);
+
+        if (is_null($trustMarksClaims)) {
+            return null;
+        }
+
+        if (!is_array($trustMarksClaims)) {
+            throw new EntityStatementException('Invalid Trust Marks claim.');
+        }
+
+        $trustMarkClaimBag = $this->trustMarkClaimBagFactory->build();
+
+        /** @psalm-suppress MixedAssignment */
+        while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
+            $trustMarkClaimBag->add($this->trustMarkClaimFactory->buildFrom($trustMarkClaimData));
+        }
+
+        return $trustMarkClaimBag;
     }
 
     /**
