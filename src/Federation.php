@@ -270,4 +270,9 @@ class Federation
     {
         return $this->maxTrustChainDepth;
     }
+
+    public function getCacheDecorator(): ?CacheDecorator
+    {
+        return $this->cacheDecorator;
+    }
 }
