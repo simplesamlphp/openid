@@ -51,13 +51,14 @@ class TrustMarkClaimTest extends TestCase
         $this->assertSame($this->otherClaims, $sut->getOtherClaims());
     }
 
-    public function testConstructThrowsForDifferentIds(): void
-    {
-        $this->expectException(TrustMarkClaimException::class);
-        $this->expectExceptionMessage('identifier');
-
-        $this->sut('differentId');
-    }
+    // TODO mivanci Enable this check once the testbed starts conforming.
+//    public function testConstructThrowsForDifferentIds(): void
+//    {
+//        $this->expectException(TrustMarkClaimException::class);
+//        $this->expectExceptionMessage('identifier');
+//
+//        $this->sut('differentId');
+//    }
 
     public function testConstructThrowsForDifferentTrustMarkPayload(): void
     {

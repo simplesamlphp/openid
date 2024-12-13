@@ -23,11 +23,13 @@ class TrustMarkClaim
         protected readonly TrustMark $trustMark,
         protected readonly array $otherClaims = [],
     ) {
-        if ($id !== $this->trustMark->getIdentifier()) {
-            throw new TrustMarkClaimException(
-                sprintf('Invalid TrustMark identifier: %s != %s.', $id, $this->trustMark->getIdentifier()),
-            );
-        }
+
+        // TODO mivanci Enable this check once the testbed starts conforming.
+//        if ($id !== $this->trustMark->getIdentifier()) {
+//            throw new TrustMarkClaimException(
+//                sprintf('Invalid TrustMark identifier: %s != %s.', $id, $this->trustMark->getIdentifier()),
+//            );
+//        }
 
         // All the claims in the JSON object MUST have the same values as those contained in the Trust Mark JWT.
         $trustMarkPayload = $this->trustMark->getPayload();
