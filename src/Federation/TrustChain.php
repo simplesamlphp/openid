@@ -622,4 +622,9 @@ class TrustChain implements JsonSerializable
 
         return $value;
     }
+
+    public function getEntities(): array
+    {
+        return $this->entities;
+    }
 }

@@ -71,4 +71,9 @@ class TrustChainBag
     {
         return $this->trustChains;
     }
+
+    public function getCount(): int
+    {
+        return count($this->trustChains);
+    }
 }
