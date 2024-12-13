@@ -170,8 +170,8 @@ class EntityStatementFetcher
         /** @psalm-suppress InvalidLiteralArgument */
         if (
             !str_contains(
-                ContentTypesEnum::ApplicationEntityStatementJwt->value,
                 $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
+                ContentTypesEnum::ApplicationEntityStatementJwt->value,
             )
         ) {
             $message = sprintf(
