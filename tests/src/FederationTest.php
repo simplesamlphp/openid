@@ -12,6 +12,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Decorators\CacheDecorator;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
@@ -22,16 +25,14 @@ use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
-use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
-use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
+use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
@@ -45,47 +46,38 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(RequestObjectFactory::class)]
 #[UsesClass(TrustMarkFactory::class)]
 #[UsesClass(TrustMarkClaimFactory::class)]
+#[UsesClass(AlgorithmManagerFactory::class)]
+#[UsesClass(JwsSerializerManagerFactory::class)]
+#[UsesClass(JwsParserFactory::class)]
+#[UsesClass(JwsParser::class)]
+#[UsesClass(JwsVerifierFactory::class)]
+#[UsesClass(DateIntervalDecorator::class)]
+#[UsesClass(DateIntervalDecoratorFactory::class)]
+#[UsesClass(CacheDecorator::class)]
+#[UsesClass(CacheDecoratorFactory::class)]
+#[UsesClass(HttpClientDecorator::class)]
+#[UsesClass(HttpClientDecoratorFactory::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
     protected MockObject $supportedSerializersMock;
-    protected MockObject $maxCacheDurationMock;
-    protected MockObject $timestampValidationLeewayMock;
+    protected DateInterval $maxCacheDuration;
+    protected DateInterval $timestampValidationLeeway;
     protected int $maxTrustChainDepth;
     protected MockObject $cacheMock;
     protected MockObject $loggerMock;
     protected MockObject $clientMock;
-    protected MockObject $helpersMock;
-    protected MockObject $algorithmManagerFactoryMock;
-    protected MockObject $jwsSerializerManagerFactoryMock;
-    protected MockObject $jwsParserFactoryMock;
-    protected MockObject $jwsVerifierFactoryMock;
-    protected MockObject $jwksFactoryMock;
-    protected MockObject $dateIntervalDecoratorFactoryMock;
-    protected MockObject $cacheDecoratorFactoryMock;
-    protected MockObject $httpClientDecoratorFactoryMock;
-    protected MockObject $trustChainBagFactoryMock;
 
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
         $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
-        $this->maxCacheDurationMock = $this->createMock(DateInterval::class);
-        $this->timestampValidationLeewayMock = $this->createMock(DateInterval::class);
+        $this->maxCacheDuration = new DateInterval('PT6H');
+        $this->timestampValidationLeeway = new DateInterval('PT1M');
         $this->maxTrustChainDepth = 9;
         $this->cacheMock = $this->createMock(CacheInterface::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->clientMock = $this->createMock(Client::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
-        $this->algorithmManagerFactoryMock = $this->createMock(AlgorithmManagerFactory::class);
-        $this->jwsSerializerManagerFactoryMock = $this->createMock(JwsSerializerManagerFactory::class);
-        $this->jwsParserFactoryMock = $this->createMock(JwsParserFactory::class);
-        $this->jwsVerifierFactoryMock = $this->createMock(JwsVerifierFactory::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->dateIntervalDecoratorFactoryMock = $this->createMock(DateIntervalDecoratorFactory::class);
-        $this->cacheDecoratorFactoryMock = $this->createMock(CacheDecoratorFactory::class);
-        $this->httpClientDecoratorFactoryMock = $this->createMock(HttpClientDecoratorFactory::class);
-        $this->trustChainBagFactoryMock = $this->createMock(TrustChainBagFactory::class);
     }
 
     protected function sut(
@@ -97,35 +89,15 @@ class FederationTest extends TestCase
         ?CacheInterface $cache = null,
         ?LoggerInterface $logger = null,
         ?Client $client = null,
-        ?Helpers $helpers = null,
-        ?AlgorithmManagerFactory $algorithmManagerFactory = null,
-        ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null,
-        ?JwsParserFactory $jwsParserFactory = null,
-        ?JwsVerifierFactory $jwsVerifierFactory = null,
-        ?JwksFactory $jwksFactory = null,
-        ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null,
-        ?CacheDecoratorFactory $cacheDecoratorFactory = null,
-        ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null,
-        ?TrustChainBagFactory $trustChainBagFactory = null,
     ): Federation {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
         $supportedSerializers ??= $this->supportedSerializersMock;
-        $maxCacheDuration ??= $this->maxCacheDurationMock;
-        $timestampValidationLeeway ??= $this->timestampValidationLeewayMock;
+        $maxCacheDuration ??= $this->maxCacheDuration;
+        $timestampValidationLeeway ??= $this->timestampValidationLeeway;
         $maxTrustChainDepth ??= $this->maxTrustChainDepth;
         $cache ??= $this->cacheMock;
         $logger ??= $this->loggerMock;
         $client ??= $this->clientMock;
-        $helpers ??= $this->helpersMock;
-        $algorithmManagerFactory ??= $this->algorithmManagerFactoryMock;
-        $jwsSerializerManagerFactory ??= $this->jwsSerializerManagerFactoryMock;
-        $jwsParserFactory ??= $this->jwsParserFactoryMock;
-        $jwsVerifierFactory ??= $this->jwsVerifierFactoryMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
-        $dateIntervalDecoratorFactory ??= $this->dateIntervalDecoratorFactoryMock;
-        $cacheDecoratorFactory ??= $this->cacheDecoratorFactoryMock;
-        $httpClientDecoratorFactory ??= $this->httpClientDecoratorFactoryMock;
-        $trustChainBagFactory ??= $this->trustChainBagFactoryMock;
 
         return new Federation(
             $supportedAlgorithms,
@@ -136,16 +108,6 @@ class FederationTest extends TestCase
             $cache,
             $logger,
             $client,
-            $helpers,
-            $algorithmManagerFactory,
-            $jwsSerializerManagerFactory,
-            $jwsParserFactory,
-            $jwsVerifierFactory,
-            $jwksFactory,
-            $dateIntervalDecoratorFactory,
-            $cacheDecoratorFactory,
-            $httpClientDecoratorFactory,
-            $trustChainBagFactory,
         );
     }
 
@@ -165,5 +127,9 @@ class FederationTest extends TestCase
         $this->assertInstanceOf(EntityStatementFactory::class, $sut->entityStatementFactory());
         $this->assertInstanceOf(RequestObjectFactory::class, $sut->requestObjectFactory());
         $this->assertInstanceOf(TrustMarkFactory::class, $sut->trustMarkFactory());
+        $this->assertInstanceOf(DateIntervalDecorator::class, $sut->maxCacheDurationDecorator());
+        $this->assertInstanceOf(SupportedAlgorithms::class, $sut->supportedAlgorithms());
+        $this->assertInstanceOf(SupportedSerializers::class, $sut->supportedSerializers());
+        $this->assertIsInt($sut->maxTrustChainDepth());
     }
 }

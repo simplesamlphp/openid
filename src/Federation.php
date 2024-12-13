@@ -35,14 +35,14 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 class Federation
 {
-    protected DateIntervalDecorator $maxCacheDuration;
-    protected DateIntervalDecorator $timestampValidationLeeway;
+    protected DateIntervalDecorator $maxCacheDurationDecorator;
+    protected DateIntervalDecorator $timestampValidationLeewayDecorator;
     protected int $maxTrustChainDepth;
     protected ?CacheDecorator $cacheDecorator;
     protected HttpClientDecorator $httpClientDecorator;
-    protected JwsSerializerManager $jwsSerializerManager;
-    protected JwsParser $jwsParser;
-    protected JwsVerifier $jwsVerifier;
+    protected ?JwsSerializerManager $jwsSerializerManager = null;
+    protected ?JwsParser $jwsParser = null;
+    protected ?JwsVerifier $jwsVerifier  = null;
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
     protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
     protected ?TrustChainFactory $trustChainFactory = null;
@@ -51,8 +51,18 @@ class Federation
     protected ?RequestObjectFactory $requestObjectFactory = null;
     protected ?TrustMarkFactory $trustMarkFactory = null;
     protected ?TrustMarkClaimFactory $trustMarkClaimFactory = null;
+    protected ?TrustMarkClaimBagFactory $trustMarkClaimBagFactory = null;
+    protected ?Helpers $helpers = null;
+    protected ?AlgorithmManagerFactory $algorithmManagerFactory = null;
+    protected ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null;
+    protected ?JwsParserFactory $jwsParserFactory = null;
+    protected ?JwsVerifierFactory $jwsVerifierFactory = null;
+    protected ?JwksFactory $jwksFactory = null;
+    protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
+    protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
+    protected ?TrustChainBagFactory $trustChainBagFactory = null;
+    protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
 
-    // TODO mivanci Consolidate internal services usage as properties accessible through public methods.
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -62,27 +72,30 @@ class Federation
         ?CacheInterface $cache = null,
         protected readonly ?LoggerInterface $logger = null,
         ?Client $client = null,
-        protected readonly Helpers $helpers = new Helpers(),
-        AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
-        JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
-        JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
-        JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
-        protected JwksFactory $jwksFactory = new JwksFactory(),
-        DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
-        CacheDecoratorFactory $cacheDecoratorFactory = new CacheDecoratorFactory(),
-        HttpClientDecoratorFactory $httpClientDecoratorFactory = new HttpClientDecoratorFactory(),
-        protected readonly TrustChainBagFactory $trustChainBagFactory = new TrustChainBagFactory(),
-        protected readonly TrustMarkClaimBagFactory $trustMarkClaimBagFactory = new TrustMarkClaimBagFactory(),
     ) {
-        $this->maxCacheDuration = $dateIntervalDecoratorFactory->build($maxCacheDuration);
-        $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
+        $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
+        $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
+            ->build($timestampValidationLeeway);
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
-        $this->cacheDecorator = is_null($cache) ? null : $cacheDecoratorFactory->build($cache);
-        $this->httpClientDecorator = $httpClientDecoratorFactory->build($client);
+        $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
+    }
 
-        $this->jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
-        $this->jwsParser = $jwsParserFactory->build($this->jwsSerializerManager);
-        $this->jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
+    public function jwsVerifier(): JwsVerifier
+    {
+        return $this->jwsVerifier ??= $this->jwsVerifierFactory()->build(
+            $this->algorithmManagerFactory()->build($this->supportedAlgorithms),
+        );
+    }
+
+    public function jwsParser(): JwsParser
+    {
+        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManager());
+    }
+
+    public function jwsSerializerManager(): JwsSerializerManager
+    {
+        return $this->jwsSerializerManager ??= $this->jwsSerializerManagerFactory()->build($this->supportedSerializers);
     }
 
     public function entityStatementFetcher(): EntityStatementFetcher
@@ -90,8 +103,8 @@ class Federation
         return $this->entityStatementFetcher ??= new EntityStatementFetcher(
             $this->httpClientDecorator,
             $this->entityStatementFactory(),
-            $this->maxCacheDuration,
-            $this->helpers,
+            $this->maxCacheDurationDecorator,
+            $this->helpers(),
             $this->cacheDecorator,
             $this->logger,
         );
@@ -99,15 +112,15 @@ class Federation
 
     public function metadataPolicyResolver(): MetadataPolicyResolver
     {
-        return $this->metadataPolicyResolver ??= new MetadataPolicyResolver($this->helpers);
+        return $this->metadataPolicyResolver ??= new MetadataPolicyResolver($this->helpers());
     }
 
     public function trustChainFactory(): TrustChainFactory
     {
         return $this->trustChainFactory ??= new TrustChainFactory(
             $this->entityStatementFactory(),
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
             $this->metadataPolicyResolver(),
         );
     }
@@ -117,8 +130,8 @@ class Federation
         return $this->trustChainResolver ??= new TrustChainResolver(
             $this->entityStatementFetcher(),
             $this->trustChainFactory(),
-            $this->trustChainBagFactory,
-            $this->maxCacheDuration,
+            $this->trustChainBagFactory(),
+            $this->maxCacheDurationDecorator,
             $this->cacheDecorator,
             $this->logger,
             $this->maxTrustChainDepth,
@@ -128,43 +141,133 @@ class Federation
     public function entityStatementFactory(): EntityStatementFactory
     {
         return $this->entityStatementFactory ??= new EntityStatementFactory(
-            $this->jwsParser,
-            $this->jwsVerifier,
-            $this->jwksFactory,
-            $this->jwsSerializerManager,
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->jwsParser(),
+            $this->jwsVerifier(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManager(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
             $this->trustMarkClaimFactory(),
-            $this->trustMarkClaimBagFactory,
+            $this->trustMarkClaimBagFactory(),
         );
     }
 
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
-            $this->jwsParser,
-            $this->jwsVerifier,
-            $this->jwksFactory,
-            $this->jwsSerializerManager,
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->jwsParser(),
+            $this->jwsVerifier(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManager(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
         );
     }
 
     public function trustMarkFactory(): TrustMarkFactory
     {
         return $this->trustMarkFactory ??= new TrustMarkFactory(
-            $this->jwsParser,
-            $this->jwsVerifier,
-            $this->jwksFactory,
-            $this->jwsSerializerManager,
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->jwsParser(),
+            $this->jwsVerifier(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManager(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
         );
     }
 
     public function trustMarkClaimFactory(): TrustMarkClaimFactory
     {
         return $this->trustMarkClaimFactory ??= new TrustMarkClaimFactory($this->trustMarkFactory());
+    }
+
+    public function helpers(): Helpers
+    {
+        return $this->helpers ??= new Helpers();
+    }
+
+    public function algorithmManagerFactory(): AlgorithmManagerFactory
+    {
+        return $this->algorithmManagerFactory ??= new AlgorithmManagerFactory();
+    }
+
+    public function jwsSerializerManagerFactory(): JwsSerializerManagerFactory
+    {
+        return $this->jwsSerializerManagerFactory ??= new JwsSerializerManagerFactory();
+    }
+
+    public function jwsParserFactory(): JwsParserFactory
+    {
+        return $this->jwsParserFactory ??= new JwsParserFactory();
+    }
+
+    public function jwsVerifierFactory(): JwsVerifierFactory
+    {
+        return $this->jwsVerifierFactory ??= new JwsVerifierFactory();
+    }
+
+    public function jwksFactory(): JwksFactory
+    {
+        return $this->jwksFactory ??= new JwksFactory();
+    }
+
+    public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
+    {
+        if (is_null($this->dateIntervalDecoratorFactory)) {
+            $this->dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory();
+        }
+
+        return $this->dateIntervalDecoratorFactory;
+    }
+
+    public function trustChainBagFactory(): TrustChainBagFactory
+    {
+        return $this->trustChainBagFactory ??= new TrustChainBagFactory();
+    }
+
+    public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
+    {
+        if (is_null($this->httpClientDecoratorFactory)) {
+            $this->httpClientDecoratorFactory = new HttpClientDecoratorFactory();
+        }
+
+        return $this->httpClientDecoratorFactory;
+    }
+
+    public function cacheDecoratorFactory(): CacheDecoratorFactory
+    {
+        if (is_null($this->cacheDecoratorFactory)) {
+            $this->cacheDecoratorFactory = new CacheDecoratorFactory();
+        }
+
+        return $this->cacheDecoratorFactory;
+    }
+
+    public function trustMarkClaimBagFactory(): TrustMarkClaimBagFactory
+    {
+        return $this->trustMarkClaimBagFactory ??= new TrustMarkClaimBagFactory();
+    }
+
+    public function maxCacheDurationDecorator(): DateIntervalDecorator
+    {
+        return $this->maxCacheDurationDecorator;
+    }
+
+    public function supportedAlgorithms(): SupportedAlgorithms
+    {
+        return $this->supportedAlgorithms;
+    }
+
+    /**
+     * @return \SimpleSAML\OpenID\SupportedSerializers
+     */
+    public function supportedSerializers(): SupportedSerializers
+    {
+        return $this->supportedSerializers;
+    }
+
+    public function maxTrustChainDepth(): int
+    {
+        return $this->maxTrustChainDepth;
     }
 }
