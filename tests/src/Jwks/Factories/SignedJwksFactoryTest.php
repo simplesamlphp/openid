@@ -2,30 +2,36 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Jwks;
+namespace SimpleSAML\Test\OpenID\Jwks\Factories;
 
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
+use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
+use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
-#[CoversClass(SignedJwks::class)]
+#[CoversClass(SignedJwksFactory::class)]
+#[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
-class SignedJwksTest extends TestCase
+#[UsesClass(SignedJwks::class)]
+class SignedJwksFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
+    protected MockObject $jwsParserMock;
     protected MockObject $jwsVerifierMock;
     protected MockObject $jwksFactoryMock;
     protected MockObject $jwsSerializerManagerMock;
@@ -72,12 +78,15 @@ class SignedJwksTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
 
+        $this->jwsParserMock = $this->createMock(JwsParser::class);
+        $this->jwsParserMock->method('parse')->willReturn($this->jwsDecoratorMock);
+
         $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
         $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
-
         $this->helpersMock = $this->createMock(Helpers::class);
+
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
 
@@ -86,22 +95,22 @@ class SignedJwksTest extends TestCase
     }
 
     protected function sut(
-        ?JwsDecorator $jwsDecorator = null,
+        ?JwsParser $jwsParser = null,
         ?JwsVerifier $jwsVerifier = null,
         ?JwksFactory $jwksFactory = null,
         ?JwsSerializerManager $jwsSerializerManager = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
-    ): SignedJwks {
-        $jwsDecorator ??= $this->jwsDecoratorMock;
+    ): SignedJwksFactory {
+        $jwsParser ??= $this->jwsParserMock;
         $jwsVerifier ??= $this->jwsVerifierMock;
         $jwksFactory ??= $this->jwksFactoryMock;
         $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
-        return new SignedJwks(
-            $jwsDecorator,
+        return new SignedJwksFactory(
+            $jwsParser,
             $jwsVerifier,
             $jwksFactory,
             $jwsSerializerManager,
@@ -112,20 +121,17 @@ class SignedJwksTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->assertInstanceOf(SignedJwksFactory::class, $this->sut());
+    }
+
+    public function testCanBuildFromToken(): void
+    {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
         $this->assertInstanceOf(
             SignedJwks::class,
-            $this->sut(),
+            $this->sut()->fromToken('token'),
         );
-    }
-
-    public function testCanGetJsonSerialize(): void
-    {
-        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
-        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
-
-        $this->assertIsArray($this->sut()->jsonSerialize());
     }
 }
