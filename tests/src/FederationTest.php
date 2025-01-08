@@ -35,6 +35,7 @@ use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(Federation::class)]
 #[UsesClass(ParsedJwsFactory::class)]
@@ -57,6 +58,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(CacheDecoratorFactory::class)]
 #[UsesClass(HttpClientDecorator::class)]
 #[UsesClass(HttpClientDecoratorFactory::class)]
+#[UsesClass(ArtifactFetcher::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
