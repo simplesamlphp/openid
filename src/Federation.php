@@ -32,6 +32,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 class Federation
 {
@@ -62,6 +63,7 @@ class Federation
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
     protected ?TrustChainBagFactory $trustChainBagFactory = null;
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
+    protected ?ArtifactFetcher $artifactFetcher = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -101,11 +103,10 @@ class Federation
     public function entityStatementFetcher(): EntityStatementFetcher
     {
         return $this->entityStatementFetcher ??= new EntityStatementFetcher(
-            $this->httpClientDecorator,
+            $this->artifactFetcher(),
             $this->entityStatementFactory(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),
-            $this->cacheDecorator,
             $this->logger,
         );
     }
@@ -274,5 +275,14 @@ class Federation
     public function cacheDecorator(): ?CacheDecorator
     {
         return $this->cacheDecorator;
+    }
+
+    public function artifactFetcher(): ArtifactFetcher
+    {
+        return $this->artifactFetcher ??= new ArtifactFetcher(
+            $this->httpClientDecorator,
+            $this->cacheDecorator(),
+            $this->logger,
+        );
     }
 }

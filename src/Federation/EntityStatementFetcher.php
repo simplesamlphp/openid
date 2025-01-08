@@ -18,16 +18,16 @@ use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 use Throwable;
 
 class EntityStatementFetcher
 {
     public function __construct(
-        protected readonly HttpClientDecorator $httpClientDecorator,
+        protected readonly ArtifactFetcher $artifactFetcher,
         protected readonly EntityStatementFactory $entityStatementFactory,
         protected readonly DateIntervalDecorator $maxCacheDuration,
         protected readonly Helpers $helpers,
-        protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
     ) {
     }
@@ -112,16 +112,7 @@ class EntityStatementFetcher
             compact('uri'),
         );
 
-        try {
-            /** @var ?string $jws */
-            $jws = $this->cacheDecorator?->get(null, $uri);
-        } catch (Throwable $exception) {
-            $this->logger?->error(
-                'Error trying to get entity statement from cache: ' . $exception->getMessage(),
-                compact('uri'),
-            );
-            return null;
-        }
+        $jws = $this->artifactFetcher->fromCacheAsString($uri);
 
         if (!is_string($jws)) {
             $this->logger?->debug('Entity statement token not found in cache.', compact('uri'));
@@ -144,17 +135,7 @@ class EntityStatementFetcher
      */
     public function fromNetwork(string $uri): EntityStatement
     {
-        try {
-            $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
-        } catch (Throwable $e) {
-            $message = sprintf(
-                'Error sending HTTP request to %s. Error was: %s',
-                $uri,
-                $e->getMessage(),
-            );
-            $this->logger?->error($message);
-            throw new FetchException($message, (int)$e->getCode(), $e);
-        }
+        $response = $this->artifactFetcher->fromNetwork($uri);
 
         if ($response->getStatusCode() !== 200) {
             $message = sprintf(
@@ -191,26 +172,10 @@ class EntityStatementFetcher
         $entityStatement = $this->entityStatementFactory->fromToken($token);
         $this->logger?->debug('Entity Statement instance built, saving its token to cache.', compact('uri', 'token'));
 
-        // Cache it
-        try {
-            $cacheTtl = $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
-                $entityStatement->getExpirationTime(),
-            );
-            $this->cacheDecorator?->set(
-                $token,
-                $cacheTtl,
-                $uri,
-            );
-            $this->logger?->debug(
-                'Entity Statement token successfully cached.',
-                compact('uri', 'token', 'cacheTtl'),
-            );
-        } catch (Throwable $exception) {
-            $this->logger?->error(
-                'Error setting entity statement to cache: ' . $exception->getMessage(),
-                compact('uri'),
-            );
-        }
+        $cacheTtl = $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
+            $entityStatement->getExpirationTime(),
+        );
+        $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri);
 
         $this->logger?->debug('Returning built Entity Statement instance.', compact('uri', 'token'));
         return $entityStatement;

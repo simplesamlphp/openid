@@ -3,9 +3,9 @@
 [![Build Status](https://github.com/simplesamlphp/openid/actions/workflows/php.yml/badge.svg)](https://github.com/simplesamlphp/openid/actions/workflows/php.yml)
 [![Coverage Status](https://codecov.io/gh/simplesamlphp/openid/branch/master/graph/badge.svg)](https://app.codecov.io/gh/simplesamlphp/openid)
 
-WARNING: this library is under heavy development and should not be used in production!
+The library is under development, and you can expect braking changes along the way.
 
-This library provides some common tools that you might find useful when working with OpenID family of specifications.
+The library provides some common tools that you might find useful when working with OpenID family of specifications.
 
 ## Installation
 

@@ -8,55 +8,49 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(EntityStatementFetcher::class)]
 class EntityStatementFetcherTest extends TestCase
 {
-    protected MockObject $httpClientDecoratorMock;
+    protected MockObject $artifactFetcherMock;
     protected MockObject $entityStatementFactoryMock;
     protected MockObject $maxCacheDurationMock;
     protected MockObject $helpersMock;
-    protected MockObject $cacheDecoratorMock;
     protected MockObject $loggerMock;
 
     protected function setUp(): void
     {
-        $this->httpClientDecoratorMock = $this->createMock(HttpClientDecorator::class);
+        $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
         $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
-        $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
     }
 
     protected function sut(
-        ?HttpClientDecorator $httpClientDecorator = null,
+        ?ArtifactFetcher $artifactFetcher = null,
         ?EntityStatementFactory $entityStatementFactory = null,
         ?DateIntervalDecorator $maxCacheDuration = null,
         ?Helpers $helpers = null,
-        ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
     ): EntityStatementFetcher {
-        $httpClientDecorator ??= $this->httpClientDecoratorMock;
+        $artifactFetcher ??= $this->artifactFetcherMock;
         $entityStatementFactory ??= $this->entityStatementFactoryMock;
         $maxCacheDuration ??= $this->maxCacheDurationMock;
         $helpers ??= $this->helpersMock;
-        $cacheDecorator ??= $this->cacheDecoratorMock;
         $logger ??= $this->loggerMock;
 
         return new EntityStatementFetcher(
-            $httpClientDecorator,
+            $artifactFetcher,
             $entityStatementFactory,
             $maxCacheDuration,
             $helpers,
-            $cacheDecorator,
             $logger,
         );
     }
@@ -68,8 +62,8 @@ class EntityStatementFetcherTest extends TestCase
 
     public function testCanFetchFromCache(): void
     {
-        $this->cacheDecoratorMock->expects($this->once())->method('get')
-            ->with(null, 'uri')
+        $this->artifactFetcherMock->expects($this->once())->method('fromCacheAsString')
+            ->with('uri')
             ->willReturn('token');
 
         $this->entityStatementFactoryMock->expects($this->once())->method('fromToken')

@@ -84,7 +84,7 @@ class JwksFetcher
         }
 
         if (!is_string($jwksJson)) {
-            $this->logger?->debug('JWKS JSON not fount in cache.', compact('uri'));
+            $this->logger?->debug('JWKS JSON not found in cache.', compact('uri'));
             return null;
         }
 
