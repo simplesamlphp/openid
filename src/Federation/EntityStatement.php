@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
@@ -190,6 +191,24 @@ class EntityStatement extends ParsedJws
     public function getKeyId(): string
     {
         return parent::getKeyId() ?? throw new EntityStatementException('No KeyId header claim found.');
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getFederationFetchEndpoint(): ?string
+    {
+        /** @psalm-suppress MixedAssignment */
+        $federationFetchEndpoint = $this->getPayload()
+        [ClaimsEnum::Metadata->value]
+        [EntityTypesEnum::FederationEntity->value]
+        [ClaimsEnum::FederationFetchEndpoint->value] ?? null;
+
+        if (is_null($federationFetchEndpoint)) {
+            return null;
+        }
+
+        return (string)$federationFetchEndpoint;
     }
 
     /**

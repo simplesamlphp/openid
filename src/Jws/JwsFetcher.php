@@ -32,7 +32,7 @@ class JwsFetcher extends AbstractJwsFetcher
         return $this->parsedJwsFactory->fromToken($token);
     }
 
-    protected function getExpectedContentTypeHttpHeader(): ?string
+    public function getExpectedContentTypeHttpHeader(): ?string
     {
         return null;
     }

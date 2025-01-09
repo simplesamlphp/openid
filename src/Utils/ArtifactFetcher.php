@@ -11,7 +11,6 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
-use SimpleSAML\OpenID\Exceptions\HttpException;
 use Throwable;
 
 class ArtifactFetcher
@@ -49,6 +48,7 @@ class ArtifactFetcher
                 'Artifact not found in cache.',
                 compact('keyElement', 'keyElements'),
             );
+            return null;
         }
 
         if (is_string($artifact)) {

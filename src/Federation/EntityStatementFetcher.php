@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
@@ -34,7 +35,7 @@ class EntityStatementFetcher extends JwsFetcher
         return $this->parsedJwsFactory->fromToken($token);
     }
 
-    protected function getExpectedContentTypeHttpHeader(): string
+    public function getExpectedContentTypeHttpHeader(): string
     {
         return ContentTypesEnum::ApplicationEntityStatementJwt->value;
     }
@@ -74,12 +75,8 @@ class EntityStatementFetcher extends JwsFetcher
         string $subjectId,
         EntityStatement $entityConfiguration,
     ): EntityStatement {
-        $entityConfigurationPayload = $entityConfiguration->getPayload();
-
-        $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimsEnum::Metadata->value]
-            [EntityTypesEnum::FederationEntity->value]
-            [ClaimsEnum::FederationFetchEndpoint->value] ??
-            throw new JwsException('No fetch endpoint found in entity configuration.'));
+        $fetchEndpointUri = $entityConfiguration->getFederationFetchEndpoint() ??
+        throw new EntityStatementException('No fetch endpoint found in entity configuration.');
 
         $this->logger?->debug(
             'Entity statement fetch from cache or fetch endpoint.',
@@ -125,6 +122,7 @@ class EntityStatementFetcher extends JwsFetcher
             return $entityStatement;
         }
 
+        // @codeCoverageIgnoreStart
         $message = 'Unexpected entity statement instance encountered for cache fetch.';
         $this->logger?->error(
             $message,
@@ -132,6 +130,7 @@ class EntityStatementFetcher extends JwsFetcher
         );
 
         throw new FetchException($message);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -148,6 +147,7 @@ class EntityStatementFetcher extends JwsFetcher
             return $entityStatement;
         }
 
+        // @codeCoverageIgnoreStart
         $message = 'Unexpected entity statement instance encountered for network fetch.';
         $this->logger?->error(
             $message,
@@ -155,5 +155,6 @@ class EntityStatementFetcher extends JwsFetcher
         );
 
         throw new FetchException($message);
+        // @codeCoverageIgnoreEnd
     }
 }
