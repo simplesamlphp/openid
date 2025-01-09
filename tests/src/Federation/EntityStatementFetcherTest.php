@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -13,42 +14,46 @@ use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
+use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(EntityStatementFetcher::class)]
+#[UsesClass(AbstractJwsFetcher::class)]
+#[UsesClass(JwsFetcher::class)]
 class EntityStatementFetcherTest extends TestCase
 {
-    protected MockObject $artifactFetcherMock;
     protected MockObject $entityStatementFactoryMock;
+    protected MockObject $artifactFetcherMock;
     protected MockObject $maxCacheDurationMock;
     protected MockObject $helpersMock;
     protected MockObject $loggerMock;
 
     protected function setUp(): void
     {
-        $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
+        $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
     }
 
     protected function sut(
-        ?ArtifactFetcher $artifactFetcher = null,
         ?EntityStatementFactory $entityStatementFactory = null,
+        ?ArtifactFetcher $artifactFetcher = null,
         ?DateIntervalDecorator $maxCacheDuration = null,
         ?Helpers $helpers = null,
         ?LoggerInterface $logger = null,
     ): EntityStatementFetcher {
-        $artifactFetcher ??= $this->artifactFetcherMock;
         $entityStatementFactory ??= $this->entityStatementFactoryMock;
+        $artifactFetcher ??= $this->artifactFetcherMock;
         $maxCacheDuration ??= $this->maxCacheDurationMock;
         $helpers ??= $this->helpersMock;
         $logger ??= $this->loggerMock;
 
         return new EntityStatementFetcher(
-            $artifactFetcher,
             $entityStatementFactory,
+            $artifactFetcher,
             $maxCacheDuration,
             $helpers,
             $logger,

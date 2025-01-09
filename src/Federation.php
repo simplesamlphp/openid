@@ -103,8 +103,8 @@ class Federation
     public function entityStatementFetcher(): EntityStatementFetcher
     {
         return $this->entityStatementFetcher ??= new EntityStatementFetcher(
-            $this->artifactFetcher(),
             $this->entityStatementFactory(),
+            $this->artifactFetcher(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),
             $this->logger,
