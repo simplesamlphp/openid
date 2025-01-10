@@ -23,10 +23,10 @@ class JwksFetcher
         protected readonly HttpClientDecorator $httpClientDecorator,
         protected readonly JwksFactory $jwksFactory,
         protected readonly SignedJwksFactory $signedJwksFactory,
-        protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
+        protected readonly Helpers $helpers,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
-        protected readonly Helpers $helpers = new Helpers(),
     ) {
     }
 
@@ -149,7 +149,7 @@ class JwksFetcher
         try {
             $this->cacheDecorator?->set(
                 $jwksJson,
-                $this->maxCacheDuration->getInSeconds(),
+                $this->maxCacheDurationDecorator->getInSeconds(),
                 $uri,
             );
             $this->logger?->debug('JWKS JSON saved to cache.', compact('uri', 'jwks'));
@@ -207,8 +207,8 @@ class JwksFetcher
             $this->logger?->debug('Signed JWKS JSON decoded.', compact('uri', 'jwksJson'));
             $signedJwksExpirationTime = $signedJwks->getExpirationTime();
             $cacheTtl = is_null($signedJwksExpirationTime) ?
-            $this->maxCacheDuration->getInSeconds() :
-            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($signedJwksExpirationTime);
+            $this->maxCacheDurationDecorator->getInSeconds() :
+            $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime($signedJwksExpirationTime);
             $this->cacheDecorator?->set($jwksJson, $cacheTtl, $uri);
             $this->logger?->debug(
                 'Signed JWKS JSON successfully cached.',

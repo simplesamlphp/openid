@@ -86,9 +86,9 @@ class Jwks
             $this->jwksFactory(),
             $this->signedJwksFactory(),
             $this->maxCacheDurationDecorator,
+            $this->helpers(),
             $this->cacheDecorator,
             $this->logger,
-            $this->helpers(),
         );
     }
 
