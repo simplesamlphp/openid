@@ -24,6 +24,7 @@ use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
@@ -46,6 +47,7 @@ class Federation
     protected ?JwsVerifier $jwsVerifier  = null;
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
     protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
+    protected ?MetadataPolicyApplicator $metadataPolicyApplicator = null;
     protected ?TrustChainFactory $trustChainFactory = null;
     protected ?TrustChainResolver $trustChainResolver = null;
     protected ?EntityStatementFactory $entityStatementFactory = null;
@@ -116,13 +118,18 @@ class Federation
         return $this->metadataPolicyResolver ??= new MetadataPolicyResolver($this->helpers());
     }
 
+    public function metadataPolicyApplicator(): MetadataPolicyApplicator
+    {
+        return $this->metadataPolicyApplicator ??= new MetadataPolicyApplicator($this->helpers());
+    }
+
     public function trustChainFactory(): TrustChainFactory
     {
         return $this->trustChainFactory ??= new TrustChainFactory(
             $this->entityStatementFactory(),
             $this->timestampValidationLeewayDecorator,
-            $this->helpers(),
             $this->metadataPolicyResolver(),
+            $this->metadataPolicyApplicator(),
         );
     }
 

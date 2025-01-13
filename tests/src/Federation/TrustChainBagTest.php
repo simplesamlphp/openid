@@ -98,4 +98,9 @@ class TrustChainBagTest extends TestCase
         // Returns null if Trust Anchor is unknown.
         $this->assertNull($sut->getShortestByTrustAnchorPriority('unknown'));
     }
+
+    public function testCanGetCount(): void
+    {
+        $this->assertSame(1, $this->sut()->getCount());
+    }
 }

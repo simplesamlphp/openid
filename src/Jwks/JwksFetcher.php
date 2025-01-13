@@ -156,7 +156,7 @@ class JwksFetcher
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting JWKS JSON to cache: ' . $exception->getMessage(),
-                compact('uri', $jwksJson),
+                compact('uri', 'jwksJson'),
             );
         }
 

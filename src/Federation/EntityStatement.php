@@ -153,6 +153,56 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
+    public function getMetadata(): ?array
+    {
+        $claimKey = ClaimsEnum::Metadata->value;
+        /** @psalm-suppress MixedAssignment */
+        $metadata = $this->getPayloadClaim($claimKey);
+
+        if (is_null($metadata)) {
+            return null;
+        }
+
+        // metadata
+        // OPTIONAL. JSON object that represents the Entity's Types and the metadata for those Entity Types.
+        if (!is_array($metadata)) {
+            throw new EntityStatementException('Invalid Metadata claim.');
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
+    public function getMetadataPolicy(): ?array
+    {
+        $claimKey = ClaimsEnum::MetadataPolicy->value;
+        $metadataPolicy = $this->getPayloadClaim($claimKey);
+
+        if (is_null($metadataPolicy)) {
+            return null;
+        }
+
+        // metadata_policy
+        // OPTIONAL. JSON object that defines a metadata policy.
+        if (!is_array($metadataPolicy)) {
+            throw new EntityStatementException('Invalid Metadata Policy claim.');
+        }
+
+        // Only Subordinate Statements MAY include this claim.
+        if ($this->isConfiguration()) {
+            throw new EntityStatementException('Metadata Policy claim encountered in configuration statement.');
+        }
+
+        return $metadataPolicy;
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -246,7 +296,10 @@ class EntityStatement extends ParsedJws
             $this->getType(...),
             $this->getKeyId(...),
             $this->getAuthorityHints(...),
+            $this->getMetadata(...),
+            $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),
+            $this->getFederationFetchEndpoint(...),
         );
     }
 }

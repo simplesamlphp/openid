@@ -27,6 +27,7 @@ use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
@@ -43,6 +44,7 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(EntityStatementFetcher::class)]
 #[UsesClass(MetadataPolicyResolver::class)]
+#[UsesClass(MetadataPolicyApplicator::class)]
 #[UsesClass(TrustChainFactory::class)]
 #[UsesClass(TrustChainResolver::class)]
 #[UsesClass(EntityStatementFactory::class)]
