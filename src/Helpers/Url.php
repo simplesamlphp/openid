@@ -15,8 +15,6 @@ class Url
     /**
      * Add (new) params to URL while preserving existing ones (if any).
      *
-     * @param string $url
-     * @param array $params
      * @return string
      */
     public function withParams(string $url, array $params): string

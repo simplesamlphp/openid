@@ -79,8 +79,6 @@ class ParsedJws
     }
 
     /**
-     * @param array $values
-     * @param string $description
      * @return non-empty-string[]
      */
     protected function ensureNonEmptyStrings(array $values, string $description): array
