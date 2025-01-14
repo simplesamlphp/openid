@@ -162,29 +162,27 @@ class MetadataPolicyResolver
                         /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         $intersection;
-                    } else {
+                    } elseif ($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] === false) {
                         // This is operator essential.
                         // If a Superior has specified essential=true, then a Subordinate MUST NOT change that.
                         // If a Superior has specified essential=false, then a Subordinate is allowed to change
                         // that to essential=true.
                         /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
-                        if ($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] === false) {
-                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                            (bool)$operatorValue;
-                        } elseif ($operatorValue !== true) {
-                            throw new MetadataPolicyException(
-                            /** @psalm-suppress MixedArrayAccess We ensured this is array. */
-                                sprintf(
-                                    'Invalid change of value for operator %s: %s -> %s.',
-                                    $metadataPolicyOperatorEnum->value,
-                                    var_export(
-                                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                                        true,
-                                    ),
-                                    var_export($operatorValue, true),
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                        (bool)$operatorValue;
+                    } elseif ($operatorValue !== true) {
+                        /** @psalm-suppress MixedArrayAccess We ensured this is array. */
+                        throw new MetadataPolicyException(
+                            sprintf(
+                                'Invalid change of value for operator %s: %s -> %s.',
+                                $metadataPolicyOperatorEnum->value,
+                                var_export(
+                                    $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                    true,
                                 ),
-                            );
-                        }
+                                var_export($operatorValue, true),
+                            ),
+                        );
                     }
                 }
 
