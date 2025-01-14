@@ -112,7 +112,7 @@ class EntityStatementFetcher extends JwsFetcher
             return null;
         }
 
-        if (is_a($entityStatement, EntityStatement::class)) {
+        if ($entityStatement instanceof \SimpleSAML\OpenID\Federation\EntityStatement) {
             return $entityStatement;
         }
 
@@ -137,7 +137,7 @@ class EntityStatementFetcher extends JwsFetcher
     {
         $entityStatement = parent::fromNetwork($uri);
 
-        if (is_a($entityStatement, EntityStatement::class)) {
+        if ($entityStatement instanceof \SimpleSAML\OpenID\Federation\EntityStatement) {
             return $entityStatement;
         }
 
