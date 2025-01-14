@@ -52,7 +52,7 @@ class TrustChainBag
 
         $prioritizedChains = $this->trustChains;
 
-        usort($prioritizedChains, function (TrustChain $a, TrustChain $b) use ($prioritizedTrustAnchorIds) {
+        usort($prioritizedChains, function (TrustChain $a, TrustChain $b) use ($prioritizedTrustAnchorIds): int {
             // Get defined position, or default to high value if not found.
             $posA = $prioritizedTrustAnchorIds[$a->getResolvedTrustAnchor()->getIssuer()] ?? PHP_INT_MAX;
             $posB = $prioritizedTrustAnchorIds[$b->getResolvedTrustAnchor()->getIssuer()] ?? PHP_INT_MAX;
