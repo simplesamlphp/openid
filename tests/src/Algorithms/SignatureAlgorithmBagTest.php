@@ -23,9 +23,9 @@ class SignatureAlgorithmBagTest extends TestCase
 
     protected function sut(SignatureAlgorithmEnum ...$signatureAlgorithmEnums): SignatureAlgorithmBag
     {
-        $signatureAlgorithmEnums = !empty($signatureAlgorithmEnums) ?
-        $signatureAlgorithmEnums :
-        [$this->signatureAlgorithmEnumRs256];
+        $signatureAlgorithmEnums = empty($signatureAlgorithmEnums) ?
+        [$this->signatureAlgorithmEnumRs256] :
+        $signatureAlgorithmEnums;
 
         return new SignatureAlgorithmBag(...$signatureAlgorithmEnums);
     }

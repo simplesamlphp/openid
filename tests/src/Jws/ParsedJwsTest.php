@@ -162,7 +162,6 @@ class ParsedJwsTest extends TestCase
 
             protected function simulateOk(): void
             {
-                return;
             }
         };
 
