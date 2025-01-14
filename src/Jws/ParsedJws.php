@@ -162,11 +162,15 @@ class ParsedJws
      */
     public function verifyWithKeySet(array $jwks, int $signatureIndex = 0): void
     {
-        $this->jwsVerifier->verifyWithKeySet(
-            $this->jws,
-            $this->jwksFactory->fromKeyData($jwks)->jwks(),
-            $signatureIndex,
-        ) || throw new JwsException('Could not verify JWS signature.');
+        if (
+            !$this->jwsVerifier->verifyWithKeySet(
+                $this->jws,
+                $this->jwksFactory->fromKeyData($jwks)->jwks(),
+                $signatureIndex,
+            )
+        ) {
+            throw new JwsException('Could not verify JWS signature.');
+        }
     }
 
     /**
@@ -251,8 +255,9 @@ class ParsedJws
 
         $exp = (int)$exp;
 
-        ($exp + $this->timestampValidationLeeway->getInSeconds() >= time()) ||
-        throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
+        if ($exp + $this->timestampValidationLeeway->getInSeconds() < time()) {
+            throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
+        }
 
         return $exp;
     }
@@ -271,8 +276,9 @@ class ParsedJws
 
         $iat = (int)$iat;
 
-        ($iat - $this->timestampValidationLeeway->getInSeconds() <= time()) ||
-        throw new JwsException("Issued At claim ($iat) is greater than current time.");
+        if ($iat - $this->timestampValidationLeeway->getInSeconds() > time()) {
+            throw new JwsException("Issued At claim ($iat) is greater than current time.");
+        }
 
         return $iat;
     }

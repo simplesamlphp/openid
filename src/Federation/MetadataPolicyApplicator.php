@@ -100,15 +100,16 @@ class MetadataPolicyApplicator
                     );
 
                     /** @var array $operatorValue */
-                    (in_array($metadataParameterValueBeforePolicy, $operatorValue, true)) ||
-                    throw new MetadataPolicyException(
-                        sprintf(
-                            'Metadata parameter %s, value %s is not one of %s.',
-                            $policyParameterName,
-                            var_export($metadataParameterValueBeforePolicy, true),
-                            var_export($operatorValue, true),
-                        ),
-                    );
+                    if (!in_array($metadataParameterValueBeforePolicy, $operatorValue, true)) {
+                        throw new MetadataPolicyException(
+                            sprintf(
+                                'Metadata parameter %s, value %s is not one of %s.',
+                                $policyParameterName,
+                                var_export($metadataParameterValueBeforePolicy, true),
+                                var_export($operatorValue, true),
+                            ),
+                        );
+                    }
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf) {
                     // If the metadata parameter is present, this operator computes the intersection between the values
                     // of the operator and the metadata parameter. If the intersection is non-empty, the metadata
@@ -152,18 +153,22 @@ class MetadataPolicyApplicator
                     );
 
                     /** @var array $operatorValue */
-                    ($metadataPolicyOperatorEnum->isValueSupersetOf(
-                        $metadataParameterValueBeforePolicy,
-                        $operatorValue,
-                    )) || throw new MetadataPolicyException(
-                        sprintf(
-                            'Parameter %s, operator %s, value %s is not superset of %s.',
-                            $policyParameterName,
-                            $metadataPolicyOperatorEnum->value,
-                            var_export($metadataParameterValueBeforePolicy, true),
-                            var_export($operatorValue, true),
-                        ),
-                    );
+                    if (
+                        !$metadataPolicyOperatorEnum->isValueSupersetOf(
+                            $metadataParameterValueBeforePolicy,
+                            $operatorValue,
+                        )
+                    ) {
+                        throw new MetadataPolicyException(
+                            sprintf(
+                                'Parameter %s, operator %s, value %s is not superset of %s.',
+                                $policyParameterName,
+                                $metadataPolicyOperatorEnum->value,
+                                var_export($metadataParameterValueBeforePolicy, true),
+                                var_export($operatorValue, true),
+                            ),
+                        );
+                    }
                 } else {
                     // This is operator 'essential'
                     // If the value of this operator is true, then the metadata parameter MUST be present. If false,
@@ -173,12 +178,14 @@ class MetadataPolicyApplicator
                         continue;
                     }
 
-                    isset($metadata[$policyParameterName]) || throw new MetadataPolicyException(
-                        sprintf(
-                            'Parameter %s is marked as essential by policy, but not present in metadata.',
-                            $policyParameterName,
-                        ),
-                    );
+                    if (!isset($metadata[$policyParameterName])) {
+                        throw new MetadataPolicyException(
+                            sprintf(
+                                'Parameter %s is marked as essential by policy, but not present in metadata.',
+                                $policyParameterName,
+                            ),
+                        );
+                    }
                 }
             }
         }

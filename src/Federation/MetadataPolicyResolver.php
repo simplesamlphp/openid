@@ -48,24 +48,29 @@ class MetadataPolicyResolver
             );
 
             // Disregard unsupported if not critical, otherwise throw.
-            (empty($unsupportedCriticalOperators = array_intersect(
-                $criticalMetadataPolicyOperators,
-                array_diff($allNextPolicyOperators, $supportedOperators), // Unsupported operators, but can be ignored
-            )))
-            || throw new MetadataPolicyException(
-                'Unsupported critical metadata policy operator(s) encountered: ' .
-                implode(', ', $unsupportedCriticalOperators),
-            );
+            if (
+                !empty($unsupportedCriticalOperators = array_intersect(
+                    $criticalMetadataPolicyOperators,
+                    array_diff($allNextPolicyOperators, $supportedOperators), // Unsupported operators, but ignored
+                ))
+            ) {
+                throw new MetadataPolicyException(
+                    'Unsupported critical metadata policy operator(s) encountered: ' .
+                    implode(', ', $unsupportedCriticalOperators),
+                );
+            }
 
             // Go over each metadata parameter and resolve the policy.
             /** @psalm-suppress MixedAssignment We'll check if $nextPolicyParameterOperations is array type. */
             foreach ($nextPolicy as $nextPolicyParameter => $nextPolicyParameterOperations) {
-                (is_array($nextPolicyParameterOperations)) || throw new MetadataPolicyException(
-                    sprintf(
-                        'Invalid format for metadata policy operations encountered: %s',
-                        var_export($nextPolicyParameterOperations, true),
-                    ),
-                );
+                if (!is_array($nextPolicyParameterOperations)) {
+                    throw new MetadataPolicyException(
+                        sprintf(
+                            'Invalid format for metadata policy operations encountered: %s',
+                            var_export($nextPolicyParameterOperations, true),
+                        ),
+                    );
+                }
 
                 MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules($nextPolicyParameterOperations);
                 MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules($nextPolicyParameterOperations);
@@ -146,17 +151,19 @@ class MetadataPolicyResolver
                         );
 
                         /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
-                        (!empty($intersection)) || throw new MetadataPolicyException(
-                            sprintf(
-                                'Empty intersection encountered for operator %s: %s | %s.',
-                                $metadataPolicyOperatorEnum->value,
-                                var_export(
-                                    $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                                    true,
+                        if (empty($intersection)) {
+                            throw new MetadataPolicyException(
+                                sprintf(
+                                    'Empty intersection encountered for operator %s: %s | %s.',
+                                    $metadataPolicyOperatorEnum->value,
+                                    var_export(
+                                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                                        true,
+                                    ),
+                                    var_export($operatorValue, true),
                                 ),
-                                var_export($operatorValue, true),
-                            ),
-                        );
+                            );
+                        }
 
                         // We have values in intersection, so set it as new operator value.
                         /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */

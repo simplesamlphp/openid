@@ -233,10 +233,11 @@ class TrustChain implements JsonSerializable
             return;
         }
 
-        ($this->expirationTime + $this->timestampValidationLeewayDecorator->getInSeconds() >= time()) ||
-        throw new TrustChainException(
-            "Trust Chain expiration time ($this->expirationTime) is lesser than current time.",
-        );
+        if ($this->expirationTime + $this->timestampValidationLeewayDecorator->getInSeconds() < time()) {
+            throw new TrustChainException(
+                "Trust Chain expiration time ($this->expirationTime) is lesser than current time.",
+            );
+        }
     }
 
     /**
@@ -264,8 +265,9 @@ class TrustChain implements JsonSerializable
      */
     protected function validateIsEmpty(): void
     {
-        empty($this->entities) ||
-        throw new TrustChainException('Trust Chain is expected to be empty at this point.');
+        if (!empty($this->entities)) {
+            throw new TrustChainException('Trust Chain is expected to be empty at this point.');
+        }
     }
 
     /**
@@ -273,8 +275,9 @@ class TrustChain implements JsonSerializable
      */
     protected function validateIsNotEmpty(): void
     {
-        !empty($this->entities) ||
-        throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
+        if (empty($this->entities)) {
+            throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
+        }
     }
 
     /**
@@ -282,8 +285,9 @@ class TrustChain implements JsonSerializable
      */
     protected function validateAtLeastNumberOfEntities(int $count): void
     {
-        (count($this->entities) >= $count) ||
-        throw new TrustChainException("Trust Chain is expected to have at least $count entity/ies at this point.");
+        if (count($this->entities) < $count) {
+            throw new TrustChainException("Trust Chain is expected to have at least $count entity/ies at this point.");
+        }
     }
 
     /**
