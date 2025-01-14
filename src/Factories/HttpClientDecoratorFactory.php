@@ -11,6 +11,6 @@ class HttpClientDecoratorFactory
 {
     public function build(?Client $client = null): HttpClientDecorator
     {
-        return new HttpClientDecorator($client);
+        return is_null($client) ? new HttpClientDecorator() : new HttpClientDecorator($client);
     }
 }

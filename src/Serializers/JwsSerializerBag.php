@@ -35,9 +35,7 @@ class JwsSerializerBag
     public function getAllInstances(): array
     {
         return array_map(
-            function (JwsSerializerEnum $jwsSerializerEnum) {
-                return $jwsSerializerEnum->instance();
-            },
+            fn(JwsSerializerEnum $jwsSerializerEnum) => $jwsSerializerEnum->instance(),
             $this->getAll(),
         );
     }

@@ -22,9 +22,10 @@ class TrustChainBag
         $this->trustChains = array_merge($this->trustChains, $trustChains);
 
         // Order the chains from shortest to longest one.
-        usort($this->trustChains, function (TrustChain $a, TrustChain $b) {
-            return $a->getResolvedLength() <=> $b->getResolvedLength();
-        });
+        usort(
+            $this->trustChains,
+            fn(TrustChain $a, TrustChain $b) => $a->getResolvedLength() <=> $b->getResolvedLength(),
+        );
     }
 
     /**

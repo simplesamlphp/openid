@@ -33,9 +33,7 @@ class SignatureAlgorithmBag
     public function getAllInstances(): array
     {
         return array_map(
-            function (SignatureAlgorithmEnum $signatureAlgorithmEnum) {
-                return $signatureAlgorithmEnum->instance();
-            },
+            fn(SignatureAlgorithmEnum $signatureAlgorithmEnum) => $signatureAlgorithmEnum->instance(),
             $this->getAll(),
         );
     }

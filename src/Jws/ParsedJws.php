@@ -53,7 +53,7 @@ class ParsedJws
             try {
                 call_user_func($call);
             } catch (Throwable $exception) {
-                $errors[] = sprintf('%s: %s', get_class($exception), $exception->getMessage());
+                $errors[] = sprintf('%s: %s', $exception::class, $exception->getMessage());
             }
         }
 

@@ -187,7 +187,7 @@ class ParsedJwsTest extends TestCase
                 $this->validateByCallbacks($this->simulateError(...));
             }
 
-            protected function simulateError(): void
+            protected function simulateError(): never
             {
                 throw new \Exception('Error');
             }
