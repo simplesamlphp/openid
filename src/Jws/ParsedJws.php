@@ -70,7 +70,7 @@ class ParsedJws
     {
         $value = (string)$value;
 
-        if (empty($value)) {
+        if ($value === '' || $value === '0') {
             $message = "Empty string value encountered: $description";
             throw new JwsException($message);
         }
@@ -144,7 +144,7 @@ class ParsedJws
 
         $payloadString = $this->jws->getPayload();
         /** @psalm-suppress RiskyTruthyFalsyComparison */
-        if (empty($payloadString)) {
+        if ($payloadString === null || $payloadString === '' || $payloadString === '0') {
             return $this->payload = [];
         }
 

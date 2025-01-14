@@ -293,7 +293,7 @@ class TrustChainResolver
     {
         $errors = [];
 
-        if (empty($entityId)) {
+        if ($entityId === '' || $entityId === '0') {
             $errors[] = 'Empty entity ID.';
         }
 

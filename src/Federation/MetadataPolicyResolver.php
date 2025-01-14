@@ -49,10 +49,10 @@ class MetadataPolicyResolver
 
             // Disregard unsupported if not critical, otherwise throw.
             if (
-                !empty($unsupportedCriticalOperators = array_intersect(
+                ($unsupportedCriticalOperators = array_intersect(
                     $criticalMetadataPolicyOperators,
                     array_diff($allNextPolicyOperators, $supportedOperators), // Unsupported operators, but ignored
-                ))
+                )) !== []
             ) {
                 throw new MetadataPolicyException(
                     'Unsupported critical metadata policy operator(s) encountered: ' .

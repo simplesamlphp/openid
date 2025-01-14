@@ -117,7 +117,7 @@ enum MetadataPolicyOperatorsEnum: string
     {
         $value = is_array($value) ? $value : [$value];
 
-        return empty(array_diff($value, $superset));
+        return array_diff($value, $superset) === [];
     }
 
     public function isValueSupersetOf(mixed $value, array $subset): bool
@@ -125,7 +125,7 @@ enum MetadataPolicyOperatorsEnum: string
         $value = is_array($value) ? $value : [$value];
 
         // Like subset, but from different perspective.
-        return empty(array_diff($subset, $value));
+        return array_diff($subset, $value) === [];
     }
 
     /**
@@ -228,7 +228,7 @@ enum MetadataPolicyOperatorsEnum: string
 
     public function isOperatorCombinationSupported(array $operatorKeys): bool
     {
-        return empty(array_diff($operatorKeys, $this->getSupportedOperatorCombinations()));
+        return array_diff($operatorKeys, $this->getSupportedOperatorCombinations()) === [];
     }
 
     /**
