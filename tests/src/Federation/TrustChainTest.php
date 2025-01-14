@@ -6,7 +6,7 @@ namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
-use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
@@ -15,7 +15,6 @@ use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
-use PHPUnit\Framework\TestCase;
 
 #[CoversClass(TrustChain::class)]
 class TrustChainTest extends TestCase
@@ -54,7 +53,7 @@ class TrustChainTest extends TestCase
     protected function sut(
         ?DateIntervalDecorator $timestampValidationLeewayDecorator = null,
         ?MetadataPolicyResolver $metadataPolicyResolver = null,
-        ?MetadataPolicyApplicator $metadataPolicyApplicator = null
+        ?MetadataPolicyApplicator $metadataPolicyApplicator = null,
     ): TrustChain {
         $timestampValidationLeewayDecorator ??= $this->timestampValidationLeewayDecoratorMock;
         $metadataPolicyResolver ??= $this->metadataPolicyResolverMock;
@@ -203,7 +202,7 @@ class TrustChainTest extends TestCase
                         'helpdesk@leaf.org',
                     ],
                     'some_claim' => 'something',
-                ]
+                ],
             );
 
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));

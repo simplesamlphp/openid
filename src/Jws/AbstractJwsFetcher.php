@@ -7,7 +7,6 @@ namespace SimpleSAML\OpenID\Jws;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 abstract class AbstractJwsFetcher

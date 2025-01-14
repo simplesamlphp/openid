@@ -20,7 +20,6 @@ use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
-use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;

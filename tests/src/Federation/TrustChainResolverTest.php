@@ -99,7 +99,7 @@ class TrustChainResolverTest extends TestCase
             ->method('fromCacheOrWellKnownEndpoint')
             ->willReturnCallback(
                 fn(string $entityId) =>
-                    $this->configChainSample[$entityId] ?? throw new \Exception('No entity.')
+                    $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'),
             );
 
         $this->leafEntityConfigurationMock

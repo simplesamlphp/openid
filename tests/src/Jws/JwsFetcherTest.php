@@ -6,16 +6,15 @@ namespace SimpleSAML\Test\OpenID\Jws;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;

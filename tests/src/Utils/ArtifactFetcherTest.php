@@ -6,6 +6,7 @@ namespace SimpleSAML\Test\OpenID\Utils;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -14,7 +15,6 @@ use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
-use PHPUnit\Framework\TestCase;
 
 #[CoversClass(ArtifactFetcher::class)]
 class ArtifactFetcherTest extends TestCase

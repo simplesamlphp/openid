@@ -7,11 +7,11 @@ namespace SimpleSAML\Test\OpenID\Federation;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(MetadataPolicyResolver::class)]
@@ -84,7 +84,7 @@ class MetadataPolicyResolverTest extends TestCase
             EntityTypesEnum::OpenIdRelyingParty,
             [
                 $this->trustAnchorMetadataPolicySample,
-                $this->intermediateMetadataPolicySample
+                $this->intermediateMetadataPolicySample,
             ],
         );
 
@@ -98,9 +98,9 @@ class MetadataPolicyResolverTest extends TestCase
                 EntityTypesEnum::FederationEntity,
                 [
                     $this->trustAnchorMetadataPolicySample,
-                    $this->intermediateMetadataPolicySample
+                    $this->intermediateMetadataPolicySample,
                 ],
-            )
+            ),
         );
     }
 

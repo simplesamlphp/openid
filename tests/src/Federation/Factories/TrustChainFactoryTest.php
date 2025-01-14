@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
-use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChainFactory::class)]
 #[UsesClass(TrustChain::class)]

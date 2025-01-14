@@ -14,7 +14,6 @@ use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
-use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;

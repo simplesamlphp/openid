@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\Jws;
 
-use DateInterval;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Helpers;
@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 #[CoversClass(ParsedJws::class)]

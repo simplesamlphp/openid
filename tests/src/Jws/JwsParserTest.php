@@ -8,10 +8,10 @@ use Jose\Component\Signature\JWS;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 #[CoversClass(JwsParser::class)]

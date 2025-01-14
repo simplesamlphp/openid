@@ -10,7 +10,6 @@ use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
-use SimpleSAML\OpenID\Helpers;
 
 class TrustChain implements JsonSerializable
 {

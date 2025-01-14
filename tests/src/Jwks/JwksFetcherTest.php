@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\Jwks;
 
-use HttpRequest;
 use JsonException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -16,13 +16,11 @@ use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\HttpException;
-use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
 
 #[CoversClass(JwksFetcher::class)]
