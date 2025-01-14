@@ -22,7 +22,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             'No keys claim found.',
         );
 
-        if ((!is_array($keys)) || empty($keys)) {
+        if ((!is_array($keys)) || $keys === []) {
             throw new SignedJwksException(
                 sprintf('Unexpected JWKS keys claim format: %s.', var_export($keys, true)),
             );

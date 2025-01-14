@@ -57,7 +57,7 @@ class ParsedJws
             }
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             throw new JwsException('JWS not valid: ' . implode('; ', $errors));
         }
     }

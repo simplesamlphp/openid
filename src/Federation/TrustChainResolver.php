@@ -119,7 +119,7 @@ class TrustChainResolver
         try {
             $entityAuthorityHints = $entityConfig->getAuthorityHints();
 
-            if ((!is_array($entityAuthorityHints)) || empty($entityAuthorityHints)) {
+            if ((!is_array($entityAuthorityHints)) || $entityAuthorityHints === []) {
                 $this->logger?->info('No common trust anchor in this path.', $debugStartInfo);
                 return $configurationChains;
             }
@@ -202,7 +202,7 @@ class TrustChainResolver
             }
         }
 
-        if (!empty($validTrustAnchorIds)) {
+        if ($validTrustAnchorIds !== []) {
             $debugStandardResolveInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
             $this->logger?->debug(
                 'Continuing with standard resolving for remaining valid trust anchor IDs.',
@@ -261,7 +261,7 @@ class TrustChainResolver
             }
         }
 
-        if (empty($resolvedChains)) {
+        if ($resolvedChains === []) {
             $message = 'Could not resolve trust chains or no common trust anchors found.';
             $this->logger?->error($message, $debugStartInfo);
             throw new TrustChainException($message);
@@ -297,11 +297,11 @@ class TrustChainResolver
             $errors[] = 'Empty entity ID.';
         }
 
-        if (empty($validTrustAnchorIds)) {
+        if ($validTrustAnchorIds === []) {
             $errors[] = 'No valid Trust Anchors provided.';
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             $message = 'Validation errors encountered: ' . implode(', ', $errors);
             $this->logger?->error($message);
             throw new TrustChainException($message);

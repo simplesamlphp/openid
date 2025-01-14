@@ -17,7 +17,7 @@ class Url
      */
     public function withParams(string $url, array $params): string
     {
-        if (empty($params)) {
+        if ($params === []) {
             return $url;
         }
 

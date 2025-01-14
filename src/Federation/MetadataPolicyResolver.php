@@ -151,7 +151,7 @@ class MetadataPolicyResolver
                         );
 
                         /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
-                        if (empty($intersection)) {
+                        if ($intersection === []) {
                             throw new MetadataPolicyException(
                                 sprintf(
                                     'Empty intersection encountered for operator %s: %s | %s.',

@@ -140,7 +140,7 @@ class EntityStatement extends ParsedJws
         }
 
         // Its value MUST contain the Entity Identifiers of its Immediate Superiors and MUST NOT be the empty array []
-        if (empty($authorityHints)) {
+        if ($authorityHints === []) {
             throw new EntityStatementException('Empty Authority Hints claim encountered.');
         }
 

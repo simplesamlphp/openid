@@ -131,7 +131,7 @@ class MetadataPolicyApplicator
                         $operatorValue,
                     );
 
-                    if (empty($intersection)) {
+                    if ($intersection === []) {
                         unset($metadata[$policyParameterName]);
                         continue;
                     }

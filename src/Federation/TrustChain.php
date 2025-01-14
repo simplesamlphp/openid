@@ -67,7 +67,7 @@ class TrustChain implements JsonSerializable
      */
     public function isEmpty(): bool
     {
-        return empty($this->entities);
+        return $this->entities === [];
     }
 
     /**
@@ -265,7 +265,7 @@ class TrustChain implements JsonSerializable
      */
     protected function validateIsEmpty(): void
     {
-        if (!empty($this->entities)) {
+        if ($this->entities !== []) {
             throw new TrustChainException('Trust Chain is expected to be empty at this point.');
         }
     }
@@ -275,7 +275,7 @@ class TrustChain implements JsonSerializable
      */
     protected function validateIsNotEmpty(): void
     {
-        if (empty($this->entities)) {
+        if ($this->entities === []) {
             throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
         }
     }
@@ -365,7 +365,7 @@ class TrustChain implements JsonSerializable
     {
         $policy = $entityStatement->getMetadataPolicy() ?? [];
 
-        if (!empty($policy)) {
+        if ($policy !== []) {
             array_unshift($this->metadataPolicies, $policy);
         }
     }
