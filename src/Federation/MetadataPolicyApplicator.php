@@ -16,15 +16,22 @@ class MetadataPolicyApplicator
     ) {
     }
 
+    /**
+     * @param array $resolvedMetadataPolicy Resolved (validated) metadata policy.
+     * @param array $metadata
+     * @return array
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
     public function for(
-        array $metadataPolicy,
+        array $resolvedMetadataPolicy,
         array $metadata,
     ): array {
         /**
          * @var string $policyParameterName
          * @var array<string,mixed> $policyOperations
          */
-        foreach ($metadataPolicy as $policyParameterName => $policyOperations) {
+        foreach ($resolvedMetadataPolicy as $policyParameterName => $policyOperations) {
             foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
                     continue;
