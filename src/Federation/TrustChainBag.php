@@ -24,7 +24,7 @@ class TrustChainBag
         // Order the chains from shortest to longest one.
         usort(
             $this->trustChains,
-            fn(TrustChain $a, TrustChain $b) => $a->getResolvedLength() <=> $b->getResolvedLength(),
+            fn(TrustChain $a, TrustChain $b): int => $a->getResolvedLength() <=> $b->getResolvedLength(),
         );
     }
 

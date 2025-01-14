@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Serializers;
 
+use Jose\Component\Signature\Serializer\JWSSerializer;
+
 class JwsSerializerBag
 {
     /**
@@ -35,7 +37,7 @@ class JwsSerializerBag
     public function getAllInstances(): array
     {
         return array_map(
-            fn(JwsSerializerEnum $jwsSerializerEnum) => $jwsSerializerEnum->instance(),
+            fn(JwsSerializerEnum $jwsSerializerEnum): JWSSerializer => $jwsSerializerEnum->instance(),
             $this->getAll(),
         );
     }
