@@ -55,7 +55,7 @@ class EntityStatementFetcher extends JwsFetcher
         $wellKnownUri = $wellKnownEnum->uriFor($entityId);
         $this->logger?->debug(
             'Entity statement fetch from cache or well-known endpoint.',
-            compact('entityId', 'wellKnownUri', 'wellKnownEnum'),
+            ['entityId' => $entityId, 'wellKnownUri' => $wellKnownUri, 'wellKnownEnum' => $wellKnownEnum],
         );
 
         return $this->fromCacheOrNetwork($wellKnownUri);
@@ -76,7 +76,7 @@ class EntityStatementFetcher extends JwsFetcher
 
         $this->logger?->debug(
             'Entity statement fetch from cache or fetch endpoint.',
-            compact('subjectId', 'fetchEndpointUri'),
+            ['subjectId' => $subjectId, 'fetchEndpointUri' => $fetchEndpointUri],
         );
 
         return $this->fromCacheOrNetwork(
@@ -120,7 +120,7 @@ class EntityStatementFetcher extends JwsFetcher
         $message = 'Unexpected entity statement instance encountered for cache fetch.';
         $this->logger?->error(
             $message,
-            compact('uri', 'entityStatement'),
+            ['uri' => $uri, 'entityStatement' => $entityStatement],
         );
 
         throw new FetchException($message);
@@ -145,7 +145,7 @@ class EntityStatementFetcher extends JwsFetcher
         $message = 'Unexpected entity statement instance encountered for network fetch.';
         $this->logger?->error(
             $message,
-            compact('uri', 'entityStatement'),
+            ['uri' => $uri, 'entityStatement' => $entityStatement],
         );
 
         throw new FetchException($message);

@@ -27,7 +27,7 @@ class ArtifactFetcher
         if (is_null($this->cacheDecorator)) {
             $this->logger?->debug(
                 'Cache instance not available, skipping cache query.',
-                compact('keyElement', 'keyElements'),
+                ['keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return null;
         }
@@ -38,7 +38,7 @@ class ArtifactFetcher
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error trying to get artifact from cache: ' . $exception->getMessage(),
-                compact('keyElement', 'keyElements'),
+                ['keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return null;
         }
@@ -46,7 +46,7 @@ class ArtifactFetcher
         if (is_null($artifact)) {
             $this->logger?->debug(
                 'Artifact not found in cache.',
-                compact('keyElement', 'keyElements'),
+                ['keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return null;
         }
@@ -54,14 +54,14 @@ class ArtifactFetcher
         if (is_string($artifact)) {
             $this->logger?->debug(
                 'Artifact found in cache, returning.',
-                compact('artifact', 'keyElement', 'keyElements'),
+                ['artifact' => $artifact, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return $artifact;
         }
 
         $this->logger?->warning(
             'Unexpected value for cached artifact (expected string).',
-            compact('artifact', 'keyElement', 'keyElements'),
+            ['artifact' => $artifact, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
         );
 
         return null;
@@ -72,7 +72,7 @@ class ArtifactFetcher
      */
     public function fromNetwork(string $uri): ResponseInterface
     {
-        $this->logger?->debug('Fetching artifact on network from URI.', compact('uri'));
+        $this->logger?->debug('Fetching artifact on network from URI.', ['uri' => $uri]);
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
         } catch (Throwable $e) {
@@ -85,7 +85,7 @@ class ArtifactFetcher
             throw new FetchException($message, (int)$e->getCode(), $e);
         }
 
-        $this->logger?->debug('Artifact fetched on network from URI, returning HTTP response.', compact('uri'));
+        $this->logger?->debug('Artifact fetched on network from URI, returning HTTP response.', ['uri' => $uri]);
 
         return $response;
     }
@@ -95,13 +95,13 @@ class ArtifactFetcher
      */
     public function fromNetworkAsString(string $uri): string
     {
-        $this->logger?->debug('Fetching artifact on network from URI (as string).', compact('uri'));
+        $this->logger?->debug('Fetching artifact on network from URI (as string).', ['uri' => $uri]);
 
         $artifact = $this->fromNetwork($uri)->getBody()->getContents();
 
         $this->logger?->debug(
             'Fetched artifact on network from URI as string.',
-            compact('artifact', 'uri'),
+            ['artifact' => $artifact, 'uri' => $uri],
         );
 
         return $artifact;
@@ -112,7 +112,7 @@ class ArtifactFetcher
         if (is_null($this->cacheDecorator)) {
             $this->logger?->debug(
                 'Cache instance not available, skipping caching.',
-                compact('artifact', 'ttl', 'keyElement', 'keyElements'),
+                ['artifact' => $artifact, 'ttl' => $ttl, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return;
         }
@@ -126,12 +126,12 @@ class ArtifactFetcher
             );
             $this->logger?->debug(
                 'Artifact saved to cache.',
-                compact('artifact', 'ttl', 'keyElement', 'keyElements'),
+                ['artifact' => $artifact, 'ttl' => $ttl, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error saving artifact to cache: ' . $exception->getMessage(),
-                compact('artifact', 'ttl', 'keyElement', 'keyElements'),
+                ['artifact' => $artifact, 'ttl' => $ttl, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
         }
     }

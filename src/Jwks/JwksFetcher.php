@@ -41,14 +41,14 @@ class JwksFetcher
             $message = 'Error trying to decode JWKS JSON document: ' . $exception->getMessage();
             $this->logger?->error(
                 'Error trying to decode JWKS JSON document: ' . $exception->getMessage(),
-                compact('jwksJson'),
+                ['jwksJson' => $jwksJson],
             );
             throw new JwksException($message);
         }
 
         if (!is_array($jwks)) {
             $message = sprintf('Unexpected JWKS type: %s.', var_export($jwks, true));
-            $this->logger?->error($message, compact('jwks'));
+            $this->logger?->error($message, ['jwks' => $jwks]);
             throw new JwksException($message);
         }
 
@@ -58,7 +58,7 @@ class JwksFetcher
             empty($jwks[ClaimsEnum::Keys->value])
         ) {
             $message = sprintf('Unexpected JWKS format: %s.', var_export($jwks, true));
-            $this->logger?->error($message, compact('jwks'));
+            $this->logger?->error($message, ['jwks' => $jwks]);
             throw new JwksException($message);
         }
 
@@ -69,7 +69,7 @@ class JwksFetcher
     {
         $this->logger?->debug(
             'Trying to get JWKS document from cache.',
-            compact('uri'),
+            ['uri' => $uri],
         );
 
         try {
@@ -78,19 +78,19 @@ class JwksFetcher
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error trying to get JWKS document from cache: ' . $exception->getMessage(),
-                compact('uri'),
+                ['uri' => $uri],
             );
             return null;
         }
 
         if (!is_string($jwksJson)) {
-            $this->logger?->debug('JWKS JSON not found in cache.', compact('uri'));
+            $this->logger?->debug('JWKS JSON not found in cache.', ['uri' => $uri]);
             return null;
         }
 
         $this->logger?->debug(
             'JWKS JSON found in cache, trying to decode it.',
-            compact('uri', 'jwksJson'),
+            ['uri' => $uri, 'jwksJson' => $jwksJson],
         );
 
         try {
@@ -98,12 +98,12 @@ class JwksFetcher
         } catch (JwksException $exception) {
             $this->logger?->error(
                 'Error trying to decode JWKS JSON: ' . $exception->getMessage(),
-                compact('uri', 'jwksJson'),
+                ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
             return null;
         }
 
-        $this->logger?->debug('JWKS JSON decoded, proceeding to instance building.', compact('uri', 'jwks'));
+        $this->logger?->debug('JWKS JSON decoded, proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
         return $this->jwksFactory->fromKeyData($jwks);
     }
@@ -119,19 +119,19 @@ class JwksFetcher
      */
     public function fromJwksUri(string $uri): ?JwksDecorator
     {
-        $this->logger?->debug('Trying to get JWKS from URI.', compact('uri'));
+        $this->logger?->debug('Trying to get JWKS from URI.', ['uri' => $uri]);
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
         } catch (HttpException $e) {
-            $this->logger?->error('Error trying to get JWKS from URI: ' . $e->getMessage(), compact('uri'));
+            $this->logger?->error('Error trying to get JWKS from URI: ' . $e->getMessage(), ['uri' => $uri]);
             return null;
         }
 
         $jwksJson = $response->getBody()->getContents();
         $this->logger?->info(
             'Successful HTTP response for JWKS URI fetch, trying to decode it.',
-            compact('uri', 'jwksJson'),
+            ['uri' => $uri, 'jwksJson' => $jwksJson],
         );
 
         try {
@@ -139,12 +139,12 @@ class JwksFetcher
         } catch (JwksException $exception) {
             $this->logger?->error(
                 'Error trying to decode JWKS document: ' . $exception->getMessage(),
-                compact('uri', 'jwksJson'),
+                ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
             return null;
         }
 
-        $this->logger?->debug('JWKS JSON decoded, saving it to cache.', compact('uri', 'jwks'));
+        $this->logger?->debug('JWKS JSON decoded, saving it to cache.', ['uri' => $uri, 'jwks' => $jwks]);
 
         try {
             $this->cacheDecorator?->set(
@@ -152,15 +152,15 @@ class JwksFetcher
                 $this->maxCacheDurationDecorator->getInSeconds(),
                 $uri,
             );
-            $this->logger?->debug('JWKS JSON saved to cache.', compact('uri', 'jwks'));
+            $this->logger?->debug('JWKS JSON saved to cache.', ['uri' => $uri, 'jwks' => $jwks]);
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting JWKS JSON to cache: ' . $exception->getMessage(),
-                compact('uri', 'jwksJson'),
+                ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
         }
 
-        $this->logger?->debug('Proceeding to instance building.', compact('uri', 'jwks'));
+        $this->logger?->debug('Proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
         return $this->jwksFactory->fromKeyData($jwks);
     }
@@ -180,31 +180,31 @@ class JwksFetcher
      */
     public function fromSignedJwksUri(string $uri, array $federationJwks): ?JwksDecorator
     {
-        $this->logger?->debug('Trying to get Signed JWKS from URI.', compact('uri'));
+        $this->logger?->debug('Trying to get Signed JWKS from URI.', ['uri' => $uri]);
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
         } catch (HttpException $e) {
-            $this->logger?->error('Error trying to get Signed JWKS from URI: ' . $e->getMessage(), compact('uri'));
+            $this->logger?->error('Error trying to get Signed JWKS from URI: ' . $e->getMessage(), ['uri' => $uri]);
             return null;
         }
 
         $token = $response->getBody()->getContents();
-        $this->logger?->info('Successful HTTP response for Signed JWKS fetch.', compact('uri', 'token'));
+        $this->logger?->info('Successful HTTP response for Signed JWKS fetch.', ['uri' => $uri, 'token' => $token]);
         $this->logger?->debug('Proceeding to Signed JWKS instance building.');
 
         $signedJwks = $this->signedJwksFactory->fromToken($token);
         $this->logger?->debug(
             'Signed JWKS instance built. Trying to verify signature.',
-            compact('uri', 'token'),
+            ['uri' => $uri, 'token' => $token],
         );
 
         $signedJwks->verifyWithKeySet($federationJwks);
-        $this->logger?->debug('Signed JWKS signature verified.', compact('uri', 'token'));
+        $this->logger?->debug('Signed JWKS signature verified.', ['uri' => $uri, 'token' => $token]);
 
         try {
             $jwksJson = $this->helpers->json()->encode($signedJwks->jsonSerialize());
-            $this->logger?->debug('Signed JWKS JSON decoded.', compact('uri', 'jwksJson'));
+            $this->logger?->debug('Signed JWKS JSON decoded.', ['uri' => $uri, 'jwksJson' => $jwksJson]);
             $signedJwksExpirationTime = $signedJwks->getExpirationTime();
             $cacheTtl = is_null($signedJwksExpirationTime) ?
             $this->maxCacheDurationDecorator->getInSeconds() :
@@ -212,12 +212,12 @@ class JwksFetcher
             $this->cacheDecorator?->set($jwksJson, $cacheTtl, $uri);
             $this->logger?->debug(
                 'Signed JWKS JSON successfully cached.',
-                compact('uri', 'jwksJson', 'cacheTtl'),
+                ['uri' => $uri, 'jwksJson' => $jwksJson, 'cacheTtl' => $cacheTtl],
             );
         } catch (Throwable $exception) {
             $this->logger?->error(
                 'Error setting Signed JWKS JSON to cache: ' . $exception->getMessage(),
-                compact('uri'),
+                ['uri' => $uri],
             );
         }
 

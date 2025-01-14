@@ -55,19 +55,19 @@ class JwsFetcher extends AbstractJwsFetcher
     {
         $this->logger?->debug(
             'Trying to get JWS token from cache.',
-            compact('uri'),
+            ['uri' => $uri],
         );
 
         $jws = $this->artifactFetcher->fromCacheAsString($uri);
 
         if (!is_string($jws)) {
-            $this->logger?->debug('JWS token not found in cache.', compact('uri'));
+            $this->logger?->debug('JWS token not found in cache.', ['uri' => $uri]);
             return null;
         }
 
         $this->logger?->debug(
             'JWS token found in cache, trying to build instance.',
-            compact('uri'),
+            ['uri' => $uri],
         );
 
         return $this->buildJwsInstance($jws);
@@ -83,7 +83,7 @@ class JwsFetcher extends AbstractJwsFetcher
     {
         $this->logger?->debug(
             'Trying to fetch JWS token from network.',
-            compact('uri'),
+            ['uri' => $uri],
         );
 
         $response = $this->artifactFetcher->fromNetwork($uri);
@@ -118,11 +118,11 @@ class JwsFetcher extends AbstractJwsFetcher
         }
 
         $token = $response->getBody()->getContents();
-        $this->logger?->debug('Successful HTTP response for JWS fetch.', compact('uri', 'token'));
+        $this->logger?->debug('Successful HTTP response for JWS fetch.', ['uri' => $uri, 'token' => $token]);
         $this->logger?->debug('Proceeding to JWS instance building.');
 
         $jwsInstance = $this->buildJwsInstance($token);
-        $this->logger?->debug('JWS instance built, saving its token to cache.', compact('uri', 'token'));
+        $this->logger?->debug('JWS instance built, saving its token to cache.', ['uri' => $uri, 'token' => $token]);
 
         $cacheTtl = is_int($expirationTime = $jwsInstance->getExpirationTime()) ?
         $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
@@ -132,7 +132,7 @@ class JwsFetcher extends AbstractJwsFetcher
 
         $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri);
 
-        $this->logger?->debug('Returning built JWS instance.', compact('uri', 'token'));
+        $this->logger?->debug('Returning built JWS instance.', ['uri' => $uri, 'token' => $token]);
 
         return $jwsInstance;
     }

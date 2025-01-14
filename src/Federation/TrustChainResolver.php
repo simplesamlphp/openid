@@ -48,7 +48,12 @@ class TrustChainResolver
         int $depth = 1,
     ): array {
         $populatedChainEntityIds = array_keys($populatedChain);
-        $debugStartInfo = compact('depth', 'entityId', 'trustAnchorIds', 'populatedChainEntityIds');
+        $debugStartInfo = [
+            'depth' => $depth,
+            'entityId' => $entityId,
+            'trustAnchorIds' => $trustAnchorIds,
+            'populatedChainEntityIds' => $populatedChainEntityIds,
+        ];
         $this->logger?->debug('Start getting configuration chains.', $debugStartInfo);
 
         $configurationChains = [];
@@ -167,13 +172,13 @@ class TrustChainResolver
     public function for(string $entityId, array $validTrustAnchorIds): TrustChainBag
     {
         $this->validateStart($entityId, $validTrustAnchorIds);
-        $debugStartInfo = compact('entityId', 'validTrustAnchorIds');
+        $debugStartInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
         $this->logger?->debug('Trust chain resolving started.', $debugStartInfo);
 
         $resolvedChains = [];
 
         foreach ($validTrustAnchorIds as $index => $validTrustAnchorId) {
-            $debugCacheQueryInfo = compact('entityId', 'validTrustAnchorId');
+            $debugCacheQueryInfo = ['entityId' => $entityId, 'validTrustAnchorId' => $validTrustAnchorId];
             $this->logger?->debug('Checking if the trust chain exists in cache.', $debugCacheQueryInfo);
             try {
                 /** @var ?string[] $tokens */
@@ -198,10 +203,10 @@ class TrustChainResolver
         }
 
         if (!empty($validTrustAnchorIds)) {
-            $debugStandardResolveInfo = compact('entityId', 'validTrustAnchorIds');
+            $debugStandardResolveInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
             $this->logger?->debug(
                 'Continuing with standard resolving for remaining valid trust anchor IDs.',
-                compact('entityId', 'validTrustAnchorIds'),
+                ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds],
             );
 
             $this->logger?->debug('Start fetching all configuration chains.', $debugStandardResolveInfo);
