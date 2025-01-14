@@ -18,7 +18,6 @@ class MetadataPolicyApplicator
 
     /**
      * @param array $resolvedMetadataPolicy Resolved (validated) metadata policy.
-     * @return array
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */

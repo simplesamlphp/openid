@@ -266,9 +266,6 @@ class Federation
         return $this->supportedAlgorithms;
     }
 
-    /**
-     * @return \SimpleSAML\OpenID\SupportedSerializers
-     */
     public function supportedSerializers(): SupportedSerializers
     {
         return $this->supportedSerializers;

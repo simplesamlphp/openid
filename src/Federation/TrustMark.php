@@ -42,7 +42,6 @@ class TrustMark extends ParsedJws
     }
 
     /**
-     * @return int
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      */

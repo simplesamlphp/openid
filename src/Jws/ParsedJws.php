@@ -107,7 +107,6 @@ class ParsedJws
 
     /**
      * @param non-empty-string $key
-     * @return mixed
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getHeaderClaim(string $key): mixed

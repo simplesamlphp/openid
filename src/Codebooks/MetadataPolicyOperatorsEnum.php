@@ -234,7 +234,6 @@ enum MetadataPolicyOperatorsEnum: string
     /**
      * Validate general parameter operation rules like operator combinations and operator value type.
      *
-     * @return void
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
     public static function validateGeneralParameterOperationRules(array $parameterOperations): void

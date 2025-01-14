@@ -16,9 +16,6 @@ class SupportedSerializers
     ) {
     }
 
-    /**
-     * @return \SimpleSAML\OpenID\Serializers\JwsSerializerBag
-     */
     public function getJwsSerializerBag(): JwsSerializerBag
     {
         return $this->jwsSerializerBag;

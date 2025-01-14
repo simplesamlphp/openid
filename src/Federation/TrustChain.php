@@ -64,8 +64,6 @@ class TrustChain implements JsonSerializable
 
     /**
      * Check if the trust chain is (currently) empty, meaning there are no entity statements present in the chain.
-     *
-     * @return bool
      */
     public function isEmpty(): bool
     {
@@ -146,7 +144,6 @@ class TrustChain implements JsonSerializable
     /**
      * Get resolved chain length.
      *
-     * @return int
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
     public function getResolvedLength(): int

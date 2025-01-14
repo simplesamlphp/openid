@@ -161,7 +161,6 @@ class TrustChainResolver
      *
      * @param non-empty-string $entityId ID of the leaf (subject) entity for which to resolve the trust chain.
      * @param non-empty-array<non-empty-string> $validTrustAnchorIds IDs of the valid trust anchors.
-     * @return \SimpleSAML\OpenID\Federation\TrustChainBag
      *
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */

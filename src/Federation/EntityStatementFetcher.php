@@ -45,7 +45,6 @@ class EntityStatementFetcher extends JwsFetcher
      * Fetch will first check if the entity statement is available in cache. If not, it will do a network fetch.
      *
      * @param non-empty-string $entityId
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -65,7 +64,6 @@ class EntityStatementFetcher extends JwsFetcher
     /**
      * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the fetch
      * endpoint (issuer).
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
@@ -103,7 +101,6 @@ class EntityStatementFetcher extends JwsFetcher
     /**
      * Fetch entity statement from cache, if available. URI is used as cache key.
      *
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement|null
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
