@@ -34,6 +34,7 @@ class JwksFetcherTest extends TestCase
     protected MockObject $cacheDecoratorMock;
     protected MockObject $loggerMock;
     protected MockObject $jsonHelperMock;
+    protected MockObject $arrHelperMock;
 
     protected MockObject $responseMock;
     protected MockObject $responseBodyMock;
@@ -66,6 +67,9 @@ class JwksFetcherTest extends TestCase
 
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
+
+        $this->arrHelperMock = $this->createMock(Helpers\Arr::class);
+        $this->helpersMock->method('arr')->willReturn($this->arrHelperMock);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
         $this->responseBodyMock = $this->createMock(StreamInterface::class);
@@ -115,6 +119,8 @@ class JwksFetcherTest extends TestCase
         $this->jsonHelperMock->expects($this->once())->method('decode')
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
+        $this->arrHelperMock->expects($this->once())->method('ensureStringKeys')
+            ->willReturnArgument(0);
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
@@ -204,6 +210,9 @@ class JwksFetcherTest extends TestCase
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
 
+        $this->arrHelperMock->expects($this->once())->method('ensureStringKeys')
+            ->willReturnArgument(0);
+
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
@@ -257,6 +266,9 @@ class JwksFetcherTest extends TestCase
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
 
+        $this->arrHelperMock->expects($this->once())->method('ensureStringKeys')
+            ->willReturnArgument(0);
+
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
@@ -288,6 +300,9 @@ class JwksFetcherTest extends TestCase
         $this->jsonHelperMock->expects($this->once())->method('decode')
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
+
+        $this->arrHelperMock->expects($this->once())->method('ensureStringKeys')
+            ->willReturnArgument(0);
 
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);

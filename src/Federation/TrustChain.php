@@ -36,7 +36,7 @@ class TrustChain implements JsonSerializable
      * issued by the most Superior Entity and ends with the Subordinate Statement issued by the Immediate Superior
      * of the Trust Chain subject.
      *
-     * @var array[]
+     * @var array<array<string,array<string,array<string,mixed>>>>
      */
     protected array $metadataPolicies = [];
 
@@ -359,10 +359,13 @@ class TrustChain implements JsonSerializable
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
     protected function gatherMetadataPolicies(EntityStatement $entityStatement): void
     {
-        $policy = $entityStatement->getMetadataPolicy() ?? [];
+        $policy = $this->metadataPolicyResolver->ensureFormat(
+            $entityStatement->getMetadataPolicy() ?? [],
+        );
 
         if ($policy !== []) {
             array_unshift($this->metadataPolicies, $policy);

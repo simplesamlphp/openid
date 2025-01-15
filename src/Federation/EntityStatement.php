@@ -227,6 +227,7 @@ class EntityStatement extends ParsedJws
 
         /** @psalm-suppress MixedAssignment */
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
+            $trustMarkClaimData = $this->helpers->arr()->ensureStringKeys($trustMarkClaimData);
             $trustMarkClaimBag->add($this->trustMarkClaimFactory->buildFrom($trustMarkClaimData));
         }
 

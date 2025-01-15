@@ -20,11 +20,17 @@ enum MetadataPolicyOperatorsEnum: string
     case SupersetOf = 'superset_of';
     case Essential = 'essential';
 
+    /**
+     * @return string[]
+     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
+    /**
+     * @return string[]
+     */
     public function getSupportedOperatorValueTypes(): array
     {
         return match ($this) {
@@ -54,6 +60,9 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+    /**
+     * @return string[]
+     */
     public function getSupportedParameterValueTypes(): array
     {
         return match ($this) {
@@ -79,6 +88,7 @@ enum MetadataPolicyOperatorsEnum: string
     }
 
     /**
+     * @return string[]
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
     public function getSupportedOperatorContainedValueTypes(): array
@@ -96,6 +106,7 @@ enum MetadataPolicyOperatorsEnum: string
     }
 
     /**
+     * @return string[]
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
     public function getSupportedParameterContainedValueTypes(): array
@@ -113,6 +124,9 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+    /**
+     * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
+     */
     public function isValueSubsetOf(mixed $value, array $superset): bool
     {
         $value = is_array($value) ? $value : [$value];
@@ -120,6 +134,9 @@ enum MetadataPolicyOperatorsEnum: string
         return array_diff($value, $superset) === [];
     }
 
+    /**
+     * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
+     */
     public function isValueSupersetOf(mixed $value, array $subset): bool
     {
         $value = is_array($value) ? $value : [$value];
@@ -178,6 +195,9 @@ enum MetadataPolicyOperatorsEnum: string
         return true;
     }
 
+    /**
+     * @return string[]
+     */
     public function getSupportedOperatorCombinations(): array
     {
         return [
@@ -226,6 +246,9 @@ enum MetadataPolicyOperatorsEnum: string
         ];
     }
 
+    /**
+     * @param string[] $operatorKeys
+     */
     public function isOperatorCombinationSupported(array $operatorKeys): bool
     {
         return array_diff($operatorKeys, $this->getSupportedOperatorCombinations()) === [];
@@ -233,6 +256,8 @@ enum MetadataPolicyOperatorsEnum: string
 
     /**
      * Validate general parameter operation rules like operator combinations and operator value type.
+     *
+     * @param array<string,mixed> $parameterOperations
      *
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */

@@ -131,6 +131,19 @@ class TrustChainTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testThrowsForInvalidExpirationTime(): void
+    {
+        $leafMock = $this->createMock(EntityStatement::class);
+        $leafMock->method('isConfiguration')->willReturn(true);
+        $leafMock->method('getExpirationTime')->willReturn(time() - 60);
+
+        $this->expectException(TrustChainException::class);
+        $this->expectExceptionMessage('expiration');
+
+        $sut = $this->sut();
+        $sut->addLeaf($leafMock);
+    }
+
     public function testThrowsForNonResolvedState(): void
     {
         $this->expectException(TrustChainException::class);
@@ -181,11 +194,9 @@ class TrustChainTest extends TestCase
         $this->subordinateMock->expects($this->once())->method('getMetadataPolicy')
             ->willReturn($subordinateMetadataPolicy);
 
-
-        $sut = $this->sut();
-        $sut->addLeaf($this->leafMock);
-        $sut->addSubordinate($this->subordinateMock);
-        $sut->addTrustAnchor($this->trustAnchorMock);
+        $this->metadataPolicyResolverMock->expects($this->once())->method('ensureFormat')
+            ->with($subordinateMetadataPolicy)
+            ->willReturn($subordinateMetadataPolicy);
 
         $this->metadataPolicyResolverMock->expects($this->once())->method('for')
             ->with(
@@ -203,10 +214,75 @@ class TrustChainTest extends TestCase
                     ],
                     'some_claim' => 'something',
                 ],
-            );
+            ); // I don't return value, as it is not important to check it here...
+
+        $sut = $this->sut();
+        $sut->addLeaf($this->leafMock);
+        $sut->addSubordinate($this->subordinateMock);
+        $sut->addTrustAnchor($this->trustAnchorMock);
+
+        // I'm only interested if all the calls are made as intended.
+        $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
+        // Validate that we only resolve metadata once.
+        $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
+    }
+
+    public function testCanGetResolvedMetadataIfNoPoliciesAreDefined(): void
+    {
+        $leafMetadata = [
+            'openid_relying_party' => [
+                'contacts' => [
+                    'helpdesk@leaf.org',
+                ],
+            ],
+        ];
+        $this->leafMock->expects($this->once())->method('getMetadata')
+            ->willReturn($leafMetadata);
+
+
+        $this->subordinateMock->expects($this->once())->method('getMetadata')
+            ->willReturn(null);
+        $this->subordinateMock->expects($this->once())->method('getMetadataPolicy')
+            ->willReturn(null);
+
+        $this->metadataPolicyApplicatorMock->expects($this->never())->method('for');
+
+        $sut = $this->sut();
+        $sut->addLeaf($this->leafMock);
+        $sut->addSubordinate($this->subordinateMock);
+        $sut->addTrustAnchor($this->trustAnchorMock);
 
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
         // Validate that we only resolve metadata once.
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
+    }
+
+    public function testThrowsOnAttemtpToAddMultipleLeafs(): void
+    {
+        $this->expectException(TrustChainException::class);
+        $this->expectExceptionMessage('empty');
+
+        $sut = $this->sut();
+        $sut->addLeaf($this->leafMock);
+        $sut->addLeaf($this->leafMock);
+    }
+
+    public function testThrowsOnAttemtpToAddSubodrinateWithoutLeaf(): void
+    {
+        $this->expectException(TrustChainException::class);
+        $this->expectExceptionMessage('non-empty');
+
+        $sut = $this->sut();
+        $sut->addSubordinate($this->subordinateMock);
+    }
+
+    public function testThrowsOnAttemtpToAddTrustAnchorWithoutSubordinate(): void
+    {
+        $this->expectException(TrustChainException::class);
+        $this->expectExceptionMessage('at least');
+
+        $sut = $this->sut();
+        $sut->addLeaf($this->leafMock);
+        $sut->addTrustAnchor($this->trustAnchorMock);
     }
 }

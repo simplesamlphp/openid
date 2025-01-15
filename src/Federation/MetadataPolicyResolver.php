@@ -17,7 +17,43 @@ class MetadataPolicyResolver
     }
 
     /**
-     * @param array[] $metadataPolicies
+     * @return array<string,array<string,array<string,mixed>>>
+     * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
+     * @psalm-suppress MixedAssignment
+     */
+    public function ensureFormat(array $metadataPolicies): array
+    {
+        foreach ($metadataPolicies as $entityType => $metadataPolicyEntityType) {
+            if (!is_string($entityType)) {
+                throw new MetadataPolicyException('Invalid metadata policy format (entity type key).');
+            }
+            if (!is_array($metadataPolicyEntityType)) {
+                throw new MetadataPolicyException('Invalid metadata policy format (entity type value).');
+            }
+
+            foreach ($metadataPolicyEntityType as $parameter => $metadataPolicyParameter) {
+                if (!is_string($parameter)) {
+                    throw new MetadataPolicyException('Invalid metadata policy format (parameter key).');
+                }
+                if (!is_array($metadataPolicyParameter)) {
+                    throw new MetadataPolicyException('Invalid metadata policy format (parameter value).');
+                }
+
+                $operators = array_keys($metadataPolicyParameter);
+                foreach ($operators as $operator) {
+                    if (!is_string($operator)) {
+                        throw new MetadataPolicyException('Invalid metadata policy format (operator key).');
+                    }
+                }
+            }
+        }
+
+        /** @var array<string,array<string,array<string,mixed>>> $metadataPolicies */
+        return $metadataPolicies;
+    }
+
+    /**
+     * @param array<array<string,array<string,array<string,mixed>>>> $metadataPolicies
      * @param string[] $criticalMetadataPolicyOperators
      *
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
@@ -28,6 +64,7 @@ class MetadataPolicyResolver
         array $metadataPolicies,
         array $criticalMetadataPolicyOperators = [],
     ): array {
+        /** @var array<string,array<string,mixed>> $currentPolicy */
         $currentPolicy = [];
         $supportedOperators = MetadataPolicyOperatorsEnum::values();
 
@@ -63,15 +100,6 @@ class MetadataPolicyResolver
             // Go over each metadata parameter and resolve the policy.
             /** @psalm-suppress MixedAssignment We'll check if $nextPolicyParameterOperations is array type. */
             foreach ($nextPolicy as $nextPolicyParameter => $nextPolicyParameterOperations) {
-                if (!is_array($nextPolicyParameterOperations)) {
-                    throw new MetadataPolicyException(
-                        sprintf(
-                            'Invalid format for metadata policy operations encountered: %s',
-                            var_export($nextPolicyParameterOperations, true),
-                        ),
-                    );
-                }
-
                 MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules($nextPolicyParameterOperations);
                 MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules($nextPolicyParameterOperations);
 
@@ -194,7 +222,7 @@ class MetadataPolicyResolver
                 }
 
                 // Check if the current policy is in valid state after merge.
-                /** @var array $currentPolicyParameterOperations We ensured this is array. */
+                /** @var array<string,array<string,mixed>> $currentPolicy */
                 foreach ($currentPolicy as $currentPolicyParameterOperations) {
                     MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules(
                         $currentPolicyParameterOperations,

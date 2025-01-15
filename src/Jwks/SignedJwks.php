@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 class SignedJwks extends ParsedJws implements JsonSerializable
 {
     /**
+     * @return array<array<string,mixed>>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
      */
@@ -28,7 +29,10 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             );
         }
 
-        return $keys;
+        return array_map(
+            $this->helpers->arr()->ensureStringKeys(...),
+            $keys,
+        );
     }
 
     /**
@@ -82,6 +86,11 @@ class SignedJwks extends ParsedJws implements JsonSerializable
         );
     }
 
+    /**
+     * @return array{keys: array<array<string, mixed>>}
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
+     */
     public function jsonSerialize(): array
     {
         return [ClaimsEnum::Keys->value => $this->getKeys()];

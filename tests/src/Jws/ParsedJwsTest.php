@@ -373,4 +373,28 @@ class ParsedJwsTest extends TestCase
 
         $this->sut()->verifyWithKeySet(['jwks']);
     }
+
+    public function testThrowsIfExpired(): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn($this->expiredPayload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Expiration');
+
+        $this->sut()->getExpirationTime();
+    }
+
+    public function testThrowsIfIssuedAtInTheFuture(): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $payload = $this->validPayload;
+        $payload['iat'] = time() + 60;
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Issued At');
+
+        $this->sut()->getIssuedAt();
+    }
 }

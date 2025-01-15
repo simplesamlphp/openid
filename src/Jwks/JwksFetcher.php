@@ -31,6 +31,7 @@ class JwksFetcher
     }
 
     /**
+     * @return array{keys:array <string,mixed>}
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      */
     protected function decodeJwksJson(string $jwksJson): array
@@ -62,6 +63,8 @@ class JwksFetcher
             throw new JwksException($message);
         }
 
+        $jwks[ClaimsEnum::Keys->value] = $this->helpers->arr()->ensureStringKeys($jwks[ClaimsEnum::Keys->value]);
+        /** @var array{keys:array<string,mixed>} $jwks */
         return $jwks;
     }
 
@@ -167,6 +170,7 @@ class JwksFetcher
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
      */
     public function fromCacheOrSignedJwksUri(string $uri, array $federationJwks): ?JwksDecorator
     {
@@ -177,6 +181,7 @@ class JwksFetcher
      * @param string $uri URI from which to fetch SignedJwks statement.
      * @param array $federationJwks Federation JWKS which will be used to check signature on SignedJwks statement.
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
      */
     public function fromSignedJwksUri(string $uri, array $federationJwks): ?JwksDecorator
     {

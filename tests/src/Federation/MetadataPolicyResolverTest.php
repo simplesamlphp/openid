@@ -156,4 +156,92 @@ class MetadataPolicyResolverTest extends TestCase
 
         $this->assertTrue($metadataPolicy['token_endpoint_auth_method']['essential']);
     }
+
+    public function testThrowsForUnsupportedCriticalOperator(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('critical');
+
+        $trustAnchorMetadataPolicy = $this->trustAnchorMetadataPolicySample;
+        $trustAnchorMetadataPolicy['openid_relying_party']['some_parameter']['critical_operator'] = true;
+
+
+        $this->sut()->for(
+            EntityTypesEnum::OpenIdRelyingParty,
+            [
+                $trustAnchorMetadataPolicy,
+            ],
+            ['critical_operator'],
+        );
+    }
+
+    public function testThrowsForEmptyIntersectionForSubsetOf(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('intersection');
+
+        $intermediateMetadataPolicy = $this->intermediateMetadataPolicySample;
+        $intermediateMetadataPolicy['openid_relying_party']['grant_types']['subset_of'] = ['invalid'];
+
+        $this->sut()->for(
+            EntityTypesEnum::OpenIdRelyingParty,
+            [
+                $this->trustAnchorMetadataPolicySample,
+                $intermediateMetadataPolicy,
+            ],
+        );
+    }
+
+    public function testCanEnsureFormat(): void
+    {
+        $this->assertSame(
+            $this->intermediateMetadataPolicySample,
+            $this->sut()->ensureFormat($this->intermediateMetadataPolicySample),
+        );
+    }
+
+    public function testEnsureFormatThrowsOnNonStringForEntityTypeKey(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('entity type');
+
+        $policy = ['a'];
+        $this->sut()->ensureFormat($policy);
+    }
+
+    public function testEnsureFormatThrowsOnNonSArrayForEntityTypeValue(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('entity type');
+
+        $policy = ['a' => 'b'];
+        $this->sut()->ensureFormat($policy);
+    }
+
+    public function testEnsureFormatThrowsOnNonStringForParameterKey(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('parameter');
+
+        $policy = ['a' => ['b']];
+        $this->sut()->ensureFormat($policy);
+    }
+
+    public function testEnsureFormatThrowsOnNonStringForParameterValue(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('parameter');
+
+        $policy = ['a' => ['b' => 'c']];
+        $this->sut()->ensureFormat($policy);
+    }
+
+    public function testEnsureFormatThrowsOnNonStringForOperatorKey(): void
+    {
+        $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('operator');
+
+        $policy = ['a' => ['b' => ['c']]];
+        $this->sut()->ensureFormat($policy);
+    }
 }

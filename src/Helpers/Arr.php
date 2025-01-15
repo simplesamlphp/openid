@@ -27,4 +27,15 @@ class Arr
 
         $this->ensureArrayDepth($array[$key], ...$keys);
     }
+
+    /**
+     * @return array<string,mixed>
+     */
+    public function ensureStringKeys(array $array): array
+    {
+        return array_combine(
+            array_map('strval', array_keys($array)),
+            $array,
+        );
+    }
 }

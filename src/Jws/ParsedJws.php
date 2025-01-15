@@ -22,6 +22,9 @@ class ParsedJws
      * @var array<string,mixed>
      */
     protected ?array $header = null;
+    /**
+     * @var array<string,mixed>
+     */
     protected ?array $payload = null;
 
     protected ?string $token = null;
@@ -80,6 +83,7 @@ class ParsedJws
 
     /**
      * @return non-empty-string[]
+     * @phpstan-ignore missingType.iterableValue (We cast everything to string)
      */
     protected function ensureNonEmptyStrings(array $values, string $description): array
     {
@@ -135,6 +139,7 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return array<string,mixed>
      */
     public function getPayload(): array
     {
@@ -143,13 +148,12 @@ class ParsedJws
         }
 
         $payloadString = $this->jws->getPayload();
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
         if ($payloadString === null || $payloadString === '' || $payloadString === '0') {
             return $this->payload = [];
         }
 
         try {
-            /** @var ?array $payload */
+            /** @var ?array<string,mixed> $payload */
             $payload = $this->helpers->json()->decode($payloadString);
             return $this->payload = is_array($payload) ? $payload : [];
         } catch (JsonException $exception) {
@@ -159,6 +163,7 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
      */
     public function verifyWithKeySet(array $jwks, int $signatureIndex = 0): void
     {
