@@ -69,7 +69,6 @@ class SignedJwks extends ParsedJws implements JsonSerializable
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
      */
     protected function validate(): void
     {
