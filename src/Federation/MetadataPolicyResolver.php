@@ -20,6 +20,7 @@ class MetadataPolicyResolver
      * @return array<string,array<string,array<string,mixed>>>
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      * @psalm-suppress MixedAssignment
+     * @phpstan-ignore missingType.iterableValue (We validate it here)
      */
     public function ensureFormat(array $metadataPolicies): array
     {
@@ -55,7 +56,7 @@ class MetadataPolicyResolver
     /**
      * @param array<array<string,array<string,array<string,mixed>>>> $metadataPolicies
      * @param string[] $criticalMetadataPolicyOperators
-     *
+     * @return array<string,array<string,mixed>>
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
@@ -72,6 +73,7 @@ class MetadataPolicyResolver
             /** @psalm-suppress MixedAssignment We'll check if $nextPolicy is array type. */
             if (
                 (!array_key_exists($entityTypeEnum->value, $metadataPolicy)) ||
+                /** @phpstan-ignore booleanNot.alwaysFalse (Let's check for validity here.) */
                 (!is_array($nextPolicy = $metadataPolicy[$entityTypeEnum->value]))
             ) {
                 continue;

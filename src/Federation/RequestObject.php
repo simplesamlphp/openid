@@ -66,20 +66,22 @@ class RequestObject extends ParsedJws
     }
 
     /**
+     * @return ?string[]
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
      */
     public function getTrustChain(): ?array
     {
+        $claimKey = ClaimsEnum::TrustChain->value;
         /** @psalm-suppress MixedAssignment */
-        $trustChain = $this->getPayloadClaim(ClaimsEnum::TrustChain->value) ?? null;
+        $trustChain = $this->getPayloadClaim($claimKey) ?? null;
 
         if (is_null($trustChain)) {
             return null;
         }
 
         if (is_array($trustChain)) {
-            return $trustChain;
+            return $this->ensureNonEmptyStrings($trustChain, $claimKey);
         }
 
         throw new RequestObjectException(

@@ -299,6 +299,7 @@ enum MetadataPolicyOperatorsEnum: string
     }
 
     /**
+     * @param array<string,mixed> $parameterOperations
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
     public static function validateSpecificParameterOperationRules(array $parameterOperations): void
@@ -316,13 +317,13 @@ enum MetadataPolicyOperatorsEnum: string
 
             // No special resolving rules for operator 'value', continue with 'add'.
             if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {
-                /** @var array $operatorValue We ensured this is array. */
+                /** @var array<mixed> $operatorValue We ensured this is array. */
                 // If add is combined with subset_of, the values of add MUST be a subset of the values of
                 // subset_of.
                 if (
                     in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array $superset We ensured this is array. */
+                    /** @var array<mixed> $superset We ensured this is array. */
                     $superset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SubsetOf->value
                     ];
@@ -346,7 +347,7 @@ enum MetadataPolicyOperatorsEnum: string
                         true,
                     )
                 ) {
-                    /** @var array $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is array. */
                     $subset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SupersetOf->value
                     ];
@@ -366,7 +367,7 @@ enum MetadataPolicyOperatorsEnum: string
                 if (
                     in_array(MetadataPolicyOperatorsEnum::OneOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array $superset We ensured this is array. */
+                    /** @var array<mixed> $superset We ensured this is array. */
                     $superset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::OneOf->value
                     ];
@@ -386,7 +387,7 @@ enum MetadataPolicyOperatorsEnum: string
                 if (
                     in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array $superset We ensured this is array. */
+                    /** @var array<mixed> $superset We ensured this is array. */
                     $superset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SubsetOf->value
                     ];
@@ -410,7 +411,7 @@ enum MetadataPolicyOperatorsEnum: string
                         true,
                     )
                 ) {
-                    /** @var array $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is array. */
                     $subset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SupersetOf->value
                     ];
@@ -440,7 +441,7 @@ enum MetadataPolicyOperatorsEnum: string
                         true,
                     )
                 ) {
-                    /** @var array $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is array. */
                     $subset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SupersetOf->value
                     ];

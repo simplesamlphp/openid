@@ -81,7 +81,7 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @return array[]
+     * @return array{keys:array<array<string,mixed>>}
      * @psalm-suppress MixedReturnTypeCoercion
      */
     public function getJwks(): array
@@ -98,6 +98,12 @@ class EntityStatement extends ParsedJws
             throw new JwsException('Invalid JWKS encountered: ' . var_export($jwks, true));
         }
 
+        $jwks[ClaimsEnum::Keys->value] = array_map(
+            $this->helpers->arr()->ensureStringKeys(...),
+            $jwks[ClaimsEnum::Keys->value],
+        );
+
+        /** @var array{keys:array<array<string,mixed>>} $jwks */
         return $jwks;
     }
 
@@ -153,6 +159,7 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @return ?array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
@@ -172,12 +179,13 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Invalid Metadata claim.');
         }
 
-        return $metadata;
+        return $this->helpers->arr()->ensureStringKeys($metadata);
     }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @phpstan-ignore missingType.iterableValue (We will ensure proper format in policy resolver.)
      */
     public function getMetadataPolicy(): ?array
     {
@@ -273,6 +281,7 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (Format is validated later.)
      */
     public function verifyWithKeySet(?array $jwks = null, int $signatureIndex = 0): void
     {

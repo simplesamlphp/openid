@@ -43,14 +43,14 @@ class TrustChain implements JsonSerializable
     /**
      * Resolved metadata policy per entity type.
      *
-     * @var array[]
+     * @var array<string,array<string,array<string,mixed>>>
      */
     protected array $resolvedMetadataPolicy = [];
 
     /**
      * Resolved metadata (after applying resolved policy) per entity type.
      *
-     * @var array<string,null|array>
+     * @var array<string,null|array<string,mixed>>
      */
     protected array $resolvedMetadata = [];
 
@@ -122,6 +122,7 @@ class TrustChain implements JsonSerializable
     }
 
     /**
+     * @return ?array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
@@ -433,17 +434,22 @@ class TrustChain implements JsonSerializable
         // to it.
         /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (empty($this->resolvedMetadataPolicy[$entityTypeEnum->value])) {
+            /** @var array<string,mixed> $leafMetadataEntityType */
             $this->resolvedMetadata[$entityTypeEnum->value] = $leafMetadataEntityType;
             return;
         }
 
         // Policy application to leaf metadata.
+        /** @var array<string,mixed> $leafMetadataEntityType */
         $this->resolvedMetadata[$entityTypeEnum->value] = $this->metadataPolicyApplicator->for(
             $this->resolvedMetadataPolicy[$entityTypeEnum->value],
             $leafMetadataEntityType,
         );
     }
 
+    /**
+     * @return \SimpleSAML\OpenID\Federation\EntityStatement[]
+     */
     public function getEntities(): array
     {
         return $this->entities;

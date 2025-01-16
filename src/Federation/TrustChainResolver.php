@@ -288,6 +288,7 @@ class TrustChainResolver
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @phpstan-ignore missingType.iterableValue (We validate it here)
      */
     protected function validateStart(string $entityId, array $validTrustAnchorIds): void
     {

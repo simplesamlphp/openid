@@ -59,6 +59,9 @@ class TrustMarkClaim
         return $this->trustMark;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getOtherClaims(): array
     {
         return $this->otherClaims;

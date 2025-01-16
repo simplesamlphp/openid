@@ -8,6 +8,9 @@ use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
 class Arr
 {
+    /**
+     * @phpstan-ignore missingType.iterableValue (We can handle mixed type)
+     */
     public function ensureArrayDepth(array &$array, int|string ...$keys): void
     {
         if (count($keys) > 99) {
@@ -30,6 +33,7 @@ class Arr
 
     /**
      * @return array<string,mixed>
+     * @phpstan-ignore missingType.iterableValue (We can handle mixed type)
      */
     public function ensureStringKeys(array $array): array
     {

@@ -17,7 +17,9 @@ class MetadataPolicyApplicator
     }
 
     /**
-     * @param array $resolvedMetadataPolicy Resolved (validated) metadata policy.
+     * @param array<string,array<string,mixed>> $resolvedMetadataPolicy Resolved (validated) metadata policy.
+     * @param array<string,mixed> $metadata
+     * @return array<string,mixed> Metadata with applied policies.
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
@@ -25,10 +27,6 @@ class MetadataPolicyApplicator
         array $resolvedMetadataPolicy,
         array $metadata,
     ): array {
-        /**
-         * @var string $policyParameterName
-         * @var array<string,mixed> $policyOperations
-         */
         foreach ($resolvedMetadataPolicy as $policyParameterName => $policyOperations) {
             foreach (MetadataPolicyOperatorsEnum::cases() as $metadataPolicyOperatorEnum) {
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
@@ -36,7 +34,7 @@ class MetadataPolicyApplicator
                 }
                 /** @psalm-suppress MixedAssignment */
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
-                /** @psalm-suppress MixedAssignment */
+                /** @psalm-suppress MixedAssignment, MixedArgumentTypeCoercion */
                 $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
                     $metadata,
                     $policyParameterName,
@@ -99,7 +97,7 @@ class MetadataPolicyApplicator
                         $policyParameterName,
                     );
 
-                    /** @var array $operatorValue */
+                    /** @var array<mixed> $operatorValue Set bc of phpstan */
                     if (!in_array($metadataParameterValueBeforePolicy, $operatorValue, true)) {
                         throw new MetadataPolicyException(
                             sprintf(
@@ -152,7 +150,7 @@ class MetadataPolicyApplicator
                         $policyParameterName,
                     );
 
-                    /** @var array $operatorValue */
+                    /** @var array<mixed> $operatorValue  Set bc of phpstan */
                     if (
                         !$metadataPolicyOperatorEnum->isValueSupersetOf(
                             $metadataParameterValueBeforePolicy,
@@ -190,9 +188,13 @@ class MetadataPolicyApplicator
             }
         }
 
+        /** @var array<string,mixed> $metadata */
         return $metadata;
     }
 
+    /**
+     * @param array<string,mixed> $metadata
+     */
     protected function resolveParameterValueBeforePolicy(array $metadata, string $parameter): mixed
     {
         /** @psalm-suppress MixedAssignment */

@@ -20,6 +20,10 @@ class JwksDecorator implements JsonSerializable
         return $this->jwks;
     }
 
+    /**
+     * @return array{keys:array<array<string,mixed>>}
+     * @psalm-suppress MixedReturnTypeCoercion, MixedReturnTypeCoercion
+     */
     public function jsonSerialize(): array
     {
         return [

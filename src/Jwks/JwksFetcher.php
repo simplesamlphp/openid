@@ -31,7 +31,7 @@ class JwksFetcher
     }
 
     /**
-     * @return array{keys:array <string,mixed>}
+     * @return array{keys:array<array<string,mixed>>}
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      */
     protected function decodeJwksJson(string $jwksJson): array
@@ -63,8 +63,12 @@ class JwksFetcher
             throw new JwksException($message);
         }
 
-        $jwks[ClaimsEnum::Keys->value] = $this->helpers->arr()->ensureStringKeys($jwks[ClaimsEnum::Keys->value]);
-        /** @var array{keys:array<string,mixed>} $jwks */
+        $jwks[ClaimsEnum::Keys->value] = array_map(
+            $this->helpers->arr()->ensureStringKeys(...),
+            $jwks[ClaimsEnum::Keys->value],
+        );
+
+        /** @var array{keys:array<array<string,mixed>>} $jwks */
         return $jwks;
     }
 
