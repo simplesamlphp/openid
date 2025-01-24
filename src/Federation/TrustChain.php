@@ -317,6 +317,11 @@ class TrustChain implements JsonSerializable
 
         // Check if the subject is the issuer of the last statement in the chain.
         $previousStatement = end($this->entities);
+
+        if (!($previousStatement instanceof EntityStatement)) {
+            throw new EntityStatementException('Unexpected statement value');
+        }
+
         reset($this->entities);
         if ($entityStatement->getSubject() !== $previousStatement->getIssuer()) {
             throw new EntityStatementException(
