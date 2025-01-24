@@ -27,19 +27,24 @@ use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
+use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(Federation::class)]
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(EntityStatementFetcher::class)]
 #[UsesClass(MetadataPolicyResolver::class)]
+#[UsesClass(MetadataPolicyApplicator::class)]
 #[UsesClass(TrustChainFactory::class)]
 #[UsesClass(TrustChainResolver::class)]
 #[UsesClass(EntityStatementFactory::class)]
@@ -57,6 +62,9 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(CacheDecoratorFactory::class)]
 #[UsesClass(HttpClientDecorator::class)]
 #[UsesClass(HttpClientDecoratorFactory::class)]
+#[UsesClass(ArtifactFetcher::class)]
+#[UsesClass(AbstractJwsFetcher::class)]
+#[UsesClass(JwsFetcher::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

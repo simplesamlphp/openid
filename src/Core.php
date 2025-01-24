@@ -23,12 +23,19 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
 
 class Core
 {
-    protected DateIntervalDecorator $timestampValidationLeeway;
-    protected JwsSerializerManager $jwsSerializerManager;
-    protected JwsParser $jwsParser;
-    protected JwsVerifier $jwsVerifier;
+    protected DateIntervalDecorator $timestampValidationLeewayDecorator;
+    protected ?JwsSerializerManager $jwsSerializerManager = null;
+    protected ?JwsParser $jwsParser = null;
+    protected ?JwsVerifier $jwsVerifier = null;
     protected ?RequestObjectFactory $requestObjectFactory = null;
     protected ?ClientAssertionFactory $clientAssertionFactory = null;
+    protected ?Helpers $helpers = null;
+    protected ?AlgorithmManagerFactory $algorithmManagerFactory = null;
+    protected ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null;
+    protected ?JwsParserFactory $jwsParserFactory = null;
+    protected ?JwsVerifierFactory $jwsVerifierFactory = null;
+    protected ?JwksFactory $jwksFactory = null;
+    protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
@@ -40,41 +47,109 @@ class Core
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
         DateInterval $timestampValidationLeeway = new DateInterval('PT1M'),
         protected readonly ?LoggerInterface $logger = null,
-        protected readonly Helpers $helpers = new Helpers(),
-        AlgorithmManagerFactory $algorithmManagerFactory = new AlgorithmManagerFactory(),
-        JwsSerializerManagerFactory $jwsSerializerManagerFactory = new JwsSerializerManagerFactory(),
-        JwsParserFactory $jwsParserFactory = new JwsParserFactory(),
-        JwsVerifierFactory $jwsVerifierFactory = new JwsVerifierFactory(),
-        protected JwksFactory $jwksFactory = new JwksFactory(),
-        DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory(),
     ) {
-        $this->timestampValidationLeeway = $dateIntervalDecoratorFactory->build($timestampValidationLeeway);
-        $this->jwsSerializerManager = $jwsSerializerManagerFactory->build($this->supportedSerializers);
-        $this->jwsParser =  $jwsParserFactory->build($this->jwsSerializerManager);
-        $this->jwsVerifier = $jwsVerifierFactory->build($algorithmManagerFactory->build($this->supportedAlgorithms));
+        $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
+            ->build($timestampValidationLeeway);
     }
 
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
-            $this->jwsParser,
-            $this->jwsVerifier,
-            $this->jwksFactory,
-            $this->jwsSerializerManager,
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->jwsParser(),
+            $this->jwsVerifier(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManager(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
         );
     }
 
     public function clientAssertionFactory(): ClientAssertionFactory
     {
         return $this->clientAssertionFactory ??= new ClientAssertionFactory(
-            $this->jwsParser,
-            $this->jwsVerifier,
-            $this->jwksFactory,
-            $this->jwsSerializerManager,
-            $this->timestampValidationLeeway,
-            $this->helpers,
+            $this->jwsParser(),
+            $this->jwsVerifier(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManager(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
         );
+    }
+
+    public function helpers(): Helpers
+    {
+        return $this->helpers ??= new Helpers();
+    }
+
+    public function algorithmManagerFactory(): AlgorithmManagerFactory
+    {
+        if (is_null($this->algorithmManagerFactory)) {
+            $this->algorithmManagerFactory = new AlgorithmManagerFactory();
+        }
+        return $this->algorithmManagerFactory;
+    }
+
+    public function jwsSerializerManagerFactory(): JwsSerializerManagerFactory
+    {
+        if (is_null($this->jwsSerializerManagerFactory)) {
+            $this->jwsSerializerManagerFactory = new JwsSerializerManagerFactory();
+        }
+        return $this->jwsSerializerManagerFactory;
+    }
+
+    public function jwsParserFactory(): JwsParserFactory
+    {
+        if (is_null($this->jwsParserFactory)) {
+            $this->jwsParserFactory = new JwsParserFactory();
+        }
+        return $this->jwsParserFactory;
+    }
+
+    public function jwsVerifierFactory(): JwsVerifierFactory
+    {
+        if (is_null($this->jwsVerifierFactory)) {
+            $this->jwsVerifierFactory = new JwsVerifierFactory();
+        }
+        return $this->jwsVerifierFactory;
+    }
+
+    public function jwksFactory(): JwksFactory
+    {
+        return $this->jwksFactory ??= new JwksFactory();
+    }
+
+    public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
+    {
+        if (is_null($this->dateIntervalDecoratorFactory)) {
+            $this->dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory();
+        }
+
+        return $this->dateIntervalDecoratorFactory;
+    }
+
+    public function jwsSerializerManager(): JwsSerializerManager
+    {
+        if (is_null($this->jwsSerializerManager)) {
+            $this->jwsSerializerManager = $this->jwsSerializerManagerFactory()->build($this->supportedSerializers);
+        }
+        return $this->jwsSerializerManager;
+    }
+
+    public function jwsParser(): JwsParser
+    {
+        if (is_null($this->jwsParser)) {
+            $this->jwsParser = $this->jwsParserFactory()->build($this->jwsSerializerManager());
+        }
+        return $this->jwsParser;
+    }
+
+    public function jwsVerifier(): JwsVerifier
+    {
+        if (is_null($this->jwsVerifier)) {
+            $this->jwsVerifier = $this->jwsVerifierFactory()->build(
+                $this->algorithmManagerFactory()->build($this->supportedAlgorithms),
+            );
+        }
+        return $this->jwsVerifier;
     }
 }

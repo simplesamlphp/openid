@@ -14,6 +14,7 @@ use SimpleSAML\OpenID\Federation\TrustMark;
 class TrustMarkClaim
 {
     /**
+     * @param array<string,mixed> $otherClaims
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkClaimException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -58,6 +59,9 @@ class TrustMarkClaim
         return $this->trustMark;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getOtherClaims(): array
     {
         return $this->otherClaims;

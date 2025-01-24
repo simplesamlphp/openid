@@ -24,6 +24,7 @@ use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
@@ -32,6 +33,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifier;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 class Federation
 {
@@ -45,6 +47,7 @@ class Federation
     protected ?JwsVerifier $jwsVerifier  = null;
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
     protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
+    protected ?MetadataPolicyApplicator $metadataPolicyApplicator = null;
     protected ?TrustChainFactory $trustChainFactory = null;
     protected ?TrustChainResolver $trustChainResolver = null;
     protected ?EntityStatementFactory $entityStatementFactory = null;
@@ -62,6 +65,7 @@ class Federation
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
     protected ?TrustChainBagFactory $trustChainBagFactory = null;
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
+    protected ?ArtifactFetcher $artifactFetcher = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -101,11 +105,10 @@ class Federation
     public function entityStatementFetcher(): EntityStatementFetcher
     {
         return $this->entityStatementFetcher ??= new EntityStatementFetcher(
-            $this->httpClientDecorator,
             $this->entityStatementFactory(),
+            $this->artifactFetcher(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),
-            $this->cacheDecorator,
             $this->logger,
         );
     }
@@ -115,13 +118,18 @@ class Federation
         return $this->metadataPolicyResolver ??= new MetadataPolicyResolver($this->helpers());
     }
 
+    public function metadataPolicyApplicator(): MetadataPolicyApplicator
+    {
+        return $this->metadataPolicyApplicator ??= new MetadataPolicyApplicator($this->helpers());
+    }
+
     public function trustChainFactory(): TrustChainFactory
     {
         return $this->trustChainFactory ??= new TrustChainFactory(
             $this->entityStatementFactory(),
             $this->timestampValidationLeewayDecorator,
-            $this->helpers(),
             $this->metadataPolicyResolver(),
+            $this->metadataPolicyApplicator(),
         );
     }
 
@@ -258,9 +266,6 @@ class Federation
         return $this->supportedAlgorithms;
     }
 
-    /**
-     * @return \SimpleSAML\OpenID\SupportedSerializers
-     */
     public function supportedSerializers(): SupportedSerializers
     {
         return $this->supportedSerializers;
@@ -274,5 +279,14 @@ class Federation
     public function cacheDecorator(): ?CacheDecorator
     {
         return $this->cacheDecorator;
+    }
+
+    public function artifactFetcher(): ArtifactFetcher
+    {
+        return $this->artifactFetcher ??= new ArtifactFetcher(
+            $this->httpClientDecorator,
+            $this->cacheDecorator(),
+            $this->logger,
+        );
     }
 }

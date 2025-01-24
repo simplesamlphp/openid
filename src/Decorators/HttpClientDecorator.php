@@ -14,11 +14,9 @@ use Throwable;
 class HttpClientDecorator
 {
     public const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
-    public readonly Client $client;
 
-    public function __construct(?Client $client = null)
+    public function __construct(public readonly Client $client = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG))
     {
-        $this->client = $client ?? new Client(self::DEFAULT_HTTP_CLIENT_CONFIG);
     }
 
     /**
@@ -37,7 +35,7 @@ class HttpClientDecorator
             throw new HttpException($message, (int)$e->getCode(), $e);
         }
 
-        if ($response->getStatusCode() !== 200) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() > 299) {
             $message = sprintf(
                 'Unexpected HTTP response for URI %s. Status code: %s, reason: %s.',
                 $uri,

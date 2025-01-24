@@ -18,6 +18,7 @@ class TrustMarkClaimFactory
     }
 
     /**
+     * @param array<string,mixed> $otherClaims
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkClaimException
@@ -31,6 +32,7 @@ class TrustMarkClaimFactory
     }
 
     /**
+     * @param array<string,mixed> $trustMarkClaimData
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkClaimException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */

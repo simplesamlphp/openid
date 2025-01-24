@@ -97,9 +97,10 @@ class TrustChainResolverTest extends TestCase
         $this->entityStatementFetcherMock
             ->expects($this->exactly(3))
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(
+                fn(string $entityId) =>
+                    $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'),
+            );
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
@@ -136,9 +137,8 @@ class TrustChainResolverTest extends TestCase
         $this->entityStatementFetcherMock
             ->expects($this->exactly(2))
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
             ->method('getAuthorityHints')
@@ -162,9 +162,8 @@ class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
             ->method('getAuthorityHints')
@@ -192,9 +191,8 @@ class TrustChainResolverTest extends TestCase
 
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->loggerMock
             ->expects($this->atLeastOnce())
@@ -212,9 +210,8 @@ class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
@@ -238,9 +235,8 @@ class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())
@@ -299,9 +295,8 @@ class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->entityStatementFetcherMock
             ->method('fromCacheOrFetchEndpoint')
@@ -329,9 +324,8 @@ class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) {
-                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
-            });
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
             ->expects($this->once())

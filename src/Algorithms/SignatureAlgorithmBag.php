@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Algorithms;
 
+use Jose\Component\Signature\Algorithm\SignatureAlgorithm;
+
 class SignatureAlgorithmBag
 {
     /** @var \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]  */
@@ -33,9 +35,9 @@ class SignatureAlgorithmBag
     public function getAllInstances(): array
     {
         return array_map(
-            function (SignatureAlgorithmEnum $signatureAlgorithmEnum) {
-                return $signatureAlgorithmEnum->instance();
-            },
+            fn(
+                SignatureAlgorithmEnum $signatureAlgorithmEnum,
+            ): SignatureAlgorithm => $signatureAlgorithmEnum->instance(),
             $this->getAll(),
         );
     }

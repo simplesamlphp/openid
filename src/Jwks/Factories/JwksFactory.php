@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
 class JwksFactory
 {
+    /**
+     * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
+     */
     public function fromKeyData(array $jwks): JwksDecorator
     {
         return new JwksDecorator(JWKSet::createFromKeyData($jwks));

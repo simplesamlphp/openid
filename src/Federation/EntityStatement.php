@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
@@ -80,7 +81,7 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @return array[]
+     * @return array{keys:array<array<string,mixed>>}
      * @psalm-suppress MixedReturnTypeCoercion
      */
     public function getJwks(): array
@@ -97,6 +98,12 @@ class EntityStatement extends ParsedJws
             throw new JwsException('Invalid JWKS encountered: ' . var_export($jwks, true));
         }
 
+        $jwks[ClaimsEnum::Keys->value] = array_map(
+            $this->helpers->arr()->ensureStringKeys(...),
+            $jwks[ClaimsEnum::Keys->value],
+        );
+
+        /** @var array{keys:array<array<string,mixed>>} $jwks */
         return $jwks;
     }
 
@@ -139,7 +146,7 @@ class EntityStatement extends ParsedJws
         }
 
         // Its value MUST contain the Entity Identifiers of its Immediate Superiors and MUST NOT be the empty array []
-        if (empty($authorityHints)) {
+        if ($authorityHints === []) {
             throw new EntityStatementException('Empty Authority Hints claim encountered.');
         }
 
@@ -149,6 +156,58 @@ class EntityStatement extends ParsedJws
         }
 
         return $this->ensureNonEmptyStrings($authorityHints, $claimKey);
+    }
+
+    /**
+     * @return ?array<string,mixed>
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
+    public function getMetadata(): ?array
+    {
+        $claimKey = ClaimsEnum::Metadata->value;
+        /** @psalm-suppress MixedAssignment */
+        $metadata = $this->getPayloadClaim($claimKey);
+
+        if (is_null($metadata)) {
+            return null;
+        }
+
+        // metadata
+        // OPTIONAL. JSON object that represents the Entity's Types and the metadata for those Entity Types.
+        if (!is_array($metadata)) {
+            throw new EntityStatementException('Invalid Metadata claim.');
+        }
+
+        return $this->helpers->arr()->ensureStringKeys($metadata);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @phpstan-ignore missingType.iterableValue (We will ensure proper format in policy resolver.)
+     */
+    public function getMetadataPolicy(): ?array
+    {
+        $claimKey = ClaimsEnum::MetadataPolicy->value;
+        $metadataPolicy = $this->getPayloadClaim($claimKey);
+
+        if (is_null($metadataPolicy)) {
+            return null;
+        }
+
+        // metadata_policy
+        // OPTIONAL. JSON object that defines a metadata policy.
+        if (!is_array($metadataPolicy)) {
+            throw new EntityStatementException('Invalid Metadata Policy claim.');
+        }
+
+        // Only Subordinate Statements MAY include this claim.
+        if ($this->isConfiguration()) {
+            throw new EntityStatementException('Metadata Policy claim encountered in configuration statement.');
+        }
+
+        return $metadataPolicy;
     }
 
     /**
@@ -176,6 +235,7 @@ class EntityStatement extends ParsedJws
 
         /** @psalm-suppress MixedAssignment */
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
+            $trustMarkClaimData = $this->helpers->arr()->ensureStringKeys($trustMarkClaimData);
             $trustMarkClaimBag->add($this->trustMarkClaimFactory->buildFrom($trustMarkClaimData));
         }
 
@@ -193,6 +253,24 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getFederationFetchEndpoint(): ?string
+    {
+        /** @psalm-suppress MixedAssignment */
+        $federationFetchEndpoint = $this->getPayload()
+        [ClaimsEnum::Metadata->value]
+        [EntityTypesEnum::FederationEntity->value]
+        [ClaimsEnum::FederationFetchEndpoint->value] ?? null;
+
+        if (is_null($federationFetchEndpoint)) {
+            return null;
+        }
+
+        return (string)$federationFetchEndpoint;
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -203,6 +281,7 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (Format is validated later.)
      */
     public function verifyWithKeySet(?array $jwks = null, int $signatureIndex = 0): void
     {
@@ -227,7 +306,10 @@ class EntityStatement extends ParsedJws
             $this->getType(...),
             $this->getKeyId(...),
             $this->getAuthorityHints(...),
+            $this->getMetadata(...),
+            $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),
+            $this->getFederationFetchEndpoint(...),
         );
     }
 }

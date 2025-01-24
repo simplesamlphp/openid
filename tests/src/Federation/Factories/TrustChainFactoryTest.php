@@ -13,9 +13,9 @@ use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
-use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChainFactory::class)]
 #[UsesClass(TrustChain::class)]
@@ -23,33 +23,33 @@ class TrustChainFactoryTest extends TestCase
 {
     protected MockObject $entityStatementFactoryMock;
     protected MockObject $timestampValidationLeewayMock;
-    protected MockObject $helpersMock;
     protected MockObject $metadataPolicyResolverMock;
+    protected MockObject $metadataPolicyApplicatorMock;
 
     protected function setUp(): void
     {
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
         $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
         $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
+        $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
     }
 
     protected function sut(
         ?EntityStatementFactory $entityStatementFactory = null,
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
-        ?Helpers $helpers = null,
         ?MetadataPolicyResolver $metadataPolicyResolver = null,
+        ?MetadataPolicyApplicator $metadataPolicyApplicator = null,
     ): TrustChainFactory {
         $entityStatementFactory ??= $this->entityStatementFactoryMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
-        $helpers ??= $this->helpersMock;
         $metadataPolicyResolver ??= $this->metadataPolicyResolverMock;
+        $metadataPolicyApplicator ??= $this->metadataPolicyApplicatorMock;
 
         return new TrustChainFactory(
             $entityStatementFactory,
             $timestampValidationLeewayMock,
-            $helpers,
             $metadataPolicyResolver,
+            $metadataPolicyApplicator,
         );
     }
 

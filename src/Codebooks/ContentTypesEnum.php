@@ -6,5 +6,6 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ContentTypesEnum: string
 {
+    case ApplicationJwt = 'application/jwt';
     case ApplicationEntityStatementJwt = 'application/entity-statement+jwt';
 }

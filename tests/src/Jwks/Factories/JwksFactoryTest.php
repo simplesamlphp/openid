@@ -6,9 +6,9 @@ namespace SimpleSAML\Test\OpenID\Jwks\Factories;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
-use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
 #[CoversClass(JwksFactory::class)]

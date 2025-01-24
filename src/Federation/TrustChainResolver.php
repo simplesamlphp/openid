@@ -48,7 +48,12 @@ class TrustChainResolver
         int $depth = 1,
     ): array {
         $populatedChainEntityIds = array_keys($populatedChain);
-        $debugStartInfo = compact('depth', 'entityId', 'trustAnchorIds', 'populatedChainEntityIds');
+        $debugStartInfo = [
+            'depth' => $depth,
+            'entityId' => $entityId,
+            'trustAnchorIds' => $trustAnchorIds,
+            'populatedChainEntityIds' => $populatedChainEntityIds,
+        ];
         $this->logger?->debug('Start getting configuration chains.', $debugStartInfo);
 
         $configurationChains = [];
@@ -114,7 +119,7 @@ class TrustChainResolver
         try {
             $entityAuthorityHints = $entityConfig->getAuthorityHints();
 
-            if ((!is_array($entityAuthorityHints)) || empty($entityAuthorityHints)) {
+            if ((!is_array($entityAuthorityHints)) || $entityAuthorityHints === []) {
                 $this->logger?->info('No common trust anchor in this path.', $debugStartInfo);
                 return $configurationChains;
             }
@@ -161,20 +166,19 @@ class TrustChainResolver
      *
      * @param non-empty-string $entityId ID of the leaf (subject) entity for which to resolve the trust chain.
      * @param non-empty-array<non-empty-string> $validTrustAnchorIds IDs of the valid trust anchors.
-     * @return \SimpleSAML\OpenID\Federation\TrustChainBag
      *
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
     public function for(string $entityId, array $validTrustAnchorIds): TrustChainBag
     {
         $this->validateStart($entityId, $validTrustAnchorIds);
-        $debugStartInfo = compact('entityId', 'validTrustAnchorIds');
+        $debugStartInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
         $this->logger?->debug('Trust chain resolving started.', $debugStartInfo);
 
         $resolvedChains = [];
 
         foreach ($validTrustAnchorIds as $index => $validTrustAnchorId) {
-            $debugCacheQueryInfo = compact('entityId', 'validTrustAnchorId');
+            $debugCacheQueryInfo = ['entityId' => $entityId, 'validTrustAnchorId' => $validTrustAnchorId];
             $this->logger?->debug('Checking if the trust chain exists in cache.', $debugCacheQueryInfo);
             try {
                 /** @var ?string[] $tokens */
@@ -198,11 +202,11 @@ class TrustChainResolver
             }
         }
 
-        if (!empty($validTrustAnchorIds)) {
-            $debugStandardResolveInfo = compact('entityId', 'validTrustAnchorIds');
+        if ($validTrustAnchorIds !== []) {
+            $debugStandardResolveInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
             $this->logger?->debug(
                 'Continuing with standard resolving for remaining valid trust anchor IDs.',
-                compact('entityId', 'validTrustAnchorIds'),
+                ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds],
             );
 
             $this->logger?->debug('Start fetching all configuration chains.', $debugStandardResolveInfo);
@@ -257,7 +261,7 @@ class TrustChainResolver
             }
         }
 
-        if (empty($resolvedChains)) {
+        if ($resolvedChains === []) {
             $message = 'Could not resolve trust chains or no common trust anchors found.';
             $this->logger?->error($message, $debugStartInfo);
             throw new TrustChainException($message);
@@ -284,20 +288,21 @@ class TrustChainResolver
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @phpstan-ignore missingType.iterableValue (We validate it here)
      */
     protected function validateStart(string $entityId, array $validTrustAnchorIds): void
     {
         $errors = [];
 
-        if (empty($entityId)) {
+        if ($entityId === '' || $entityId === '0') {
             $errors[] = 'Empty entity ID.';
         }
 
-        if (empty($validTrustAnchorIds)) {
+        if ($validTrustAnchorIds === []) {
             $errors[] = 'No valid Trust Anchors provided.';
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             $message = 'Validation errors encountered: ' . implode(', ', $errors);
             $this->logger?->error($message);
             throw new TrustChainException($message);

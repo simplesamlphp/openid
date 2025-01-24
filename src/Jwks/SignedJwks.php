@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 class SignedJwks extends ParsedJws implements JsonSerializable
 {
     /**
+     * @return array<array<string,mixed>>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
      */
@@ -22,13 +23,16 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             'No keys claim found.',
         );
 
-        if ((!is_array($keys)) || empty($keys)) {
+        if ((!is_array($keys)) || $keys === []) {
             throw new SignedJwksException(
                 sprintf('Unexpected JWKS keys claim format: %s.', var_export($keys, true)),
             );
         }
 
-        return $keys;
+        return array_map(
+            $this->helpers->arr()->ensureStringKeys(...),
+            $keys,
+        );
     }
 
     /**
@@ -69,7 +73,6 @@ class SignedJwks extends ParsedJws implements JsonSerializable
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
      */
     protected function validate(): void
     {
@@ -83,6 +86,11 @@ class SignedJwks extends ParsedJws implements JsonSerializable
         );
     }
 
+    /**
+     * @return array{keys: array<array<string, mixed>>}
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
+     */
     public function jsonSerialize(): array
     {
         return [ClaimsEnum::Keys->value => $this->getKeys()];

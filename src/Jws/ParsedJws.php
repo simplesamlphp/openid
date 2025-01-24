@@ -22,6 +22,9 @@ class ParsedJws
      * @var array<string,mixed>
      */
     protected ?array $header = null;
+    /**
+     * @var array<string,mixed>
+     */
     protected ?array $payload = null;
 
     protected ?string $token = null;
@@ -53,11 +56,11 @@ class ParsedJws
             try {
                 call_user_func($call);
             } catch (Throwable $exception) {
-                $errors[] = sprintf('%s: %s', get_class($exception), $exception->getMessage());
+                $errors[] = sprintf('%s: %s', $exception::class, $exception->getMessage());
             }
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             throw new JwsException('JWS not valid: ' . implode('; ', $errors));
         }
     }
@@ -70,7 +73,7 @@ class ParsedJws
     {
         $value = (string)$value;
 
-        if (empty($value)) {
+        if ($value === '' || $value === '0') {
             $message = "Empty string value encountered: $description";
             throw new JwsException($message);
         }
@@ -79,9 +82,8 @@ class ParsedJws
     }
 
     /**
-     * @param array $values
-     * @param string $description
      * @return non-empty-string[]
+     * @phpstan-ignore missingType.iterableValue (We cast everything to string)
      */
     protected function ensureNonEmptyStrings(array $values, string $description): array
     {
@@ -109,7 +111,6 @@ class ParsedJws
 
     /**
      * @param non-empty-string $key
-     * @return mixed
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getHeaderClaim(string $key): mixed
@@ -138,6 +139,7 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return array<string,mixed>
      */
     public function getPayload(): array
     {
@@ -146,13 +148,12 @@ class ParsedJws
         }
 
         $payloadString = $this->jws->getPayload();
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
-        if (empty($payloadString)) {
+        if ($payloadString === null || $payloadString === '' || $payloadString === '0') {
             return $this->payload = [];
         }
 
         try {
-            /** @var ?array $payload */
+            /** @var ?array<string,mixed> $payload */
             $payload = $this->helpers->json()->decode($payloadString);
             return $this->payload = is_array($payload) ? $payload : [];
         } catch (JsonException $exception) {
@@ -162,14 +163,19 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
      */
     public function verifyWithKeySet(array $jwks, int $signatureIndex = 0): void
     {
-        $this->jwsVerifier->verifyWithKeySet(
-            $this->jws,
-            $this->jwksFactory->fromKeyData($jwks)->jwks(),
-            $signatureIndex,
-        ) || throw new JwsException('Could not verify JWS signature.');
+        if (
+            !$this->jwsVerifier->verifyWithKeySet(
+                $this->jws,
+                $this->jwksFactory->fromKeyData($jwks)->jwks(),
+                $signatureIndex,
+            )
+        ) {
+            throw new JwsException('Could not verify JWS signature.');
+        }
     }
 
     /**
@@ -254,8 +260,9 @@ class ParsedJws
 
         $exp = (int)$exp;
 
-        ($exp + $this->timestampValidationLeeway->getInSeconds() >= time()) ||
-        throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
+        if ($exp + $this->timestampValidationLeeway->getInSeconds() < time()) {
+            throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
+        }
 
         return $exp;
     }
@@ -274,8 +281,9 @@ class ParsedJws
 
         $iat = (int)$iat;
 
-        ($iat - $this->timestampValidationLeeway->getInSeconds() <= time()) ||
-        throw new JwsException("Issued At claim ($iat) is greater than current time.");
+        if ($iat - $this->timestampValidationLeeway->getInSeconds() > time()) {
+            throw new JwsException("Issued At claim ($iat) is greater than current time.");
+        }
 
         return $iat;
     }

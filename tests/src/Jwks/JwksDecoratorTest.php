@@ -8,9 +8,8 @@ use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
-use SimpleSAML\OpenID\Jwks;
-use SimpleSAML\OpenID\Jwks\JwksDecorator;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
 #[CoversClass(JwksDecorator::class)]
 class JwksDecoratorTest extends TestCase

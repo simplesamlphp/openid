@@ -286,4 +286,105 @@ class EntityStatementTest extends TestCase
 
         $this->sut();
     }
+
+    public function testCanGetFederationFetchEndpoint(): void
+    {
+        $payload = $this->validPayload;
+        $payload['metadata']['federation_entity']['federation_fetch_endpoint'] = 'uri';
+
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->assertSame('uri', $this->sut()->getFederationFetchEndpoint());
+    }
+
+    public function testFederationFetchEndpointIsOptional(): void
+    {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->assertNull($this->sut()->getFederationFetchEndpoint());
+    }
+
+    public function testMetadataIsOptional(): void
+    {
+        $payload = $this->validPayload;
+        unset($payload['metadata']);
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->assertNull($this->sut()->getMetadata());
+    }
+
+    public function testThrowsForInvalidMetadataClaim(): void
+    {
+        $payload = $this->validPayload;
+        $payload['metadata'] = 'invalid';
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Metadata');
+
+        $this->sut()->getMetadata();
+    }
+
+    public function testCanGetMetadataPolicyClaim(): void
+    {
+        $payload = $this->validPayload;
+        $payload['sub'] = 'something-else';
+        unset($payload['authority_hints']);
+        $payload['metadata_policy'] = [
+            'openid_relying_party' => [
+                'contacts' => [
+                    'add' => ['helpdesk@subordinate.org'],
+                ],
+            ],
+        ];
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->assertSame($payload['metadata_policy'], $this->sut()->getMetadataPolicy());
+    }
+
+    public function testThrowsForInvalidMetadataPolicyClaim(): void
+    {
+        $payload = $this->validPayload;
+        $payload['sub'] = 'something-else';
+        unset($payload['authority_hints']);
+        $payload['metadata_policy'] = 'invalid';
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Metadata Policy');
+
+        $this->sut()->getMetadataPolicy();
+    }
+
+    public function testThrowsIfMetadataPolicyIsSetInConfigurationStatement(): void
+    {
+        $payload = $this->validPayload;
+        unset($payload['authority_hints']);
+        $payload['metadata_policy'] = [
+            'openid_relying_party' => [
+                'contacts' => [
+                    'add' => ['helpdesk@subordinate.org'],
+                ],
+            ],
+        ];
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('configuration');
+
+        $this->sut()->getMetadataPolicy();
+    }
 }

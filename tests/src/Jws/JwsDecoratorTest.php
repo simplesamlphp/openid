@@ -6,8 +6,8 @@ namespace SimpleSAML\Test\OpenID\Jws;
 
 use Jose\Component\Signature\JWS;
 use PHPUnit\Framework\Attributes\CoversClass;
-use SimpleSAML\OpenID\Jws\JwsDecorator;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Jws\JwsDecorator;
 
 #[CoversClass(JwsDecorator::class)]
 class JwsDecoratorTest extends TestCase

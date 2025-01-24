@@ -32,9 +32,11 @@ class ClientAssertion extends ParsedJws
      */
     protected function validateIssuerAndSubject(): void
     {
-        ($this->getIssuer() === $this->getSubject()) || throw new ClientAssertionException(
-            'Issuer claim is expected to be the same as Subject claim',
-        );
+        if ($this->getIssuer() !== $this->getSubject()) {
+            throw new ClientAssertionException(
+                'Issuer claim is expected to be the same as Subject claim',
+            );
+        }
     }
 
     /**

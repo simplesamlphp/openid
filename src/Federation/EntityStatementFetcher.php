@@ -7,29 +7,35 @@ namespace SimpleSAML\OpenID\Federation;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
-use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
-use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
-use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
-use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
-use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
-use Throwable;
+use SimpleSAML\OpenID\Jws\JwsFetcher;
+use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
-class EntityStatementFetcher
+class EntityStatementFetcher extends JwsFetcher
 {
     public function __construct(
-        protected readonly HttpClientDecorator $httpClientDecorator,
-        protected readonly EntityStatementFactory $entityStatementFactory,
-        protected readonly DateIntervalDecorator $maxCacheDuration,
-        protected readonly Helpers $helpers,
-        protected readonly ?CacheDecorator $cacheDecorator = null,
-        protected readonly ?LoggerInterface $logger = null,
+        private readonly EntityStatementFactory $parsedJwsFactory,
+        ArtifactFetcher $artifactFetcher,
+        DateIntervalDecorator $maxCacheDuration,
+        Helpers $helpers,
+        ?LoggerInterface $logger = null,
     ) {
+        parent::__construct($parsedJwsFactory, $artifactFetcher, $maxCacheDuration, $helpers, $logger);
+    }
+
+    protected function buildJwsInstance(string $token): EntityStatement
+    {
+        return $this->parsedJwsFactory->fromToken($token);
+    }
+
+    public function getExpectedContentTypeHttpHeader(): string
+    {
+        return ContentTypesEnum::ApplicationEntityStatementJwt->value;
     }
 
     /**
@@ -37,8 +43,6 @@ class EntityStatementFetcher
      * Fetch will first check if the entity statement is available in cache. If not, it will do a network fetch.
      *
      * @param non-empty-string $entityId
-     * @param \SimpleSAML\OpenID\Codebooks\WellKnownEnum $wellKnownEnum
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -49,17 +53,15 @@ class EntityStatementFetcher
         $wellKnownUri = $wellKnownEnum->uriFor($entityId);
         $this->logger?->debug(
             'Entity statement fetch from cache or well-known endpoint.',
-            compact('entityId', 'wellKnownUri', 'wellKnownEnum'),
+            ['entityId' => $entityId, 'wellKnownUri' => $wellKnownUri, 'wellKnownEnum' => $wellKnownEnum],
         );
 
         return $this->fromCacheOrNetwork($wellKnownUri);
     }
 
     /**
-     * @param string $subjectId
      * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the fetch
      * endpoint (issuer).
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
@@ -67,16 +69,12 @@ class EntityStatementFetcher
         string $subjectId,
         EntityStatement $entityConfiguration,
     ): EntityStatement {
-        $entityConfigurationPayload = $entityConfiguration->getPayload();
-
-        $fetchEndpointUri = (string)($entityConfigurationPayload[ClaimsEnum::Metadata->value]
-            [EntityTypesEnum::FederationEntity->value]
-            [ClaimsEnum::FederationFetchEndpoint->value] ??
-            throw new JwsException('No fetch endpoint found in entity configuration.'));
+        $fetchEndpointUri = $entityConfiguration->getFederationFetchEndpoint() ??
+        throw new EntityStatementException('No fetch endpoint found in entity configuration.');
 
         $this->logger?->debug(
             'Entity statement fetch from cache or fetch endpoint.',
-            compact('subjectId', 'fetchEndpointUri'),
+            ['subjectId' => $subjectId, 'fetchEndpointUri' => $fetchEndpointUri],
         );
 
         return $this->fromCacheOrNetwork(
@@ -101,39 +99,30 @@ class EntityStatementFetcher
     /**
      * Fetch entity statement from cache, if available. URI is used as cache key.
      *
-     * @param string $uri
-     * @return \SimpleSAML\OpenID\Federation\EntityStatement|null
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
     public function fromCache(string $uri): ?EntityStatement
     {
-        $this->logger?->debug(
-            'Trying to get entity statement token from cache.',
-            compact('uri'),
-        );
+        $entityStatement = parent::fromCache($uri);
 
-        try {
-            /** @var ?string $jws */
-            $jws = $this->cacheDecorator?->get(null, $uri);
-        } catch (Throwable $exception) {
-            $this->logger?->error(
-                'Error trying to get entity statement from cache: ' . $exception->getMessage(),
-                compact('uri'),
-            );
+        if (is_null($entityStatement)) {
             return null;
         }
 
-        if (!is_string($jws)) {
-            $this->logger?->debug('Entity statement token not found in cache.', compact('uri'));
-            return null;
+        if ($entityStatement instanceof \SimpleSAML\OpenID\Federation\EntityStatement) {
+            return $entityStatement;
         }
 
-        $this->logger?->debug(
-            'Entity statement token found in cache, trying to build instance.',
-            compact('uri'),
+        // @codeCoverageIgnoreStart
+        $message = 'Unexpected entity statement instance encountered for cache fetch.';
+        $this->logger?->error(
+            $message,
+            ['uri' => $uri, 'entityStatement' => $entityStatement],
         );
 
-        return $this->prepareEntityStatement($jws);
+        throw new FetchException($message);
+        // @codeCoverageIgnoreEnd
     }
 
     /**
@@ -144,83 +133,20 @@ class EntityStatementFetcher
      */
     public function fromNetwork(string $uri): EntityStatement
     {
-        try {
-            $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
-        } catch (Throwable $e) {
-            $message = sprintf(
-                'Error sending HTTP request to %s. Error was: %s',
-                $uri,
-                $e->getMessage(),
-            );
-            $this->logger?->error($message);
-            throw new FetchException($message, (int)$e->getCode(), $e);
+        $entityStatement = parent::fromNetwork($uri);
+
+        if ($entityStatement instanceof \SimpleSAML\OpenID\Federation\EntityStatement) {
+            return $entityStatement;
         }
 
-        if ($response->getStatusCode() !== 200) {
-            $message = sprintf(
-                'Unexpected HTTP response for entity statement fetch, status code: %s, reason: %s. URI %s',
-                $response->getStatusCode(),
-                $response->getReasonPhrase(),
-                $uri,
-            );
-            $this->logger?->error($message);
-            throw new FetchException($message);
-        }
+        // @codeCoverageIgnoreStart
+        $message = 'Unexpected entity statement instance encountered for network fetch.';
+        $this->logger?->error(
+            $message,
+            ['uri' => $uri, 'entityStatement' => $entityStatement],
+        );
 
-        /** @psalm-suppress InvalidLiteralArgument */
-        if (
-            !str_contains(
-                $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
-                ContentTypesEnum::ApplicationEntityStatementJwt->value,
-            )
-        ) {
-            $message = sprintf(
-                'Unexpected content type in response for entity statement fetch: %s, expected: %s. URI %s',
-                $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
-                ContentTypesEnum::ApplicationEntityStatementJwt->value,
-                $uri,
-            );
-            $this->logger?->error($message);
-            throw new FetchException($message);
-        }
-
-        $token = $response->getBody()->getContents();
-        $this->logger?->debug('Successful HTTP response for entity statement fetch.', compact('uri', 'token'));
-        $this->logger?->debug('Proceeding to EntityStatement instance building.');
-
-        $entityStatement = $this->entityStatementFactory->fromToken($token);
-        $this->logger?->debug('Entity Statement instance built, saving its token to cache.', compact('uri', 'token'));
-
-        // Cache it
-        try {
-            $cacheTtl = $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
-                $entityStatement->getExpirationTime(),
-            );
-            $this->cacheDecorator?->set(
-                $token,
-                $cacheTtl,
-                $uri,
-            );
-            $this->logger?->debug(
-                'Entity Statement token successfully cached.',
-                compact('uri', 'token', 'cacheTtl'),
-            );
-        } catch (Throwable $exception) {
-            $this->logger?->error(
-                'Error setting entity statement to cache: ' . $exception->getMessage(),
-                compact('uri'),
-            );
-        }
-
-        $this->logger?->debug('Returning built Entity Statement instance.', compact('uri', 'token'));
-        return $entityStatement;
-    }
-
-    /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     */
-    protected function prepareEntityStatement(string $jws): EntityStatement
-    {
-        return $this->entityStatementFactory->fromToken($jws);
+        throw new FetchException($message);
+        // @codeCoverageIgnoreEnd
     }
 }

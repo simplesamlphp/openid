@@ -22,9 +22,10 @@ class TrustChainBag
         $this->trustChains = array_merge($this->trustChains, $trustChains);
 
         // Order the chains from shortest to longest one.
-        usort($this->trustChains, function (TrustChain $a, TrustChain $b) {
-            return $a->getResolvedLength() <=> $b->getResolvedLength();
-        });
+        usort(
+            $this->trustChains,
+            fn(TrustChain $a, TrustChain $b): int => $a->getResolvedLength() <=> $b->getResolvedLength(),
+        );
     }
 
     /**
@@ -51,7 +52,7 @@ class TrustChainBag
 
         $prioritizedChains = $this->trustChains;
 
-        usort($prioritizedChains, function (TrustChain $a, TrustChain $b) use ($prioritizedTrustAnchorIds) {
+        usort($prioritizedChains, function (TrustChain $a, TrustChain $b) use ($prioritizedTrustAnchorIds): int {
             // Get defined position, or default to high value if not found.
             $posA = $prioritizedTrustAnchorIds[$a->getResolvedTrustAnchor()->getIssuer()] ?? PHP_INT_MAX;
             $posB = $prioritizedTrustAnchorIds[$b->getResolvedTrustAnchor()->getIssuer()] ?? PHP_INT_MAX;
