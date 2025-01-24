@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\Factories;
 
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
@@ -35,6 +36,12 @@ class TrustChainFactory
      */
     public function fromStatements(EntityStatement ...$statements): TrustChain
     {
+        if (count($statements) < 3) {
+            throw new TrustChainException(
+                sprintf('TrustChain must have at least 3 statements, %s given.', count($statements)),
+            );
+        }
+
         $trustChain = $this->empty();
 
         // First item should be the leaf configuration.
@@ -46,7 +53,10 @@ class TrustChainFactory
         }
 
         // Last item should be trust anchor configuration.
-        $trustChain->addTrustAnchor(array_shift($statements));
+        ($trustAnchorStatement = array_shift($statements)) || throw new TrustChainException(
+            'No Trust Anchor statement present.',
+        );
+        $trustChain->addTrustAnchor($trustAnchorStatement);
 
         return $trustChain;
     }
