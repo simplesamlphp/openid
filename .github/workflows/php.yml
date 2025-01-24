@@ -156,6 +156,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         php-versions: ['8.2', '8.3']
+        jwt-version: ['^3.4', '^4.0']
 
     steps:
       - name: Setup PHP, with composer and extensions
@@ -191,6 +192,9 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
+      - name: Require specific dependencies
+        run: composer require web-token/jwt-framework:${{ matrix.jwt-version }} --no-update
+
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
@@ -218,6 +222,7 @@ jobs:
       matrix:
         operating-system: [windows-latest]
         php-versions: ['8.2', '8.3']
+        jwt-version: ['^3.4', '^4.0']
 
     steps:
       - name: Setup PHP, with composer and extensions
@@ -252,6 +257,9 @@ jobs:
           path: $COMPOSER_CACHE
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
+
+      - name: Require specific dependencies
+        run: composer require web-token/jwt-framework:${{ matrix.jwt-version }} --no-update
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
