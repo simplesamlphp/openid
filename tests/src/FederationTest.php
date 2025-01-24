@@ -12,14 +12,15 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Federation;
 use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
@@ -32,10 +33,12 @@ use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
@@ -51,11 +54,11 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(RequestObjectFactory::class)]
 #[UsesClass(TrustMarkFactory::class)]
 #[UsesClass(TrustMarkClaimFactory::class)]
-#[UsesClass(AlgorithmManagerFactory::class)]
-#[UsesClass(JwsSerializerManagerFactory::class)]
+#[UsesClass(AlgorithmManagerDecoratorFactory::class)]
+#[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
 #[UsesClass(JwsParserFactory::class)]
 #[UsesClass(JwsParser::class)]
-#[UsesClass(JwsVerifierFactory::class)]
+#[UsesClass(JwsVerifierDecoratorFactory::class)]
 #[UsesClass(DateIntervalDecorator::class)]
 #[UsesClass(DateIntervalDecoratorFactory::class)]
 #[UsesClass(CacheDecorator::class)]
@@ -65,6 +68,9 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(ArtifactFetcher::class)]
 #[UsesClass(AbstractJwsFetcher::class)]
 #[UsesClass(JwsFetcher::class)]
+#[UsesClass(AlgorithmManagerDecorator::class)]
+#[UsesClass(JwsVerifierDecorator::class)]
+#[UsesClass(JwsSerializerManagerDecorator::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

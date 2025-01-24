@@ -9,14 +9,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedSerializers;
 
-#[CoversClass(JwsSerializerManagerFactory::class)]
-#[UsesClass(JwsSerializerManager::class)]
-class JwsSerializerManagerFactoryTest extends TestCase
+#[CoversClass(JwsSerializerManagerDecoratorFactory::class)]
+#[UsesClass(JwsSerializerManagerDecorator::class)]
+class JwsSerializerManagerDecoratorFactoryTest extends TestCase
 {
     protected MockObject $supportedSerializersMock;
     protected MockObject $jwsSerializerBagMock;
@@ -35,15 +35,15 @@ class JwsSerializerManagerFactoryTest extends TestCase
             ->willReturn([$this->jwsSerializerMock]);
     }
 
-    protected function sut(): JwsSerializerManagerFactory
+    protected function sut(): JwsSerializerManagerDecoratorFactory
     {
-        return new JwsSerializerManagerFactory();
+        return new JwsSerializerManagerDecoratorFactory();
     }
 
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(
-            JwsSerializerManagerFactory::class,
+            JwsSerializerManagerDecoratorFactory::class,
             $this->sut(),
         );
     }
@@ -51,7 +51,7 @@ class JwsSerializerManagerFactoryTest extends TestCase
     public function testCanBuild(): void
     {
         $this->assertInstanceOf(
-            JwsSerializerManager::class,
+            JwsSerializerManagerDecorator::class,
             $this->sut()->build($this->supportedSerializersMock),
         );
     }

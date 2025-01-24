@@ -12,22 +12,25 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jwks;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
@@ -42,11 +45,14 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(CacheDecoratorFactory::class)]
 #[UsesClass(DateIntervalDecoratorFactory::class)]
 #[UsesClass(HttpClientDecoratorFactory::class)]
-#[UsesClass(AlgorithmManagerFactory::class)]
-#[UsesClass(JwsSerializerManagerFactory::class)]
+#[UsesClass(AlgorithmManagerDecoratorFactory::class)]
+#[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
 #[UsesClass(JwsParserFactory::class)]
-#[UsesClass(JwsVerifierFactory::class)]
+#[UsesClass(JwsVerifierDecoratorFactory::class)]
 #[UsesClass(JwsParser::class)]
+#[UsesClass(AlgorithmManagerDecorator::class)]
+#[UsesClass(JwsVerifierDecorator::class)]
+#[UsesClass(JwsSerializerManagerDecorator::class)]
 class JwksTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

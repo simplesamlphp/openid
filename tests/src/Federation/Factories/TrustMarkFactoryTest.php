@@ -18,9 +18,9 @@ use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(TrustMarkFactory::class)]
 #[UsesClass(ParsedJwsFactory::class)]
@@ -32,7 +32,7 @@ class TrustMarkFactoryTest extends TestCase
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
     protected MockObject $jwsParserMock;
-    protected MockObject $jwsVerifierMock;
+    protected MockObject $jwsVerifierDecoratorMock;
     protected MockObject $jwksFactoryMock;
     protected MockObject $jwsSerializerManagerMock;
     protected MockObject $dateIntervalDecoratorMock;
@@ -71,9 +71,9 @@ class TrustMarkFactoryTest extends TestCase
         $this->jwsParserMock = $this->createMock(JwsParser::class);
         $this->jwsParserMock->method('parse')->willReturn($this->jwsDecoratorMock);
 
-        $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
+        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
+        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -86,24 +86,24 @@ class TrustMarkFactoryTest extends TestCase
 
     protected function sut(
         ?JwsParser $jwsParser = null,
-        ?JwsVerifier $jwsVerifier = null,
+        ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
-        ?JwsSerializerManager $jwsSerializerManager = null,
+        ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
     ): TrustMarkFactory {
         $jwsParser ??= $this->jwsParserMock;
-        $jwsVerifier ??= $this->jwsVerifierMock;
+        $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
+        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
         return new TrustMarkFactory(
             $jwsParser,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
         );

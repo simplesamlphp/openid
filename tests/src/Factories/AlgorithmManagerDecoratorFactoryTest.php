@@ -6,15 +6,17 @@ namespace SimpleSAML\Test\OpenID\Factories;
 
 use Jose\Component\Signature\Algorithm\SignatureAlgorithm;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Algorithms\AlgorithmManager;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 
-#[CoversClass(AlgorithmManagerFactory::class)]
-class AlgorithmManagerFactoryTest extends TestCase
+#[CoversClass(AlgorithmManagerDecoratorFactory::class)]
+#[UsesClass(AlgorithmManagerDecorator::class)]
+class AlgorithmManagerDecoratorFactoryTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
     protected MockObject $signatureAlgorithmBagMock;
@@ -34,15 +36,15 @@ class AlgorithmManagerFactoryTest extends TestCase
             ]);
     }
 
-    protected function sut(): AlgorithmManagerFactory
+    protected function sut(): AlgorithmManagerDecoratorFactory
     {
-        return new AlgorithmManagerFactory();
+        return new AlgorithmManagerDecoratorFactory();
     }
 
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(
-            AlgorithmManagerFactory::class,
+            AlgorithmManagerDecoratorFactory::class,
             $this->sut(),
         );
     }
@@ -50,7 +52,7 @@ class AlgorithmManagerFactoryTest extends TestCase
     public function testCanBuild(): void
     {
         $this->assertInstanceOf(
-            AlgorithmManager::class,
+            AlgorithmManagerDecorator::class,
             $this->sut()->build($this->supportedAlgorithmsMock),
         );
     }

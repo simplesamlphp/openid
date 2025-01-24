@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Jws;
 
-use Jose\Component\Signature\JWS;
 use JsonException;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
@@ -12,12 +11,11 @@ use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
 
 class ParsedJws
 {
-    protected JWS $jws;
     /**
      * @var array<string,mixed>
      */
@@ -30,14 +28,13 @@ class ParsedJws
     protected ?string $token = null;
 
     public function __construct(
-        JwsDecorator $jwsDecorator,
-        protected readonly JwsVerifier $jwsVerifier,
+        protected readonly JwsDecorator $jwsDecorator,
+        protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
         protected readonly JwksFactory $jwksFactory,
-        protected readonly JwsSerializerManager $jwsSerializerManager,
+        protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly Helpers $helpers,
     ) {
-        $this->jws = $jwsDecorator->jws();
         $this->validate();
     }
 
@@ -103,7 +100,7 @@ class ParsedJws
     {
         try {
             /** @psalm-suppress MixedAssignment */
-            return $this->header ??= $this->jws->getSignature($signatureId)->getProtectedHeader();
+            return $this->header ??= $this->jwsDecorator->jws()->getSignature($signatureId)->getProtectedHeader();
         } catch (Throwable $exception) {
             throw new JwsException('Unable to get protected header.', (int)$exception->getCode(), $exception);
         }
@@ -130,9 +127,9 @@ class ParsedJws
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
     ): string {
-        return $this->token ??= $this->jwsSerializerManager->serialize(
+        return $this->token ??= $this->jwsSerializerManagerDecorator->serialize(
             $jwsSerializerEnum->value,
-            $this->jws,
+            $this->jwsDecorator,
             $signatureIndex,
         );
     }
@@ -147,7 +144,7 @@ class ParsedJws
             return $this->payload;
         }
 
-        $payloadString = $this->jws->getPayload();
+        $payloadString = $this->jwsDecorator->jws()->getPayload();
         if ($payloadString === null || $payloadString === '' || $payloadString === '0') {
             return $this->payload = [];
         }
@@ -168,9 +165,9 @@ class ParsedJws
     public function verifyWithKeySet(array $jwks, int $signatureIndex = 0): void
     {
         if (
-            !$this->jwsVerifier->verifyWithKeySet(
-                $this->jws,
-                $this->jwksFactory->fromKeyData($jwks)->jwks(),
+            !$this->jwsVerifierDecorator->verifyWithKeySet(
+                $this->jwsDecorator,
+                $this->jwksFactory->fromKeyData($jwks),
                 $signatureIndex,
             )
         ) {

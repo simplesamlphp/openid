@@ -10,17 +10,17 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(JwsParserFactory::class)]
 #[UsesClass(JwsParser::class)]
 class JwsParserFactoryTest extends TestCase
 {
-    protected MockObject $jwsSerializerManagerMock;
+    protected MockObject $jwsSerializerManagerDecoratorMock;
 
     protected function setUp(): void
     {
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
     }
 
     protected function sut(): JwsParserFactory
@@ -37,7 +37,7 @@ class JwsParserFactoryTest extends TestCase
     {
         $this->assertInstanceOf(
             JwsParser::class,
-            $this->sut()->build($this->jwsSerializerManagerMock),
+            $this->sut()->build($this->jwsSerializerManagerDecoratorMock),
         );
     }
 }

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws;
 
 use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
 
 class JwsParser
 {
     public function __construct(
-        protected readonly JwsSerializerManager $serializerManager,
+        protected readonly JwsSerializerManagerDecorator $serializerManagerDecorator,
     ) {
     }
 
@@ -21,7 +21,7 @@ class JwsParser
     public function parse(string $token): JwsDecorator
     {
         try {
-            return new JwsDecorator($this->serializerManager->unserialize($token));
+            return $this->serializerManagerDecorator->unserialize($token);
         } catch (Throwable $exception) {
             throw new JwsException('Unable to parse token.', (int)$exception->getCode(), $exception);
         }

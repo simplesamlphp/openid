@@ -14,17 +14,17 @@ use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJws::class)]
 class ParsedJwsTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
-    protected MockObject $jwsVerifierMock;
+    protected MockObject $jwsVerifierDecoratorMock;
     protected MockObject $jwksFactoryMock;
-    protected MockObject $jwsSerializerManagerMock;
+    protected MockObject $jwsSerializerManagerDecoratorMock;
     protected MockObject $timestampValidationLeewayMock;
     protected MockObject $helpersMock;
 
@@ -95,9 +95,9 @@ class ParsedJwsTest extends TestCase
     protected function setUp(): void
     {
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
+        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
 
@@ -116,24 +116,24 @@ class ParsedJwsTest extends TestCase
 
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
-        ?JwsVerifier $jwsVerifier = null,
+        ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
-        ?JwsSerializerManager $jwsSerializerManager = null,
+        ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
         ?Helpers $helpers = null,
     ): ParsedJws {
         $jwsDecorator ??= $this->jwsDecoratorMock;
-        $jwsVerifier ??= $this->jwsVerifierMock;
+        $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
+        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
         $helpers ??= $this->helpersMock;
 
         return new ParsedJws(
             $jwsDecorator,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $timestampValidationLeewayMock,
             $helpers,
         );
@@ -148,9 +148,9 @@ class ParsedJwsTest extends TestCase
     {
         $sut = new class (
             $this->jwsDecoratorMock,
-            $this->jwsVerifierMock,
+            $this->jwsVerifierDecoratorMock,
             $this->jwksFactoryMock,
-            $this->jwsSerializerManagerMock,
+            $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
         ) extends ParsedJws {
@@ -174,9 +174,9 @@ class ParsedJwsTest extends TestCase
 
         new class (
             $this->jwsDecoratorMock,
-            $this->jwsVerifierMock,
+            $this->jwsVerifierDecoratorMock,
             $this->jwksFactoryMock,
-            $this->jwsSerializerManagerMock,
+            $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
         ) extends ParsedJws {
@@ -325,9 +325,9 @@ class ParsedJwsTest extends TestCase
     {
         $sut = new class (
             $this->jwsDecoratorMock,
-            $this->jwsVerifierMock,
+            $this->jwsVerifierDecoratorMock,
             $this->jwksFactoryMock,
-            $this->jwsSerializerManagerMock,
+            $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
         ) extends ParsedJws {
@@ -345,7 +345,7 @@ class ParsedJwsTest extends TestCase
 
     public function testCanSerializeToToken(): void
     {
-        $this->jwsSerializerManagerMock->expects($this->once())->method('serialize')
+        $this->jwsSerializerManagerDecoratorMock->expects($this->once())->method('serialize')
             ->willReturn('token');
 
         $sut = $this->sut();
@@ -357,7 +357,7 @@ class ParsedJwsTest extends TestCase
 
     public function testCanVerifyWithKeySet(): void
     {
-        $this->jwsVerifierMock->expects($this->once())->method('verifyWithKeySet')
+        $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
             ->willReturn(true);
 
         $this->sut()->verifyWithKeySet(['jwks']);
@@ -365,7 +365,7 @@ class ParsedJwsTest extends TestCase
 
     public function testThrowsOnVerifyWithKeySetError(): void
     {
-        $this->jwsVerifierMock->expects($this->once())->method('verifyWithKeySet')
+        $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
             ->willReturn(false);
 
         $this->expectException(JwsException::class);
