@@ -148,7 +148,7 @@ jobs:
         run: composer audit
 
   unit-tests-linux:
-    name: "Unit tests, PHP ${{ matrix.php-versions }}, ${{ matrix.jwt-version }}, ${{ matrix.operating-system }}"
+    name: "Unit tests, PHP ${{ matrix.php-versions }}, JWT ${{ matrix.jwt-version }}, ${{ matrix.operating-system }}"
     runs-on: ${{ matrix.operating-system }}
     needs: [linter, quality, security]
     strategy:
@@ -156,7 +156,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         php-versions: ['8.2', '8.3']
-        jwt-version: ['^3.4', '^4.0']
+        jwt-version: ['^3.4', '^4.0.2']
 
     steps:
       - name: Setup PHP, with composer and extensions
@@ -214,7 +214,7 @@ jobs:
           path: ${{ github.workspace }}/build
 
   unit-tests-windows:
-    name: "Unit tests, PHP ${{ matrix.php-versions }}, ${{ matrix.operating-system }}"
+    name: "Unit tests, PHP ${{ matrix.php-versions }}, JWT ${{ matrix.jwt-version }}, ${{ matrix.operating-system }}"
     runs-on: ${{ matrix.operating-system }}
     needs: [linter, quality, security]
     strategy:
@@ -222,7 +222,7 @@ jobs:
       matrix:
         operating-system: [windows-latest]
         php-versions: ['8.2', '8.3']
-        jwt-version: ['^3.4', '^4.0']
+        jwt-version: ['^3.4', '^4.0.2']
 
     steps:
       - name: Setup PHP, with composer and extensions
