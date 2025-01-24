@@ -12,16 +12,16 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class EntityStatementFactory extends ParsedJwsFactory
 {
     public function __construct(
         JwsParser $jwsParser,
-        JwsVerifier $jwsVerifier,
+        JwsVerifierDecorator $jwsVerifierDecorator,
         JwksFactory $jwksFactory,
-        JwsSerializerManager $jwsSerializerManager,
+        JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         DateIntervalDecorator $timestampValidationLeeway,
         Helpers $helpers,
         protected readonly TrustMarkClaimFactory $trustMarkClaimFactory,
@@ -29,9 +29,9 @@ class EntityStatementFactory extends ParsedJwsFactory
     ) {
         parent::__construct(
             $jwsParser,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $timestampValidationLeeway,
             $helpers,
         );
@@ -44,9 +44,9 @@ class EntityStatementFactory extends ParsedJwsFactory
     {
         return new EntityStatement(
             $this->jwsParser->parse($token),
-            $this->jwsVerifier,
+            $this->jwsVerifierDecorator,
             $this->jwksFactory,
-            $this->jwsSerializerManager,
+            $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,
             $this->trustMarkClaimFactory,

@@ -18,9 +18,9 @@ use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(EntityStatement::class)]
 #[UsesClass(ParsedJws::class)]
@@ -29,9 +29,9 @@ class EntityStatementTest extends TestCase
     protected MockObject $signatureMock;
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
-    protected MockObject $jwsVerifierMock;
+    protected MockObject $jwsVerifierDecoratorMock;
     protected MockObject $jwksFactoryMock;
-    protected MockObject $jwsSerializerManagerMock;
+    protected MockObject $jwsSerializerManagerDecoratorMock;
     protected MockObject $dateIntervalDecoratorMock;
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
@@ -108,9 +108,9 @@ class EntityStatementTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
 
-        $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
+        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -126,18 +126,18 @@ class EntityStatementTest extends TestCase
 
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
-        ?JwsVerifier $jwsVerifier = null,
+        ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
-        ?JwsSerializerManager $jwsSerializerManager = null,
+        ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?TrustMarkClaimFactory $trustMarkClaimFactory = null,
         ?TrustMarkClaimBagFactory $trustMarkClaimBagFactory = null,
     ): EntityStatement {
         $jwsDecorator ??= $this->jwsDecoratorMock;
-        $jwsVerifier ??= $this->jwsVerifierMock;
+        $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
+        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $trustMarkClaimFactory ??= $this->trustMarkClaimFactoryMock;
@@ -145,9 +145,9 @@ class EntityStatementTest extends TestCase
 
         return new EntityStatement(
             $jwsDecorator,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
             $trustMarkClaimFactory,
@@ -200,7 +200,7 @@ class EntityStatementTest extends TestCase
 
     public function testVerifyWithKeySetRuns(): void
     {
-        $this->jwsVerifierMock->expects($this->once())->method('verifyWithKeySet')
+        $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
             ->willReturn(true);
 
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);

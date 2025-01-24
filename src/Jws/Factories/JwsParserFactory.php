@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws\Factories;
 
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class JwsParserFactory
 {
-    public function build(JwsSerializerManager $jwsSerializerManager): JwsParser
+    public function build(JwsSerializerManagerDecorator $jwsSerializerManagerDecorator): JwsParser
     {
-        return new JwsParser($jwsSerializerManager);
+        return new JwsParser($jwsSerializerManagerDecorator);
     }
 }

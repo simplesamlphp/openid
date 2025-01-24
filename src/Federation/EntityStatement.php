@@ -16,17 +16,17 @@ use SimpleSAML\OpenID\Federation\EntityStatement\TrustMarkClaimBag;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class EntityStatement extends ParsedJws
 {
     public function __construct(
         JwsDecorator $jwsDecorator,
-        JwsVerifier $jwsVerifier,
+        JwsVerifierDecorator $jwsVerifierDecorator,
         JwksFactory $jwksFactory,
-        JwsSerializerManager $jwsSerializerManager,
+        JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         DateIntervalDecorator $timestampValidationLeeway,
         Helpers $helpers,
         protected readonly TrustMarkClaimFactory $trustMarkClaimFactory,
@@ -34,9 +34,9 @@ class EntityStatement extends ParsedJws
     ) {
         parent::__construct(
             $jwsDecorator,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $timestampValidationLeeway,
             $helpers,
         );

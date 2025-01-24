@@ -10,17 +10,20 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Core;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
@@ -30,11 +33,14 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(ClientAssertionFactory::class)]
 #[UsesClass(DateIntervalDecorator::class)]
 #[UsesClass(DateIntervalDecoratorFactory::class)]
-#[UsesClass(AlgorithmManagerFactory::class)]
-#[UsesClass(JwsSerializerManagerFactory::class)]
+#[UsesClass(AlgorithmManagerDecoratorFactory::class)]
+#[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
 #[UsesClass(JwsParserFactory::class)]
-#[UsesClass(JwsVerifierFactory::class)]
+#[UsesClass(JwsVerifierDecoratorFactory::class)]
 #[UsesClass(JwsParser::class)]
+#[UsesClass(AlgorithmManagerDecorator::class)]
+#[UsesClass(JwsVerifierDecorator::class)]
+#[UsesClass(JwsSerializerManagerDecorator::class)]
 class CoreTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

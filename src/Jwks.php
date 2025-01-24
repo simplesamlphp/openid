@@ -11,19 +11,19 @@ use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class Jwks
 {
@@ -32,16 +32,16 @@ class Jwks
     protected ?CacheDecorator $cacheDecorator;
     protected ?JwksFetcher $jwksFetcher = null;
     protected HttpClientDecorator $httpClientDecorator;
-    protected ?JwsSerializerManager $jwsSerializerManager = null;
+    protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
     protected ?JwsParser $jwsParser = null;
-    protected ?JwsVerifier $jwsVerifier  = null;
+    protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
     protected ?JwksFactory $jwksFactory = null;
     protected ?SignedJwksFactory $signedJwksFactory = null;
     protected ?Helpers $helpers = null;
-    protected ?AlgorithmManagerFactory $algorithmManagerFactory = null;
-    protected ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null;
+    protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
+    protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
     protected ?JwsParserFactory $jwsParserFactory = null;
-    protected ?JwsVerifierFactory $jwsVerifierFactory = null;
+    protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
@@ -71,9 +71,9 @@ class Jwks
     {
         return $this->signedJwksFactory ??= new SignedJwksFactory(
             $this->jwsParser(),
-            $this->jwsVerifier(),
+            $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
-            $this->jwsSerializerManager(),
+            $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
         );
@@ -97,20 +97,20 @@ class Jwks
         return $this->helpers ??= new Helpers();
     }
 
-    public function algorithmManagerFactory(): AlgorithmManagerFactory
+    public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
-        if (is_null($this->algorithmManagerFactory)) {
-            $this->algorithmManagerFactory = new AlgorithmManagerFactory();
+        if (is_null($this->algorithmManagerDecoratorFactory)) {
+            $this->algorithmManagerDecoratorFactory = new AlgorithmManagerDecoratorFactory();
         }
-        return $this->algorithmManagerFactory;
+        return $this->algorithmManagerDecoratorFactory;
     }
 
-    public function jwsSerializerManagerFactory(): JwsSerializerManagerFactory
+    public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
-        if (is_null($this->jwsSerializerManagerFactory)) {
-            $this->jwsSerializerManagerFactory = new JwsSerializerManagerFactory();
+        if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
+            $this->jwsSerializerManagerDecoratorFactory = new JwsSerializerManagerDecoratorFactory();
         }
-        return $this->jwsSerializerManagerFactory;
+        return $this->jwsSerializerManagerDecoratorFactory;
     }
 
     public function jwsParserFactory(): JwsParserFactory
@@ -121,12 +121,12 @@ class Jwks
         return $this->jwsParserFactory;
     }
 
-    public function jwsVerifierFactory(): JwsVerifierFactory
+    public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
-        if (is_null($this->jwsVerifierFactory)) {
-            $this->jwsVerifierFactory = new JwsVerifierFactory();
+        if (is_null($this->jwsVerifierDecoratorFactory)) {
+            $this->jwsVerifierDecoratorFactory = new JwsVerifierDecoratorFactory();
         }
-        return $this->jwsVerifierFactory;
+        return $this->jwsVerifierDecoratorFactory;
     }
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
@@ -156,20 +156,21 @@ class Jwks
         return $this->httpClientDecoratorFactory;
     }
 
-    public function jwsVerifier(): JwsVerifier
+    public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
-        return $this->jwsVerifier ??= $this->jwsVerifierFactory()->build(
-            $this->algorithmManagerFactory()->build($this->supportedAlgorithms),
+        return $this->jwsVerifierDecorator ??= $this->jwsVerifierDecoratorFactory()->build(
+            $this->algorithmManagerDecoratorFactory()->build($this->supportedAlgorithms),
         );
     }
 
     public function jwsParser(): JwsParser
     {
-        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManager());
+        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
     }
 
-    public function jwsSerializerManager(): JwsSerializerManager
+    public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
-        return $this->jwsSerializerManager ??= $this->jwsSerializerManagerFactory()->build($this->supportedSerializers);
+        return $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
+            ->build($this->supportedSerializers);
     }
 }

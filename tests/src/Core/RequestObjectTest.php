@@ -16,9 +16,9 @@ use SimpleSAML\OpenID\Exceptions\RequestObjectException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(RequestObject::class)]
 #[UsesClass(ParsedJws::class)]
@@ -27,9 +27,9 @@ class RequestObjectTest extends TestCase
     protected MockObject $signatureMock;
     protected MockObject $jwsMock;
     protected MockObject $jwsDecoratorMock;
-    protected MockObject $jwsVerifierMock;
+    protected MockObject $jwsVerifierDecoratorMock;
     protected MockObject $jwksFactoryMock;
-    protected MockObject $jwsSerializerManagerMock;
+    protected MockObject $jwsSerializerManagerDecoratorMock;
     protected MockObject $dateIntervalDecoratorMock;
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
@@ -50,9 +50,9 @@ class RequestObjectTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
 
-        $this->jwsVerifierMock = $this->createMock(JwsVerifier::class);
+        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManager::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -62,24 +62,24 @@ class RequestObjectTest extends TestCase
 
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
-        ?JwsVerifier $jwsVerifier = null,
+        ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
-        ?JwsSerializerManager $jwsSerializerManager = null,
+        ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
     ): RequestObject {
         $jwsDecorator ??= $this->jwsDecoratorMock;
-        $jwsVerifier ??= $this->jwsVerifierMock;
+        $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $jwsSerializerManager ??= $this->jwsSerializerManagerMock;
+        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
 
         return new RequestObject(
             $jwsDecorator,
-            $jwsVerifier,
+            $jwsVerifierDecorator,
             $jwksFactory,
-            $jwsSerializerManager,
+            $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
         );

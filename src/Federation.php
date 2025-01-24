@@ -11,11 +11,11 @@ use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
-use SimpleSAML\OpenID\Factories\AlgorithmManagerFactory;
+use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
-use SimpleSAML\OpenID\Factories\JwsSerializerManagerFactory;
+use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
@@ -29,10 +29,10 @@ use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsVerifierFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsParser;
-use SimpleSAML\OpenID\Jws\JwsVerifier;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManager;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 class Federation
@@ -42,9 +42,9 @@ class Federation
     protected int $maxTrustChainDepth;
     protected ?CacheDecorator $cacheDecorator;
     protected HttpClientDecorator $httpClientDecorator;
-    protected ?JwsSerializerManager $jwsSerializerManager = null;
+    protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
     protected ?JwsParser $jwsParser = null;
-    protected ?JwsVerifier $jwsVerifier  = null;
+    protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
     protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
     protected ?MetadataPolicyApplicator $metadataPolicyApplicator = null;
@@ -56,10 +56,10 @@ class Federation
     protected ?TrustMarkClaimFactory $trustMarkClaimFactory = null;
     protected ?TrustMarkClaimBagFactory $trustMarkClaimBagFactory = null;
     protected ?Helpers $helpers = null;
-    protected ?AlgorithmManagerFactory $algorithmManagerFactory = null;
-    protected ?JwsSerializerManagerFactory $jwsSerializerManagerFactory = null;
+    protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
+    protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
     protected ?JwsParserFactory $jwsParserFactory = null;
-    protected ?JwsVerifierFactory $jwsVerifierFactory = null;
+    protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
     protected ?JwksFactory $jwksFactory = null;
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
@@ -85,21 +85,22 @@ class Federation
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
     }
 
-    public function jwsVerifier(): JwsVerifier
+    public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
-        return $this->jwsVerifier ??= $this->jwsVerifierFactory()->build(
-            $this->algorithmManagerFactory()->build($this->supportedAlgorithms),
+        return $this->jwsVerifierDecorator ??= $this->jwsVerifierDecoratorFactory()->build(
+            $this->algorithmManagerDecoratorFactory()->build($this->supportedAlgorithms),
         );
     }
 
     public function jwsParser(): JwsParser
     {
-        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManager());
+        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
     }
 
-    public function jwsSerializerManager(): JwsSerializerManager
+    public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
-        return $this->jwsSerializerManager ??= $this->jwsSerializerManagerFactory()->build($this->supportedSerializers);
+        return $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
+            ->build($this->supportedSerializers);
     }
 
     public function entityStatementFetcher(): EntityStatementFetcher
@@ -150,9 +151,9 @@ class Federation
     {
         return $this->entityStatementFactory ??= new EntityStatementFactory(
             $this->jwsParser(),
-            $this->jwsVerifier(),
+            $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
-            $this->jwsSerializerManager(),
+            $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
             $this->trustMarkClaimFactory(),
@@ -164,9 +165,9 @@ class Federation
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
             $this->jwsParser(),
-            $this->jwsVerifier(),
+            $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
-            $this->jwsSerializerManager(),
+            $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
         );
@@ -176,9 +177,9 @@ class Federation
     {
         return $this->trustMarkFactory ??= new TrustMarkFactory(
             $this->jwsParser(),
-            $this->jwsVerifier(),
+            $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
-            $this->jwsSerializerManager(),
+            $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
         );
@@ -194,14 +195,14 @@ class Federation
         return $this->helpers ??= new Helpers();
     }
 
-    public function algorithmManagerFactory(): AlgorithmManagerFactory
+    public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
-        return $this->algorithmManagerFactory ??= new AlgorithmManagerFactory();
+        return $this->algorithmManagerDecoratorFactory ??= new AlgorithmManagerDecoratorFactory();
     }
 
-    public function jwsSerializerManagerFactory(): JwsSerializerManagerFactory
+    public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
-        return $this->jwsSerializerManagerFactory ??= new JwsSerializerManagerFactory();
+        return $this->jwsSerializerManagerDecoratorFactory ??= new JwsSerializerManagerDecoratorFactory();
     }
 
     public function jwsParserFactory(): JwsParserFactory
@@ -209,9 +210,9 @@ class Federation
         return $this->jwsParserFactory ??= new JwsParserFactory();
     }
 
-    public function jwsVerifierFactory(): JwsVerifierFactory
+    public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
-        return $this->jwsVerifierFactory ??= new JwsVerifierFactory();
+        return $this->jwsVerifierDecoratorFactory ??= new JwsVerifierDecoratorFactory();
     }
 
     public function jwksFactory(): JwksFactory

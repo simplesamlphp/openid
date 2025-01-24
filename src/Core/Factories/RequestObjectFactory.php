@@ -13,9 +13,9 @@ class RequestObjectFactory extends ParsedJwsFactory
     {
         return new RequestObject(
             $this->jwsParser->parse($token),
-            $this->jwsVerifier,
+            $this->jwsVerifierDecorator,
             $this->jwksFactory,
-            $this->jwsSerializerManager,
+            $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,
         );
