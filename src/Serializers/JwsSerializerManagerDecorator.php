@@ -26,6 +26,6 @@ class JwsSerializerManagerDecorator
 
     public function unserialize(string $input, ?string &$name = null): JwsDecorator
     {
-        return new JWSDecorator($this->jwsSerializerManager()->unserialize($input, $name));
+        return new JwsDecorator($this->jwsSerializerManager()->unserialize($input, $name));
     }
 }

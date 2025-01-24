@@ -39,4 +39,9 @@ class AlgorithmManagerDecoratorTest extends TestCase
     {
         $this->assertInstanceOf(AlgorithmManagerDecorator::class, $this->sut());
     }
+
+    public function testCanGetAlgorithmManager(): void
+    {
+        $this->assertInstanceOf(AlgorithmManager::class, $this->sut()->algorithmManager());
+    }
 }
