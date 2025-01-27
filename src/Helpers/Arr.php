@@ -19,7 +19,6 @@ class Arr
 
         $key = array_shift($keys);
 
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (!$key) {
             return;
         }

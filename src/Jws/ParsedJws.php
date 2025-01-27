@@ -65,12 +65,10 @@ class ParsedJws
     /**
      * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @psalm-suppress MixedReturnStatement
      */
     public function getHeader(int $signatureId = 0): array
     {
         try {
-            /** @psalm-suppress MixedAssignment */
             return $this->header ??= $this->jwsDecorator->jws()->getSignature($signatureId)->getProtectedHeader();
         } catch (Throwable $exception) {
             throw new JwsException('Unable to get protected header.', (int)$exception->getCode(), $exception);
@@ -154,7 +152,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Iss->value;
 
-        /** @psalm-suppress MixedAssignment */
         $iss = $this->getPayloadClaim($claimKey);
 
         return is_null($iss) ?
@@ -170,7 +167,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Sub->value;
 
-        /** @psalm-suppress MixedAssignment */
         $sub = $this->getPayloadClaim($claimKey);
 
         return is_null($sub) ? null : $this->helpers->type()->ensureNonEmptyString($sub, $claimKey);
@@ -182,7 +178,6 @@ class ParsedJws
      */
     public function getAudience(): ?array
     {
-        /** @psalm-suppress MixedAssignment */
         $aud = $this->getPayloadClaim(ClaimsEnum::Aud->value);
 
         if (is_null($aud)) {
@@ -210,7 +205,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Jti->value;
 
-        /** @psalm-suppress MixedAssignment */
         $jti = $this->getPayloadClaim($claimKey);
 
         return is_null($jti) ? null : $this->helpers->type()->ensureNonEmptyString($jti, $claimKey);
@@ -222,7 +216,6 @@ class ParsedJws
      */
     public function getExpirationTime(): ?int
     {
-        /** @psalm-suppress MixedAssignment */
         $exp = $this->getPayloadClaim(ClaimsEnum::Exp->value);
 
         if (is_null($exp)) {
@@ -243,7 +236,6 @@ class ParsedJws
      */
     public function getIssuedAt(): ?int
     {
-        /** @psalm-suppress MixedAssignment */
         $iat = $this->getPayloadClaim(ClaimsEnum::Iat->value);
 
         if (is_null($iat)) {
@@ -267,7 +259,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Id->value;
 
-        /** @psalm-suppress MixedAssignment */
         $id = $this->getPayloadClaim($claimKey);
 
         return is_null($id) ?
@@ -283,7 +274,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Kid->value;
 
-        /** @psalm-suppress MixedAssignment */
         $kid = $this->getHeaderClaim($claimKey);
 
         return is_null($kid) ? null : $this->helpers->type()->ensureNonEmptyString($kid, $claimKey);
@@ -297,7 +287,6 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Typ->value;
 
-        /** @psalm-suppress MixedAssignment */
         $typ = $this->getHeaderClaim($claimKey);
 
         return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);

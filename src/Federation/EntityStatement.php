@@ -82,11 +82,9 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return array{keys:array<array<string,mixed>>}
-     * @psalm-suppress MixedReturnTypeCoercion
      */
     public function getJwks(): array
     {
-        /** @psalm-suppress MixedAssignment We check the type manually. */
         $jwks = $this->getPayloadClaim(ClaimsEnum::Jwks->value);
 
         if (
@@ -140,7 +138,6 @@ class EntityStatement extends ParsedJws
     public function getAuthorityHints(): ?array
     {
         $claimKey = ClaimsEnum::AuthorityHints->value;
-        /** @psalm-suppress MixedAssignment */
         $authorityHints = $this->getPayloadClaim($claimKey);
 
         if (is_null($authorityHints)) {
@@ -175,7 +172,6 @@ class EntityStatement extends ParsedJws
     public function getMetadata(): ?array
     {
         $claimKey = ClaimsEnum::Metadata->value;
-        /** @psalm-suppress MixedAssignment */
         $metadata = $this->getPayloadClaim($claimKey);
 
         if (is_null($metadata)) {
@@ -229,7 +225,6 @@ class EntityStatement extends ParsedJws
         // OPTIONAL. An array of JSON objects, each representing a Trust Mark.
 
         $claimKey = ClaimsEnum::TrustMarks->value;
-        /** @psalm-suppress MixedAssignment */
         $trustMarksClaims = $this->getPayloadClaim($claimKey);
 
         if (is_null($trustMarksClaims)) {
@@ -242,7 +237,6 @@ class EntityStatement extends ParsedJws
 
         $trustMarkClaimBag = $this->trustMarkClaimBagFactory->build();
 
-        /** @psalm-suppress MixedAssignment */
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
             $trustMarkClaimData = $this->helpers->arr()->ensureStringKeys($trustMarkClaimData);
             $trustMarkClaimBag->add($this->trustMarkClaimFactory->buildFrom($trustMarkClaimData));
@@ -268,7 +262,6 @@ class EntityStatement extends ParsedJws
      */
     public function getFederationFetchEndpoint(): ?string
     {
-        /** @psalm-suppress MixedAssignment */
         // phpcs:disable
         // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)
         $federationFetchEndpoint = $this->getPayload() // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)

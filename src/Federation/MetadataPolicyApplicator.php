@@ -32,9 +32,7 @@ class MetadataPolicyApplicator
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
                     continue;
                 }
-                /** @psalm-suppress MixedAssignment */
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
-                /** @psalm-suppress MixedAssignment, MixedArgumentTypeCoercion */
                 /** @var array<string,mixed> $metadata */
                 $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
                     $metadata,
@@ -49,7 +47,6 @@ class MetadataPolicyApplicator
                         continue;
                     }
                     $this->helpers->arr()->ensureArrayDepth($metadata, $policyParameterName);
-                    /** @psalm-suppress MixedAssignment */
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $operatorValue,
                         $policyParameterName,
@@ -59,7 +56,6 @@ class MetadataPolicyApplicator
                     // already present in the metadata parameter MUST NOT be added another time. If the metadata
                     // parameter is absent, it MUST be initialized with the value of this operator.
                     if (!isset($metadata[$policyParameterName])) {
-                        /** @psalm-suppress MixedAssignment */
                         $metadata[$policyParameterName] = $operatorValue;
                         continue;
                     }
@@ -69,14 +65,12 @@ class MetadataPolicyApplicator
                         $policyParameterName,
                     );
 
-                    /** @psalm-suppress MixedArgument */
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
                     $metadataParameterValue = array_unique(
                         array_merge($metadataParameterValueBeforePolicy, $operatorValue),
                     );
 
-                    /** @psalm-suppress MixedAssignment */
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $metadataParameterValue,
                         $policyParameterName,
@@ -85,7 +79,6 @@ class MetadataPolicyApplicator
                     // If the metadata parameter is absent, it MUST be set to the value of the operator. If the metadata
                     // parameter is present, this operator has no effect.
                     if (!isset($metadata[$policyParameterName])) {
-                        /** @psalm-suppress MixedAssignment */
                         $metadata[$policyParameterName] = $operatorValue;
                     }
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf) {
@@ -126,7 +119,6 @@ class MetadataPolicyApplicator
                         $policyParameterName,
                     );
 
-                    /** @psalm-suppress MixedArgument */
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
                     $intersection = array_intersect(
@@ -138,7 +130,6 @@ class MetadataPolicyApplicator
                         unset($metadata[$policyParameterName]);
                         continue;
                     }
-                    /** @psalm-suppress MixedAssignment */
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $intersection,
                         $policyParameterName,
@@ -202,7 +193,6 @@ class MetadataPolicyApplicator
      */
     protected function resolveParameterValueBeforePolicy(array $metadata, string $parameter): mixed
     {
-        /** @psalm-suppress MixedAssignment */
         $value = $metadata[$parameter] ?? null;
 
         // Special case for 'scope' parameter, which needs to be converted to array before policy application.
@@ -217,7 +207,6 @@ class MetadataPolicyApplicator
     {
         // Special case for 'scope' parameter, which needs to be converted to string after policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_array($value)) {
-            /** @psalm-suppress MixedArgumentTypeCoercion */
             $value = implode(' ', $value);
         }
 

@@ -57,7 +57,6 @@ class TrustMark extends ParsedJws
      */
     public function getLogoUri(): ?string
     {
-        /** @psalm-suppress MixedAssignment */
         $logoUri = $this->getPayloadClaim(ClaimsEnum::LogoUri->value);
 
         return is_null($logoUri) ?
@@ -72,7 +71,6 @@ class TrustMark extends ParsedJws
      */
     public function getReference(): ?string
     {
-        /** @psalm-suppress MixedAssignment */
         $ref = $this->getPayloadClaim(ClaimsEnum::Ref->value);
 
         return is_null($ref) ?
@@ -86,7 +84,6 @@ class TrustMark extends ParsedJws
      */
     public function getDelegation(): ?string
     {
-        /** @psalm-suppress MixedAssignment */
         $delegation = $this->getPayloadClaim(ClaimsEnum::Delegation->value);
 
         return is_null($delegation) ?

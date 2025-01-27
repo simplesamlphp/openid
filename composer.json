@@ -36,8 +36,7 @@
         "phpunit/phpunit": "^10",
         "rector/rector": "^2.0",
         "simplesamlphp/simplesamlphp-test-framework": "^1",
-        "squizlabs/php_codesniffer": "^3",
-        "vimeo/psalm": "^5"
+        "squizlabs/php_codesniffer": "^3"
     },
     "config": {
         "sort-packages": true,
@@ -52,10 +51,10 @@
             "vendor/bin/phpcbf",
             "vendor/bin/phpcs -p",
             "composer update web-token/jwt-framework --with web-token/jwt-framework:^3.0",
-            "vendor/bin/psalm --no-cache",
+            "vendor/bin/phpstan",
             "vendor/bin/phpunit --no-coverage",
             "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.0",
-            "vendor/bin/psalm --no-cache",
+            "vendor/bin/phpstan",
             "vendor/bin/phpunit --no-coverage",
             "vendor/bin/rector --dry-run"
         ]

@@ -35,7 +35,6 @@ class TrustMarkClaim
         // All the claims in the JSON object MUST have the same values as those contained in the Trust Mark JWT.
         $trustMarkPayload = $this->trustMark->getPayload();
         $commonClaims = array_intersect_key($this->otherClaims, $trustMarkPayload);
-        /** @psalm-suppress MixedAssignment */
         foreach ($commonClaims as $key => $value) {
             if ($value !== $trustMarkPayload[$key]) {
                 throw new TrustMarkClaimException(

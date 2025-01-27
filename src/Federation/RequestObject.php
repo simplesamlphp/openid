@@ -73,7 +73,6 @@ class RequestObject extends ParsedJws
     public function getTrustChain(): ?array
     {
         $claimKey = ClaimsEnum::TrustChain->value;
-        /** @psalm-suppress MixedAssignment */
         $trustChain = $this->getPayloadClaim($claimKey) ?? null;
 
         if (is_null($trustChain)) {

@@ -419,7 +419,6 @@ class TrustChain implements JsonSerializable
         // subject's Entity Configuration. If both metadata and metadata_policy
         // appear in a Subordinate Statement, then the stated metadata MUST
         // be applied before the metadata_policy.
-        /** @psalm-suppress MixedAssignment We check type manually. */
         $immediateSuperiorMetadata = $this->getResolvedImmediateSuperior()->getMetadata();
         if (
             is_array($immediateSuperiorMetadata) &&
@@ -436,7 +435,6 @@ class TrustChain implements JsonSerializable
         // metadata_policy claim, the metadata of the Trust Chain subject resolves simply to the metadata found
         // in its Entity Configuration, with any metadata parameters provided by the Immediate Superior applied
         // to it.
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
         if (empty($this->resolvedMetadataPolicy[$entityTypeEnum->value])) {
             /** @var array<string,mixed> $leafMetadataEntityType */
             $this->resolvedMetadata[$entityTypeEnum->value] = $leafMetadataEntityType;

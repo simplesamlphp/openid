@@ -99,7 +99,6 @@ class JwsFetcher extends AbstractJwsFetcher
             throw new FetchException($message);
         }
 
-        /** @psalm-suppress InvalidLiteralArgument */
         if (
             is_string($expectedContentTypeHttpHeader = $this->getExpectedContentTypeHttpHeader()) &&
             (!str_contains(

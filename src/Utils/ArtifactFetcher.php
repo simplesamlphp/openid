@@ -33,7 +33,6 @@ class ArtifactFetcher
         }
 
         try {
-            /** @psalm-suppress MixedAssignment */
             $artifact = $this->cacheDecorator->get(null, $keyElement, ...$keyElements);
         } catch (Throwable $exception) {
             $this->logger?->error(

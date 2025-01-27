@@ -158,7 +158,6 @@ enum MetadataPolicyOperatorsEnum: string
 
         // Check contained values for declared types.
         if (in_array($this, [self::Add, self::OneOf, self::SubsetOf, self::SupersetOf], true)) {
-            /** @psalm-suppress MixedAssignment We'll check the type of $containedValue. */
             foreach ((array)$operatorValue as $containedValue) {
                 $containedValueType = gettype($containedValue);
                 if (! in_array($containedValueType, $this->getSupportedOperatorContainedValueTypes(), true)) {
@@ -183,7 +182,6 @@ enum MetadataPolicyOperatorsEnum: string
 
         // Check contained values for declared types.
         if (in_array($this, [self::Add, self::SubsetOf, self::SupersetOf], true)) {
-            /** @psalm-suppress MixedAssignment We'll check the type of $containedValue. */
             foreach ((array)$parameterValue as $containedValue) {
                 $containedValueType = gettype($containedValue);
                 if (! in_array($containedValueType, $this->getSupportedParameterContainedValueTypes(), true)) {
@@ -272,7 +270,6 @@ enum MetadataPolicyOperatorsEnum: string
                 continue;
             }
 
-            /** @psalm-suppress MixedAssignment */
             $operatorValue = $parameterOperations[$metadataPolicyOperatorsEnum->value];
             // Check common policy resolving rules for each supported operator.
             // If operator value type is not supported, throw.
@@ -312,7 +309,6 @@ enum MetadataPolicyOperatorsEnum: string
                 continue;
             }
 
-            /** @psalm-suppress MixedAssignment */
             $operatorValue = $parameterOperations[$metadataPolicyOperatorEnum->value];
 
             // No special resolving rules for operator 'value', continue with 'add'.

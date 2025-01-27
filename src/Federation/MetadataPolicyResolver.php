@@ -19,7 +19,6 @@ class MetadataPolicyResolver
     /**
      * @return array<string,array<string,array<string,mixed>>>
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
-     * @psalm-suppress MixedAssignment
      * @phpstan-ignore missingType.iterableValue (We validate it here)
      */
     public function ensureFormat(array $metadataPolicies): array
@@ -70,7 +69,6 @@ class MetadataPolicyResolver
         $supportedOperators = MetadataPolicyOperatorsEnum::values();
 
         foreach ($metadataPolicies as $metadataPolicy) {
-            /** @psalm-suppress MixedAssignment We'll check if $nextPolicy is array type. */
             if (
                 (!array_key_exists($entityTypeEnum->value, $metadataPolicy)) ||
                 /** @phpstan-ignore booleanNot.alwaysFalse (Let's check for validity here.) */
@@ -100,7 +98,6 @@ class MetadataPolicyResolver
             }
 
             // Go over each metadata parameter and resolve the policy.
-            /** @psalm-suppress MixedAssignment We'll check if $nextPolicyParameterOperations is array type. */
             foreach ($nextPolicy as $nextPolicyParameter => $nextPolicyParameterOperations) {
                 MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules($nextPolicyParameterOperations);
                 MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules($nextPolicyParameterOperations);
@@ -112,7 +109,6 @@ class MetadataPolicyResolver
                         continue;
                     }
 
-                    /** @psalm-suppress MixedAssignment */
                     $operatorValue = $nextPolicyParameterOperations[$metadataPolicyOperatorEnum->value];
 
                     // If it doesn't exist, we can simply set it as is.
@@ -126,7 +122,6 @@ class MetadataPolicyResolver
                             $nextPolicyParameter,
                             $metadataPolicyOperatorEnum->value,
                         );
-                        /** @psalm-suppress MixedAssignment, MixedArrayAssignment We ensured this is array. */
                         // @phpstan-ignore offsetAccess.nonOffsetAccessible (We ensured this is array.)
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         $operatorValue;
@@ -137,7 +132,6 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Default
                     ) {
                         // These must have the same value in different policies.
-                        /** @psalm-suppress MixedArrayAccess We ensured this is array. */
                         if (
                             $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] !==
                             $operatorValue
@@ -175,7 +169,6 @@ class MetadataPolicyResolver
                         }
 
                         // We merge with existing values.
-                        /** @psalm-suppress MixedAssignment, MixedArgument, MixedArrayAssignment, MixedArrayAccess We ensured this is array. */
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         array_unique(
                             array_merge(
@@ -203,13 +196,11 @@ class MetadataPolicyResolver
 
                         // The result of merging the values of two operators is the intersection of the
                         // operator values. If the intersection is empty, this MUST result in a policy error.
-                        /** @psalm-suppress MixedArgument, MixedArrayAccess We ensured this is array. */
                         $intersection = array_intersect(
                             $operatorValue,
                             $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
                         );
 
-                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
                         if ($intersection === []) {
                             throw new MetadataPolicyException(
                                 sprintf(
@@ -225,7 +216,6 @@ class MetadataPolicyResolver
                         }
 
                         // We have values in intersection, so set it as new operator value.
-                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         $intersection;
                     } elseif ($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] === false) {
@@ -233,11 +223,9 @@ class MetadataPolicyResolver
                         // If a Superior has specified essential=true, then a Subordinate MUST NOT change that.
                         // If a Superior has specified essential=false, then a Subordinate is allowed to change
                         // that to essential=true.
-                        /** @psalm-suppress MixedArrayAccess, MixedArrayAssignment We ensured this is array. */
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         (bool)$operatorValue;
                     } elseif ($operatorValue !== true) {
-                        /** @psalm-suppress MixedArrayAccess We ensured this is array. */
                         throw new MetadataPolicyException(
                             sprintf(
                                 'Invalid change of value for operator %s: %s -> %s.',
