@@ -131,6 +131,7 @@ class Federation
             $this->timestampValidationLeewayDecorator,
             $this->metadataPolicyResolver(),
             $this->metadataPolicyApplicator(),
+            $this->helpers(),
         );
     }
 
@@ -187,7 +188,10 @@ class Federation
 
     public function trustMarkClaimFactory(): TrustMarkClaimFactory
     {
-        return $this->trustMarkClaimFactory ??= new TrustMarkClaimFactory($this->trustMarkFactory());
+        return $this->trustMarkClaimFactory ??= new TrustMarkClaimFactory(
+            $this->trustMarkFactory(),
+            $this->helpers(),
+        );
     }
 
     public function helpers(): Helpers

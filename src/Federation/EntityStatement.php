@@ -98,10 +98,19 @@ class EntityStatement extends ParsedJws
             throw new JwsException('Invalid JWKS encountered: ' . var_export($jwks, true));
         }
 
-        $jwks[ClaimsEnum::Keys->value] = array_map(
-            $this->helpers->arr()->ensureStringKeys(...),
-            $jwks[ClaimsEnum::Keys->value],
-        );
+        $ensuredKeys = [];
+
+        foreach ($jwks[ClaimsEnum::Keys->value] as $index => $key) {
+            if (!is_array($key)) {
+                throw new JwsException(
+                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
+                );
+            }
+
+            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
+        }
+
+        $jwks[ClaimsEnum::Keys->value] = $ensuredKeys;
 
         /** @var array{keys:array<array<string,mixed>>} $jwks */
         return $jwks;
@@ -155,7 +164,7 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Authority Hints claim encountered in non-configuration statement.');
         }
 
-        return $this->ensureNonEmptyStrings($authorityHints, $claimKey);
+        return $this->helpers->type()->ensureNonEmptyStrings($authorityHints, $claimKey);
     }
 
     /**
@@ -254,20 +263,25 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     *
+     * phpcs:ignore
      */
     public function getFederationFetchEndpoint(): ?string
     {
         /** @psalm-suppress MixedAssignment */
-        $federationFetchEndpoint = $this->getPayload()
+        // phpcs:disable
+        // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)
+        $federationFetchEndpoint = $this->getPayload() // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)
         [ClaimsEnum::Metadata->value]
         [EntityTypesEnum::FederationEntity->value]
         [ClaimsEnum::FederationFetchEndpoint->value] ?? null;
+        // phpcs:enable
 
         if (is_null($federationFetchEndpoint)) {
             return null;
         }
 
-        return (string)$federationFetchEndpoint;
+        return $this->helpers->type()->ensureString($federationFetchEndpoint);
     }
 
     /**

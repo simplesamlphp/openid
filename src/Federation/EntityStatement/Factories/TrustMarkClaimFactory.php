@@ -9,11 +9,13 @@ use SimpleSAML\OpenID\Exceptions\TrustMarkClaimException;
 use SimpleSAML\OpenID\Federation\EntityStatement\TrustMarkClaim;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
+use SimpleSAML\OpenID\Helpers;
 
 class TrustMarkClaimFactory
 {
     public function __construct(
         protected readonly TrustMarkFactory $trustMarkFactory,
+        protected readonly Helpers $helpers,
     ) {
     }
 
@@ -35,6 +37,7 @@ class TrustMarkClaimFactory
      * @param array<string,mixed> $trustMarkClaimData
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkClaimException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function buildFrom(array $trustMarkClaimData): TrustMarkClaim
     {
@@ -43,14 +46,17 @@ class TrustMarkClaimFactory
         // The Trust Mark identifier. It MUST be the same value as the id claim contained in the Trust Mark JWT.
         // trust_mark
         // A signed JSON Web Token that represents a Trust Mark.
-        $id = (string)($trustMarkClaimData[ClaimsEnum::Id->value] ?? throw new TrustMarkClaimException(
-            'No ID present in Trust Mark Claim.',
-        ));
+        $id = $this->helpers->type()->ensureString(
+            $trustMarkClaimData[ClaimsEnum::Id->value] ?? throw new TrustMarkClaimException(
+                'No ID present in Trust Mark Claim.',
+            ),
+        );
 
-        $trustMarkToken = (string)($trustMarkClaimData[ClaimsEnum::TrustMark->value] ??
-        throw new TrustMarkClaimException(
-            'No Trust Mark token present in Trust Mark Claim.',
-        ));
+        $trustMarkToken = $this->helpers->type()->ensureString(
+            $trustMarkClaimData[ClaimsEnum::TrustMark->value] ?? throw new TrustMarkClaimException(
+                'No Trust Mark token present in Trust Mark Claim.',
+            ),
+        );
 
         $otherClaims = array_diff_key(
             $trustMarkClaimData,

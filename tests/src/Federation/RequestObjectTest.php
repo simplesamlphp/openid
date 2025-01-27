@@ -33,6 +33,7 @@ class RequestObjectTest extends TestCase
     protected MockObject $dateIntervalDecoratorMock;
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
+    protected MockObject $typeHelperMock;
     protected array $expiredPayload = [
         'iat' => 1731178665,
         'nbf' => 1731178665,
@@ -67,6 +68,11 @@ class RequestObjectTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
+        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+
+        $this->typeHelperMock->method('ensureNonEmptyStrings')->willReturnArgument(0);
+        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;

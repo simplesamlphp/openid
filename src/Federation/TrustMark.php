@@ -53,25 +53,31 @@ class TrustMark extends ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getLogoUri(): ?string
     {
         /** @psalm-suppress MixedAssignment */
         $logoUri = $this->getPayloadClaim(ClaimsEnum::LogoUri->value);
 
-        return is_null($logoUri) ? null : $this->ensureNonEmptyString($logoUri, ClaimsEnum::LogoUri->value);
+        return is_null($logoUri) ?
+        null :
+        $this->helpers->type()->ensureNonEmptyString($logoUri, ClaimsEnum::LogoUri->value);
     }
 
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getReference(): ?string
     {
         /** @psalm-suppress MixedAssignment */
         $ref = $this->getPayloadClaim(ClaimsEnum::Ref->value);
 
-        return is_null($ref) ? null : $this->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
+        return is_null($ref) ?
+        null :
+        $this->helpers->type()->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
     }
 
     /**
@@ -83,7 +89,9 @@ class TrustMark extends ParsedJws
         /** @psalm-suppress MixedAssignment */
         $delegation = $this->getPayloadClaim(ClaimsEnum::Delegation->value);
 
-        return is_null($delegation) ? null : $this->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
+        return is_null($delegation) ?
+        null :
+        $this->helpers->type()->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
     }
 
     /**

@@ -39,9 +39,10 @@ class EntityStatementFactoryTest extends TestCase
     protected MockObject $jwsSerializerManagerDecoratorMock;
     protected MockObject $dateIntervalDecoratorMock;
     protected MockObject $helpersMock;
+    protected MockObject $jsonHelperMock;
+    protected MockObject $typeHelperMock;
     protected MockObject $trustMarkClaimFactoryMock;
     protected MockObject $trustMarkClaimBagFactoryMock;
-    protected MockObject $jsonHelperMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -114,12 +115,18 @@ class EntityStatementFactoryTest extends TestCase
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
-        $this->trustMarkClaimFactoryMock = $this->createMock(TrustMarkClaimFactory::class);
-        $this->trustMarkClaimBagFactoryMock = $this->createMock(TrustMarkClaimBagFactory::class);
 
+        $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
+        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+
+        $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
+
+        $this->trustMarkClaimFactoryMock = $this->createMock(TrustMarkClaimFactory::class);
+        $this->trustMarkClaimBagFactoryMock = $this->createMock(TrustMarkClaimBagFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;

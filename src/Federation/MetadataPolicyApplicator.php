@@ -35,6 +35,7 @@ class MetadataPolicyApplicator
                 /** @psalm-suppress MixedAssignment */
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
                 /** @psalm-suppress MixedAssignment, MixedArgumentTypeCoercion */
+                /** @var array<string,mixed> $metadata */
                 $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
                     $metadata,
                     $policyParameterName,
@@ -69,6 +70,8 @@ class MetadataPolicyApplicator
                     );
 
                     /** @psalm-suppress MixedArgument */
+                    /** @var array<mixed> $metadataParameterValueBeforePolicy */
+                    /** @var array<mixed> $operatorValue */
                     $metadataParameterValue = array_unique(
                         array_merge($metadataParameterValueBeforePolicy, $operatorValue),
                     );
@@ -124,6 +127,8 @@ class MetadataPolicyApplicator
                     );
 
                     /** @psalm-suppress MixedArgument */
+                    /** @var array<mixed> $metadataParameterValueBeforePolicy */
+                    /** @var array<mixed> $operatorValue */
                     $intersection = array_intersect(
                         $metadataParameterValueBeforePolicy,
                         $operatorValue,

@@ -63,35 +63,6 @@ class ParsedJws
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @return non-empty-string
-     */
-    protected function ensureNonEmptyString(mixed $value, string $description): string
-    {
-        $value = (string)$value;
-
-        if ($value === '' || $value === '0') {
-            $message = "Empty string value encountered: $description";
-            throw new JwsException($message);
-        }
-
-        return $value;
-    }
-
-    /**
-     * @return non-empty-string[]
-     * @phpstan-ignore missingType.iterableValue (We cast everything to string)
-     */
-    protected function ensureNonEmptyStrings(array $values, string $description): array
-    {
-        return array_map(
-            $this->ensureNonEmptyString(...),
-            $values,
-            array_fill(0, count($values), $description),
-        );
-    }
-
-    /**
      * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @psalm-suppress MixedReturnStatement
@@ -186,7 +157,9 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $iss = $this->getPayloadClaim($claimKey);
 
-        return is_null($iss) ? null : $this->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
+        return is_null($iss) ?
+        null :
+        $this->helpers->type()->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
     }
 
     /**
@@ -200,7 +173,7 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $sub = $this->getPayloadClaim($claimKey);
 
-        return is_null($sub) ? null : $this->ensureNonEmptyString($sub, $claimKey);
+        return is_null($sub) ? null : $this->helpers->type()->ensureNonEmptyString($sub, $claimKey);
     }
 
     /**
@@ -218,7 +191,7 @@ class ParsedJws
 
         if (is_array($aud)) {
             // Ensure string values.
-            return array_map(fn(mixed $val): string => (string)$val, $aud);
+            return $this->helpers->type()->ensureStrings($aud, ClaimsEnum::Aud->value);
         }
 
         if (is_string($aud)) {
@@ -240,11 +213,12 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $jti = $this->getPayloadClaim($claimKey);
 
-        return is_null($jti) ? null : $this->ensureNonEmptyString($jti, $claimKey);
+        return is_null($jti) ? null : $this->helpers->type()->ensureNonEmptyString($jti, $claimKey);
     }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getExpirationTime(): ?int
     {
@@ -255,7 +229,7 @@ class ParsedJws
             return null;
         }
 
-        $exp = (int)$exp;
+        $exp = $this->helpers->type()->ensureInt($exp);
 
         if ($exp + $this->timestampValidationLeeway->getInSeconds() < time()) {
             throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
@@ -276,7 +250,7 @@ class ParsedJws
             return null;
         }
 
-        $iat = (int)$iat;
+        $iat = $this->helpers->type()->ensureInt($iat);
 
         if ($iat - $this->timestampValidationLeeway->getInSeconds() > time()) {
             throw new JwsException("Issued At claim ($iat) is greater than current time.");
@@ -296,7 +270,9 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $id = $this->getPayloadClaim($claimKey);
 
-        return is_null($id) ? null : $this->ensureNonEmptyString($id, $claimKey);
+        return is_null($id) ?
+        null :
+        $this->helpers->type()->ensureNonEmptyString($id, $claimKey);
     }
 
     /**
@@ -310,7 +286,7 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $kid = $this->getHeaderClaim($claimKey);
 
-        return is_null($kid) ? null : $this->ensureNonEmptyString($kid, $claimKey);
+        return is_null($kid) ? null : $this->helpers->type()->ensureNonEmptyString($kid, $claimKey);
     }
 
     /**
@@ -324,6 +300,6 @@ class ParsedJws
         /** @psalm-suppress MixedAssignment */
         $typ = $this->getHeaderClaim($claimKey);
 
-        return is_null($typ) ? null : $this->ensureNonEmptyString($typ, $claimKey);
+        return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);
     }
 }

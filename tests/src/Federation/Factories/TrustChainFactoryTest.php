@@ -16,6 +16,7 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
+use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChainFactory::class)]
 #[UsesClass(TrustChain::class)]
@@ -25,6 +26,7 @@ class TrustChainFactoryTest extends TestCase
     protected MockObject $timestampValidationLeewayMock;
     protected MockObject $metadataPolicyResolverMock;
     protected MockObject $metadataPolicyApplicatorMock;
+    protected MockObject $helpersMock;
 
     protected function setUp(): void
     {
@@ -32,6 +34,7 @@ class TrustChainFactoryTest extends TestCase
         $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
         $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
         $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
+        $this->helpersMock = $this->createMock(Helpers::class);
     }
 
     protected function sut(
@@ -39,17 +42,20 @@ class TrustChainFactoryTest extends TestCase
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
         ?MetadataPolicyResolver $metadataPolicyResolver = null,
         ?MetadataPolicyApplicator $metadataPolicyApplicator = null,
+        ?Helpers $helpers = null,
     ): TrustChainFactory {
         $entityStatementFactory ??= $this->entityStatementFactoryMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
         $metadataPolicyResolver ??= $this->metadataPolicyResolverMock;
         $metadataPolicyApplicator ??= $this->metadataPolicyApplicatorMock;
+        $helpers ??= $this->helpersMock;
 
         return new TrustChainFactory(
             $entityStatementFactory,
             $timestampValidationLeewayMock,
             $metadataPolicyResolver,
             $metadataPolicyApplicator,
+            $helpers,
         );
     }
 

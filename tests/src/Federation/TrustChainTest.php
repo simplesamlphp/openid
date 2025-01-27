@@ -15,6 +15,7 @@ use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
+use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChain::class)]
 class TrustChainTest extends TestCase
@@ -35,6 +36,7 @@ class TrustChainTest extends TestCase
         $this->timestampValidationLeewayDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
         $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
+        $this->helpersMock = $this->createMock(Helpers::class);
 
         $this->expirationTime = time() + 60;
         $this->leafMock = $this->createMock(EntityStatement::class);
@@ -54,15 +56,18 @@ class TrustChainTest extends TestCase
         ?DateIntervalDecorator $timestampValidationLeewayDecorator = null,
         ?MetadataPolicyResolver $metadataPolicyResolver = null,
         ?MetadataPolicyApplicator $metadataPolicyApplicator = null,
+        ?Helpers $helpers = null,
     ): TrustChain {
         $timestampValidationLeewayDecorator ??= $this->timestampValidationLeewayDecoratorMock;
         $metadataPolicyResolver ??= $this->metadataPolicyResolverMock;
         $metadataPolicyApplicator ??= $this->metadataPolicyApplicatorMock;
+        $helpers ??= $this->helpersMock;
 
         return new TrustChain(
             $timestampValidationLeewayDecorator,
             $metadataPolicyResolver,
             $metadataPolicyApplicator,
+            $helpers,
         );
     }
 

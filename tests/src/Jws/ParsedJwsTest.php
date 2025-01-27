@@ -32,6 +32,7 @@ class ParsedJwsTest extends TestCase
     protected MockObject $signatureMock;
 
     protected MockObject $jsonHelperMock;
+    protected MockObject $typeHelperMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -109,6 +110,12 @@ class ParsedJwsTest extends TestCase
 
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
+        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+
+        $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $this->typeHelperMock->method('ensureStrings')->willReturnArgument(0);
+        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
@@ -306,41 +313,6 @@ class ParsedJwsTest extends TestCase
         $this->expectExceptionMessage('audience');
 
         $this->sut()->getAudience();
-    }
-
-    public function testThrowsOnEmptyString(): void
-    {
-        $payload = ['iss' => ''];
-
-        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
-        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn($payload);
-
-        $this->expectException(JwsException::class);
-        $this->expectExceptionMessage('Empty');
-
-        $this->sut()->getIssuer();
-    }
-
-    public function testThrowsOnEmptyStrings(): void
-    {
-        $sut = new class (
-            $this->jwsDecoratorMock,
-            $this->jwsVerifierDecoratorMock,
-            $this->jwksFactoryMock,
-            $this->jwsSerializerManagerDecoratorMock,
-            $this->timestampValidationLeewayMock,
-            $this->helpersMock,
-        ) extends ParsedJws {
-            public function simulateEmptyStringsCase(): array
-            {
-                return $this->ensureNonEmptyStrings([''], 'test');
-            }
-        };
-
-        $this->expectException(JwsException::class);
-        $this->expectExceptionMessage('Empty');
-
-        $sut->simulateEmptyStringsCase();
     }
 
     public function testCanSerializeToToken(): void

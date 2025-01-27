@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
+use SimpleSAML\OpenID\Helpers;
 
 class TrustChainFactory
 {
@@ -18,6 +19,7 @@ class TrustChainFactory
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly MetadataPolicyResolver $metadataPolicyResolver,
         protected readonly MetadataPolicyApplicator $metadataPolicyApplicator,
+        protected readonly Helpers $helpers,
     ) {
     }
 
@@ -27,6 +29,7 @@ class TrustChainFactory
             $this->timestampValidationLeeway,
             $this->metadataPolicyResolver,
             $this->metadataPolicyApplicator,
+            $this->helpers,
         );
     }
 

@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Helpers;
 
 class TrustChain implements JsonSerializable
 {
@@ -58,6 +59,7 @@ class TrustChain implements JsonSerializable
         protected readonly DateIntervalDecorator $timestampValidationLeewayDecorator,
         protected readonly MetadataPolicyResolver $metadataPolicyResolver,
         protected readonly MetadataPolicyApplicator $metadataPolicyApplicator,
+        protected readonly Helpers $helpers,
     ) {
     }
 
@@ -355,10 +357,7 @@ class TrustChain implements JsonSerializable
     {
         $operators = (array)($entityStatement->getPayloadClaim(ClaimsEnum::MetadataPolicyCrit->value) ?? []);
         // Make sure we have strings only
-        $operators = array_map(
-            fn(mixed $value): string => (string)$value,
-            $operators,
-        );
+        $operators = $this->helpers->type()->ensureStrings($operators);
 
         $this->criticalMetadataPolicyOperators = array_merge($this->criticalMetadataPolicyOperators, $operators);
     }

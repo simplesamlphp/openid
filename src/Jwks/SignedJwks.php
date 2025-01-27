@@ -29,10 +29,19 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             );
         }
 
-        return array_map(
-            $this->helpers->arr()->ensureStringKeys(...),
-            $keys,
-        );
+        $ensuredKeys = [];
+
+        foreach ($keys as $index => $key) {
+            if (!is_array($key)) {
+                throw new SignedJwksException(
+                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
+                );
+            }
+
+            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
+        }
+
+        return $ensuredKeys;
     }
 
     /**

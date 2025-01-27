@@ -117,7 +117,9 @@ class MetadataPolicyResolver
 
                     // If it doesn't exist, we can simply set it as is.
                     if (
-                        !isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value])
+                        (!isset($currentPolicy[$nextPolicyParameter])) ||
+                        (!is_array($currentPolicy[$nextPolicyParameter])) ||
+                        (!isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
                     ) {
                         $this->helpers->arr()->ensureArrayDepth(
                             $currentPolicy,
@@ -125,6 +127,7 @@ class MetadataPolicyResolver
                             $metadataPolicyOperatorEnum->value,
                         );
                         /** @psalm-suppress MixedAssignment, MixedArrayAssignment We ensured this is array. */
+                        // @phpstan-ignore offsetAccess.nonOffsetAccessible (We ensured this is array.)
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         $operatorValue;
 
@@ -157,8 +160,21 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add ||
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SupersetOf
                     ) {
+                        if (
+                            (!is_array($operatorValue)) ||
+                            (!is_array($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
+                        ) {
+                            // The values are invalid, we have to throw.
+                            throw new MetadataPolicyException(
+                                sprintf(
+                                    'Invalid operator value encountered for operator %s: %s.',
+                                    $metadataPolicyOperatorEnum->value,
+                                    var_export($operatorValue, true),
+                                ),
+                            );
+                        }
+
                         // We merge with existing values.
-                        /** @var array $operatorValue We ensured this is array. */
                         /** @psalm-suppress MixedAssignment, MixedArgument, MixedArrayAssignment, MixedArrayAccess We ensured this is array. */
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         array_unique(
@@ -171,9 +187,22 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf ||
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf
                     ) {
+                        if (
+                            (!is_array($operatorValue)) ||
+                            (!is_array($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
+                        ) {
+                            // The values are invalid, we have to throw.
+                            throw new MetadataPolicyException(
+                                sprintf(
+                                    'Invalid operator value encountered for operator %s: %s.',
+                                    $metadataPolicyOperatorEnum->value,
+                                    var_export($operatorValue, true),
+                                ),
+                            );
+                        }
+
                         // The result of merging the values of two operators is the intersection of the
                         // operator values. If the intersection is empty, this MUST result in a policy error.
-                        /** @var array $operatorValue We ensured this is array. */
                         /** @psalm-suppress MixedArgument, MixedArrayAccess We ensured this is array. */
                         $intersection = array_intersect(
                             $operatorValue,

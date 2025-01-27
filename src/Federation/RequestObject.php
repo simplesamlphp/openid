@@ -81,7 +81,7 @@ class RequestObject extends ParsedJws
         }
 
         if (is_array($trustChain)) {
-            return $this->ensureNonEmptyStrings($trustChain, $claimKey);
+            return $this->helpers->type()->ensureNonEmptyStrings($trustChain, $claimKey);
         }
 
         throw new RequestObjectException(

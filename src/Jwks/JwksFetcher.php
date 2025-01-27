@@ -63,10 +63,19 @@ class JwksFetcher
             throw new JwksException($message);
         }
 
-        $jwks[ClaimsEnum::Keys->value] = array_map(
-            $this->helpers->arr()->ensureStringKeys(...),
-            $jwks[ClaimsEnum::Keys->value],
-        );
+        $ensuredKeys = [];
+
+        foreach ($jwks[ClaimsEnum::Keys->value] as $index => $key) {
+            if (!is_array($key)) {
+                throw new JwksException(
+                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
+                );
+            }
+
+            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
+        }
+
+        $jwks[ClaimsEnum::Keys->value] = $ensuredKeys;
 
         /** @var array{keys:array<array<string,mixed>>} $jwks */
         return $jwks;

@@ -14,26 +14,40 @@ use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory
 use SimpleSAML\OpenID\Federation\EntityStatement\TrustMarkClaim;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
+use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustMarkClaimFactory::class)]
 #[UsesClass(TrustMarkClaim::class)]
 class TrustMarkClaimFactoryTest extends TestCase
 {
     protected MockObject $trustMarkFactoryMock;
+    protected MockObject $helpersMock;
+    protected MockObject $typeHelpersMock;
     protected MockObject $trustMarkMock;
 
     protected function setUp(): void
     {
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
+        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->typeHelpersMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($this->typeHelpersMock);
+
+        $this->typeHelpersMock->method('ensureString')->willReturnArgument(0);
+
         $this->trustMarkMock = $this->createMock(TrustMark::class);
     }
 
     protected function sut(
         ?TrustMarkFactory $trustMarkFactory = null,
+        ?Helpers $helpers = null,
     ): TrustMarkClaimFactory {
         $trustMarkFactory ??= $this->trustMarkFactoryMock;
+        $helpers ??= $this->helpersMock;
 
-        return new TrustMarkClaimFactory($trustMarkFactory);
+        return new TrustMarkClaimFactory(
+            $trustMarkFactory,
+            $helpers,
+        );
     }
 
     public function testCanCreateInstance(): void

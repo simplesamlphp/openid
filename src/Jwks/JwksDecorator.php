@@ -26,6 +26,7 @@ class JwksDecorator implements JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        // @phpstan-ignore return.type (So I don't have to override JWK::jsonSerialize which actually returns OK)
         return [
             ClaimsEnum::Keys->value => array_map(
                 fn(JWK $jwk): array => $jwk->jsonSerialize(),
