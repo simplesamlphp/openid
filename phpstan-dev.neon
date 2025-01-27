@@ -3,4 +3,4 @@ parameters:
 	level: 0
 	paths:
 		- tests
-    tmpDir: build/phpstan
+	tmpDir: build/phpstan
