@@ -141,8 +141,8 @@ jobs:
       fail-fast: false
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['8.2', '8.4']
-        jwt-version: ['^4.0.2']
+        php-versions: ['8.2', '8.3', '8.4']
+        jwt-version: ['^3.4', '^4.0.2']
 
     steps:
       - name: Setup PHP, with composer and extensions
@@ -207,8 +207,8 @@ jobs:
       fail-fast: true
       matrix:
         operating-system: [windows-latest]
-        php-versions: ['8.2', '8.3', '8.4']
-        jwt-version: ['^3.4', '^4.0.2']
+        php-versions: ['8.2', '8.4']
+        jwt-version: ['^4.0.2']
 
     steps:
       - name: Setup PHP, with composer and extensions
