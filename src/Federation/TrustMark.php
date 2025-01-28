@@ -81,6 +81,7 @@ class TrustMark extends ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getDelegation(): ?string
     {

@@ -19,7 +19,7 @@ class Type
         }
 
         $error = 'Unsafe string casting, aborting.';
-        $error .= is_string($context) ? "Context: $context" : '';
+        $error .= is_string($context) ? " Context: $context" : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);
@@ -38,7 +38,7 @@ class Type
         }
 
         $error = 'Empty string value encountered, aborting.';
-        $error .= is_string($context) ? "Context: $context" : '';
+        $error .= is_string($context) ? " Context: $context" : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);
