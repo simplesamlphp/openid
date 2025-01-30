@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Claims;
 
 class GenericClaim
 {
+    /**
+     * @param non-empty-string $name
+     */
     public function __construct(
         protected readonly string $name,
         protected readonly mixed $value,

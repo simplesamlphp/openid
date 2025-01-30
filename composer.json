@@ -55,8 +55,9 @@
             "vendor/bin/phpunit --no-coverage",
             "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.0",
             "vendor/bin/phpstan",
-            "vendor/bin/phpunit --no-coverage",
-            "vendor/bin/rector --dry-run"
+            "vendor/bin/phpunit",
+            "vendor/bin/rector --dry-run",
+            "vendor/bin/phpstan analyze -c phpstan-dev.neon --memory-limit=1024M"
         ]
     }
 }

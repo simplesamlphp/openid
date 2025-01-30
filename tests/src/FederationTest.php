@@ -18,11 +18,11 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Federation;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
@@ -53,7 +53,6 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(EntityStatementFactory::class)]
 #[UsesClass(RequestObjectFactory::class)]
 #[UsesClass(TrustMarkFactory::class)]
-#[UsesClass(TrustMarkClaimFactory::class)]
 #[UsesClass(AlgorithmManagerDecoratorFactory::class)]
 #[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
 #[UsesClass(JwsParserFactory::class)]
@@ -71,6 +70,7 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(AlgorithmManagerDecorator::class)]
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
+#[UsesClass(ClaimFactory::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
@@ -144,6 +144,6 @@ class FederationTest extends TestCase
         $this->assertInstanceOf(DateIntervalDecorator::class, $sut->maxCacheDurationDecorator());
         $this->assertInstanceOf(SupportedAlgorithms::class, $sut->supportedAlgorithms());
         $this->assertInstanceOf(SupportedSerializers::class, $sut->supportedSerializers());
-        $this->assertIsInt($sut->maxTrustChainDepth());
+        $this->assertNotEmpty($sut->maxTrustChainDepth());
     }
 }

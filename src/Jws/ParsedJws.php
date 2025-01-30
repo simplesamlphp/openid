@@ -8,6 +8,7 @@ use JsonException;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
@@ -34,6 +35,7 @@ class ParsedJws
         protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly Helpers $helpers,
+        protected readonly ClaimFactory $claimFactory,
     ) {
         $this->validate();
     }
@@ -186,7 +188,7 @@ class ParsedJws
 
         if (is_array($aud)) {
             // Ensure string values.
-            return $this->helpers->type()->ensureStrings($aud, ClaimsEnum::Aud->value);
+            return $this->helpers->type()->ensureArrayWithValuesAsStrings($aud, ClaimsEnum::Aud->value);
         }
 
         if (is_string($aud)) {

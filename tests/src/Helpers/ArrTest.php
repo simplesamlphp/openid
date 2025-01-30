@@ -36,29 +36,4 @@ class ArrTest extends TestCase
         $arr = [];
         $this->sut()->ensureArrayDepth($arr, ...range(0, 100));
     }
-
-    public function testCanEnsureStringKeys(): void
-    {
-        $this->assertSame(
-            ['1' => 'a', '2' => 'b'],
-            $this->sut()->ensureStringKeys([1 => 'a', 2 => 'b']),
-        );
-        $this->assertSame(
-            ['1' => 1, '2' => 2],
-            $this->sut()->ensureStringKeys([1 => 1, '2' => 2]),
-        );
-        $this->assertSame(
-            ['0' => 0, '1' => 1, '2' => 2],
-            $this->sut()->ensureStringKeys([0, 1, 2]),
-        );
-
-        // Test call for nested array
-        $this->assertSame(
-            [['0' => 0, '1' => 1], ['0' => 2, '1' => 3]],
-            array_map(
-                $this->sut()->ensureStringKeys(...),
-                [[0, 1], [2, 3]],
-            ),
-        );
-    }
 }

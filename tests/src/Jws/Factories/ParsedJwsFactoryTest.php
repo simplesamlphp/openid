@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -27,6 +28,7 @@ class ParsedJwsFactoryTest extends TestCase
     protected MockObject $jwsSerializerManagerDecoratorMock;
     protected MockObject $dateIntervalDecoratorMock;
     protected MockObject $helpersMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $validPayload;
 
@@ -38,6 +40,7 @@ class ParsedJwsFactoryTest extends TestCase
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
 
     protected function sut(
@@ -47,6 +50,7 @@ class ParsedJwsFactoryTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): ParsedJwsFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -54,6 +58,7 @@ class ParsedJwsFactoryTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new ParsedJwsFactory(
             $jwsParser,
@@ -62,6 +67,7 @@ class ParsedJwsFactoryTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 

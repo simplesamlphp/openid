@@ -13,11 +13,10 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
@@ -53,8 +52,6 @@ class Federation
     protected ?EntityStatementFactory $entityStatementFactory = null;
     protected ?RequestObjectFactory $requestObjectFactory = null;
     protected ?TrustMarkFactory $trustMarkFactory = null;
-    protected ?TrustMarkClaimFactory $trustMarkClaimFactory = null;
-    protected ?TrustMarkClaimBagFactory $trustMarkClaimBagFactory = null;
     protected ?Helpers $helpers = null;
     protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
@@ -66,6 +63,7 @@ class Federation
     protected ?TrustChainBagFactory $trustChainBagFactory = null;
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
     protected ?ArtifactFetcher $artifactFetcher = null;
+    protected ?ClaimFactory $claimFactory = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -157,8 +155,7 @@ class Federation
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
-            $this->trustMarkClaimFactory(),
-            $this->trustMarkClaimBagFactory(),
+            $this->claimFactory(),
         );
     }
 
@@ -171,6 +168,7 @@ class Federation
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
+            $this->claimFactory(),
         );
     }
 
@@ -183,14 +181,7 @@ class Federation
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
-        );
-    }
-
-    public function trustMarkClaimFactory(): TrustMarkClaimFactory
-    {
-        return $this->trustMarkClaimFactory ??= new TrustMarkClaimFactory(
-            $this->trustMarkFactory(),
-            $this->helpers(),
+            $this->claimFactory(),
         );
     }
 
@@ -256,11 +247,6 @@ class Federation
         return $this->cacheDecoratorFactory;
     }
 
-    public function trustMarkClaimBagFactory(): TrustMarkClaimBagFactory
-    {
-        return $this->trustMarkClaimBagFactory ??= new TrustMarkClaimBagFactory();
-    }
-
     public function maxCacheDurationDecorator(): DateIntervalDecorator
     {
         return $this->maxCacheDurationDecorator;
@@ -292,6 +278,13 @@ class Federation
             $this->httpClientDecorator,
             $this->cacheDecorator(),
             $this->logger,
+        );
+    }
+
+    public function claimFactory(): ClaimFactory
+    {
+        return $this->claimFactory ??= new ClaimFactory(
+            $this->helpers(),
         );
     }
 }

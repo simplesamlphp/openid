@@ -16,6 +16,7 @@ use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -41,6 +42,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(AlgorithmManagerDecorator::class)]
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
+#[UsesClass(ClaimFactory::class)]
 class CoreTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

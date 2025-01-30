@@ -18,6 +18,7 @@ class RequestObjectFactory extends ParsedJwsFactory
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,
+            $this->claimFactory,
         );
     }
 }

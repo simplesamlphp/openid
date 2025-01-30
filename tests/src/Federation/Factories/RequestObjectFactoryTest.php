@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\RequestObject;
 use SimpleSAML\OpenID\Helpers;
@@ -39,6 +40,7 @@ class RequestObjectFactoryTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -87,6 +89,8 @@ class RequestObjectFactoryTest extends TestCase
 
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
     }
@@ -98,6 +102,7 @@ class RequestObjectFactoryTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): RequestObjectFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -105,6 +110,7 @@ class RequestObjectFactoryTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new RequestObjectFactory(
             $jwsParser,
@@ -113,6 +119,7 @@ class RequestObjectFactoryTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 

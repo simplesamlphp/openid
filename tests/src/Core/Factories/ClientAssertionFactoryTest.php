@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Core\ClientAssertion;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -37,6 +38,7 @@ class ClientAssertionFactoryTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $expiredPayload = [
         'iat' => 1730820687,
@@ -80,6 +82,8 @@ class ClientAssertionFactoryTest extends TestCase
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
     }
@@ -91,6 +95,7 @@ class ClientAssertionFactoryTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): ClientAssertionFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -98,6 +103,7 @@ class ClientAssertionFactoryTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new ClientAssertionFactory(
             $jwsParser,
@@ -106,6 +112,7 @@ class ClientAssertionFactoryTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 

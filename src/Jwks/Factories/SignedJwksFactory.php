@@ -21,6 +21,7 @@ class SignedJwksFactory extends ParsedJwsFactory
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,
+            $this->claimFactory,
         );
     }
 }

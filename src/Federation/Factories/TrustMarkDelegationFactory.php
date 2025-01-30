@@ -18,6 +18,7 @@ class TrustMarkDelegationFactory extends ParsedJwsFactory
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,
+            $this->claimFactory,
         );
     }
 }

@@ -11,6 +11,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -33,6 +34,7 @@ class ParsedJwsTest extends TestCase
 
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -114,8 +116,10 @@ class ParsedJwsTest extends TestCase
         $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
 
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
-        $this->typeHelperMock->method('ensureStrings')->willReturnArgument(0);
+        $this->typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
+
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
@@ -128,6 +132,7 @@ class ParsedJwsTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): ParsedJws {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -135,6 +140,7 @@ class ParsedJwsTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new ParsedJws(
             $jwsDecorator,
@@ -143,6 +149,7 @@ class ParsedJwsTest extends TestCase
             $jwsSerializerManagerDecorator,
             $timestampValidationLeewayMock,
             $helpers,
+            $claimFactory,
         );
     }
 
@@ -160,6 +167,7 @@ class ParsedJwsTest extends TestCase
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
+            $this->claimFactoryMock,
         ) extends ParsedJws {
             protected function validate(): void
             {
@@ -179,6 +187,7 @@ class ParsedJwsTest extends TestCase
         $this->expectException(JwsException::class);
         $this->expectExceptionMessage('not valid');
 
+        /** @phpstan-ignore expr.resultUnused (Validation is invoked from constructor.) */
         new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
@@ -186,6 +195,7 @@ class ParsedJwsTest extends TestCase
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
+            $this->claimFactoryMock,
         ) extends ParsedJws {
             protected function validate(): void
             {

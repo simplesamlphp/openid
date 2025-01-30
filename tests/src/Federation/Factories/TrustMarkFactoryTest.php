@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Helpers;
@@ -39,6 +40,7 @@ class TrustMarkFactoryTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -86,6 +88,8 @@ class TrustMarkFactoryTest extends TestCase
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
     }
@@ -97,6 +101,7 @@ class TrustMarkFactoryTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): TrustMarkFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -104,6 +109,7 @@ class TrustMarkFactoryTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new TrustMarkFactory(
             $jwsParser,
@@ -112,6 +118,7 @@ class TrustMarkFactoryTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 

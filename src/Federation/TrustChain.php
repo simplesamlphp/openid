@@ -332,7 +332,7 @@ class TrustChain implements JsonSerializable
         }
 
         // Verify previous statement using the keys in subordinate statement.
-        $previousStatement->verifyWithKeySet($entityStatement->getJwks());
+        $previousStatement->verifyWithKeySet($entityStatement->getJwks()->getValue());
     }
 
     /**
@@ -357,7 +357,7 @@ class TrustChain implements JsonSerializable
     {
         $operators = (array)($entityStatement->getPayloadClaim(ClaimsEnum::MetadataPolicyCrit->value) ?? []);
         // Make sure we have strings only
-        $operators = $this->helpers->type()->ensureStrings($operators);
+        $operators = $this->helpers->type()->ensureArrayWithValuesAsStrings($operators);
 
         $this->criticalMetadataPolicyOperators = array_merge($this->criticalMetadataPolicyOperators, $operators);
     }

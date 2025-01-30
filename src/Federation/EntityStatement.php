@@ -4,43 +4,17 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
+use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
-use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
-use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
-use SimpleSAML\OpenID\Federation\EntityStatement\TrustMarkClaimBag;
-use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
-use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Jws\ParsedJws;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class EntityStatement extends ParsedJws
 {
-    public function __construct(
-        JwsDecorator $jwsDecorator,
-        JwsVerifierDecorator $jwsVerifierDecorator,
-        JwksFactory $jwksFactory,
-        JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
-        DateIntervalDecorator $timestampValidationLeeway,
-        Helpers $helpers,
-        protected readonly TrustMarkClaimFactory $trustMarkClaimFactory,
-        protected readonly TrustMarkClaimBagFactory $trustMarkClaimBagFactory,
-    ) {
-        parent::__construct(
-            $jwsDecorator,
-            $jwsVerifierDecorator,
-            $jwksFactory,
-            $jwsSerializerManagerDecorator,
-            $timestampValidationLeeway,
-            $helpers,
-        );
-    }
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -73,6 +47,7 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getExpirationTime(): int
     {
@@ -80,38 +55,18 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @return array{keys:array<array<string,mixed>>}
      */
-    public function getJwks(): array
+    public function getJwks(): JwksClaim
     {
-        $jwks = $this->getPayloadClaim(ClaimsEnum::Jwks->value);
+        $jwks = $this->getPayloadClaim(ClaimsEnum::Jwks->value) ?? throw new EntityStatementException(
+            'No JWKS claim found.',
+        );
 
-        if (
-            !is_array($jwks) ||
-            !array_key_exists(ClaimsEnum::Keys->value, $jwks) ||
-            !is_array($jwks[ClaimsEnum::Keys->value]) ||
-            (empty($jwks[ClaimsEnum::Keys->value]))
-        ) {
-            throw new JwsException('Invalid JWKS encountered: ' . var_export($jwks, true));
-        }
-
-        $ensuredKeys = [];
-
-        foreach ($jwks[ClaimsEnum::Keys->value] as $index => $key) {
-            if (!is_array($key)) {
-                throw new JwsException(
-                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
-                );
-            }
-
-            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
-        }
-
-        $jwks[ClaimsEnum::Keys->value] = $ensuredKeys;
-
-        /** @var array{keys:array<array<string,mixed>>} $jwks */
-        return $jwks;
+        return $this->claimFactory->buildJwks($jwks);
     }
 
     /**
@@ -161,7 +116,7 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Authority Hints claim encountered in non-configuration statement.');
         }
 
-        return $this->helpers->type()->ensureNonEmptyStrings($authorityHints, $claimKey);
+        return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($authorityHints, $claimKey);
     }
 
     /**
@@ -184,7 +139,7 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Invalid Metadata claim.');
         }
 
-        return $this->helpers->arr()->ensureStringKeys($metadata);
+        return $this->helpers->type()->ensureArrayWithKeysAsStrings($metadata);
     }
 
     /**
@@ -218,8 +173,9 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function getTrustMarks(): ?TrustMarkClaimBag
+    public function getTrustMarks(): ?TrustMarksClaimBag
     {
         // trust_marks
         // OPTIONAL. An array of JSON objects, each representing a Trust Mark.
@@ -235,14 +191,36 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Invalid Trust Marks claim.');
         }
 
-        $trustMarkClaimBag = $this->trustMarkClaimBagFactory->build();
+        $trustMarkClaimBag = $this->claimFactory->forFederation()->buildTrustMarksClaimBag();
 
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
-            $trustMarkClaimData = $this->helpers->arr()->ensureStringKeys($trustMarkClaimData);
-            $trustMarkClaimBag->add($this->trustMarkClaimFactory->buildFrom($trustMarkClaimData));
+            $trustMarkClaimBag->add(
+                $this->claimFactory->forFederation()->buildTrustMarksClaimValueFrom($trustMarkClaimData),
+            );
         }
 
         return $trustMarkClaimBag;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
+    public function getTrustMarkOwners(): ?TrustMarkOwnersClaimBag
+    {
+        // trust_mark_owners
+        // OPTIONAL. It is a JSON object with member names that are Trust Mark identifiers and each
+        // corresponding value being a JSON object with members: sub, jwks and optionally other members.
+
+        $claimKey = ClaimsEnum::TrustMarkOwners->value;
+        $trustMarkOwnersClaimData = $this->getPayloadClaim($claimKey);
+
+        if (is_null($trustMarkOwnersClaimData)) {
+            return null;
+        }
+
+        return $this->claimFactory->forFederation()->buildTrustMarkOwnersClaimBagFrom($trustMarkOwnersClaimData);
     }
 
     /**
@@ -257,6 +235,7 @@ class EntityStatement extends ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      *
      * phpcs:ignore
      */
@@ -287,13 +266,16 @@ class EntityStatement extends ParsedJws
     }
 
     /**
+     * @param array<mixed>|null $jwks
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @phpstan-ignore missingType.iterableValue (Format is validated later.)
      */
     public function verifyWithKeySet(?array $jwks = null, int $signatureIndex = 0): void
     {
         // Verify with provided JWKS, otherwise use own JWKS.
-        $jwks ??= $this->getJwks();
+        $jwks ??= $this->getJwks()->getValue();
 
         parent::verifyWithKeySet($jwks, $signatureIndex);
     }

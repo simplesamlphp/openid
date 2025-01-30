@@ -11,9 +11,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimBagFactory;
-use SimpleSAML\OpenID\Federation\EntityStatement\Factories\TrustMarkClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
@@ -41,8 +40,7 @@ class EntityStatementFactoryTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
-    protected MockObject $trustMarkClaimFactoryMock;
-    protected MockObject $trustMarkClaimBagFactoryMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -125,8 +123,7 @@ class EntityStatementFactoryTest extends TestCase
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
-        $this->trustMarkClaimFactoryMock = $this->createMock(TrustMarkClaimFactory::class);
-        $this->trustMarkClaimBagFactoryMock = $this->createMock(TrustMarkClaimBagFactory::class);
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
@@ -139,8 +136,7 @@ class EntityStatementFactoryTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
-        ?TrustMarkClaimFactory $trustMarkClaimFactory = null,
-        ?TrustMarkClaimBagFactory $trustMarkClaimBagFactory = null,
+        ?ClaimFactory $claimFactory = null,
     ): EntityStatementFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -148,8 +144,7 @@ class EntityStatementFactoryTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
-        $trustMarkClaimFactory ??= $this->trustMarkClaimFactoryMock;
-        $trustMarkClaimBagFactory ??= $this->trustMarkClaimBagFactoryMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new EntityStatementFactory(
             $jwsParser,
@@ -158,8 +153,7 @@ class EntityStatementFactoryTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
-            $trustMarkClaimFactory,
-            $trustMarkClaimBagFactory,
+            $claimFactory,
         );
     }
 

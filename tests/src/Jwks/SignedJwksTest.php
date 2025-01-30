@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
@@ -33,6 +34,7 @@ class SignedJwksTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -87,6 +89,8 @@ class SignedJwksTest extends TestCase
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
     }
@@ -98,6 +102,7 @@ class SignedJwksTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): SignedJwks {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -105,6 +110,7 @@ class SignedJwksTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new SignedJwks(
             $jwsDecorator,
@@ -113,6 +119,7 @@ class SignedJwksTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 
@@ -132,6 +139,6 @@ class SignedJwksTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
-        $this->assertIsArray($this->sut()->jsonSerialize());
+        $this->assertArrayHasKey('keys', $this->sut()->jsonSerialize());
     }
 }

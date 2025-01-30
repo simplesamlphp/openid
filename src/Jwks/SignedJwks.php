@@ -38,7 +38,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
                 );
             }
 
-            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
+            $ensuredKeys[$index] = $this->helpers->type()->ensureArrayWithKeysAsStrings($key);
         }
 
         return $ensuredKeys;

@@ -88,7 +88,7 @@ class MetadataPolicyResolverTest extends TestCase
             ],
         );
 
-        $this->assertIsArray($metadataPolicy);
+        $this->assertNotEmpty($metadataPolicy);
     }
 
     public function testReturnsEmptyArrayIfEntityTypeNotPresent(): void

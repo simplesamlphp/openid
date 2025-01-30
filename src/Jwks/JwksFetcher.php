@@ -72,7 +72,7 @@ class JwksFetcher
                 );
             }
 
-            $ensuredKeys[$index] = $this->helpers->arr()->ensureStringKeys($key);
+            $ensuredKeys[$index] = $this->helpers->type()->ensureArrayWithKeysAsStrings($key);
         }
 
         $jwks[ClaimsEnum::Keys->value] = $ensuredKeys;

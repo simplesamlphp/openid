@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
@@ -45,6 +46,7 @@ class Jwks
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
+    protected ?ClaimFactory $claimFactory = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -76,6 +78,7 @@ class Jwks
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
+            $this->claimFactory(),
         );
     }
 
@@ -172,5 +175,12 @@ class Jwks
     {
         return $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
             ->build($this->supportedSerializers);
+    }
+
+    public function claimFactory(): ClaimFactory
+    {
+        return $this->claimFactory ??= new ClaimFactory(
+            $this->helpers(),
+        );
     }
 }

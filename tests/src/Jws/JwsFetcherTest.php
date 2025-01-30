@@ -130,7 +130,7 @@ class JwsFetcherTest extends TestCase
             $this->helpersMock,
             $this->loggerMock,
         ) extends JwsFetcher {
-            public function getExpectedContentTypeHttpHeader(): ?string
+            public function getExpectedContentTypeHttpHeader(): string
             {
                 return 'application/jwt';
             }

@@ -92,7 +92,7 @@ class TrustChainTest extends TestCase
         $this->assertFalse($sut->isEmpty());
         $this->assertCount(3, $sut->getEntities());
         $this->assertSame(3, $sut->getResolvedLength());
-        $this->assertIsArray($sut->jsonSerialize());
+        $this->assertNotEmpty($sut->jsonSerialize());
         $this->assertSame($this->expirationTime, $sut->getResolvedExpirationTime());
         $this->assertSame($this->leafMock, $sut->getResolvedLeaf());
         $this->assertSame($this->subordinateMock, $sut->getResolvedImmediateSuperior());

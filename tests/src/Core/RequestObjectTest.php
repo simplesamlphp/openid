@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Core\RequestObject;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\RequestObjectException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -34,6 +35,7 @@ class RequestObjectTest extends TestCase
     protected MockObject $helpersMock;
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
+    protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -63,6 +65,8 @@ class RequestObjectTest extends TestCase
         $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
 
         $this->typeHelperMock->method('ensureString')->willReturnArgument(0);
+
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
 
     protected function sut(
@@ -72,6 +76,7 @@ class RequestObjectTest extends TestCase
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
     ): RequestObject {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -79,6 +84,7 @@ class RequestObjectTest extends TestCase
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
 
         return new RequestObject(
             $jwsDecorator,
@@ -87,6 +93,7 @@ class RequestObjectTest extends TestCase
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
+            $claimFactory,
         );
     }
 
