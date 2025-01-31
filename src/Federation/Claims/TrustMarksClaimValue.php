@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\Claims;
 
+use JsonSerializable;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+
 /**
  * Value object representing a single Trust Mark Claim value with properties 'id' and 'trust_mark'. This object is
  * contained in trust_marks claim array in Entity Statement.
  */
-class TrustMarksClaimValue
+class TrustMarksClaimValue implements JsonSerializable
 {
     /**
      * @param non-empty-string $trustMarkId
@@ -44,5 +47,19 @@ class TrustMarksClaimValue
     public function getOtherClaims(): array
     {
         return $this->otherClaims;
+    }
+
+    /**
+     * @return array<non-empty-string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return array_merge(
+            [
+                ClaimsEnum::Id->value => $this->trustMarkId,
+                ClaimsEnum::TrustMark->value => $this->trustMark,
+            ],
+            $this->otherClaims,
+        );
     }
 }

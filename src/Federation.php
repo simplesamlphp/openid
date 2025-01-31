@@ -22,10 +22,12 @@ use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
@@ -64,6 +66,8 @@ class Federation
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
     protected ?ArtifactFetcher $artifactFetcher = null;
     protected ?ClaimFactory $claimFactory = null;
+    protected ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null;
+    protected ?TrustMarkValidator $trustMarkValidator = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -182,6 +186,29 @@ class Federation
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
             $this->claimFactory(),
+        );
+    }
+
+    public function trustMarkDelegationFactory(): TrustMarkDelegationFactory
+    {
+        return $this->trustMarkDelegationFactory ?? new TrustMarkDelegationFactory(
+            $this->jwsParser(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
+        );
+    }
+
+    public function trustMarkValidator(): TrustMarkValidator
+    {
+        return $this->trustMarkValidator ??= new TrustMarkValidator(
+            $this->trustChainResolver(),
+            $this->trustMarkFactory(),
+            $this->trustMarkDelegationFactory(),
+            $this->logger,
         );
     }
 

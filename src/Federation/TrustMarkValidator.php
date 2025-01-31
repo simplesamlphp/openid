@@ -241,6 +241,13 @@ class TrustMarkValidator
         $this->logger?->debug('Trust Mark signature validated.');
     }
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
     public function validateTrustMarkDelegation(
         TrustMark $trustMark,
         EntityStatement $trustAnchorEntityConfiguration,

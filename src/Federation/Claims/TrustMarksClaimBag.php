@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\Claims;
 
-class TrustMarksClaimBag
+use JsonSerializable;
+
+class TrustMarksClaimBag implements JsonSerializable
 {
     /**
      * @var \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue[]
@@ -50,5 +52,16 @@ class TrustMarksClaimBag
         }
 
         return null;
+    }
+
+    /**
+     * @return array<mixed[]>
+     */
+    public function jsonSerialize(): array
+    {
+        return array_map(
+            fn(TrustMarksClaimValue $trustMarksClaimValue): array => $trustMarksClaimValue->jsonSerialize(),
+            $this->trustMarksClaimValues,
+        );
     }
 }
