@@ -21,7 +21,7 @@ class TrustChainResolver
         protected readonly EntityStatementFetcher $entityStatementFetcher,
         protected readonly TrustChainFactory $trustChainFactory,
         protected readonly TrustChainBagFactory $trustChainBagFactory,
-        protected readonly DateIntervalDecorator $maxCacheDuration,
+        protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
         int $maxTrustChainDepth = 10,
@@ -324,7 +324,9 @@ class TrustChainResolver
     {
         $this->cacheDecorator?->set(
             $trustChain->jsonSerialize(),
-            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime($trustChain->getResolvedExpirationTime()),
+            $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime(
+                $trustChain->getResolvedExpirationTime(),
+            ),
             $trustChain->getResolvedLeaf()->getIssuer(),
             $trustChain->getResolvedTrustAnchor()->getIssuer(),
         );

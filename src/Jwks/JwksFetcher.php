@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jwks;
 
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Exceptions\JwksException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
@@ -25,14 +25,16 @@ class JwksFetcher
         protected readonly SignedJwksFactory $signedJwksFactory,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly Helpers $helpers,
+        protected readonly ClaimFactory $claimFactory,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
     ) {
     }
 
     /**
-     * @return array{keys:array<array<string,mixed>>}
+     * @return array{keys:non-empty-array<array<string,mixed>>}
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     protected function decodeJwksJson(string $jwksJson): array
     {
@@ -41,44 +43,13 @@ class JwksFetcher
         } catch (\JsonException $exception) {
             $message = 'Error trying to decode JWKS JSON document: ' . $exception->getMessage();
             $this->logger?->error(
-                'Error trying to decode JWKS JSON document: ' . $exception->getMessage(),
+                $message,
                 ['jwksJson' => $jwksJson],
             );
             throw new JwksException($message);
         }
 
-        if (!is_array($jwks)) {
-            $message = sprintf('Unexpected JWKS type: %s.', var_export($jwks, true));
-            $this->logger?->error($message, ['jwks' => $jwks]);
-            throw new JwksException($message);
-        }
-
-        if (
-            (!array_key_exists(ClaimsEnum::Keys->value, $jwks)) ||
-            (!is_array($jwks[ClaimsEnum::Keys->value])) ||
-            empty($jwks[ClaimsEnum::Keys->value])
-        ) {
-            $message = sprintf('Unexpected JWKS format: %s.', var_export($jwks, true));
-            $this->logger?->error($message, ['jwks' => $jwks]);
-            throw new JwksException($message);
-        }
-
-        $ensuredKeys = [];
-
-        foreach ($jwks[ClaimsEnum::Keys->value] as $index => $key) {
-            if (!is_array($key)) {
-                throw new JwksException(
-                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
-                );
-            }
-
-            $ensuredKeys[$index] = $this->helpers->type()->ensureArrayWithKeysAsStrings($key);
-        }
-
-        $jwks[ClaimsEnum::Keys->value] = $ensuredKeys;
-
-        /** @var array{keys:array<array<string,mixed>>} $jwks */
-        return $jwks;
+        return $this->claimFactory->buildJwks($jwks)->getValue();
     }
 
     public function fromCache(string $uri): ?JwksDecorator

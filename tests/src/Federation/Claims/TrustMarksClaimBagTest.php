@@ -11,19 +11,21 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 
 #[CoversClass(TrustMarksClaimBag::class)]
-class TrustMarkClaimBagTest extends TestCase
+class TrustMarksClaimBagTest extends TestCase
 {
     protected MockObject $trustMarkClaimMock;
 
     protected function setUp(): void
     {
-        $this->trustMarkClaimMock = $this->createMock(\SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue::class);
+        $this->trustMarkClaimMock = $this->createMock(TrustMarksClaimValue::class);
+        $this->trustMarkClaimMock->method('getTrustMarkId')->willReturn('trustMarkId');
+        $this->trustMarkClaimMock->method('getTrustMark')->willReturn('token');
     }
 
     protected function sut(
-        \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue ...$trustMarkClaims,
+        TrustMarksClaimValue ...$trustMarkClaims,
     ): TrustMarksClaimBag {
-        return new \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag(...$trustMarkClaims);
+        return new TrustMarksClaimBag(...$trustMarkClaims);
     }
 
     public function testCanCreateInstance(): void
@@ -52,7 +54,7 @@ class TrustMarkClaimBagTest extends TestCase
 
         $sut = $this->sut($firstTrustMarkClaim, $secondTrustMarkClaim);
 
-        $allForSecond = $sut->gerAllFor('second');
+        $allForSecond = $sut->getAllFor('second');
 
         $this->assertCount(1, $allForSecond);
         $this->assertSame($secondTrustMarkClaim->getTrustMarkId(), $allForSecond[0]->getTrustMarkId());
@@ -62,7 +64,7 @@ class TrustMarkClaimBagTest extends TestCase
     {
         $firstTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
         $firstTrustMarkClaim->method('getTrustMarkId')->willReturn('first');
-        $secondTrustMarkClaim = $this->createMock(\SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue::class);
+        $secondTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
         $secondTrustMarkClaim->method('getTrustMarkId')->willReturn('second');
 
         $sut = $this->sut($firstTrustMarkClaim, $secondTrustMarkClaim);
@@ -80,5 +82,13 @@ class TrustMarkClaimBagTest extends TestCase
         $sut = $this->sut($firstTrustMarkClaim);
 
         $this->assertNull($sut->getFirstFor('second'));
+    }
+
+    public function testCanJsonSerialize(): void
+    {
+        $sut = $this->sut($this->trustMarkClaimMock);
+        $this->assertCount(1, $sut->jsonSerialize());
+        $sut->add($this->createMock(TrustMarksClaimValue::class));
+        $this->assertCount(2, $sut->jsonSerialize());
     }
 }

@@ -208,6 +208,8 @@ class Federation
             $this->trustChainResolver(),
             $this->trustMarkFactory(),
             $this->trustMarkDelegationFactory(),
+            $this->maxCacheDurationDecorator,
+            $this->cacheDecorator(),
             $this->logger,
         );
     }

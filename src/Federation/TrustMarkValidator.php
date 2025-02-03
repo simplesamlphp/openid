@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Decorators\CacheDecorator;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
@@ -17,29 +19,254 @@ class TrustMarkValidator
         protected readonly TrustChainResolver $trustChainResolver,
         protected readonly TrustMarkFactory $trustMarkFactory,
         protected readonly TrustMarkDelegationFactory $trustMarkDelegationFactory,
+        protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
+        protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
     ) {
     }
 
     /**
+     * If cached, validation has already been performed.
+     *
+     * @param non-empty-string $trustMarkId
+     * @param non-empty-string $leafEntityId
+     * @param non-empty-string $trustAnchorId
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function isValidationCachedFor(
+        string $trustMarkId,
+        string $leafEntityId,
+        string $trustAnchorId,
+    ): bool {
+        if (is_null($this->cacheDecorator)) {
+            return false;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Checking cached Trust Mark %s validation for leaf entity %s under Trust Anchor %s.',
+                $trustMarkId,
+                $leafEntityId,
+                $trustAnchorId,
+            ),
+        );
+
+        if (
+            !is_null($cachedValue = $this->cacheDecorator->get(
+                null,
+                $trustMarkId,
+                $leafEntityId,
+                $trustAnchorId,
+            )) && $cachedValue === $trustMarkId
+        ) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Mark %s cached validation found for leaf entity %s under Trust Anchor %s.',
+                    $trustMarkId,
+                    $leafEntityId,
+                    $trustAnchorId,
+                ),
+            );
+            return true;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Mark %s validation not cached for leaf entity %s under Trust Anchor %s.',
+                $trustMarkId,
+                $leafEntityId,
+                $trustAnchorId,
+            ),
+        );
+
+        return false;
+    }
+
+    /**
+     * @param non-empty-string $trustMarkId
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function forTrustMarkId(
+        string $trustMarkId,
+        EntityStatement $leafEntityConfiguration,
+        EntityStatement $trustAnchorEntityConfiguration,
+    ): void {
+        if (
+            $this->isValidationCachedFor(
+                $trustMarkId,
+                $leafEntityConfiguration->getIssuer(),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            )
+        ) {
+            return;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Validating Trust Mark %s for leaf entity %s under Trust Anchor %s.',
+                $trustMarkId,
+                $leafEntityConfiguration->getIssuer(),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            ),
+        );
+
+        $trustMarksClaimBag = $leafEntityConfiguration->getTrustMarks();
+
+        if (is_null($trustMarksClaimBag)) {
+            $error = sprintf(
+                'Leaf entity %s does not have any Trust Marks available.',
+                $leafEntityConfiguration->getIssuer(),
+            );
+
+            $this->logger?->error($error);
+            throw new TrustMarkException($error);
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Leaf entity %s has Trust Marks available, checking for Trust Mark %s.',
+                $leafEntityConfiguration->getIssuer(),
+                $trustMarkId,
+            ),
+            ['trustMarksClaimBag' => $trustMarksClaimBag->jsonSerialize()],
+        );
+
+        $trustMarksClaimValues = $trustMarksClaimBag->getAllFor($trustMarkId);
+
+        if ($trustMarksClaimValues === []) {
+            $error = sprintf(
+                'Leaf entity %s has no claims for Trust Mark %s.',
+                $leafEntityConfiguration->getIssuer(),
+                $trustMarkId,
+            );
+            $this->logger?->debug($error);
+            throw new TrustMarkException($error);
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Leaf entity %s has %s claim/claims for Trust Mark %s.',
+                $leafEntityConfiguration->getIssuer(),
+                count($trustMarksClaimValues),
+                $trustMarkId,
+            ),
+        );
+
+        foreach ($trustMarksClaimValues as $idx => $trustMarksClaimValue) {
+            $this->logger?->debug(
+                sprintf(
+                    'Validating Trust Mark %s using claim %s for leaf entity %s, under Trust Anchor %s.',
+                    $trustMarkId,
+                    $idx,
+                    $leafEntityConfiguration->getIssuer(),
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                ),
+                ['trustMarkClaim' => $trustMarksClaimValue->jsonSerialize()],
+            );
+
+            try {
+                $this->doForTrustMarksClaimValue(
+                    $trustMarksClaimValue,
+                    $leafEntityConfiguration,
+                    $trustAnchorEntityConfiguration,
+                );
+
+                $this->logger?->debug(
+                    sprintf(
+                        'Trust Mark %s validated using claim %s for leaf entity %s, under Trust Anchor %s.',
+                        $trustMarkId,
+                        $idx,
+                        $leafEntityConfiguration->getIssuer(),
+                        $trustAnchorEntityConfiguration->getIssuer(),
+                    ),
+                );
+                return;
+            } catch (\Throwable $exception) {
+                $this->logger?->debug(
+                    sprintf(
+                        'Trust Mark %s validation failed using claim %s for leaf entity %s, under Trust Anchor' .
+                        ' %s. Error was %s. Trying next if available.',
+                        $trustMarkId,
+                        $idx,
+                        $leafEntityConfiguration->getIssuer(),
+                        $trustAnchorEntityConfiguration->getIssuer(),
+                        $exception->getMessage(),
+                    ),
+                );
+                continue;
+            }
+        }
+
+        throw new TrustMarkException(sprintf(
+            'Could not validate Trust Mark %s for leaf entity %s under Trust Anchor %s.',
+            $trustMarkId,
+            $leafEntityConfiguration->getIssuer(),
+            $trustAnchorEntityConfiguration->getIssuer(),
+        ));
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function forTrustMarksClaimValue(
         TrustMarksClaimValue $trustMarksClaimValue,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
     ): void {
+        if (
+            $this->isValidationCachedFor(
+                $trustMarksClaimValue->getTrustMarkId(),
+                $leafEntityConfiguration->getIssuer(),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            )
+        ) {
+            return;
+        }
 
+        $this->doForTrustMarksClaimValue(
+            $trustMarksClaimValue,
+            $leafEntityConfiguration,
+            $trustAnchorEntityConfiguration,
+        );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwksException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
+    protected function doForTrustMarksClaimValue(
+        TrustMarksClaimValue $trustMarksClaimValue,
+        EntityStatement $leafEntityConfiguration,
+        EntityStatement $trustAnchorEntityConfiguration,
+    ): void {
         $trustMark = $this->validateTrustMarksClaimValue($trustMarksClaimValue);
 
-        $this->forTrustMark(
+        $this->doForTrustMark(
             $trustMark,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
         );
     }
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     */
     public function validateTrustMarksClaimValue(
         TrustMarksClaimValue $trustMarksClaimValue,
     ): TrustMark {
@@ -62,16 +289,15 @@ class TrustMarkValidator
             ['trustMarkPayload' => $trustMarkPayload],
         );
 
-        // TODO mivanci Enable this check once the testbed starts conforming.
-//        if ($trustMarksClaimValue->getId() !== $trustMark->getIdentifier()) {
-//            throw new TrustMarkException(
-//                sprintf(
-//                    'Invalid TrustMark identifier: %s != %s.',
-//                    $trustMarksClaimValue->getId(),
-//                    $trustMark->getIdentifier(),
-//                ),
-//            );
-//        }
+        if ($trustMarksClaimValue->getTrustMarkId() !== $trustMark->getIdentifier()) {
+            throw new TrustMarkException(
+                sprintf(
+                    'Invalid TrustMark identifier: %s != %s.',
+                    $trustMarksClaimValue->getTrustMarkId(),
+                    $trustMark->getIdentifier(),
+                ),
+            );
+        }
 
         // All the claims in the JSON object MUST have the same values as those contained in the Trust Mark JWT.
         $commonClaims = array_intersect_key($trustMarksClaimValue->getOtherClaims(), $trustMarkPayload);
@@ -104,8 +330,40 @@ class TrustMarkValidator
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function forTrustMark(
+        TrustMark $trustMark,
+        EntityStatement $leafEntityConfiguration,
+        EntityStatement $trustAnchorEntityConfiguration,
+    ): void {
+        if (
+            $this->isValidationCachedFor(
+                $trustMark->getIdentifier(),
+                $leafEntityConfiguration->getIssuer(),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            )
+        ) {
+            return;
+        }
+
+        $this->doForTrustMark(
+            $trustMark,
+            $leafEntityConfiguration,
+            $trustAnchorEntityConfiguration,
+        );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwksException
+     */
+    protected function doForTrustMark(
         TrustMark $trustMark,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
@@ -132,7 +390,52 @@ class TrustMarkValidator
 
         $this->validateTrustMarkDelegation($trustMark, $trustAnchorEntityConfiguration);
 
-        $this->logger?->debug('Trust Mark validated.');
+        $this->logger?->debug(sprintf(
+            'Trust Mark %s validated for leaf entity %s under Trust Anchor %s.',
+            $trustMark->getIdentifier(),
+            $leafEntityConfiguration->getIssuer(),
+            $trustAnchorEntityConfiguration->getIssuer(),
+        ));
+
+        if (!is_null($this->cacheDecorator)) {
+            $expirationTime = $leafEntityConfigurationExpirationTime = $leafEntityConfiguration->getExpirationTime();
+            if (!is_null($trustMarkExpirationTime = $trustMark->getExpirationTime())) {
+                $expirationTime = min(
+                    $leafEntityConfigurationExpirationTime,
+                    $trustMarkExpirationTime,
+                );
+            }
+
+            $cacheTtl = $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime($expirationTime);
+
+            $this->logger?->debug(sprintf(
+                'Caching Trust Mark %s validation for leaf entity %s under Trust Anchor %s with TTL %s.',
+                $trustMark->getIdentifier(),
+                $leafEntityConfiguration->getIssuer(),
+                $trustAnchorEntityConfiguration->getIssuer(),
+                $cacheTtl,
+            ));
+
+            try {
+                $this->cacheDecorator->set(
+                    $trustMark->getIdentifier(),
+                    $cacheTtl,
+                    $trustMark->getIdentifier(),
+                    $leafEntityConfiguration->getIssuer(),
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                );
+            } catch (Throwable $exception) {
+                $this->logger?->debug(sprintf(
+                    'Error caching Trust Mark %s validation for leaf entity %s under Trust Anchor %s with TTL' .
+                    ' %s. Error wa: %s.',
+                    $trustMark->getIdentifier(),
+                    $leafEntityConfiguration->getIssuer(),
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                    $cacheTtl,
+                    $exception->getMessage(),
+                ));
+            }
+        }
     }
 
     /**
@@ -148,7 +451,7 @@ class TrustMarkValidator
 
         if ($trustMark->getSubject() !== $leafEntityConfiguration->getIssuer()) {
             $error = sprintf(
-                'Leaf entity ID %s is different than the subject %s of Trust Mark %s',
+                'Leaf entity %s is different than the subject %s of Trust Mark %s',
                 $leafEntityConfiguration->getIssuer(),
                 $trustMark->getSubject(),
                 $trustMark->getIdentifier(),
@@ -159,7 +462,7 @@ class TrustMarkValidator
 
         $this->logger?->debug(
             sprintf(
-                'Leaf entity ID %s is the subject of the Trust Mark %s.',
+                'Leaf entity %s is the subject of the Trust Mark %s.',
                 $leafEntityConfiguration->getIssuer(),
                 $trustMark->getIdentifier(),
             ),

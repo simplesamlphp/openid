@@ -31,11 +31,11 @@ class ClaimFactory
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function buildGeneric(mixed $key, mixed $value): GenericClaim
+    public function buildGeneric(mixed $value, string $name): GenericClaim
     {
         return new GenericClaim(
-            $this->helpers->type()->ensureNonEmptyString($key, 'ClaimKey'),
             $value,
+            $this->helpers->type()->ensureNonEmptyString($name, 'ClaimName'),
         );
     }
 
@@ -43,7 +43,7 @@ class ClaimFactory
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function buildJwks(mixed $jwks, string $key = ClaimsEnum::Jwks->value): JwksClaim
+    public function buildJwks(mixed $jwks, string $name = ClaimsEnum::Jwks->value): JwksClaim
     {
         if (
             !is_array($jwks) ||
@@ -59,7 +59,7 @@ class ClaimFactory
         foreach ($jwks[ClaimsEnum::Keys->value] as $index => $key) {
             if (!is_array($key)) {
                 throw new JwksException(
-                    sprintf('Unexpected JWKS key format: %s.', var_export($key, true)),
+                    sprintf('Invalid JWKS key format: %s.', var_export($key, true)),
                 );
             }
 
@@ -70,7 +70,7 @@ class ClaimFactory
 
         return new JwksClaim(
             $jwks,
-            $this->helpers->type()->ensureNonEmptyString($key, 'ClaimKey'),
+            $this->helpers->type()->ensureNonEmptyString($name, 'ClaimName'),
         );
     }
 }

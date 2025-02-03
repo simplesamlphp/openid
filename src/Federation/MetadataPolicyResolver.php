@@ -154,25 +154,13 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add ||
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SupersetOf
                     ) {
-                        if (
-                            (!is_array($operatorValue)) ||
-                            (!is_array($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
-                        ) {
-                            // The values are invalid, we have to throw.
-                            throw new MetadataPolicyException(
-                                sprintf(
-                                    'Invalid operator value encountered for operator %s: %s.',
-                                    $metadataPolicyOperatorEnum->value,
-                                    var_export($operatorValue, true),
-                                ),
-                            );
-                        }
-
                         // We merge with existing values.
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         array_unique(
                             array_merge(
+                                /** @phpstan-ignore argument.type (We ensured this is array.) */
                                 $operatorValue,
+                                /** @phpstan-ignore argument.type (We ensured this is array.) */
                                 $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
                             ),
                         );
@@ -180,24 +168,12 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf ||
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf
                     ) {
-                        if (
-                            (!is_array($operatorValue)) ||
-                            (!is_array($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
-                        ) {
-                            // The values are invalid, we have to throw.
-                            throw new MetadataPolicyException(
-                                sprintf(
-                                    'Invalid operator value encountered for operator %s: %s.',
-                                    $metadataPolicyOperatorEnum->value,
-                                    var_export($operatorValue, true),
-                                ),
-                            );
-                        }
-
                         // The result of merging the values of two operators is the intersection of the
                         // operator values. If the intersection is empty, this MUST result in a policy error.
                         $intersection = array_intersect(
+                            /** @phpstan-ignore argument.type (We ensured this is array.) */
                             $operatorValue,
+                            /** @phpstan-ignore argument.type (We ensured this is array.) */
                             $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
                         );
 

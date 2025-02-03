@@ -83,7 +83,7 @@ class TrustMarkDelegation extends ParsedJws
     {
         $typ = parent::getType() ?? throw new TrustMarkDelegationException('No Type header claim found.');
 
-        if ($typ !== JwtTypesEnum::TrustMarkJwt->value) {
+        if ($typ !== JwtTypesEnum::TrustMarkDelegationJwt->value) {
             throw new TrustMarkDelegationException('Invalid Type header claim.');
         }
 

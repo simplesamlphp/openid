@@ -90,6 +90,7 @@ class Jwks
             $this->signedJwksFactory(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),
+            $this->claimFactory(),
             $this->cacheDecorator,
             $this->logger,
         );

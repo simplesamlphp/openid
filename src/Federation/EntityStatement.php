@@ -298,6 +298,7 @@ class EntityStatement extends ParsedJws
             $this->getMetadata(...),
             $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),
+            $this->getTrustMarkOwners(...),
             $this->getFederationFetchEndpoint(...),
         );
     }

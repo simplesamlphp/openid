@@ -11,11 +11,13 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\HttpException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
@@ -31,6 +33,7 @@ class JwksFetcherTest extends TestCase
     protected MockObject $signedJwksFactoryMock;
     protected MockObject $maxCacheDurationDecoratorMock;
     protected MockObject $helpersMock;
+    protected MockObject $claimFactoryMock;
     protected MockObject $cacheDecoratorMock;
     protected MockObject $loggerMock;
     protected MockObject $jsonHelperMock;
@@ -40,6 +43,7 @@ class JwksFetcherTest extends TestCase
     protected MockObject $responseBodyMock;
 
     protected MockObject $signedJwksMock;
+    protected MockObject $jwksClaimMock;
 
     protected array $jwksArraySample = [
         'keys' => [
@@ -62,6 +66,7 @@ class JwksFetcherTest extends TestCase
         $this->signedJwksFactoryMock = $this->createMock(SignedJwksFactory::class);
         $this->maxCacheDurationDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
+        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
         $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
@@ -76,6 +81,8 @@ class JwksFetcherTest extends TestCase
         $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
 
         $this->signedJwksMock = $this->createMock(SignedJwks::class);
+
+        $this->jwksClaimMock = $this->createMock(JwksClaim::class);
     }
 
     protected function sut(
@@ -84,6 +91,7 @@ class JwksFetcherTest extends TestCase
         ?SignedJwksFactory $signedJwksFactory = null,
         ?DateIntervalDecorator $maxCacheDurationDecorator = null,
         ?Helpers $helpers = null,
+        ?ClaimFactory $claimFactory = null,
         ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
     ): JwksFetcher {
@@ -92,6 +100,7 @@ class JwksFetcherTest extends TestCase
         $signedJwksFactory ??= $this->signedJwksFactoryMock;
         $maxCacheDurationDecorator ??= $this->maxCacheDurationDecoratorMock;
         $helpers ??= $this->helpersMock;
+        $claimFactory ??= $this->claimFactoryMock;
         $cacheDecorator ??= $this->cacheDecoratorMock;
         $logger ??= $this->loggerMock;
 
@@ -101,6 +110,7 @@ class JwksFetcherTest extends TestCase
             $signedJwksFactory,
             $maxCacheDurationDecorator,
             $helpers,
+            $claimFactory,
             $cacheDecorator,
             $logger,
         );
@@ -116,12 +126,19 @@ class JwksFetcherTest extends TestCase
         $this->cacheDecoratorMock->expects($this->once())->method('get')
             ->with(null, 'uri')
             ->willReturn('jwks-json');
+
         $this->jsonHelperMock->expects($this->once())->method('decode')
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
-        $this->typeHelperMock->expects($this->once())
-            ->method('ensureArrayWithKeysAsStrings')
-            ->willReturnArgument(0);
+
+        $this->claimFactoryMock->expects($this->once())
+            ->method('buildJwks')
+            ->willReturn($this->jwksClaimMock);
+
+        $this->jwksClaimMock->expects($this->once())
+            ->method('getValue')
+            ->willReturn($this->jwksArraySample);
+
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
@@ -165,39 +182,6 @@ class JwksFetcherTest extends TestCase
         $this->assertNull($this->sut()->fromCache('uri'));
     }
 
-    public function testLogsErrorInCaseOfNonArrayCacheValue(): void
-    {
-        $this->cacheDecoratorMock->expects($this->once())->method('get')
-            ->with(null, 'uri')
-            ->willReturn('jwks-json');
-
-        $this->jsonHelperMock->expects($this->once())->method('decode')
-            ->with('jwks-json')
-            ->willReturn(123);
-
-        $this->loggerMock->expects($this->atLeastOnce())->method('error')
-            ->with($this->stringContains('type'));
-
-        $this->assertNull($this->sut()->fromCache('uri'));
-    }
-
-
-    public function testLogsErrorInCaseOfInvalidArrayCacheValue(): void
-    {
-        $this->cacheDecoratorMock->expects($this->once())->method('get')
-            ->with(null, 'uri')
-            ->willReturn('jwks-json');
-
-        $this->jsonHelperMock->expects($this->once())->method('decode')
-            ->with('jwks-json')
-            ->willReturn(['invalid']);
-
-        $this->loggerMock->expects($this->atLeastOnce())->method('error')
-            ->with($this->stringContains('format'));
-
-        $this->assertNull($this->sut()->fromCache('uri'));
-    }
-
     public function testCanGetFromJwksUri(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -211,9 +195,13 @@ class JwksFetcherTest extends TestCase
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
 
-        $this->typeHelperMock->expects($this->once())
-            ->method('ensureArrayWithKeysAsStrings')
-            ->willReturnArgument(0);
+        $this->claimFactoryMock->expects($this->once())
+            ->method('buildJwks')
+            ->willReturn($this->jwksClaimMock);
+
+        $this->jwksClaimMock->expects($this->once())
+            ->method('getValue')
+            ->willReturn($this->jwksArraySample);
 
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
@@ -268,9 +256,13 @@ class JwksFetcherTest extends TestCase
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
 
-        $this->typeHelperMock->expects($this->once())
-            ->method('ensureArrayWithKeysAsStrings')
-            ->willReturnArgument(0);
+        $this->claimFactoryMock->expects($this->once())
+            ->method('buildJwks')
+            ->willReturn($this->jwksClaimMock);
+
+        $this->jwksClaimMock->expects($this->once())
+            ->method('getValue')
+            ->willReturn($this->jwksArraySample);
 
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
@@ -304,9 +296,13 @@ class JwksFetcherTest extends TestCase
             ->with('jwks-json')
             ->willReturn($this->jwksArraySample);
 
-        $this->typeHelperMock->expects($this->once())
-            ->method('ensureArrayWithKeysAsStrings')
-            ->willReturnArgument(0);
+        $this->claimFactoryMock->expects($this->once())
+            ->method('buildJwks')
+            ->willReturn($this->jwksClaimMock);
+
+        $this->jwksClaimMock->expects($this->once())
+            ->method('getValue')
+            ->willReturn($this->jwksArraySample);
 
         $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);

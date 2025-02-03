@@ -47,23 +47,11 @@ class TrustMarksClaimValueTest extends TestCase
         $this->assertSame($this->otherClaims, $sut->getOtherClaims());
     }
 
-    // TODO mivanci Move this checks to TrustMarkValiadtor once the testbed starts conforming.
-//    public function testConstructThrowsForDifferentIds(): void
-//    {
-//        $this->expectException(TrustMarkClaimException::class);
-//        $this->expectExceptionMessage('identifier');
-//
-//        $this->sut('differentId');
-//    }
-//
-//    public function testConstructThrowsForDifferentTrustMarkPayload(): void
-//    {
-//        $this->trustMark->method('getPayload')
-//            ->willReturn(['something' => 'different']);
-//
-//        $this->expectException(TrustMarkClaimException::class);
-//        $this->expectExceptionMessage('different');
-//
-//        $this->sut();
-//    }
+    public function testCanJsonSerialize(): void
+    {
+        $this->assertSame(
+            ['id' => $this->id, 'trust_mark' => $this->trustMark, 'something' => 'else'],
+            $this->sut()->jsonSerialize(),
+        );
+    }
 }

@@ -35,7 +35,7 @@ class TrustMarksClaimBag implements JsonSerializable
      * @param non-empty-string $trustMarkId
      * @return \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue[]
      */
-    public function gerAllFor(string $trustMarkId): array
+    public function getAllFor(string $trustMarkId): array
     {
         return array_values(array_filter(
             $this->trustMarksClaimValues,

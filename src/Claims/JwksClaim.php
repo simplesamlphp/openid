@@ -6,15 +6,15 @@ namespace SimpleSAML\OpenID\Claims;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
-class JwksClaim
+class JwksClaim implements ClaimInterface
 {
     /**
      * @param array{keys:non-empty-array<array<string,mixed>>} $value
-     * @param non-empty-string $key
+     * @param non-empty-string $name
      */
     public function __construct(
         protected readonly array $value,
-        protected readonly string $key = ClaimsEnum::Jwks->value,
+        protected readonly string $name = ClaimsEnum::Jwks->value,
     ) {
     }
 
@@ -29,8 +29,18 @@ class JwksClaim
     /**
      * @return non-empty-string
      */
-    public function getKey(): string
+    public function getName(): string
     {
-        return $this->key;
+        return $this->name;
+    }
+
+    /**
+     * @return array<non-empty-string,array{keys:non-empty-array<array<string,mixed>>}>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            $this->name => $this->value,
+        ];
     }
 }

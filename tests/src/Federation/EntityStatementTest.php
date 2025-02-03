@@ -14,6 +14,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement;
+use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -36,6 +37,7 @@ class EntityStatementTest extends TestCase
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
     protected MockObject $claimFactoryMock;
+    protected MockObject $federationClaimFactoryMock;
 
     protected array $expiredPayload = [
         'iat' => 1731175727,
@@ -124,6 +126,8 @@ class EntityStatementTest extends TestCase
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->federationClaimFactoryMock = $this->createMock(FederationClaimFactory::class);
+        $this->claimFactoryMock->method('forFederation')->willReturn($this->federationClaimFactoryMock);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
@@ -261,6 +265,35 @@ class EntityStatementTest extends TestCase
             EntityStatement::class,
             $this->sut(),
         );
+    }
+
+    public function testTrustMarkOwnersIsOptional(): void
+    {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->assertInstanceOf(
+            EntityStatement::class,
+            $this->sut(),
+        );
+    }
+
+    public function testTrustMarkOwnersIsBuildUsingFactoryOptional(): void
+    {
+        $this->validPayload['trust_mark_owners'] = [
+            'trustMarkId' => [
+                'sub' => 'subject',
+                'jwks' => ['keys' => [['key' => 'value']]],
+            ],
+        ];
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->federationClaimFactoryMock->expects($this->atLeastOnce())
+            ->method('buildTrustMarkOwnersClaimBagFrom')
+            ->with($this->validPayload['trust_mark_owners']);
+
+        $this->sut()->getTrustMarkOwners();
     }
 
     public function testThrowsOnInvalidTrustMarks(): void
