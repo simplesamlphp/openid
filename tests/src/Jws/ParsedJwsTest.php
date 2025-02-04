@@ -293,6 +293,7 @@ class ParsedJwsTest extends TestCase
         $this->assertNull($sut->getExpirationTime());
         $this->assertNull($sut->getIssuedAt());
         $this->assertNull($sut->getIdentifier());
+        $this->assertNull($sut->getIssuer());
     }
 
     public function testCanGetAudienceArrayFromString(): void

@@ -27,10 +27,12 @@ use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
@@ -71,6 +73,8 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
 #[UsesClass(ClaimFactory::class)]
+#[UsesClass(TrustMarkDelegationFactory::class)]
+#[UsesClass(TrustMarkValidator::class)]
 class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
@@ -145,5 +149,7 @@ class FederationTest extends TestCase
         $this->assertInstanceOf(SupportedAlgorithms::class, $sut->supportedAlgorithms());
         $this->assertInstanceOf(SupportedSerializers::class, $sut->supportedSerializers());
         $this->assertNotEmpty($sut->maxTrustChainDepth());
+        $this->assertInstanceOf(TrustMarkDelegationFactory::class, $sut->trustMarkDelegationFactory());
+        $this->assertInstanceOf(TrustMarkValidator::class, $sut->trustMarkValidator());
     }
 }

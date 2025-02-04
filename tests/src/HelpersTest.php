@@ -10,12 +10,14 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Helpers\Arr;
 use SimpleSAML\OpenID\Helpers\Json;
+use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Helpers\Url;
 
 #[CoversClass(Helpers::class)]
 #[UsesClass(Url::class)]
 #[UsesClass(Json::class)]
 #[UsesClass(Arr::class)]
+#[UsesClass(Type::class)]
 class HelpersTest extends TestCase
 {
     protected function sut(): Helpers
@@ -35,5 +37,6 @@ class HelpersTest extends TestCase
         $this->assertInstanceOf(Url::class, $sut->url());
         $this->assertInstanceOf(Json::class, $sut->json());
         $this->assertInstanceOf(Arr::class, $sut->arr());
+        $this->assertInstanceOf(Type::class, $sut->type());
     }
 }

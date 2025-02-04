@@ -60,7 +60,7 @@ class Test
             )
         );
         
-        // Define the maximum cache TTL for federation artifacts. This will be used together with 'exp'
+        // Define the maximum cache Time-To-Live (TTL) for federation artifacts. This will be used together with 'exp'
         // claim to resolve the maximum cache time for trust chains, entity statements, etc.
         $maxCacheDuration = new DateInterval('PT6H');
         
@@ -101,7 +101,7 @@ try {
         ],
     );
 } catch (\Throwable $exception) {
-    $this->loggerService->error('Could not resolve trust chain: ' . $exception->getMessage())
+    $this->logger->error('Could not resolve trust chain: ' . $exception->getMessage())
     return;
 }
 
@@ -126,7 +126,7 @@ try {
         'https://trust-achor-id.example.org/',
     );
 } catch (\Throwable $exception) {
-    $this->loggerService->error('Could not resolve trust chain: ' . $exception->getMessage())
+    $this->logger->error('Could not resolve trust chain: ' . $exception->getMessage())
     return;
 }
 
@@ -145,7 +145,7 @@ try {
     /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
     $metadata = $trustChain->getResolvedMetadata($entityType);
 } catch (\Throwable $exception) {
-    $this->loggerService->error(
+    $this->logger->error(
         sprintf(
             'Error resolving metadata for entity type %s. Error: %s.',
             $entityType->value,
@@ -156,7 +156,7 @@ try {
 }
 
 if (is_null($metadata)) {
-    $this->loggerService->error(
+    $this->logger->error(
         sprintf(
             'No metadata available for entity type %s.',
             $entityType->value,      
@@ -191,8 +191,51 @@ $trustAnchorEntityId = $trustAnchorConfigurationStatement->getIssuer();
 try {    
     $trustAnchorConfigurationStatement->verifyWithKeySet($trustAnchorJwks);
 } catch (\Throwable $exception) {
-    $this->loggerService->error('Could not verify trust anchor configuration statement signature: ' .
+    $this->logger->error('Could not verify trust anchor configuration statement signature: ' .
     $exception->getMessage());
+    return;
+}
+
+```
+
+### Validating Trust Marks
+
+Federation tools expose Trust Mark Validator with several methods for validating Trust Marks, with the most common
+one being the one to validate Trust Mark for some entity simply based on the Trust Mark ID.
+
+If cache is utilized, Trust Mark validation will be cached with cache TTL being the minimum expiration
+time of Trust Mark, Leaf Entity Statement or `maxCacheDuration`, whatever is smaller.
+
+```php
+// ...
+
+/** @var \SimpleSAML\OpenID\Federation $federationTools */
+/** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
+
+
+// Trust Mark ID that you want to validate. 
+$trustMarkId = 'https://example.com/trust-mark/member';
+// Leaf for which you want to validate the Trust Mark with ID above.
+$leafEntityConfigurationStatement = $trustChain->getResolvedLeaf();
+// Trust Anchor under which you want to validate Trust Mark.
+$trustAnchorConfigurationStatement = $trustChain->getResolvedTrustAnchor();
+
+try {
+    // Example which queries cache for previously validated Trust Mark, and does formal validation if not cached.
+    $federationTools->trustMarkValidator()->fromCacheOrDoForTrustMarkId(
+        $trustMarkId,
+        $leafEntityConfigurationStatement,
+        $trustAnchorConfigurationStatement,
+    );
+    
+    // Example which always does formal validation (does not use cache).
+    $federationTools->trustMarkValidator()->doForTrustMarkId(
+        $trustMarkId,
+        $leafEntityConfigurationStatement,
+        $trustAnchorConfigurationStatement,
+    );
+} catch (\Throwable $exception) {
+    $this->logger->error('Trust Mark validation failed. Error was: ' . $exception->getMessage());
     return;
 }
 
