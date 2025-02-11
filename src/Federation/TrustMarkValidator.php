@@ -202,7 +202,7 @@ class TrustMarkValidator
                 );
                 return;
             } catch (\Throwable $exception) {
-                $this->logger?->debug(
+                $this->logger?->error(
                     sprintf(
                         'Trust Mark %s validation failed using claim %s for leaf entity %s, under Trust Anchor' .
                         ' %s. Error was %s. Trying next if available.',
