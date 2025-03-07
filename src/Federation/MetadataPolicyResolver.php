@@ -86,10 +86,10 @@ class MetadataPolicyResolver
 
             // Disregard unsupported if not critical, otherwise throw.
             if (
-                ($unsupportedCriticalOperators = array_intersect(
+                ($unsupportedCriticalOperators = array_values(array_intersect(
                     $criticalMetadataPolicyOperators,
                     array_diff($allNextPolicyOperators, $supportedOperators), // Unsupported operators, but ignored
-                )) !== []
+                ))) !== []
             ) {
                 throw new MetadataPolicyException(
                     'Unsupported critical metadata policy operator(s) encountered: ' .
@@ -115,7 +115,7 @@ class MetadataPolicyResolver
                     if (
                         (!isset($currentPolicy[$nextPolicyParameter])) ||
                         (!is_array($currentPolicy[$nextPolicyParameter])) ||
-                        (!isset($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value]))
+                        (!array_key_exists($metadataPolicyOperatorEnum->value, $currentPolicy[$nextPolicyParameter]))
                     ) {
                         $this->helpers->arr()->ensureArrayDepth(
                             $currentPolicy,
@@ -156,26 +156,23 @@ class MetadataPolicyResolver
                     ) {
                         // We merge with existing values.
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                        array_unique(
-                            array_merge(
+                        array_values(array_unique(array_merge(
                                 /** @phpstan-ignore argument.type (We ensured this is array.) */
-                                $operatorValue,
-                                /** @phpstan-ignore argument.type (We ensured this is array.) */
+                            $operatorValue,
+                            /** @phpstan-ignore argument.type (We ensured this is array.) */
                                 $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                            ),
-                        );
+                        )));
                     } elseif (
-                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf ||
-                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf
                     ) {
                         // The result of merging the values of two operators is the intersection of the
-                        // operator values. If the intersection is empty, this MUST result in a policy error.
-                        $intersection = array_intersect(
+                        // operator values.
+                        $intersection = array_values(array_intersect(
                             /** @phpstan-ignore argument.type (We ensured this is array.) */
                             $operatorValue,
                             /** @phpstan-ignore argument.type (We ensured this is array.) */
                             $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                        );
+                        ));
 
                         if ($intersection === []) {
                             throw new MetadataPolicyException(
@@ -192,6 +189,21 @@ class MetadataPolicyResolver
                         }
 
                         // We have values in intersection, so set it as new operator value.
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
+                        $intersection;
+                    } elseif (
+                        $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf
+                    ) {
+                        // The result of merging the values of two operators is the intersection of the
+                        // operator values.
+                        $intersection = array_values(array_intersect(
+                        /** @phpstan-ignore argument.type (We ensured this is array.) */
+                            $operatorValue,
+                            /** @phpstan-ignore argument.type (We ensured this is array.) */
+                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
+                        ));
+
+                        // Set it as new operator value, even if its empty.
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
                         $intersection;
                     } elseif ($currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] === false) {

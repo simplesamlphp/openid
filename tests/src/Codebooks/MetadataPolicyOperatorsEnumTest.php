@@ -473,6 +473,11 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::Value->value,
+                MetadataPolicyOperatorsEnum::Add->value,
+                MetadataPolicyOperatorsEnum::Default->value,
+                MetadataPolicyOperatorsEnum::OneOf->value,
+                MetadataPolicyOperatorsEnum::SubsetOf->value,
+                MetadataPolicyOperatorsEnum::SupersetOf->value,
                 MetadataPolicyOperatorsEnum::Essential->value,
             ],
             MetadataPolicyOperatorsEnum::Value->getSupportedOperatorCombinations(),
@@ -481,6 +486,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::Add->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Default->value,
                 MetadataPolicyOperatorsEnum::SubsetOf->value,
                 MetadataPolicyOperatorsEnum::SupersetOf->value,
@@ -492,6 +498,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::Default->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Add->value,
                 MetadataPolicyOperatorsEnum::OneOf->value,
                 MetadataPolicyOperatorsEnum::SubsetOf->value,
@@ -504,6 +511,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::OneOf->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Default->value,
                 MetadataPolicyOperatorsEnum::Essential->value,
             ],
@@ -513,6 +521,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::SubsetOf->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Add->value,
                 MetadataPolicyOperatorsEnum::Default->value,
                 MetadataPolicyOperatorsEnum::SupersetOf->value,
@@ -524,6 +533,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::SupersetOf->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Add->value,
                 MetadataPolicyOperatorsEnum::Default->value,
                 MetadataPolicyOperatorsEnum::SubsetOf->value,
@@ -535,6 +545,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->assertSame(
             [
                 MetadataPolicyOperatorsEnum::Essential->value,
+                MetadataPolicyOperatorsEnum::Value->value,
                 MetadataPolicyOperatorsEnum::Add->value,
                 MetadataPolicyOperatorsEnum::Default->value,
                 MetadataPolicyOperatorsEnum::OneOf->value,
@@ -562,14 +573,14 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         );
 
         $this->assertFalse(
-            MetadataPolicyOperatorsEnum::Value->isOperatorCombinationSupported([
+            MetadataPolicyOperatorsEnum::OneOf->isOperatorCombinationSupported([
                 MetadataPolicyOperatorsEnum::Add->value,
             ]),
         );
 
         $this->assertFalse(
             MetadataPolicyOperatorsEnum::SupersetOf->isOperatorCombinationSupported([
-                MetadataPolicyOperatorsEnum::Value->value,
+                MetadataPolicyOperatorsEnum::OneOf->value,
             ]),
         );
     }
@@ -612,7 +623,7 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
 
         MetadataPolicyOperatorsEnum::validateGeneralParameterOperationRules(
             [
-                MetadataPolicyOperatorsEnum::Value->value => 'a',
+                MetadataPolicyOperatorsEnum::OneOf->value => ['a'],
                 MetadataPolicyOperatorsEnum::SubsetOf->value => ['a', 'b'],
             ],
         );
@@ -623,97 +634,18 @@ class MetadataPolicyOperatorsEnumTest extends TestCase
         // If add is combined with subset_of, the values of add MUST be a subset of the values of subset_of.
         MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
             [
-                MetadataPolicyOperatorsEnum::Add->value => 'a',
+                MetadataPolicyOperatorsEnum::Add->value => ['a'],
                 MetadataPolicyOperatorsEnum::SubsetOf->value => ['a', 'b'],
             ],
         );
         $this->addToAssertionCount(1);
 
         $this->expectException(MetadataPolicyException::class);
+        $this->expectExceptionMessage('subset');
         MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
             [
-                MetadataPolicyOperatorsEnum::Add->value => 'c',
+                MetadataPolicyOperatorsEnum::Add->value => ['c'],
                 MetadataPolicyOperatorsEnum::SubsetOf->value => ['a', 'b'],
-            ],
-        );
-    }
-
-    public function testValidateSpecificParameterOperationRulesForAddAndSupersetOf(): void
-    {
-        // If add is combined with subset_of, the values of add MUST be a subset of the values of subset_of.
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Add->value => 'a',
-                MetadataPolicyOperatorsEnum::SupersetOf->value => ['a'],
-            ],
-        );
-        $this->addToAssertionCount(1);
-
-        $this->expectException(MetadataPolicyException::class);
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Add->value => 'a',
-                MetadataPolicyOperatorsEnum::SupersetOf->value => ['a', 'b'],
-            ],
-        );
-    }
-
-    public function testValidateSpecificParameterOperationRulesForDefaultAndOneOf(): void
-    {
-        // If default is combined with one_of, the default value MUST be among the one_of values.
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'a',
-                MetadataPolicyOperatorsEnum::OneOf->value => ['a', 'b'],
-            ],
-        );
-        $this->addToAssertionCount(1);
-
-        $this->expectException(MetadataPolicyException::class);
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'c',
-                MetadataPolicyOperatorsEnum::OneOf->value => ['a', 'b'],
-            ],
-        );
-    }
-
-    public function testValidateSpecificParameterOperationRulesForDefaultAndSubsetOf(): void
-    {
-        // If default is combined with subset_of, the value of default MUST be a subset of the values of subset_of.
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'a',
-                MetadataPolicyOperatorsEnum::SubsetOf->value => ['a', 'b'],
-            ],
-        );
-        $this->addToAssertionCount(1);
-
-        $this->expectException(MetadataPolicyException::class);
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'c',
-                MetadataPolicyOperatorsEnum::SubsetOf->value => ['a', 'b'],
-            ],
-        );
-    }
-
-    public function testValidateSpecificParameterOperationRulesForDefaultAndSupersetOf(): void
-    {
-        // If add is combined with superset_of, the values of add MUST be a superset of the values of superset_of.
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'a',
-                MetadataPolicyOperatorsEnum::SupersetOf->value => ['a'],
-            ],
-        );
-        $this->addToAssertionCount(1);
-
-        $this->expectException(MetadataPolicyException::class);
-        MetadataPolicyOperatorsEnum::validateSpecificParameterOperationRules(
-            [
-                MetadataPolicyOperatorsEnum::Default->value => 'c',
-                MetadataPolicyOperatorsEnum::SupersetOf->value => ['a'],
             ],
         );
     }

@@ -175,13 +175,13 @@ class MetadataPolicyResolverTest extends TestCase
         );
     }
 
-    public function testThrowsForEmptyIntersectionForSubsetOf(): void
+    public function testThrowsForEmptyIntersectionForOneOf(): void
     {
         $this->expectException(MetadataPolicyException::class);
         $this->expectExceptionMessage('intersection');
 
         $intermediateMetadataPolicy = $this->intermediateMetadataPolicySample;
-        $intermediateMetadataPolicy['openid_relying_party']['grant_types']['subset_of'] = ['invalid'];
+        $intermediateMetadataPolicy['openid_relying_party']['token_endpoint_auth_method']['one_of'] = ['invalid'];
 
         $this->sut()->for(
             EntityTypesEnum::OpenIdRelyingParty,

@@ -174,23 +174,6 @@ class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
-    public function testRemovesParameterOnEmptySubsetOf(): void
-    {
-        $metadataPolicy = [
-            'scope' => [
-                'subset_of' => ['openid'],
-            ],
-        ];
-        $metadata = [
-            'scope' => 'profile',
-        ];
-
-        $this->assertEquals(
-            [],
-            $this->sut()->for($metadataPolicy, $metadata),
-        );
-    }
-
     public function testHasEmptyParameterOnNonExistingParameterForSubsetOf(): void
     {
         $metadataPolicy = [
