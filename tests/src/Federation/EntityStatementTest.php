@@ -196,10 +196,11 @@ class EntityStatementTest extends TestCase
     public function testIsNotConfiguration(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
-        $this->validPayload['iss'] = 'something-else';
+        $payload = $this->validPayload;
+        $payload['iss'] = 'something-else';
         // Authority hints should not be present if not configuration.
-        unset($this->validPayload['authority_hints']);
-        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        unset($payload['authority_hints']);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
 
         $this->assertFalse($this->sut()->isConfiguration());
     }
@@ -256,10 +257,11 @@ class EntityStatementTest extends TestCase
 
     public function testTrustMarksAreOptional(): void
     {
-        unset($this->validPayload['trust_marks']);
+        $payload = $this->validPayload;
+        unset($payload['trust_marks']);
 
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
-        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
 
         $this->assertInstanceOf(
             EntityStatement::class,
