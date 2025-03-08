@@ -226,6 +226,7 @@ try {
         $trustMarkId,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
+        $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
     
     // Example which always does formal validation (does not use cache).
@@ -233,6 +234,7 @@ try {
         $trustMarkId,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
+        $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
 } catch (\Throwable $exception) {
     $this->logger->error('Trust Mark validation failed. Error was: ' . $exception->getMessage());

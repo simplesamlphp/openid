@@ -10,7 +10,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Helpers;
@@ -35,6 +38,7 @@ class TrustMarkTest extends TestCase
     protected MockObject $jsonHelperMock;
     protected MockObject $typeHelperMock;
     protected MockObject $claimFactoryMock;
+    protected JwtTypesEnum $expectedJwtType;
 
     protected array $expiredPayload = [
         'iat' => 1734016912,
@@ -83,6 +87,8 @@ class TrustMarkTest extends TestCase
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
+
+        $this->expectedJwtType = JwtTypesEnum::TrustMarkJwt;
     }
 
     protected function sut(
@@ -93,6 +99,7 @@ class TrustMarkTest extends TestCase
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
+        ?JwtTypesEnum $expectedJwtType = null,
     ): TrustMark {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -101,6 +108,7 @@ class TrustMarkTest extends TestCase
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
+        $expectedJwtType ??= $this->expectedJwtType;
 
         return new TrustMark(
             $jwsDecorator,
@@ -110,6 +118,7 @@ class TrustMarkTest extends TestCase
             $dateIntervalDecorator,
             $helpers,
             $claimFactory,
+            $expectedJwtType,
         );
     }
 
@@ -122,5 +131,16 @@ class TrustMarkTest extends TestCase
             TrustMark::class,
             $this->sut(),
         );
+    }
+
+    public function testThrowsOnUnexpectedJwtType(): void
+    {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Type');
+
+        $this->sut(expectedJwtType: JwtTypesEnum::TrustMarkDelegationJwt);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
@@ -95,6 +96,7 @@ class TrustMarkValidator
         string $trustMarkId,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): void {
         if (
             $this->isValidationCachedFor(
@@ -106,7 +108,12 @@ class TrustMarkValidator
             return;
         }
 
-        $this->doForTrustMarkId($trustMarkId, $leafEntityConfiguration, $trustAnchorEntityConfiguration);
+        $this->doForTrustMarkId(
+            $trustMarkId,
+            $leafEntityConfiguration,
+            $trustAnchorEntityConfiguration,
+            $expectedJwtType,
+        );
     }
 
     /**
@@ -120,6 +127,7 @@ class TrustMarkValidator
         string $trustMarkId,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): void {
         $this->logger?->debug(
             sprintf(
@@ -189,6 +197,7 @@ class TrustMarkValidator
                     $trustMarksClaimValue,
                     $leafEntityConfiguration,
                     $trustAnchorEntityConfiguration,
+                    $expectedJwtType,
                 );
 
                 $this->logger?->debug(
@@ -240,6 +249,7 @@ class TrustMarkValidator
         TrustMarksClaimValue $trustMarksClaimValue,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): void {
         if (
             $this->isValidationCachedFor(
@@ -255,6 +265,7 @@ class TrustMarkValidator
             $trustMarksClaimValue,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
+            $expectedJwtType,
         );
     }
 
@@ -271,8 +282,9 @@ class TrustMarkValidator
         TrustMarksClaimValue $trustMarksClaimValue,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): void {
-        $trustMark = $this->validateTrustMarksClaimValue($trustMarksClaimValue);
+        $trustMark = $this->validateTrustMarksClaimValue($trustMarksClaimValue, $expectedJwtType);
 
         $this->doForTrustMark(
             $trustMark,
@@ -287,6 +299,7 @@ class TrustMarkValidator
      */
     public function validateTrustMarksClaimValue(
         TrustMarksClaimValue $trustMarksClaimValue,
+        JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): TrustMark {
         $this->logger?->debug(
             'Validating Trust Mark claim value.',
@@ -299,7 +312,10 @@ class TrustMarkValidator
 
         $this->logger?->debug('Building Trust Mark instance.');
 
-        $trustMark = $this->trustMarkFactory->fromToken($trustMarksClaimValue->getTrustMark());
+        $trustMark = $this->trustMarkFactory->fromToken(
+            $trustMarksClaimValue->getTrustMark(),
+            $expectedJwtType,
+        );
         $trustMarkPayload = $trustMark->getPayload();
 
         $this->logger?->debug(
