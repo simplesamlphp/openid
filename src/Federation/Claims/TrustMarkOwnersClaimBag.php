@@ -43,7 +43,7 @@ class TrustMarkOwnersClaimBag implements JsonSerializable
     }
 
     /**
-     * @return array<non-empty-string,array<non-empty-string,mixed>>
+     * @return array<non-empty-string,array<mixed>>
      */
     public function jsonSerialize(): array
     {

@@ -53,13 +53,13 @@ class TrustMarkOwnersClaimValue implements JsonSerializable
     }
 
     /**
-     * @return array<non-empty-string,mixed>
+     * @return array<mixed>
      */
     public function jsonSerialize(): array
     {
         return array_merge(
             [
-                ClaimsEnum::Id->value => $this->trustMarkId,
+                ClaimsEnum::TrustMarkId->value => $this->trustMarkId,
                 ClaimsEnum::Sub->value => $this->subject,
                 ClaimsEnum::Jwks->value => $this->jwks->getValue(),
             ],

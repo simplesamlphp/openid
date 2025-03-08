@@ -82,6 +82,7 @@ enum ClaimsEnum: string
     case Typ = 'typ';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
+    case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarks = 'trust_marks';
     case UserinfoEndpoint = 'userinfo_endpoint';

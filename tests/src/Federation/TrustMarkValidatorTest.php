@@ -184,7 +184,7 @@ class TrustMarkValidatorTest extends TestCase
         $this->trustMarksClaimValueMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkFactoryMock->expects($this->once())->method('fromToken')
             ->willReturn($this->trustMarkMock);
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
         $this->trustChainResolverMock->expects($this->once())->method('for');
         $this->trustMarkMock->expects($this->once())->method('verifyWithKeySet');
@@ -280,7 +280,7 @@ class TrustMarkValidatorTest extends TestCase
         $this->trustMarksClaimValueMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkFactoryMock->expects($this->once())->method('fromToken')
             ->willReturn($this->trustMarkMock);
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
         $this->trustChainResolverMock->expects($this->once())->method('for');
         $this->trustMarkMock->expects($this->once())->method('verifyWithKeySet');
@@ -301,7 +301,7 @@ class TrustMarkValidatorTest extends TestCase
             ->willReturn(['key' => 'value']);
         $this->trustMarkFactoryMock->expects($this->once())->method('fromToken')
             ->willReturn($this->trustMarkMock);
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getPayload')
             ->willReturn(['key' => 'differentValue']);
 
@@ -323,7 +323,7 @@ class TrustMarkValidatorTest extends TestCase
                 'trustAnchorId',
             )->willReturn('trustMarkId');
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->expects($this->never())->method('getSubject');
 
         $this->sut()->fromCacheOrDoForTrustMark(
@@ -336,7 +336,7 @@ class TrustMarkValidatorTest extends TestCase
     public function testFromCacheOrDoForTrustMarkRuns(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get');
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
         $this->trustChainResolverMock->expects($this->once())->method('for');
         $this->trustMarkMock->expects($this->once())->method('verifyWithKeySet');
@@ -356,7 +356,7 @@ class TrustMarkValidatorTest extends TestCase
         $leafEntityConfigurationExpirationTime = time() + 120;
         $this->leafEntityConfigurationMock->method('getExpirationTime')
             ->willReturn($leafEntityConfigurationExpirationTime);
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
         $trustMarkExpirationTime = time() + 60;
         $this->trustMarkMock->method('getExpirationTime')->willReturn($trustMarkExpirationTime);
@@ -378,7 +378,7 @@ class TrustMarkValidatorTest extends TestCase
     public function testDoForTrustMarksLogsCacheError(): void
     {
         $this->cacheDecoratorMock->expects($this->never())->method('get');
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
         $this->trustChainResolverMock->expects($this->once())->method('for');
         $this->trustMarkMock->expects($this->once())->method('verifyWithKeySet');
@@ -451,7 +451,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn('delegationToken');
 
         $this->trustMarkDelegationFactoryMock->expects($this->once())
@@ -467,7 +467,7 @@ class TrustMarkValidatorTest extends TestCase
         $this->trustMarkMock->method('getIssuer')->willReturn('trustMarkIssuerId');
         $this->trustMarkDelegationMock->method('getSubject')->willReturn('trustMarkIssuerId');
 
-        $this->trustMarkDelegationMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkDelegationMock->method('getTrustMarkId')->willReturn('trustMarkId');
 
         $this->sut()->validateTrustMarkDelegation(
             $this->trustMarkMock,
@@ -480,7 +480,7 @@ class TrustMarkValidatorTest extends TestCase
         $this->trustAnchorConfigurationMock->expects($this->once())
             ->method('getTrustMarkOwners')
             ->willReturn($this->trustMarkOwnersClaimBagMock);
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkOwnersClaimBagMock->expects($this->once())
             ->method('get')
             ->with('trustMarkId')
@@ -512,7 +512,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn(null);
 
         $this->expectException(TrustMarkException::class);
@@ -534,7 +534,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn('delegationToken');
 
         $this->trustMarkDelegationFactoryMock->expects($this->once())
@@ -564,7 +564,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn('delegationToken');
 
         $this->trustMarkDelegationFactoryMock->expects($this->once())
@@ -596,7 +596,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn('delegationToken');
 
         $this->trustMarkDelegationFactoryMock->expects($this->once())
@@ -631,7 +631,7 @@ class TrustMarkValidatorTest extends TestCase
             ->with('trustMarkId')
             ->willReturn($this->trustMarkOwnersClaimValueMock);
 
-        $this->trustMarkMock->method('getIdentifier')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
         $this->trustMarkMock->method('getDelegation')->willReturn('delegationToken');
 
         $this->trustMarkDelegationFactoryMock->expects($this->once())
@@ -647,7 +647,7 @@ class TrustMarkValidatorTest extends TestCase
         $this->trustMarkMock->method('getIssuer')->willReturn('trustMarkIssuerId');
         $this->trustMarkDelegationMock->method('getSubject')->willReturn('trustMarkIssuerId');
 
-        $this->trustMarkDelegationMock->method('getIdentifier')->willReturn('otherTrustMarkId');
+        $this->trustMarkDelegationMock->method('getTrustMarkId')->willReturn('otherTrustMarkId');
 
         $this->expectException(TrustMarkException::class);
         $this->expectExceptionMessage('Trust Mark ID');

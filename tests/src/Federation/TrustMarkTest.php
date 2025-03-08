@@ -13,7 +13,6 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
-use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Helpers;
@@ -44,7 +43,8 @@ class TrustMarkTest extends TestCase
         'iat' => 1734016912,
         'nbf' => 1734016912,
         'exp' => 1734020512,
-        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        // phpcs:ignore
+        'trust_mark_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
         'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
         'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];

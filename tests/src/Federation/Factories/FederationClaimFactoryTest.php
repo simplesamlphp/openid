@@ -79,7 +79,7 @@ class FederationClaimFactoryTest extends TestCase
     public function testCanBuildTrustMarksClaimValueFrom(): void
     {
         $trustMarksClaimData = [
-            ClaimsEnum::Id->value => 'trustMarkId',
+            ClaimsEnum::TrustMarkId->value => 'trustMarkId',
             ClaimsEnum::TrustMark->value => 'trustMark',
             'something' => 'else',
         ];

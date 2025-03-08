@@ -63,7 +63,7 @@ class TrustMarkOwnersClaimValueTest extends TestCase
     {
         $this->assertSame(
             [
-                'id' => $this->trustMarkId,
+                'trust_mark_id' => $this->trustMarkId,
                 'sub' => $this->subject,
                 'jwks' => [],
                 'key' => 'value',
