@@ -12,10 +12,10 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
 #[CoversClass(JwksDecorator::class)]
-class JwksDecoratorTest extends TestCase
+final class JwksDecoratorTest extends TestCase
 {
     protected MockObject $jwkSetMock;
-    protected MockObject $jwkMock;
+
 
     protected array $jwkArraySample = [
         'alg' => 'RS256',
@@ -29,10 +29,10 @@ class JwksDecoratorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->jwkMock = $this->createMock(JWK::class);
-        $this->jwkMock->method('jsonSerialize')->willReturn($this->jwkArraySample);
+        $jwkMock = $this->createMock(JWK::class);
+        $jwkMock->method('jsonSerialize')->willReturn($this->jwkArraySample);
         $this->jwkSetMock = $this->createMock(JWKSet::class);
-        $this->jwkSetMock->method('all')->willReturn([$this->jwkMock]);
+        $this->jwkSetMock->method('all')->willReturn([$jwkMock]);
     }
 
     protected function sut(

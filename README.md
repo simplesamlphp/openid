@@ -15,7 +15,7 @@ Library can be installed by using Composer:
 composer require simplesamlphp/openid
 ```
 
-## OpenID Federation (draft 41)
+## OpenID Federation (draft 42)
 
 The initial functionality of the library revolves around the OpenID Federation specification. To use it, create an
 instance of the class `\SimpleSAML\OpenID\Federation`
@@ -226,6 +226,7 @@ try {
         $trustMarkId,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
+        $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
     
     // Example which always does formal validation (does not use cache).
@@ -233,6 +234,7 @@ try {
         $trustMarkId,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
+        $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
 } catch (\Throwable $exception) {
     $this->logger->error('Trust Mark validation failed. Error was: ' . $exception->getMessage());

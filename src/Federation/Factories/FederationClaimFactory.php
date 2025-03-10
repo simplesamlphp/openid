@@ -47,11 +47,11 @@ class FederationClaimFactory
         $trustMarksClaimData = $this->helpers->type()->ensureArray($trustMarksClaimData);
 
         // Each JSON object MUST contain the following two claims and MAY contain other claims.
-        // id
+        // trust_mark_id
         // The Trust Mark identifier. It MUST be the same value as the id claim contained in the Trust Mark JWT.
         // trust_mark
         // A signed JSON Web Token that represents a Trust Mark.
-        $trustMarkId = $trustMarksClaimData[ClaimsEnum::Id->value] ?? throw new TrustMarkException(
+        $trustMarkId = $trustMarksClaimData[ClaimsEnum::TrustMarkId->value] ?? throw new TrustMarkException(
             'No ID present in Trust Mark claim.',
         );
 
@@ -61,7 +61,7 @@ class FederationClaimFactory
 
         $otherClaims = array_diff_key(
             $trustMarksClaimData,
-            [ClaimsEnum::Id->value => true, ClaimsEnum::TrustMark->value => true],
+            [ClaimsEnum::TrustMarkId->value => true, ClaimsEnum::TrustMark->value => true],
         );
 
         return $this->buildTrustMarksClaimValue(
@@ -127,7 +127,7 @@ class FederationClaimFactory
 
             $otherClaims = array_diff_key(
                 $trustMarkOwnersClaim,
-                [ClaimsEnum::Id->value => true, ClaimsEnum::TrustMark->value => true],
+                [ClaimsEnum::TrustMarkId->value => true, ClaimsEnum::TrustMark->value => true],
             );
 
             $trustMarkOwnersClaimValues[] = $this->buildTrustMarkOwnersClaimValue(

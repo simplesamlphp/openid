@@ -18,15 +18,20 @@ use SimpleSAML\OpenID\Federation\TrustChain;
 use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChain::class)]
-class TrustChainTest extends TestCase
+final class TrustChainTest extends TestCase
 {
     protected MockObject $timestampValidationLeewayDecoratorMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $metadataPolicyResolverMock;
+
     protected MockObject $metadataPolicyApplicatorMock;
 
     protected MockObject $leafMock;
+
     protected MockObject $subordinateMock;
+
     protected MockObject $trustAnchorMock;
 
     protected int $expirationTime;

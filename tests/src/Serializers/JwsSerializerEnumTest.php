@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 
 #[CoversClass(JwsSerializerEnum::class)]
-class JwsSerializerEnumTest extends TestCase
+final class JwsSerializerEnumTest extends TestCase
 {
     public function testCanGetInstance(): void
     {

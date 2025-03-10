@@ -32,6 +32,7 @@ class MetadataPolicyApplicator
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
                     continue;
                 }
+
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
                 /** @var array<string,mixed> $metadata */
                 $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
@@ -46,6 +47,7 @@ class MetadataPolicyApplicator
                         unset($metadata[$policyParameterName]);
                         continue;
                     }
+
                     $this->helpers->arr()->ensureArrayDepth($metadata, $policyParameterName);
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $operatorValue,
@@ -67,9 +69,10 @@ class MetadataPolicyApplicator
 
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
-                    $metadataParameterValue = array_unique(
-                        array_merge($metadataParameterValueBeforePolicy, $operatorValue),
-                    );
+                    $metadataParameterValue = array_values(array_unique(array_merge(
+                        $metadataParameterValueBeforePolicy,
+                        $operatorValue,
+                    )));
 
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $metadataParameterValue,
@@ -105,11 +108,10 @@ class MetadataPolicyApplicator
                         );
                     }
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SubsetOf) {
-                    // If the metadata parameter is present, this operator computes the intersection between the values
-                    // of the operator and the metadata parameter. If the intersection is non-empty, the metadata
-                    // parameter is set to the values in the intersection. If the intersection is empty, the
-                    // metadata parameter MUST be removed. Note that this behavior makes subset_of a
-                    // potential value modifier in addition to it being a value check.
+                    // Action: If the metadata parameter is present, it is assigned the intersection between the values
+                    // of the operator and the metadata parameter. Note that the resulting intersection may thus be an
+                    // empty array []. Also note that subset_of is a potential value modifier in addition to it being
+                    // a value check.
                     if (!isset($metadata[$policyParameterName])) {
                         continue;
                     }
@@ -121,15 +123,11 @@ class MetadataPolicyApplicator
 
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
-                    $intersection = array_intersect(
+                    $intersection = array_values(array_intersect(
                         $metadataParameterValueBeforePolicy,
                         $operatorValue,
-                    );
+                    ));
 
-                    if ($intersection === []) {
-                        unset($metadata[$policyParameterName]);
-                        continue;
-                    }
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $intersection,
                         $policyParameterName,
@@ -197,7 +195,7 @@ class MetadataPolicyApplicator
 
         // Special case for 'scope' parameter, which needs to be converted to array before policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_string($value)) {
-            $value = explode(' ', $value);
+            return explode(' ', $value);
         }
 
         return $value;
@@ -207,7 +205,7 @@ class MetadataPolicyApplicator
     {
         // Special case for 'scope' parameter, which needs to be converted to string after policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_array($value)) {
-            $value = implode(' ', $value);
+            return implode(' ', $value);
         }
 
         return $value;

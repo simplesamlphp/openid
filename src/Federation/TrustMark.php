@@ -6,11 +6,39 @@ namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
+use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
+use SimpleSAML\OpenID\Factories\ClaimFactory;
+use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jws\JwsDecorator;
+use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 class TrustMark extends ParsedJws
 {
+    public function __construct(
+        JwsDecorator $jwsDecorator,
+        JwsVerifierDecorator $jwsVerifierDecorator,
+        JwksFactory $jwksFactory,
+        JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
+        DateIntervalDecorator $timestampValidationLeeway,
+        Helpers $helpers,
+        ClaimFactory $claimFactory,
+        protected readonly JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
+    ) {
+        parent::__construct(
+            $jwsDecorator,
+            $jwsVerifierDecorator,
+            $jwksFactory,
+            $jwsSerializerManagerDecorator,
+            $timestampValidationLeeway,
+            $helpers,
+            $claimFactory,
+        );
+    }
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -34,11 +62,16 @@ class TrustMark extends ParsedJws
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      */
-    public function getIdentifier(): string
+    public function getTrustMarkId(): string
     {
-        return parent::getIdentifier() ?? throw new TrustMarkException('No Identifier claim found.');
+        $claimKey = ClaimsEnum::TrustMarkId->value;
+
+        $trustMarkId = $this->getPayloadClaim($claimKey) ?? throw new TrustMarkException(
+            'No Trust Mark ID claim found.',
+        );
+
+        return $this->helpers->type()->ensureNonEmptyString($trustMarkId);
     }
 
     /**
@@ -111,8 +144,12 @@ class TrustMark extends ParsedJws
     {
         $typ = parent::getType() ?? throw new TrustMarkException('No Type header claim found.');
 
-        if ($typ !== JwtTypesEnum::TrustMarkJwt->value) {
-            throw new TrustMarkException('Invalid Type header claim.');
+        if ($typ !== $this->expectedJwtType->value) {
+            throw new TrustMarkException(sprintf(
+                'Invalid Type header claim. Expected %s, got %s.',
+                $this->expectedJwtType->value,
+                $typ,
+            ));
         }
 
         return $typ;
@@ -122,12 +159,12 @@ class TrustMark extends ParsedJws
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      */
-    public function validate(): void
+    protected function validate(): void
     {
         $this->validateByCallbacks(
             $this->getIssuer(...),
             $this->getSubject(...),
-            $this->getIdentifier(...),
+            $this->getTrustMarkId(...),
             $this->getIssuedAt(...),
             $this->getLogoUri(...),
             $this->getExpirationTime(...),

@@ -23,18 +23,25 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(RequestObject::class)]
 #[UsesClass(ParsedJws::class)]
-class RequestObjectTest extends TestCase
+final class RequestObjectTest extends TestCase
 {
     protected MockObject $signatureMock;
-    protected MockObject $jwsMock;
+
+
     protected MockObject $jwsDecoratorMock;
+
     protected MockObject $jwsVerifierDecoratorMock;
+
     protected MockObject $jwksFactoryMock;
+
     protected MockObject $jwsSerializerManagerDecoratorMock;
+
     protected MockObject $dateIntervalDecoratorMock;
+
     protected MockObject $helpersMock;
-    protected MockObject $jsonHelperMock;
-    protected MockObject $typeHelperMock;
+
+
+
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -47,11 +54,11 @@ class RequestObjectTest extends TestCase
     {
         $this->signatureMock = $this->createMock(Signature::class);
 
-        $this->jwsMock = $this->createMock(JWS::class);
-        $this->jwsMock->method('getSignature')->willReturn($this->signatureMock);
+        $jwsMock = $this->createMock(JWS::class);
+        $jwsMock->method('getSignature')->willReturn($this->signatureMock);
 
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
+        $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
@@ -59,12 +66,12 @@ class RequestObjectTest extends TestCase
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
-        $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
-        $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
-        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+        $jsonHelperMock = $this->createMock(Helpers\Json::class);
+        $this->helpersMock->method('json')->willReturn($jsonHelperMock);
+        $typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
-        $this->typeHelperMock->method('ensureString')->willReturnArgument(0);
+        $typeHelperMock->method('ensureString')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }

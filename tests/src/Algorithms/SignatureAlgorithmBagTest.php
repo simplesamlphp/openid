@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
 #[CoversClass(SignatureAlgorithmBag::class)]
 #[UsesClass(SignatureAlgorithmEnum::class)]
-class SignatureAlgorithmBagTest extends TestCase
+final class SignatureAlgorithmBagTest extends TestCase
 {
     protected SignatureAlgorithmEnum $signatureAlgorithmEnumRs256;
 

@@ -11,7 +11,7 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 
 #[CoversClass(TrustMarkOwnersClaimBag::class)]
-class TrustMarkOwnersClaimBagTest extends TestCase
+final class TrustMarkOwnersClaimBagTest extends TestCase
 {
     protected MockObject $trustMarkOwnersClaimValueMock;
 
@@ -35,7 +35,7 @@ class TrustMarkOwnersClaimBagTest extends TestCase
 
     public function testCanAddAndGet(): void
     {
-        $this->assertCount(0, $this->sut()->getAll());
+        $this->assertEmpty($this->sut()->getAll());
         $sut = $this->sut($this->trustMarkOwnersClaimValueMock);
         $this->assertCount(1, $sut->getAll());
         $this->assertTrue($sut->has('trustMarkId'));

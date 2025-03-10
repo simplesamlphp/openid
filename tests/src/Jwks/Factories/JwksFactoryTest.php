@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\Jwks\JwksDecorator;
 #[CoversClass(JwksFactory::class)]
 #[UsesClass(JwksDecorator::class)]
 #[UsesClass(JwksFactory::class)]
-class JwksFactoryTest extends TestCase
+final class JwksFactoryTest extends TestCase
 {
     protected array $jwksArraySample = [
         'keys' => [

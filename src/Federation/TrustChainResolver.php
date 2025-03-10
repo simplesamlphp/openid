@@ -15,6 +15,7 @@ use Throwable;
 class TrustChainResolver
 {
     protected int $maxTrustChainDepth;
+
     protected int $maxAuthorityHints;
 
     public function __construct(
@@ -60,9 +61,9 @@ class TrustChainResolver
 
         try {
             $this->validateStart($entityId, $trustAnchorIds);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error validating configuration chain fetch start condition: ' . $e->getMessage(),
+                'Error validating configuration chain fetch start condition: ' . $throwable->getMessage(),
                 $debugStartInfo,
             );
             return $configurationChains;
@@ -93,9 +94,9 @@ class TrustChainResolver
                 'Fetched entity configuration statement.',
                 [...$debugStartInfo, 'entityConfigPayload' => $entityConfig->getPayload(),],
             );
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Unable to fetch entity configuration statement, error was: ' . $exception->getMessage(),
+                'Unable to fetch entity configuration statement, error was: ' . $throwable->getMessage(),
                 $debugStartInfo,
             );
             return $configurationChains;
@@ -151,9 +152,9 @@ class TrustChainResolver
                     $this->getConfigurationChains($authorityHint, $trustAnchorIds, $currentPath, $depth + 1),
                 );
             }
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Unable to handle entity authority hints, error was: ' . $exception->getMessage(),
+                'Unable to handle entity authority hints, error was: ' . $throwable->getMessage(),
                 $debugStartInfo,
             );
         }
@@ -193,6 +194,7 @@ class TrustChainResolver
                     unset($validTrustAnchorIds[$index]);
                     continue;
                 }
+
                 $this->logger?->debug('Trust chain does not exist in cache.', $debugCacheQueryInfo);
             } catch (Throwable $exception) {
                 $this->logger?->warning(
@@ -244,6 +246,7 @@ class TrustChainResolver
                         if (array_key_last($configurationChain) === $id) {
                             array_unshift($currenChainElements, $configurationStatement);
                         }
+
                         $previousEntity = $configurationStatement;
                     }
 
@@ -277,8 +280,8 @@ class TrustChainResolver
             while ($trustChain = array_pop($resolvedChains)) {
                 $trustChainBag->add($this->cacheTrustChain($trustChain));
             }
-        } catch (Throwable $exception) {
-            $message = 'Error building Trust Chain Bag: ' . $exception->getMessage();
+        } catch (Throwable $throwable) {
+            $message = 'Error building Trust Chain Bag: ' . $throwable->getMessage();
             $this->logger?->error($message, $debugStartInfo);
             throw new TrustChainException($message);
         }

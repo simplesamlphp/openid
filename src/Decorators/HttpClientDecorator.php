@@ -26,13 +26,13 @@ class HttpClientDecorator
     {
         try {
             $response = $this->client->request($httpMethodsEnum->value, $uri);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',
                 $uri,
-                $e->getMessage(),
+                $throwable->getMessage(),
             );
-            throw new HttpException($message, (int)$e->getCode(), $e);
+            throw new HttpException($message, (int)$throwable->getCode(), $throwable);
         }
 
         if ($response->getStatusCode() < 200 || $response->getStatusCode() > 299) {

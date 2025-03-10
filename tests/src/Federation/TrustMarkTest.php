@@ -10,7 +10,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Helpers;
@@ -22,25 +24,36 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(TrustMark::class)]
 #[UsesClass(ParsedJws::class)]
-class TrustMarkTest extends TestCase
+final class TrustMarkTest extends TestCase
 {
     protected MockObject $signatureMock;
-    protected MockObject $jwsMock;
+
+
     protected MockObject $jwsDecoratorMock;
+
     protected MockObject $jwsVerifierDecoratorMock;
+
     protected MockObject $jwksFactoryMock;
+
     protected MockObject $jwsSerializerManagerDecoratorMock;
+
     protected MockObject $dateIntervalDecoratorMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $jsonHelperMock;
-    protected MockObject $typeHelperMock;
+
+
     protected MockObject $claimFactoryMock;
+
+    protected JwtTypesEnum $expectedJwtType;
 
     protected array $expiredPayload = [
         'iat' => 1734016912,
         'nbf' => 1734016912,
         'exp' => 1734020512,
-        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        // phpcs:ignore
+        'trust_mark_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
         'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
         'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];
@@ -57,13 +70,13 @@ class TrustMarkTest extends TestCase
     {
         $this->signatureMock = $this->createMock(Signature::class);
 
-        $this->jwsMock = $this->createMock(JWS::class);
-        $this->jwsMock->method('getPayload')
+        $jwsMock = $this->createMock(JWS::class);
+        $jwsMock->method('getPayload')
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
-        $this->jwsMock->method('getSignature')->willReturn($this->signatureMock);
+        $jwsMock->method('getSignature')->willReturn($this->signatureMock);
 
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
+        $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
@@ -73,16 +86,18 @@ class TrustMarkTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
-        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+        $typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
-        $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
-        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
+
+        $this->expectedJwtType = JwtTypesEnum::TrustMarkJwt;
     }
 
     protected function sut(
@@ -93,6 +108,7 @@ class TrustMarkTest extends TestCase
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
+        ?JwtTypesEnum $expectedJwtType = null,
     ): TrustMark {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
@@ -101,6 +117,7 @@ class TrustMarkTest extends TestCase
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
+        $expectedJwtType ??= $this->expectedJwtType;
 
         return new TrustMark(
             $jwsDecorator,
@@ -110,6 +127,7 @@ class TrustMarkTest extends TestCase
             $dateIntervalDecorator,
             $helpers,
             $claimFactory,
+            $expectedJwtType,
         );
     }
 
@@ -122,5 +140,16 @@ class TrustMarkTest extends TestCase
             TrustMark::class,
             $this->sut(),
         );
+    }
+
+    public function testThrowsOnUnexpectedJwtType(): void
+    {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Type');
+
+        $this->sut(expectedJwtType: JwtTypesEnum::TrustMarkDelegationJwt);
     }
 }

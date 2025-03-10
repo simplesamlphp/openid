@@ -23,19 +23,27 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(TrustMarkDelegationFactory::class)]
 #[UsesClass(TrustMarkDelegation::class)]
-class TrustMarkDelegationFactoryTest extends TestCase
+final class TrustMarkDelegationFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
-    protected MockObject $jwsMock;
-    protected MockObject $jwsDecoratorMock;
+
+
+
     protected MockObject $jwsParserMock;
+
     protected MockObject $jwsVerifierDecoratorMock;
+
     protected MockObject $jwksFactoryMock;
+
     protected MockObject $jwsSerializerManagerMock;
+
     protected MockObject $dateIntervalDecoratorMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $jsonHelperMock;
-    protected MockObject $typeHelperMock;
+
+
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -48,7 +56,8 @@ class TrustMarkDelegationFactoryTest extends TestCase
         'iat' => 1734016912,
         'nbf' => 1734016912,
         'exp' => 1734020512,
-        'id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        // phpcs:ignore
+        'trust_mark_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
         'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
         'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
         'ref' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/ref/trust-mark/member',
@@ -60,16 +69,16 @@ class TrustMarkDelegationFactoryTest extends TestCase
     {
         $this->signatureMock = $this->createMock(Signature::class);
 
-        $this->jwsMock = $this->createMock(JWS::class);
-        $this->jwsMock->method('getPayload')
+        $jwsMock = $this->createMock(JWS::class);
+        $jwsMock->method('getPayload')
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
-        $this->jwsMock->method('getSignature')->willReturn($this->signatureMock);
+        $jwsMock->method('getSignature')->willReturn($this->signatureMock);
 
-        $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $this->jwsDecoratorMock->method('jws')->willReturn($this->jwsMock);
+        $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
+        $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
         $this->jwsParserMock = $this->createMock(JwsParser::class);
-        $this->jwsParserMock->method('parse')->willReturn($this->jwsDecoratorMock);
+        $this->jwsParserMock->method('parse')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
@@ -79,11 +88,11 @@ class TrustMarkDelegationFactoryTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
-        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+        $typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
-        $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
-        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
 

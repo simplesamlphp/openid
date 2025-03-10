@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Helpers\Type;
 
 #[CoversClass(Type::class)]
-class TypeTest extends TestCase
+final class TypeTest extends TestCase
 {
     protected function sut(): Type
     {
@@ -105,6 +105,7 @@ class TypeTest extends TestCase
 
         $object = new class {
             public int $a = 1;
+
             public int $b = 2;
         };
         $this->assertSame(

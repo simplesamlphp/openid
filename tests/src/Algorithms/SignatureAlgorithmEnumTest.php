@@ -21,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
 #[CoversClass(SignatureAlgorithmEnum::class)]
-class SignatureAlgorithmEnumTest extends TestCase
+final class SignatureAlgorithmEnumTest extends TestCase
 {
     #[RequiresPhpExtension('sodium')]
     public function testCanGetProperSignatureAlgorithmInstance(): void

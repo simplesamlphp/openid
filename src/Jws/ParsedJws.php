@@ -21,6 +21,7 @@ class ParsedJws
      * @var array<string,mixed>
      */
     protected ?array $header = null;
+
     /**
      * @var array<string,mixed>
      */
@@ -72,8 +73,8 @@ class ParsedJws
     {
         try {
             return $this->header ??= $this->jwsDecorator->jws()->getSignature($signatureId)->getProtectedHeader();
-        } catch (Throwable $exception) {
-            throw new JwsException('Unable to get protected header.', (int)$exception->getCode(), $exception);
+        } catch (Throwable $throwable) {
+            throw new JwsException('Unable to get protected header.', (int)$throwable->getCode(), $throwable);
         }
     }
 
@@ -124,8 +125,8 @@ class ParsedJws
             /** @var ?array<string,mixed> $payload */
             $payload = $this->helpers->json()->decode($payloadString);
             return $this->payload = is_array($payload) ? $payload : [];
-        } catch (JsonException $exception) {
-            throw new JwsException('Unable to decode JWS payload.', $exception->getCode(), $exception);
+        } catch (JsonException $jsonException) {
+            throw new JwsException('Unable to decode JWS payload.', $jsonException->getCode(), $jsonException);
         }
     }
 
@@ -227,7 +228,7 @@ class ParsedJws
         $exp = $this->helpers->type()->ensureInt($exp);
 
         if ($exp + $this->timestampValidationLeeway->getInSeconds() < time()) {
-            throw new JwsException("Expiration Time claim ($exp) is lesser than current time.");
+            throw new JwsException(sprintf('Expiration Time claim (%d) is lesser than current time.', $exp));
         }
 
         return $exp;
@@ -247,7 +248,7 @@ class ParsedJws
         $iat = $this->helpers->type()->ensureInt($iat);
 
         if ($iat - $this->timestampValidationLeeway->getInSeconds() > time()) {
-            throw new JwsException("Issued At claim ($iat) is greater than current time.");
+            throw new JwsException(sprintf('Issued At claim (%d) is greater than current time.', $iat));
         }
 
         return $iat;

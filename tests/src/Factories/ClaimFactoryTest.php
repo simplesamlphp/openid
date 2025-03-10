@@ -20,9 +20,10 @@ use SimpleSAML\OpenID\Helpers;
 #[UsesClass(FederationClaimFactory::class)]
 #[UsesClass(GenericClaim::class)]
 #[UsesClass(JwksClaim::class)]
-class ClaimFactoryTest extends TestCase
+final class ClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
+
     protected array $jwksValueSample = [
         'keys' => [
             [

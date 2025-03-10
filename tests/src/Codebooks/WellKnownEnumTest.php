@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 
 #[CoversClass(WellKnownEnum::class)]
-class WellKnownEnumTest extends TestCase
+final class WellKnownEnumTest extends TestCase
 {
     public function testReturnsPrefixOnlyPathForPrefixCase(): void
     {

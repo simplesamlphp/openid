@@ -15,9 +15,10 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(JwsParser::class)]
 #[UsesClass(JwsDecorator::class)]
-class JwsParserTest extends TestCase
+final class JwsParserTest extends TestCase
 {
     protected MockObject $jwsSerializerManagerDecoratorMock;
+
     protected MockObject $jwsDecoratorMock;
 
     protected function setUp(): void

@@ -16,23 +16,23 @@ use SimpleSAML\OpenID\SupportedAlgorithms;
 
 #[CoversClass(AlgorithmManagerDecoratorFactory::class)]
 #[UsesClass(AlgorithmManagerDecorator::class)]
-class AlgorithmManagerDecoratorFactoryTest extends TestCase
+final class AlgorithmManagerDecoratorFactoryTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
-    protected MockObject $signatureAlgorithmBagMock;
-    protected MockObject $signatureAlgorithmMock;
+
+
 
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->signatureAlgorithmBagMock = $this->createMock(SignatureAlgorithmBag::class);
-        $this->signatureAlgorithmMock = $this->createMock(SignatureAlgorithm::class);
+        $signatureAlgorithmBagMock = $this->createMock(SignatureAlgorithmBag::class);
+        $signatureAlgorithmMock = $this->createMock(SignatureAlgorithm::class);
 
         $this->supportedAlgorithmsMock->method('getSignatureAlgorithmBag')
-            ->willReturn($this->signatureAlgorithmBagMock);
-        $this->signatureAlgorithmBagMock->method('getAllInstances')
+            ->willReturn($signatureAlgorithmBagMock);
+        $signatureAlgorithmBagMock->method('getAllInstances')
             ->willReturn([
-                $this->signatureAlgorithmMock,
+                $signatureAlgorithmMock,
             ]);
     }
 

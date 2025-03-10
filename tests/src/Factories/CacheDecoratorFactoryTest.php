@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\Factories\CacheDecoratorFactory;
 
 #[CoversClass(CacheDecoratorFactory::class)]
 #[UsesClass(CacheDecorator::class)]
-class CacheDecoratorFactoryTest extends TestCase
+final class CacheDecoratorFactoryTest extends TestCase
 {
     protected MockObject $cacheInterfaceMock;
 

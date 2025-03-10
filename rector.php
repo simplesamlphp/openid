@@ -11,7 +11,20 @@ return RectorConfig::configure()
     ])
     // uncomment to reach your current PHP version
     ->withPhpSets()
-    ->withTypeCoverageLevel(1000)
-    ->withDeadCodeLevel(1000)
-    ->withCodeQualityLevel(1000)
-    ;
+    ->withPreparedSets(
+        deadCode: true,
+        codeQuality: true,
+        codingStyle: true,
+        typeDeclarations: true,
+//        privatization: true,
+//        naming: true,
+        instanceOf: true,
+        earlyReturn: true,
+        strictBooleans: true,
+//        carbon: true,
+        rectorPreset: true,
+        phpunitCodeQuality: true,
+//        doctrineCodeQuality: true,
+//        symfonyCodeQuality: true,
+//        symfonyConfigs: true,
+    );

@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 
 #[CoversClass(HttpClientDecoratorFactory::class)]
 #[UsesClass(HttpClientDecorator::class)]
-class HttpClientDecoratorFactoryTest extends TestCase
+final class HttpClientDecoratorFactoryTest extends TestCase
 {
     protected MockObject $clientMock;
 

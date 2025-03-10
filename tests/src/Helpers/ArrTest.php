@@ -10,7 +10,7 @@ use SimpleSAML\OpenID\Exceptions\OpenIdException;
 use SimpleSAML\OpenID\Helpers\Arr;
 
 #[CoversClass(Arr::class)]
-class ArrTest extends TestCase
+final class ArrTest extends TestCase
 {
     protected function sut(): Arr
     {

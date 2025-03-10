@@ -11,7 +11,7 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 
 #[CoversClass(SupportedAlgorithms::class)]
-class SupportedAlgorithmsTest extends TestCase
+final class SupportedAlgorithmsTest extends TestCase
 {
     protected MockObject $signatureAlgorithmBagMock;
 

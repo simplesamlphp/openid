@@ -56,7 +56,7 @@ class TrustMarksClaimValue implements JsonSerializable
     {
         return array_merge(
             [
-                ClaimsEnum::Id->value => $this->trustMarkId,
+                ClaimsEnum::TrustMarkId->value => $this->trustMarkId,
                 ClaimsEnum::TrustMark->value => $this->trustMark,
             ],
             $this->otherClaims,

@@ -12,8 +12,11 @@ use SimpleSAML\OpenID\Helpers\Url;
 class Helpers
 {
     protected static ?Url $url = null;
+
     protected static ?Json $json = null;
+
     protected static ?Arr $arr = null;
+
     protected static ?Type $type = null;
 
     public function url(): Url

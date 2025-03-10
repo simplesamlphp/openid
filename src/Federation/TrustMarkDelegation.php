@@ -34,11 +34,16 @@ class TrustMarkDelegation extends ParsedJws
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
      */
-    public function getIdentifier(): string
+    public function getTrustMarkId(): string
     {
-        return parent::getIdentifier() ?? throw new TrustMarkDelegationException('No Identifier claim found.');
+        $claimKey = ClaimsEnum::TrustMarkId->value;
+
+        $trustMarkId = $this->getPayloadClaim($claimKey) ?? throw new TrustMarkDelegationException(
+            'No Trust Mark ID claim found.',
+        );
+
+        return $this->helpers->type()->ensureNonEmptyString($trustMarkId);
     }
 
     /**
@@ -94,12 +99,12 @@ class TrustMarkDelegation extends ParsedJws
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
      */
-    public function validate(): void
+    protected function validate(): void
     {
         $this->validateByCallbacks(
             $this->getIssuer(...),
             $this->getSubject(...),
-            $this->getIdentifier(...),
+            $this->getTrustMarkId(...),
             $this->getIssuedAt(...),
             $this->getExpirationTime(...),
             $this->getReference(...),

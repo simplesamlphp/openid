@@ -11,11 +11,14 @@ use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 
 #[CoversClass(TrustMarkOwnersClaimValue::class)]
-class TrustMarkOwnersClaimValueTest extends TestCase
+final class TrustMarkOwnersClaimValueTest extends TestCase
 {
     protected string $trustMarkId;
+
     protected string $subject = 'subject';
+
     protected MockObject $jwksClaimMock;
+
     protected array $otherClaims;
 
     protected function setUp(): void
@@ -63,7 +66,7 @@ class TrustMarkOwnersClaimValueTest extends TestCase
     {
         $this->assertSame(
             [
-                'id' => $this->trustMarkId,
+                'trust_mark_id' => $this->trustMarkId,
                 'sub' => $this->subject,
                 'jwks' => [],
                 'key' => 'value',

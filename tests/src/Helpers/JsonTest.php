@@ -9,12 +9,13 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Helpers\Json;
 
 #[CoversClass(Json::class)]
-class JsonTest extends TestCase
+final class JsonTest extends TestCase
 {
     protected function sut(): Json
     {
         return new Json();
     }
+
     public function testEncodeDecode(): void
     {
         $arr = ['a' => 'b'];

@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Helpers\Url;
 
 #[CoversClass(Url::class)]
-class UrlTest extends TestCase
+final class UrlTest extends TestCase
 {
     protected function sut(): Url
     {

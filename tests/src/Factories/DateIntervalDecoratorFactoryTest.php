@@ -13,7 +13,7 @@ use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 
 #[CoversClass(DateIntervalDecoratorFactory::class)]
 #[UsesClass(DateIntervalDecorator::class)]
-class DateIntervalDecoratorFactoryTest extends TestCase
+final class DateIntervalDecoratorFactoryTest extends TestCase
 {
     protected DateInterval $dateInterval;
 

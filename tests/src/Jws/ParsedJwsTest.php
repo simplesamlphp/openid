@@ -20,20 +20,27 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJws::class)]
-class ParsedJwsTest extends TestCase
+final class ParsedJwsTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
+
     protected MockObject $jwsVerifierDecoratorMock;
+
     protected MockObject $jwksFactoryMock;
+
     protected MockObject $jwsSerializerManagerDecoratorMock;
+
     protected MockObject $timestampValidationLeewayMock;
+
     protected MockObject $helpersMock;
 
     protected MockObject $jwsMock;
+
     protected MockObject $signatureMock;
 
     protected MockObject $jsonHelperMock;
-    protected MockObject $typeHelperMock;
+
+
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -112,12 +119,12 @@ class ParsedJwsTest extends TestCase
 
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
-        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+        $typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
-        $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
-        $this->typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
-        $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
+        $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
 

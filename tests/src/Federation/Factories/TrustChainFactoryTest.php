@@ -20,12 +20,16 @@ use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(TrustChainFactory::class)]
 #[UsesClass(TrustChain::class)]
-class TrustChainFactoryTest extends TestCase
+final class TrustChainFactoryTest extends TestCase
 {
     protected MockObject $entityStatementFactoryMock;
+
     protected MockObject $timestampValidationLeewayMock;
+
     protected MockObject $metadataPolicyResolverMock;
+
     protected MockObject $metadataPolicyApplicatorMock;
+
     protected MockObject $helpersMock;
 
     protected function setUp(): void
