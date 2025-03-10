@@ -34,9 +34,9 @@ class ArtifactFetcher
 
         try {
             $artifact = $this->cacheDecorator->get(null, $keyElement, ...$keyElements);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error trying to get artifact from cache: ' . $exception->getMessage(),
+                'Error trying to get artifact from cache: ' . $throwable->getMessage(),
                 ['keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
             return null;
@@ -74,14 +74,14 @@ class ArtifactFetcher
         $this->logger?->debug('Fetching artifact on network from URI.', ['uri' => $uri]);
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',
                 $uri,
-                $e->getMessage(),
+                $throwable->getMessage(),
             );
             $this->logger?->error($message);
-            throw new FetchException($message, (int)$e->getCode(), $e);
+            throw new FetchException($message, (int)$throwable->getCode(), $throwable);
         }
 
         $this->logger?->debug('Artifact fetched on network from URI, returning HTTP response.', ['uri' => $uri]);
@@ -127,9 +127,9 @@ class ArtifactFetcher
                 'Artifact saved to cache.',
                 ['artifact' => $artifact, 'ttl' => $ttl, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error saving artifact to cache: ' . $exception->getMessage(),
+                'Error saving artifact to cache: ' . $throwable->getMessage(),
                 ['artifact' => $artifact, 'ttl' => $ttl, 'keyElement' => $keyElement, 'keyElements' => $keyElements],
             );
         }

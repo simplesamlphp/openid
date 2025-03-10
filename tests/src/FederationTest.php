@@ -75,15 +75,22 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(ClaimFactory::class)]
 #[UsesClass(TrustMarkDelegationFactory::class)]
 #[UsesClass(TrustMarkValidator::class)]
-class FederationTest extends TestCase
+final class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
+
     protected MockObject $supportedSerializersMock;
+
     protected DateInterval $maxCacheDuration;
+
     protected DateInterval $timestampValidationLeeway;
+
     protected int $maxTrustChainDepth;
+
     protected MockObject $cacheMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $clientMock;
 
     protected function setUp(): void

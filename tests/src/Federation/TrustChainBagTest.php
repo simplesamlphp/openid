@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\Federation\TrustChain;
 use SimpleSAML\OpenID\Federation\TrustChainBag;
 
 #[CoversClass(TrustChainBag::class)]
-class TrustChainBagTest extends TestCase
+final class TrustChainBagTest extends TestCase
 {
     protected MockObject $trustChainMock;
 
@@ -83,20 +83,20 @@ class TrustChainBagTest extends TestCase
         $sut->add($chain1);
 
         $this->assertSame($chain1, $sut->getShortestByTrustAnchorPriority('ta1'));
-        $this->assertSame($sut->getShortestByTrustAnchorPriority('ta1', 'ta2')
-            ->getResolvedTrustAnchor()->getIssuer(), 'ta1');
+        $this->assertSame('ta1', $sut->getShortestByTrustAnchorPriority('ta1', 'ta2')
+                ->getResolvedTrustAnchor()->getIssuer());
 
         $this->assertSame($chain2, $sut->getShortestByTrustAnchorPriority('ta2'));
-        $this->assertSame($sut->getShortestByTrustAnchorPriority('ta2', 'ta1')
-            ->getResolvedTrustAnchor()->getIssuer(), 'ta2');
+        $this->assertSame('ta2', $sut->getShortestByTrustAnchorPriority('ta2', 'ta1')
+                ->getResolvedTrustAnchor()->getIssuer());
 
         // Can get chain even if some trust anchors are unknown.
         $this->assertSame($chain2, $sut->getShortestByTrustAnchorPriority('unknown', 'ta2'));
-        $this->assertSame($sut->getShortestByTrustAnchorPriority('unknown', 'ta2', 'ta1')
-            ->getResolvedTrustAnchor()->getIssuer(), 'ta2');
+        $this->assertSame('ta2', $sut->getShortestByTrustAnchorPriority('unknown', 'ta2', 'ta1')
+                ->getResolvedTrustAnchor()->getIssuer());
 
         // Returns null if Trust Anchor is unknown.
-        $this->assertNull($sut->getShortestByTrustAnchorPriority('unknown'));
+        $this->assertNotInstanceOf(TrustChain::class, $sut->getShortestByTrustAnchorPriority('unknown'));
     }
 
     public function testCanGetCount(): void

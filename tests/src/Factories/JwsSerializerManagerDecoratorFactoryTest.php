@@ -16,23 +16,23 @@ use SimpleSAML\OpenID\SupportedSerializers;
 
 #[CoversClass(JwsSerializerManagerDecoratorFactory::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
-class JwsSerializerManagerDecoratorFactoryTest extends TestCase
+final class JwsSerializerManagerDecoratorFactoryTest extends TestCase
 {
     protected MockObject $supportedSerializersMock;
-    protected MockObject $jwsSerializerBagMock;
-    protected MockObject $jwsSerializerMock;
+
+
 
     protected function setUp(): void
     {
         $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
-        $this->jwsSerializerBagMock = $this->createMock(JwsSerializerBag::class);
-        $this->jwsSerializerMock = $this->createMock(JwsSerializer::class);
+        $jwsSerializerBagMock = $this->createMock(JwsSerializerBag::class);
+        $jwsSerializerMock = $this->createMock(JwsSerializer::class);
 
         $this->supportedSerializersMock->method('getJwsSerializerBag')
-            ->willReturn($this->jwsSerializerBagMock);
+            ->willReturn($jwsSerializerBagMock);
 
-        $this->jwsSerializerBagMock->method('getAllInstances')
-            ->willReturn([$this->jwsSerializerMock]);
+        $jwsSerializerBagMock->method('getAllInstances')
+            ->willReturn([$jwsSerializerMock]);
     }
 
     protected function sut(): JwsSerializerManagerDecoratorFactory

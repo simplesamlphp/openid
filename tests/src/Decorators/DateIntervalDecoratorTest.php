@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 
 #[CoversClass(DateIntervalDecorator::class)]
-class DateIntervalDecoratorTest extends TestCase
+final class DateIntervalDecoratorTest extends TestCase
 {
     protected DateInterval $dateInterval;
 
@@ -41,14 +41,14 @@ class DateIntervalDecoratorTest extends TestCase
     {
         $expirationTime = time() + 100;
         $this->assertSame(
-            $this->sut()->lowestInSecondsComparedToExpirationTime($expirationTime),
             100,
+            $this->sut()->lowestInSecondsComparedToExpirationTime($expirationTime),
         );
 
         $expirationTime = time() + 100 + 86400;
         $this->assertSame(
-            $this->sut()->lowestInSecondsComparedToExpirationTime($expirationTime),
             86400,
+            $this->sut()->lowestInSecondsComparedToExpirationTime($expirationTime),
         );
     }
 }

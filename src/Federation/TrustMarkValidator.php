@@ -210,7 +210,7 @@ class TrustMarkValidator
                     ),
                 );
                 return;
-            } catch (\Throwable $exception) {
+            } catch (Throwable $exception) {
                 $this->logger?->error(
                     sprintf(
                         'Trust Mark %s validation failed using claim %s for leaf entity %s, under Trust Anchor' .
@@ -344,7 +344,8 @@ class TrustMarkValidator
             if ($value !== $trustMarkPayload[$key]) {
                 throw new TrustMarkException(
                     sprintf(
-                        "Trust Mark Claim value for '$key' is different from Trust Mark JWT value: %s != %s",
+                        "Trust Mark Claim value for '%s' is different from Trust Mark JWT value: %s != %s",
+                        $key,
                         var_export($value, true),
                         var_export($trustMarkPayload[$key], true),
                     ),
@@ -432,7 +433,8 @@ class TrustMarkValidator
         ));
 
         if (!is_null($this->cacheDecorator)) {
-            $expirationTime = $leafEntityConfigurationExpirationTime = $leafEntityConfiguration->getExpirationTime();
+            $expirationTime = $leafEntityConfiguration->getExpirationTime();
+            $leafEntityConfigurationExpirationTime = $expirationTime;
             if (!is_null($trustMarkExpirationTime = $trustMark->getExpirationTime())) {
                 $expirationTime = min(
                     $leafEntityConfigurationExpirationTime,
@@ -441,7 +443,6 @@ class TrustMarkValidator
             }
 
             $cacheTtl = $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime($expirationTime);
-
             $this->logger?->debug(sprintf(
                 'Caching Trust Mark %s validation for leaf entity %s under Trust Anchor %s with TTL %s.',
                 $trustMark->getTrustMarkId(),
@@ -449,7 +450,6 @@ class TrustMarkValidator
                 $trustAnchorEntityConfiguration->getIssuer(),
                 $cacheTtl,
             ));
-
             try {
                 $this->cacheDecorator->set(
                     $trustMark->getTrustMarkId(),
@@ -526,12 +526,12 @@ class TrustMarkValidator
                 $trustMark->getIssuer(),
                 [$trustAnchorEntityConfiguration->getIssuer()],
             )->getShortest();
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $error = sprintf(
                 'Error resolving Trust Chain for Issuer %s using Trust Anchor %s. Error was: %s',
                 $trustMark->getIssuer(),
                 $trustAnchorEntityConfiguration->getIssuer(),
-                $exception->getMessage(),
+                $throwable->getMessage(),
             );
 
             $this->logger?->error($error);
@@ -564,10 +564,10 @@ class TrustMarkValidator
         $this->logger?->debug('Validating Trust Mark signature.');
         try {
             $trustMark->verifyWithKeySet($trustMarkIssuerEntityConfiguration->getJwks()->getValue());
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $error = sprintf(
                 'Trust Mark signature validation failed with error: %s',
-                $exception->getMessage(),
+                $throwable->getMessage(),
             );
             $this->logger?->error(
                 $error,
@@ -575,6 +575,7 @@ class TrustMarkValidator
             );
             throw new TrustMarkException($error);
         }
+
         $this->logger?->debug('Trust Mark signature validated.');
     }
 
@@ -653,10 +654,10 @@ class TrustMarkValidator
         $this->logger?->debug('Validating Trust Mark Delegation signature.');
         try {
             $trustMarkDelegation->verifyWithKeySet($trustMarkOwnersClaimValue->getJwks()->getValue());
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $error = sprintf(
                 'Trust Mark Delegation signature validation failed with error: %s',
-                $exception->getMessage(),
+                $throwable->getMessage(),
             );
             $this->logger?->error(
                 $error,
@@ -664,6 +665,7 @@ class TrustMarkValidator
             );
             throw new TrustMarkException($error);
         }
+
         $this->logger?->debug('Trust Mark Delegation signature validated.');
 
         // The issuer of the delegation JWT MUST match the sub value in this set of claims.
@@ -678,6 +680,7 @@ class TrustMarkValidator
             $this->logger?->error($error);
             throw new TrustMarkException($error);
         }
+
         $this->logger?->debug('Trust Mark Delegation Issuer claim validated.');
 
         // The subject of the delegation JWT MUST match the iss value in the Trust Mark.
@@ -692,6 +695,7 @@ class TrustMarkValidator
             $this->logger?->error($error);
             throw new TrustMarkException($error);
         }
+
         $this->logger?->debug('Trust Mark Issuer claim validated.');
 
         // The ID of the delegation JWT MUST match the id value in the Trust Mark.
@@ -706,6 +710,7 @@ class TrustMarkValidator
             $this->logger?->error($error);
             throw new TrustMarkException($error);
         }
+
         $this->logger?->debug('Trust Mark ID claim validated.');
 
         $this->logger?->debug('Trust Mark delegation validated.');

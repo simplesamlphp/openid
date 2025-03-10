@@ -23,10 +23,12 @@ use SimpleSAML\Test\OpenID\Help;
 #[UsesClass(MetadataPolicyOperatorsEnum::class)]
 #[UsesClass(Helpers::class)]
 #[UsesClass(Helpers\Arr::class)]
-class MetadataPolicyTestVectorsTest extends TestCase
+final class MetadataPolicyTestVectorsTest extends TestCase
 {
     protected static array $testVectors;
+
     protected static MetadataPolicyResolver $metadataPolicyResolver;
+
     protected static MetadataPolicyApplicator $metadataPolicyApplicator;
 
     public static function setUpBeforeClass(): void

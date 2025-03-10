@@ -20,17 +20,21 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
-class ParsedJwsFactoryTest extends TestCase
+final class ParsedJwsFactoryTest extends TestCase
 {
     protected MockObject $jwsParserMock;
-    protected MockObject $jwsVerifierDecoratorMock;
-    protected MockObject $jwksFactoryMock;
-    protected MockObject $jwsSerializerManagerDecoratorMock;
-    protected MockObject $dateIntervalDecoratorMock;
-    protected MockObject $helpersMock;
-    protected MockObject $claimFactoryMock;
 
-    protected array $validPayload;
+    protected MockObject $jwsVerifierDecoratorMock;
+
+    protected MockObject $jwksFactoryMock;
+
+    protected MockObject $jwsSerializerManagerDecoratorMock;
+
+    protected MockObject $dateIntervalDecoratorMock;
+
+    protected MockObject $helpersMock;
+
+    protected MockObject $claimFactoryMock;
 
     protected function setUp(): void
     {

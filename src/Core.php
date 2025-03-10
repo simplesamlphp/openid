@@ -25,18 +25,31 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 class Core
 {
     protected DateIntervalDecorator $timestampValidationLeewayDecorator;
+
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
+
     protected ?JwsParser $jwsParser = null;
+
     protected ?JwsVerifierDecorator $jwsVerifierDecorator = null;
+
     protected ?RequestObjectFactory $requestObjectFactory = null;
+
     protected ?ClientAssertionFactory $clientAssertionFactory = null;
+
     protected ?Helpers $helpers = null;
+
     protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
+
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
+
     protected ?JwsParserFactory $jwsParserFactory = null;
+
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
+
     protected ?JwksFactory $jwksFactory = null;
+
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
+
     protected ?ClaimFactory $claimFactory = null;
 
     public function __construct(
@@ -90,6 +103,7 @@ class Core
         if (is_null($this->algorithmManagerDecoratorFactory)) {
             $this->algorithmManagerDecoratorFactory = new AlgorithmManagerDecoratorFactory();
         }
+
         return $this->algorithmManagerDecoratorFactory;
     }
 
@@ -98,6 +112,7 @@ class Core
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
             $this->jwsSerializerManagerDecoratorFactory = new JwsSerializerManagerDecoratorFactory();
         }
+
         return $this->jwsSerializerManagerDecoratorFactory;
     }
 
@@ -106,6 +121,7 @@ class Core
         if (is_null($this->jwsParserFactory)) {
             $this->jwsParserFactory = new JwsParserFactory();
         }
+
         return $this->jwsParserFactory;
     }
 
@@ -114,6 +130,7 @@ class Core
         if (is_null($this->jwsVerifierDecoratorFactory)) {
             $this->jwsVerifierDecoratorFactory = new JwsVerifierDecoratorFactory();
         }
+
         return $this->jwsVerifierDecoratorFactory;
     }
 
@@ -137,6 +154,7 @@ class Core
             $this->jwsSerializerManagerDecorator = $this->jwsSerializerManagerDecoratorFactory()
                 ->build($this->supportedSerializers);
         }
+
         return $this->jwsSerializerManagerDecorator;
     }
 
@@ -145,6 +163,7 @@ class Core
         if (is_null($this->jwsParser)) {
             $this->jwsParser = $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
         }
+
         return $this->jwsParser;
     }
 
@@ -155,6 +174,7 @@ class Core
                 $this->algorithmManagerDecoratorFactory()->build($this->supportedAlgorithms),
             );
         }
+
         return $this->jwsVerifierDecorator;
     }
 

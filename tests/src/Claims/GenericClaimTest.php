@@ -9,9 +9,10 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Claims\GenericClaim;
 
 #[CoversClass(GenericClaim::class)]
-class GenericClaimTest extends TestCase
+final class GenericClaimTest extends TestCase
 {
     protected string $valueSample;
+
     protected string $nameSample;
 
     protected function setUp(): void

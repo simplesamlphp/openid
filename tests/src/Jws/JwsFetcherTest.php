@@ -21,15 +21,21 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(JwsFetcher::class)]
 #[CoversClass(AbstractJwsFetcher::class)]
-class JwsFetcherTest extends TestCase
+final class JwsFetcherTest extends TestCase
 {
     protected MockObject $parsedJwsFactoryMock;
+
     protected MockObject $artifactFetcherMock;
+
     protected MockObject $maxCacheDurationMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $responseMock;
-    protected MockObject $responseBodyMock;
+
+
     protected MockObject $parsedJwsMock;
 
     protected function setUp(): void
@@ -41,8 +47,8 @@ class JwsFetcherTest extends TestCase
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
-        $this->responseBodyMock = $this->createMock(StreamInterface::class);
-        $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
+        $responseBodyMock = $this->createMock(StreamInterface::class);
+        $this->responseMock->method('getBody')->willReturn($responseBodyMock);
         $this->artifactFetcherMock->method('fromNetwork')->willReturn($this->responseMock);
 
         $this->parsedJwsMock = $this->createMock(ParsedJws::class);

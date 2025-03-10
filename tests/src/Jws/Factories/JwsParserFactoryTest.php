@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(JwsParserFactory::class)]
 #[UsesClass(JwsParser::class)]
-class JwsParserFactoryTest extends TestCase
+final class JwsParserFactoryTest extends TestCase
 {
     protected MockObject $jwsSerializerManagerDecoratorMock;
 

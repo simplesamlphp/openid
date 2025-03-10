@@ -15,7 +15,7 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 #[CoversClass(JwsVerifierDecoratorFactory::class)]
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(AlgorithmManagerDecorator::class)]
-class JwsVerifierDecoratorFactoryTest extends TestCase
+final class JwsVerifierDecoratorFactoryTest extends TestCase
 {
     protected AlgorithmManagerDecorator $algorithmManagerDecorator;
 

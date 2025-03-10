@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 
 #[CoversClass(JwsDecorator::class)]
-class JwsDecoratorTest extends TestCase
+final class JwsDecoratorTest extends TestCase
 {
     protected JWS $jwsMock;
 

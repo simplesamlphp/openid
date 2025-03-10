@@ -26,14 +26,20 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(AbstractJwsFetcher::class)]
 #[UsesClass(JwsFetcher::class)]
 #[UsesClass(WellKnownEnum::class)]
-class EntityStatementFetcherTest extends TestCase
+final class EntityStatementFetcherTest extends TestCase
 {
     protected MockObject $entityStatementFactoryMock;
+
     protected MockObject $artifactFetcherMock;
+
     protected MockObject $maxCacheDurationMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $responseMock;
+
     protected MockObject $entityStatementMock;
 
     protected function setUp(): void

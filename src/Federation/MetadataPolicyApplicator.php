@@ -32,6 +32,7 @@ class MetadataPolicyApplicator
                 if (!array_key_exists($metadataPolicyOperatorEnum->value, $policyOperations)) {
                     continue;
                 }
+
                 $operatorValue = $policyOperations[$metadataPolicyOperatorEnum->value];
                 /** @var array<string,mixed> $metadata */
                 $metadataParameterValueBeforePolicy = $this->resolveParameterValueBeforePolicy(
@@ -46,6 +47,7 @@ class MetadataPolicyApplicator
                         unset($metadata[$policyParameterName]);
                         continue;
                     }
+
                     $this->helpers->arr()->ensureArrayDepth($metadata, $policyParameterName);
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $operatorValue,
@@ -193,7 +195,7 @@ class MetadataPolicyApplicator
 
         // Special case for 'scope' parameter, which needs to be converted to array before policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_string($value)) {
-            $value = explode(' ', $value);
+            return explode(' ', $value);
         }
 
         return $value;
@@ -203,7 +205,7 @@ class MetadataPolicyApplicator
     {
         // Special case for 'scope' parameter, which needs to be converted to string after policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_array($value)) {
-            $value = implode(' ', $value);
+            return implode(' ', $value);
         }
 
         return $value;

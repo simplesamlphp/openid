@@ -11,7 +11,7 @@ use Psr\SimpleCache\CacheInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 
 #[CoversClass(CacheDecorator::class)]
-class CacheDecoratorTest extends TestCase
+final class CacheDecoratorTest extends TestCase
 {
     protected MockObject $cacheMock;
 

@@ -18,18 +18,28 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 
 #[CoversClass(TrustChainResolver::class)]
-class TrustChainResolverTest extends TestCase
+final class TrustChainResolverTest extends TestCase
 {
     protected MockObject $entityStatementFetcherMock;
+
     protected MockObject $trustChainFactoryMock;
+
     protected MockObject $trustChainBagFactoryMock;
+
     protected MockObject $maxCacheDurationDecorator;
+
     protected MockObject $cacheDecoratorMock;
+
     protected MockObject $loggerMock;
+
     protected int $maxTrustChainDepth;
+
     protected int $maxAuthorityHints;
+
     protected MockObject $leafEntityConfigurationMock;
+
     protected MockObject $intermediateEntityConfigurationMock;
+
     protected MockObject $trustAnchorEntityConfigurationMock;
 
     protected array $configChainSample = [];

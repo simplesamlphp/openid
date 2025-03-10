@@ -18,12 +18,14 @@ class Type
     {
         if (is_string($value)) {
             return $value;
-        } elseif (is_scalar($value) || $value instanceof Stringable) {
+        }
+
+        if (is_scalar($value) || $value instanceof Stringable) {
             return (string)$value;
         }
 
         $error = 'Unsafe string casting, aborting.';
-        $error .= is_string($context) ? " Context: $context" : '';
+        $error .= is_string($context) ? ' Context: ' . $context : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);
@@ -42,7 +44,7 @@ class Type
         }
 
         $error = 'Empty string value encountered, aborting.';
-        $error .= is_string($context) ? " Context: $context" : '';
+        $error .= is_string($context) ? ' Context: ' . $context : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);
@@ -56,16 +58,23 @@ class Type
     {
         if (is_array($value)) {
             return $value;
-        } elseif ($value instanceof Traversable) {
+        }
+
+        if ($value instanceof Traversable) {
             return iterator_to_array($value);
-        } elseif ($value instanceof JsonSerializable) {
+        }
+
+        if ($value instanceof JsonSerializable) {
             return (array)$value->jsonSerialize();
-        } elseif (is_object($value)) {
-            return (array)$value; // Converts object properties to an array
+        }
+
+        if (is_object($value)) {
+            return (array)$value;
+            // Converts object properties to an array
         }
 
         $error = 'Unsafe array casting, aborting.';
-        $error .= is_string($context) ? "Context: $context" : '';
+        $error .= is_string($context) ? 'Context: ' . $context : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);
@@ -188,12 +197,14 @@ class Type
     {
         if (is_int($value)) {
             return $value;
-        } elseif (is_numeric($value)) {
+        }
+
+        if (is_numeric($value)) {
             return (int)$value;
         }
 
         $error = 'Unsafe integer casting, aborting.';
-        $error .= is_string($context) ? "Context: $context" : '';
+        $error .= is_string($context) ? 'Context: ' . $context : '';
         $error .= ' Value was: ' . var_export($value, true);
 
         throw new InvalidValueException($error);

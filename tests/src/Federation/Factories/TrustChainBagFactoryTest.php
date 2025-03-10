@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\Federation\TrustChainBag;
 
 #[CoversClass(TrustChainBagFactory::class)]
 #[UsesClass(TrustChainBag::class)]
-class TrustChainBagFactoryTest extends TestCase
+final class TrustChainBagFactoryTest extends TestCase
 {
     protected MockObject $trustChainMock;
 

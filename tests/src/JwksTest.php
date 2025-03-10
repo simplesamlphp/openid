@@ -55,14 +55,20 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
 #[UsesClass(ClaimFactory::class)]
-class JwksTest extends TestCase
+final class JwksTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
+
     protected MockObject $supportedSerializersMock;
+
     protected DateInterval $maxCacheDuration;
+
     protected MockObject $cacheMock;
+
     protected MockObject $httpClientMock;
+
     protected MockObject $loggerMock;
+
     protected DateInterval $timestampValidationLeeway;
 
     protected function setUp(): void

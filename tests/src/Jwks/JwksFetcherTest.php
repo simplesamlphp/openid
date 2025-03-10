@@ -26,23 +26,33 @@ use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
 
 #[CoversClass(JwksFetcher::class)]
-class JwksFetcherTest extends TestCase
+final class JwksFetcherTest extends TestCase
 {
     protected MockObject $httpClientDecoratorMock;
+
     protected MockObject $jwksFactoryMock;
+
     protected MockObject $signedJwksFactoryMock;
+
     protected MockObject $maxCacheDurationDecoratorMock;
+
     protected MockObject $helpersMock;
+
     protected MockObject $claimFactoryMock;
+
     protected MockObject $cacheDecoratorMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $jsonHelperMock;
-    protected MockObject $typeHelperMock;
+
 
     protected MockObject $responseMock;
+
     protected MockObject $responseBodyMock;
 
     protected MockObject $signedJwksMock;
+
     protected MockObject $jwksClaimMock;
 
     protected array $jwksArraySample = [
@@ -73,8 +83,8 @@ class JwksFetcherTest extends TestCase
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
 
-        $this->typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($this->typeHelperMock);
+        $typeHelperMock = $this->createMock(Helpers\Type::class);
+        $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
         $this->responseBodyMock = $this->createMock(StreamInterface::class);
@@ -154,7 +164,7 @@ class JwksFetcherTest extends TestCase
         $this->loggerMock->expects($this->once())->method('error')
         ->with($this->stringContains('cache'));
 
-        $this->assertNull($this->sut()->fromCache('uri'));
+        $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
 
     public function testReturnsNullInCaseOfNonStringValueInCache(): void
@@ -163,7 +173,7 @@ class JwksFetcherTest extends TestCase
             ->with(null, 'uri')
             ->willReturn(123);
 
-        $this->assertNull($this->sut()->fromCache('uri'));
+        $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
 
     public function testLogsErrorInCaseOfCacheValueDecodeError(): void
@@ -179,7 +189,7 @@ class JwksFetcherTest extends TestCase
         $this->loggerMock->expects($this->atLeastOnce())->method('error')
             ->with($this->stringContains('decode'));
 
-        $this->assertNull($this->sut()->fromCache('uri'));
+        $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
 
     public function testCanGetFromJwksUri(): void
@@ -221,7 +231,7 @@ class JwksFetcherTest extends TestCase
         $this->loggerMock->expects($this->atLeastOnce())->method('error')
             ->with($this->stringContains('URI'));
 
-        $this->assertNull($this->sut()->fromJwksUri('uri'));
+        $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromJwksUri('uri'));
     }
 
     public function testJwksUriReturnsNullOnJsonDecodeError(): void
@@ -240,7 +250,7 @@ class JwksFetcherTest extends TestCase
         $this->loggerMock->expects($this->atLeastOnce())->method('error')
             ->with($this->stringContains('decode'));
 
-        $this->assertNull($this->sut()->fromJwksUri('uri'));
+        $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromJwksUri('uri'));
     }
 
     public function testJwksUriLogsErrorInCaseOfCacheSetError(): void

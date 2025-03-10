@@ -159,7 +159,7 @@ class TrustMark extends ParsedJws
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      */
-    public function validate(): void
+    protected function validate(): void
     {
         $this->validateByCallbacks(
             $this->getIssuer(...),

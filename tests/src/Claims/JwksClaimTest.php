@@ -10,9 +10,10 @@ use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
 #[CoversClass(JwksClaim::class)]
-class JwksClaimTest extends TestCase
+final class JwksClaimTest extends TestCase
 {
     protected array $valueSample;
+
     protected string $nameSample;
 
     protected function setUp(): void

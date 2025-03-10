@@ -18,7 +18,7 @@ use SimpleSAML\OpenID\Helpers\Url;
 #[UsesClass(Json::class)]
 #[UsesClass(Arr::class)]
 #[UsesClass(Type::class)]
-class HelpersTest extends TestCase
+final class HelpersTest extends TestCase
 {
     protected function sut(): Helpers
     {

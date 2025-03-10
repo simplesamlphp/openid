@@ -15,7 +15,7 @@ use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(MetadataPolicyApplicator::class)]
 #[UsesClass(MetadataPolicyOperatorsEnum::class)]
-class MetadataPolicyApplicatorTest extends TestCase
+final class MetadataPolicyApplicatorTest extends TestCase
 {
     protected MockObject $helpersMock;
 
@@ -53,6 +53,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             ],
         ],
     ];
+
     protected array $metadataSample = [
         'redirect_uris' => [
             0 => 'https://rp.example.org/callback',
@@ -92,14 +93,10 @@ class MetadataPolicyApplicatorTest extends TestCase
             'redirect_uris' => [
                 0 => 'https://rp.example.org/callback',
             ],
-            'grant_types' => [
-                0 => 'authorization_code',
-            ],
             'response_types' => [
                 0 => 'code',
             ],
             'token_endpoint_auth_method' => 'self_signed_tls_client_auth',
-            'subject_type' => 'pairwise',
             'sector_identifier_uri' => 'https://org.example.org/sector-ids.json',
             'policy_uri' => 'https://org.example.org/policy.html',
             'contacts' => [
@@ -107,6 +104,10 @@ class MetadataPolicyApplicatorTest extends TestCase
                 1 => 'helpdesk@federation.example.org',
                 2 => 'helpdesk@org.example.org',
             ],
+            'grant_types' => [
+                0 => 'authorization_code',
+            ],
+            'subject_type' => 'pairwise',
         ];
 
         $resolvedMetadata = $this->sut()->for(
@@ -114,7 +115,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             $this->metadataSample,
         );
 
-        $this->assertEquals($expectedResolvedMetadata, $resolvedMetadata);
+        $this->assertSame($expectedResolvedMetadata, $resolvedMetadata);
     }
 
     public function testCanHandleScopeClaims(): void
@@ -134,7 +135,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'scope' => 'openid profile',
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['scope' => 'openid profile email'],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -152,7 +153,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'scope' => 'openid profile',
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -168,7 +169,7 @@ class MetadataPolicyApplicatorTest extends TestCase
 
         $metadata = [];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['scope' => 'openid'],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -183,7 +184,7 @@ class MetadataPolicyApplicatorTest extends TestCase
         ];
         $metadata = [];
 
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -198,7 +199,7 @@ class MetadataPolicyApplicatorTest extends TestCase
         ];
         $metadata = [];
 
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -213,7 +214,7 @@ class MetadataPolicyApplicatorTest extends TestCase
         ];
         $metadata = [];
 
-        $this->assertEquals(
+        $this->assertSame(
             [],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -230,7 +231,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => '2',
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => '1'],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -247,7 +248,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => ['1'],
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => ['1', '2']],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -262,7 +263,7 @@ class MetadataPolicyApplicatorTest extends TestCase
         ];
         $metadata = [];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => '1'],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -279,7 +280,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => '1',
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => '1'],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -313,7 +314,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => ['1'],
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => ['1']],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -330,7 +331,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => ['1', '2'],
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => ['1']],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -347,7 +348,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => ['1', '2'],
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => ['1', '2']],
             $this->sut()->for($metadataPolicy, $metadata),
         );
@@ -381,7 +382,7 @@ class MetadataPolicyApplicatorTest extends TestCase
             'something' => ['1', '2'],
         ];
 
-        $this->assertEquals(
+        $this->assertSame(
             ['something' => ['1', '2']],
             $this->sut()->for($metadataPolicy, $metadata),
         );

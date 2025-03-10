@@ -11,7 +11,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
 use SimpleSAML\OpenID\SupportedSerializers;
 
 #[CoversClass(SupportedSerializers::class)]
-class SupportedSerializersTest extends TestCase
+final class SupportedSerializersTest extends TestCase
 {
     protected MockObject $jwsSerializerBagMock;
 

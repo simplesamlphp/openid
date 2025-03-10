@@ -293,6 +293,7 @@ enum MetadataPolicyOperatorsEnum: string
                     ),
                 );
             }
+
             // If operator combination is not allowed, throw.
             if (!$metadataPolicyOperatorsEnum->isOperatorCombinationSupported($parameterOperatorKeys)) {
                 throw new MetadataPolicyException(

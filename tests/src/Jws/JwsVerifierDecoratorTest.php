@@ -13,10 +13,12 @@ use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 
 #[CoversClass(JwsVerifierDecorator::class)]
-class JwsVerifierDecoratorTest extends TestCase
+final class JwsVerifierDecoratorTest extends TestCase
 {
     protected MockObject $jwsVerifierMock;
+
     protected MockObject $jwsDecoratorMock;
+
     protected MockObject $jwksDecoratorMock;
 
     protected function setUp(): void

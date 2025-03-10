@@ -39,34 +39,63 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 class Federation
 {
     protected DateIntervalDecorator $maxCacheDurationDecorator;
+
     protected DateIntervalDecorator $timestampValidationLeewayDecorator;
+
     protected int $maxTrustChainDepth;
+
     protected ?CacheDecorator $cacheDecorator;
+
     protected HttpClientDecorator $httpClientDecorator;
+
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
+
     protected ?JwsParser $jwsParser = null;
+
     protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
+
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
+
     protected ?MetadataPolicyResolver $metadataPolicyResolver = null;
+
     protected ?MetadataPolicyApplicator $metadataPolicyApplicator = null;
+
     protected ?TrustChainFactory $trustChainFactory = null;
+
     protected ?TrustChainResolver $trustChainResolver = null;
+
     protected ?EntityStatementFactory $entityStatementFactory = null;
+
     protected ?RequestObjectFactory $requestObjectFactory = null;
+
     protected ?TrustMarkFactory $trustMarkFactory = null;
+
     protected ?Helpers $helpers = null;
+
     protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
+
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
+
     protected ?JwsParserFactory $jwsParserFactory = null;
+
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
+
     protected ?JwksFactory $jwksFactory = null;
+
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
+
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
+
     protected ?TrustChainBagFactory $trustChainBagFactory = null;
+
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
+
     protected ?ArtifactFetcher $artifactFetcher = null;
+
     protected ?ClaimFactory $claimFactory = null;
+
     protected ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null;
+
     protected ?TrustMarkValidator $trustMarkValidator = null;
 
     public function __construct(

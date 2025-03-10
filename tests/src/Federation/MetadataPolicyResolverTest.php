@@ -16,7 +16,7 @@ use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(MetadataPolicyResolver::class)]
 #[UsesClass(MetadataPolicyOperatorsEnum::class)]
-class MetadataPolicyResolverTest extends TestCase
+final class MetadataPolicyResolverTest extends TestCase
 {
     protected MockObject $helpersMock;
 

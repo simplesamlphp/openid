@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 
 #[CoversClass(JwsSerializerBag::class)]
 #[UsesClass(JwsSerializerEnum::class)]
-class JwsSerializerBagTest extends TestCase
+final class JwsSerializerBagTest extends TestCase
 {
     /** @var JwsSerializerEnum[] */
     protected array $jwsSerializers;

@@ -22,8 +22,8 @@ class JwsParser
     {
         try {
             return $this->serializerManagerDecorator->unserialize($token);
-        } catch (Throwable $exception) {
-            throw new JwsException('Unable to parse token.', (int)$exception->getCode(), $exception);
+        } catch (Throwable $throwable) {
+            throw new JwsException('Unable to parse token.', (int)$throwable->getCode(), $throwable);
         }
     }
 }

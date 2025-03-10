@@ -9,10 +9,12 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 
 #[CoversClass(TrustMarksClaimValue::class)]
-class TrustMarksClaimValueTest extends TestCase
+final class TrustMarksClaimValueTest extends TestCase
 {
     protected string $trustMarkId;
+
     protected string $trustMark;
+
     protected array $otherClaims = [];
 
     protected function setUp(): void

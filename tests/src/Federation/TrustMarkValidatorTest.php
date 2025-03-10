@@ -24,21 +24,34 @@ use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 
 #[CoversClass(TrustMarkValidator::class)]
-class TrustMarkValidatorTest extends TestCase
+final class TrustMarkValidatorTest extends TestCase
 {
     protected MockObject $trustChainResolverMock;
+
     protected MockObject $trustMarkFactoryMock;
+
     protected MockObject $trustMarkDelegationFactoryMock;
+
     protected MockObject $maxCacheDurationDecoratorMock;
+
     protected MockObject $cacheDecoratorMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $leafEntityConfigurationMock;
+
     protected MockObject $trustAnchorConfigurationMock;
+
     protected MockObject $trustMarksClaimBagMock;
+
     protected MockObject $trustMarksClaimValueMock;
+
     protected MockObject $trustMarkMock;
+
     protected MockObject $trustMarkOwnersClaimBagMock;
+
     protected MockObject $trustMarkOwnersClaimValueMock;
+
     protected MockObject $trustMarkDelegationMock;
 
     protected function setUp(): void

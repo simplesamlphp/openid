@@ -27,6 +27,7 @@ class MetadataPolicyResolver
             if (!is_string($entityType)) {
                 throw new MetadataPolicyException('Invalid metadata policy format (entity type key).');
             }
+
             if (!is_array($metadataPolicyEntityType)) {
                 throw new MetadataPolicyException('Invalid metadata policy format (entity type value).');
             }
@@ -35,6 +36,7 @@ class MetadataPolicyResolver
                 if (!is_string($parameter)) {
                     throw new MetadataPolicyException('Invalid metadata policy format (parameter key).');
                 }
+
                 if (!is_array($metadataPolicyParameter)) {
                     throw new MetadataPolicyException('Invalid metadata policy format (parameter value).');
                 }
@@ -69,11 +71,12 @@ class MetadataPolicyResolver
         $supportedOperators = MetadataPolicyOperatorsEnum::values();
 
         foreach ($metadataPolicies as $metadataPolicy) {
-            if (
-                (!array_key_exists($entityTypeEnum->value, $metadataPolicy)) ||
-                /** @phpstan-ignore booleanNot.alwaysFalse (Let's check for validity here.) */
-                (!is_array($nextPolicy = $metadataPolicy[$entityTypeEnum->value]))
-            ) {
+            if (!array_key_exists($entityTypeEnum->value, $metadataPolicy)) {
+                continue;
+            }
+
+            /** @phpstan-ignore booleanNot.alwaysFalse (Let's check for validity here.) */
+            if (!is_array($nextPolicy = $metadataPolicy[$entityTypeEnum->value])) {
                 continue;
             }
 
@@ -149,6 +152,7 @@ class MetadataPolicyResolver
                                 ),
                             );
                         }
+
                         // Values are the same, so it's ok. We can continue.
                     } elseif (
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add ||

@@ -11,7 +11,7 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 
 #[CoversClass(TrustMarksClaimBag::class)]
-class TrustMarksClaimBagTest extends TestCase
+final class TrustMarksClaimBagTest extends TestCase
 {
     protected MockObject $trustMarkClaimMock;
 
@@ -81,7 +81,7 @@ class TrustMarksClaimBagTest extends TestCase
 
         $sut = $this->sut($firstTrustMarkClaim);
 
-        $this->assertNull($sut->getFirstFor('second'));
+        $this->assertNotInstanceOf(TrustMarksClaimValue::class, $sut->getFirstFor('second'));
     }
 
     public function testCanJsonSerialize(): void

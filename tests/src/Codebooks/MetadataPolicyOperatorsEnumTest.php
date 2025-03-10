@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
 use stdClass;
 
 #[CoversClass(MetadataPolicyOperatorsEnum::class)]
-class MetadataPolicyOperatorsEnumTest extends TestCase
+final class MetadataPolicyOperatorsEnumTest extends TestCase
 {
     public function testItReturnsValuesInOrder(): void
     {

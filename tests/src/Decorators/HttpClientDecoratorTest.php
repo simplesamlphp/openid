@@ -14,9 +14,10 @@ use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 
 #[CoversClass(HttpClientDecorator::class)]
-class HttpClientDecoratorTest extends TestCase
+final class HttpClientDecoratorTest extends TestCase
 {
     protected MockObject $clientMock;
+
     protected MockObject $responseInterfaceMock;
 
     protected function setUp(): void

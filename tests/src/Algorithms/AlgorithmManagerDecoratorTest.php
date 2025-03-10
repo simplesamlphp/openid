@@ -7,24 +7,20 @@ namespace SimpleSAML\Test\OpenID\Algorithms;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Signature\Algorithm\SignatureAlgorithm;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 
 #[CoversClass(AlgorithmManagerDecorator::class)]
-class AlgorithmManagerDecoratorTest extends TestCase
+final class AlgorithmManagerDecoratorTest extends TestCase
 {
-    protected MockObject $signatureAlgorithmMock;
-    /** @var \PHPUnit\Framework\MockObject\MockObject[] */
-    protected array $signatureAlgorithmMocks;
     protected AlgorithmManager $algorithmManager;
 
     protected function setUp(): void
     {
-        $this->signatureAlgorithmMock = $this->createMock(SignatureAlgorithm::class);
-        $this->signatureAlgorithmMocks[] = $this->signatureAlgorithmMock;
+        $signatureAlgorithmMock = $this->createMock(SignatureAlgorithm::class);
+        $signatureAlgorithmMocks[] = $signatureAlgorithmMock;
 
-        $this->algorithmManager = new AlgorithmManager($this->signatureAlgorithmMocks);
+        $this->algorithmManager = new AlgorithmManager($signatureAlgorithmMocks);
     }
 
     protected function sut(

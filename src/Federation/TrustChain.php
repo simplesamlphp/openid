@@ -237,7 +237,7 @@ class TrustChain implements JsonSerializable
 
         if ($this->expirationTime + $this->timestampValidationLeewayDecorator->getInSeconds() < time()) {
             throw new TrustChainException(
-                "Trust Chain expiration time ($this->expirationTime) is lesser than current time.",
+                sprintf('Trust Chain expiration time (%d) is lesser than current time.', $this->expirationTime),
             );
         }
     }
@@ -288,7 +288,10 @@ class TrustChain implements JsonSerializable
     protected function validateAtLeastNumberOfEntities(int $count): void
     {
         if (count($this->entities) < $count) {
-            throw new TrustChainException("Trust Chain is expected to have at least $count entity/ies at this point.");
+            throw new TrustChainException(sprintf(
+                'Trust Chain is expected to have at least %d entity/ies at this point.',
+                $count,
+            ));
         }
     }
 

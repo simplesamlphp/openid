@@ -26,10 +26,12 @@ use SimpleSAML\OpenID\Helpers;
 #[UsesClass(TrustMarksClaimBag::class)]
 #[UsesClass(TrustMarkOwnersClaimValue::class)]
 #[UsesClass(TrustMarkOwnersClaimBag::class)]
-class FederationClaimFactoryTest extends TestCase
+final class FederationClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
+
     protected ClaimFactory $claimFactory;
+
     protected array $jwksArraySample = [
         'keys' => [
             [

@@ -40,8 +40,8 @@ class JwksFetcher
     {
         try {
             $jwks = $this->helpers->json()->decode($jwksJson);
-        } catch (\JsonException $exception) {
-            $message = 'Error trying to decode JWKS JSON document: ' . $exception->getMessage();
+        } catch (\JsonException $jsonException) {
+            $message = 'Error trying to decode JWKS JSON document: ' . $jsonException->getMessage();
             $this->logger?->error(
                 $message,
                 ['jwksJson' => $jwksJson],
@@ -62,9 +62,9 @@ class JwksFetcher
         try {
             /** @var ?string $jwksJson */
             $jwksJson = $this->cacheDecorator?->get(null, $uri);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error trying to get JWKS document from cache: ' . $exception->getMessage(),
+                'Error trying to get JWKS document from cache: ' . $throwable->getMessage(),
                 ['uri' => $uri],
             );
             return null;
@@ -82,9 +82,9 @@ class JwksFetcher
 
         try {
             $jwks = $this->decodeJwksJson($jwksJson);
-        } catch (JwksException $exception) {
+        } catch (JwksException $jwksException) {
             $this->logger?->error(
-                'Error trying to decode JWKS JSON: ' . $exception->getMessage(),
+                'Error trying to decode JWKS JSON: ' . $jwksException->getMessage(),
                 ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
             return null;
@@ -110,8 +110,11 @@ class JwksFetcher
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
-        } catch (HttpException $e) {
-            $this->logger?->error('Error trying to get JWKS from URI: ' . $e->getMessage(), ['uri' => $uri]);
+        } catch (HttpException $httpException) {
+            $this->logger?->error(
+                'Error trying to get JWKS from URI: ' . $httpException->getMessage(),
+                ['uri' => $uri],
+            );
             return null;
         }
 
@@ -123,9 +126,9 @@ class JwksFetcher
 
         try {
             $jwks = $this->decodeJwksJson($jwksJson);
-        } catch (JwksException $exception) {
+        } catch (JwksException $jwksException) {
             $this->logger?->error(
-                'Error trying to decode JWKS document: ' . $exception->getMessage(),
+                'Error trying to decode JWKS document: ' . $jwksException->getMessage(),
                 ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
             return null;
@@ -140,9 +143,9 @@ class JwksFetcher
                 $uri,
             );
             $this->logger?->debug('JWKS JSON saved to cache.', ['uri' => $uri, 'jwks' => $jwks]);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error setting JWKS JSON to cache: ' . $exception->getMessage(),
+                'Error setting JWKS JSON to cache: ' . $throwable->getMessage(),
                 ['uri' => $uri, 'jwksJson' => $jwksJson],
             );
         }
@@ -173,8 +176,11 @@ class JwksFetcher
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
-        } catch (HttpException $e) {
-            $this->logger?->error('Error trying to get Signed JWKS from URI: ' . $e->getMessage(), ['uri' => $uri]);
+        } catch (HttpException $httpException) {
+            $this->logger?->error(
+                'Error trying to get Signed JWKS from URI: ' . $httpException->getMessage(),
+                ['uri' => $uri],
+            );
             return null;
         }
 
@@ -203,9 +209,9 @@ class JwksFetcher
                 'Signed JWKS JSON successfully cached.',
                 ['uri' => $uri, 'jwksJson' => $jwksJson, 'cacheTtl' => $cacheTtl],
             );
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             $this->logger?->error(
-                'Error setting Signed JWKS JSON to cache: ' . $exception->getMessage(),
+                'Error setting Signed JWKS JSON to cache: ' . $throwable->getMessage(),
                 ['uri' => $uri],
             );
         }

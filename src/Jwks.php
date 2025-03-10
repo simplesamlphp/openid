@@ -29,23 +29,41 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 class Jwks
 {
     protected DateIntervalDecorator $maxCacheDurationDecorator;
+
     protected DateIntervalDecorator $timestampValidationLeewayDecorator;
+
     protected ?CacheDecorator $cacheDecorator;
+
     protected ?JwksFetcher $jwksFetcher = null;
+
     protected HttpClientDecorator $httpClientDecorator;
+
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
+
     protected ?JwsParser $jwsParser = null;
+
     protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
+
     protected ?JwksFactory $jwksFactory = null;
+
     protected ?SignedJwksFactory $signedJwksFactory = null;
+
     protected ?Helpers $helpers = null;
+
     protected ?AlgorithmManagerDecoratorFactory $algorithmManagerDecoratorFactory = null;
+
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
+
     protected ?JwsParserFactory $jwsParserFactory = null;
+
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
+
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
+
     protected ?CacheDecoratorFactory $cacheDecoratorFactory = null;
+
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
+
     protected ?ClaimFactory $claimFactory = null;
 
     public function __construct(
@@ -106,6 +124,7 @@ class Jwks
         if (is_null($this->algorithmManagerDecoratorFactory)) {
             $this->algorithmManagerDecoratorFactory = new AlgorithmManagerDecoratorFactory();
         }
+
         return $this->algorithmManagerDecoratorFactory;
     }
 
@@ -114,6 +133,7 @@ class Jwks
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
             $this->jwsSerializerManagerDecoratorFactory = new JwsSerializerManagerDecoratorFactory();
         }
+
         return $this->jwsSerializerManagerDecoratorFactory;
     }
 
@@ -122,6 +142,7 @@ class Jwks
         if (is_null($this->jwsParserFactory)) {
             $this->jwsParserFactory = new JwsParserFactory();
         }
+
         return $this->jwsParserFactory;
     }
 
@@ -130,6 +151,7 @@ class Jwks
         if (is_null($this->jwsVerifierDecoratorFactory)) {
             $this->jwsVerifierDecoratorFactory = new JwsVerifierDecoratorFactory();
         }
+
         return $this->jwsVerifierDecoratorFactory;
     }
 

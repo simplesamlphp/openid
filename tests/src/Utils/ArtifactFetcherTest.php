@@ -17,12 +17,16 @@ use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(ArtifactFetcher::class)]
-class ArtifactFetcherTest extends TestCase
+final class ArtifactFetcherTest extends TestCase
 {
     protected MockObject $httpClientDecoratorMock;
+
     protected MockObject $cacheDecoratorMock;
+
     protected MockObject $loggerMock;
+
     protected MockObject $responseMock;
+
     protected MockObject $responseBodyMock;
 
     protected function setUp(): void
