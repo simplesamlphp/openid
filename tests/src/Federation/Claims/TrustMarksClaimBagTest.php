@@ -70,6 +70,7 @@ final class TrustMarksClaimBagTest extends TestCase
         $sut = $this->sut($firstTrustMarkClaim, $secondTrustMarkClaim);
 
         $second = $sut->getFirstFor('second');
+        $this->assertInstanceof(\SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue::class, $second);
         $this->assertSame($secondTrustMarkClaim->getTrustMarkId(), $second->getTrustMarkId());
     }
 
