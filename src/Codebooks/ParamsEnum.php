@@ -20,6 +20,7 @@ enum ParamsEnum: string
     case Error = 'error';
     case ErrorDescription = 'error_description';
     case IdTokenHint = 'id_token_hint';
+    case IssuerState = 'issuer_state';
     case LoginHint = 'login_hint';
     case MaxAge = 'max_age';
     case Nonce = 'nonce';

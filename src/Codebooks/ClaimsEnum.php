@@ -17,6 +17,7 @@ enum ClaimsEnum: string
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
     case BackChannelLogoutSupported = 'backchannel_logout_supported';
     case BackChannelLogoutUri = 'backchannel_logout_uri';
+    case ClaimsSupported = 'claims_supported';
     case ClaimsParameterSupported = 'claims_parameter_supported';
     case ClientId = 'client_id';
     case ClientName = 'client_name';
