@@ -199,6 +199,7 @@ try {
 ```
 
 ### Fetching Trust Marks
+
 Federation tools expose Trust Mark Fetcher which you can use to dynamically fetch or refresh (short-living) Trust Marks.
 
 ```php
