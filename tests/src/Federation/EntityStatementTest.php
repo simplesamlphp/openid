@@ -43,6 +43,8 @@ final class EntityStatementTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
+    protected MockObject $arrHelperMock;
+
 
     protected MockObject $claimFactoryMock;
 
@@ -126,9 +128,11 @@ final class EntityStatementTest extends TestCase
 
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
+        $this->arrHelperMock = $this->createMock(Helpers\Arr::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
         $typeHelperMock = $this->createMock(Helpers\Type::class);
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
+        $this->helpersMock->method('arr')->willReturn($this->arrHelperMock);
 
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
@@ -341,6 +345,13 @@ final class EntityStatementTest extends TestCase
 
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $this->jsonHelperMock->method('decode')->willReturn($payload);
+        $this->arrHelperMock->method('getNestedValue')
+            ->willReturnCallback(fn(
+                array $array,
+                string $key,
+                string $key2,
+                string $key3,
+            ): ?string => $array[$key][$key2][$key3] ?? null);
 
         $this->assertSame('uri', $this->sut()->getFederationFetchEndpoint());
     }
@@ -349,8 +360,28 @@ final class EntityStatementTest extends TestCase
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        $this->arrHelperMock->method('getNestedValue')->willReturn(null);
 
         $this->assertNull($this->sut()->getFederationFetchEndpoint());
+    }
+
+    public function testCanGetFederationTrustMarkEndpoint(): void
+    {
+        $payload = $this->validPayload;
+        $payload['metadata']['federation_entity']['federation_trust_mark_endpoint'] = 'uri';
+
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+        $this->arrHelperMock->method('getNestedValue')
+            ->willReturnCallback(fn(
+                    array $array,
+                    string $key,
+                    string $key2,
+                    string $key3,
+                ): ?string => $array[$key][$key2][$key3] ?? null);
+
+        $this->assertSame('uri', $this->sut()->getFederationTrustMarkEndpoint());
     }
 
     public function testMetadataIsOptional(): void

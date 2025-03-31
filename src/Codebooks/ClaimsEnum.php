@@ -30,6 +30,7 @@ enum ClaimsEnum: string
     // ExpirationTime
     case Exp = 'exp';
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
+    case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
     case GrantTypes = 'grant_types';
     case GrantTypesSupported = 'grant_types_supported';
     case HomepageUri = 'homepage_uri';

@@ -27,6 +27,7 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -97,6 +98,8 @@ class Federation
     protected ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null;
 
     protected ?TrustMarkValidator $trustMarkValidator = null;
+
+    protected ?TrustMarkFetcher $trustMarkFetcher = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -239,6 +242,17 @@ class Federation
             $this->trustMarkDelegationFactory(),
             $this->maxCacheDurationDecorator,
             $this->cacheDecorator(),
+            $this->logger,
+        );
+    }
+
+    public function trustMarkFetcher(): TrustMarkFetcher
+    {
+        return $this->trustMarkFetcher ??= new TrustMarkFetcher(
+            $this->trustMarkFactory(),
+            $this->artifactFetcher(),
+            $this->maxCacheDurationDecorator,
+            $this->helpers(),
             $this->logger,
         );
     }

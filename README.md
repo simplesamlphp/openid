@@ -197,6 +197,40 @@ try {
 }
 
 ```
+### Fetching Trust Marks
+Federation tools expose Trust Mark Fetcher which you can use to dynamically fetch or refresh (short-living) Trust Marks.
+
+```php
+// ...
+
+/** @var \SimpleSAML\OpenID\Federation $federationTools */
+
+// Trust Mark ID that you want to fetch. 
+$trustMarkId = 'https://example.com/trust-mark/member';
+// ID of Subject for which to fetch the Trust Mark.
+$subjectId = 'https://leaf-entity.org'
+// ID of the Trust Mark Issuer from which to fetch the Trust Mark.
+$trustMarkIssuerEntityId = 'https://trust-mark-issuer.org'
+
+try {
+    // First, fetch the Configuration Statement for Trust Mark Issuer.
+    $trustMarkIssuerConfigurationStatement = $this->federation
+        ->entityStatementFetcher()
+        ->fromCacheOrWellKnownEndpoint($trustMarkIssuerEntityId);
+
+    // Fetch the Trust Mark from Issuer.
+    $trustMarkEntity = $federationTools->trustMarkFetcher()->fromCacheOrFederationTrustMarkEndpoint(
+        $trustMarkId,
+        $subjectId,
+        $trustMarkIssuerConfigurationStatement
+    );
+    
+} catch (\Throwable $exception) {
+    $this->logger->error('Trust Mark fetch failed. Error was: ' . $exception->getMessage());
+    return;
+}
+
+```
 
 ### Validating Trust Marks
 

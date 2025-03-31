@@ -236,24 +236,47 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      *
-     * phpcs:ignore
+     * @return ?non-empty-string
      */
     public function getFederationFetchEndpoint(): ?string
     {
-        // phpcs:disable
-        // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)
-        $federationFetchEndpoint = $this->getPayload() // @phpstan-ignore offsetAccess.nonOffsetAccessible (We fall back to null if not available.)
-        [ClaimsEnum::Metadata->value]
-        [EntityTypesEnum::FederationEntity->value]
-        [ClaimsEnum::FederationFetchEndpoint->value] ?? null;
-        // phpcs:enable
+        $federationFetchEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationFetchEndpoint->value,
+        );
 
         if (is_null($federationFetchEndpoint)) {
             return null;
         }
 
-        return $this->helpers->type()->ensureString($federationFetchEndpoint);
+        return $this->helpers->type()->ensureNonEmptyString($federationFetchEndpoint);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     *
+     * @return ?non-empty-string
+     */
+    public function getFederationTrustMarkEndpoint(): ?string
+    {
+        $federationTrustMarkEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationTrustMarkEndpoint->value,
+        );
+
+        if (is_null($federationTrustMarkEndpoint)) {
+            return null;
+        }
+
+        return $this->helpers->type()->ensureNonEmptyString($federationTrustMarkEndpoint);
     }
 
     /**
@@ -283,6 +306,7 @@ class EntityStatement extends ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     protected function validate(): void
     {
@@ -300,6 +324,7 @@ class EntityStatement extends ParsedJws
             $this->getTrustMarks(...),
             $this->getTrustMarkOwners(...),
             $this->getFederationFetchEndpoint(...),
+            $this->getFederationTrustMarkEndpoint(...),
         );
     }
 }

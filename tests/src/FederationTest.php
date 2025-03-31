@@ -32,6 +32,7 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
+use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -75,6 +76,7 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(ClaimFactory::class)]
 #[UsesClass(TrustMarkDelegationFactory::class)]
 #[UsesClass(TrustMarkValidator::class)]
+#[UsesClass(TrustMarkFetcher::class)]
 final class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
@@ -158,5 +160,6 @@ final class FederationTest extends TestCase
         $this->assertNotEmpty($sut->maxTrustChainDepth());
         $this->assertInstanceOf(TrustMarkDelegationFactory::class, $sut->trustMarkDelegationFactory());
         $this->assertInstanceOf(TrustMarkValidator::class, $sut->trustMarkValidator());
+        $this->assertInstanceOf(TrustMarkFetcher::class, $sut->trustMarkFetcher());
     }
 }

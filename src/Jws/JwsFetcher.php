@@ -88,7 +88,7 @@ class JwsFetcher extends AbstractJwsFetcher
 
         $response = $this->artifactFetcher->fromNetwork($uri);
 
-        if ($response->getStatusCode() !== 200) {
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() > 299) {
             $message = sprintf(
                 'Unexpected HTTP response for JWS fetch, status code: %s, reason: %s. URI %s',
                 $response->getStatusCode(),
