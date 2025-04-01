@@ -17,9 +17,11 @@ enum ParamsEnum: string
     case CodeChallengeMethod = 'code_challenge_method';
     case CodeVerifier = 'code_verifier';
     case Display = 'display';
+    case EntityType = 'entity_type';
     case Error = 'error';
     case ErrorDescription = 'error_description';
     case IdTokenHint = 'id_token_hint';
+    case Intermediate = 'intermediate';
     case IssuerState = 'issuer_state';
     case LoginHint = 'login_hint';
     case MaxAge = 'max_age';
@@ -32,5 +34,7 @@ enum ParamsEnum: string
     case ResponseType = 'response_type';
     case Scope = 'scope';
     case State = 'state';
+    case TrustMarked = 'trust_marked';
+    case TrustMarkId = 'trust_mark_id';
     case UiLocales = 'ui_locales';
 }
