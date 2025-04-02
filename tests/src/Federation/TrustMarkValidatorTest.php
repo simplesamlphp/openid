@@ -407,6 +407,25 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
+    public function testDoForTrustMarkCanHandleTrustAnchorAsTrustMarkIssuer(): void
+    {
+        $this->cacheDecoratorMock->expects($this->never())->method('get');
+        $this->trustMarkMock->method('getTrustMarkId')->willReturn('trustMarkId');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkMock->method('getIssuer')->willReturn('trustAnchorId');
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getJwks');
+        $this->trustChainResolverMock->expects($this->never())->method('for');
+        $this->trustMarkMock->expects($this->once())->method('verifyWithKeySet');
+        $this->cacheDecoratorMock->expects($this->once())->method('set');
+
+        $this->sut()->doForTrustMark(
+            $this->trustMarkMock,
+            $this->leafEntityConfigurationMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
     public function testValidateSubjectClaimThrowsForInvalidSubject(): void
     {
         $this->trustMarkMock->method('getSubject')->willReturn('invalidSubject');
