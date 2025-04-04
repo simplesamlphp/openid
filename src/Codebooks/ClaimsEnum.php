@@ -9,14 +9,23 @@ enum ClaimsEnum: string
     case AcrValuesSupported = 'acr_values_supported';
     // Algorithm
     case Alg = 'alg';
+    // AlgorithmValuesSupported
+    case AlgValuesSupported = 'alg_values_supported';
+    // AlternativeText
+    case AltText = 'alt_text';
     case ApplicationType = 'application_type';
     // Audience
     case Aud = 'aud';
     case AuthorityHints = 'authority_hints';
     case AuthorizationEndpoint = 'authorization_endpoint';
+    case AuthorizationServers = 'authorization_servers';
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
     case BackChannelLogoutSupported = 'backchannel_logout_supported';
     case BackChannelLogoutUri = 'backchannel_logout_uri';
+    case BatchCredentialIssuance = 'batch_credential_issuance';
+    case BackgroundColor = 'background_color';
+    case BackgroundImage = 'background_image';
+    case BatchSize = 'batch_size';
     case ClaimsSupported = 'claims_supported';
     case ClaimsParameterSupported = 'claims_parameter_supported';
     case ClientId = 'client_id';
@@ -25,13 +34,27 @@ enum ClaimsEnum: string
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
+    case CredentialConfigurationsSupported = 'credential_configurations_supported';
+    case CredentialEndpoint = 'credential_endpoint';
+    case CredentialIssuer = 'credential_issuer';
+    case CredentialResponseEncryption = 'credential_response_encryption';
+    // CredentialSigningAlgorithmValuesSupported
+    case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
+    case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
+    case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
     case Delegation = 'delegation';
+    case Description = 'description';
+    case Display = 'display';
     case EndSessionEndpoint = 'end_session_endpoint';
     // ExpirationTime
     case Exp = 'exp';
+    case EncryptionRequired = 'encryption_required';
+    // EncryptionValuesSupported
+    case EncValuesSupported = 'enc_values_supported';
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
+    case Format = 'format';
     case GrantTypes = 'grant_types';
     case GrantTypesSupported = 'grant_types_supported';
     case HomepageUri = 'homepage_uri';
@@ -50,21 +73,29 @@ enum ClaimsEnum: string
     case JwksUri = 'jwks_uri';
     // KeyId
     case Kid = 'kid';
+    case KeyAttestationsRequired = 'key_attestations_required';
+    case KeyStorage = 'key_storage';
     case Keys = 'keys';
+    case Locale = 'locale';
+    case Logo = 'logo';
     case LogoUri = 'logo_uri';
     case Metadata = 'metadata';
     case MetadataPolicy = 'metadata_policy';
     // MetadataPolicyCritical
     case MetadataPolicyCrit = 'metadata_policy_crit';
+    case Name = 'name';
+    case NonceEndpoint = 'nonce_endpoint';
+    case NotificationEndpoint = 'notification_endpoint';
     case OrganizationName = 'organization_name';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
+    case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
+    // ProofSigningAlgorithmValuesSupported
+    case ProofSigningAlgValuesSupported = 'proof_signing_alg_values_supported';
+    case ProofTypesSupported = 'proof_types_supported';
     // Reference
     case Ref = 'ref';
-    case ScopesSupported = 'scopes_supported';
-    case SignedJwksUri = 'signed_jwks_uri';
     // PublicKeyUse
-    case Use = 'use';
     case RedirectUris = 'redirect_uris';
     case RequestAuthenticationMethodsSupported = 'request_authentication_methods_supported';
     case RequestAuthenticationSigningAlgValuesSupported = 'request_authentication_signing_alg_values_supported';
@@ -74,9 +105,13 @@ enum ClaimsEnum: string
     case ResponseTypes = 'response_types';
     case ResponseTypesSupported = 'response_types_supported';
     case Scope = 'scope';
+    case ScopesSupported = 'scopes_supported';
+    case SignedJwksUri = 'signed_jwks_uri';
+    case SignedMetadata = 'signed_metadata';
     // Subject
     case Sub = 'sub';
     case SubjectTypesSupported = 'subject_types_supported';
+    case TextColor = 'text_color';
     case TokenEndpoint = 'token_endpoint';
     case TokenEndpointAuthMethod = 'token_endpoint_auth_method';
     case TokenEndpointAuthMethodsSupported = 'token_endpoint_auth_methods_supported';
@@ -88,5 +123,8 @@ enum ClaimsEnum: string
     case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarks = 'trust_marks';
+    case Uri = 'uri';
+    case Use = 'use';
+    case UserAuthentication = 'user_authentication';
     case UserinfoEndpoint = 'userinfo_endpoint';
 }
