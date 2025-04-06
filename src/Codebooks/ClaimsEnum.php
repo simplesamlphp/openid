@@ -63,6 +63,10 @@ enum ClaimsEnum: string
     // Identifier
     case Id = 'id';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
+    case IntrospectionEndpoint = 'introspection_endpoint';
+    case IntrospectionEndpointAuthMethodsSupported = 'introspection_endpoint_auth_methods_supported';
+    case IntrospectionEndpointAuthSigningAlgValuesSupported =
+    'introspection_endpoint_auth_signing_alg_values_supported';
     // Issuer
     case Iss = 'iss';
     case Issuer = 'issuer';
@@ -86,6 +90,10 @@ enum ClaimsEnum: string
     case Name = 'name';
     case NonceEndpoint = 'nonce_endpoint';
     case NotificationEndpoint = 'notification_endpoint';
+    // OpenIDProviderPolicyUri
+    case OpPolicyUri = 'op_policy_uri';
+    // OpenIDProviderTermsOfServiceUri
+    case OpTosUri = 'op_tos_uri';
     case OrganizationName = 'organization_name';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
@@ -97,15 +105,21 @@ enum ClaimsEnum: string
     case Ref = 'ref';
     // PublicKeyUse
     case RedirectUris = 'redirect_uris';
+    case RegistrationEndpoint = 'registration_endpoint';
     case RequestAuthenticationMethodsSupported = 'request_authentication_methods_supported';
     case RequestAuthenticationSigningAlgValuesSupported = 'request_authentication_signing_alg_values_supported';
     case RequestObjectSigningAlgValuesSupported = 'request_object_signing_alg_values_supported';
     case RequestParameterSupported = 'request_parameter_supported';
     case RequestUriParameterSupported = 'request_uri_parameter_supported';
+    case ResponseModesSupported = 'response_modes_supported';
     case ResponseTypes = 'response_types';
     case ResponseTypesSupported = 'response_types_supported';
+    case RevocationEndpoint = 'revocation_endpoint';
+    case RevocationEndpointAuthMethodsSupported = 'revocation_endpoint_auth_methods_supported';
+    case RevocationEndpointAuthSigningAlgValuesSupported = 'revocation_endpoint_auth_signing_alg_values_supported';
     case Scope = 'scope';
     case ScopesSupported = 'scopes_supported';
+    case ServiceDocumentation = 'service_documentation';
     case SignedJwksUri = 'signed_jwks_uri';
     case SignedMetadata = 'signed_metadata';
     // Subject
@@ -123,6 +137,8 @@ enum ClaimsEnum: string
     case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarks = 'trust_marks';
+    // UserInterfaceLocalesSupported
+    case UiLocalesSupported = 'ui_locales_supported';
     case Uri = 'uri';
     case Use = 'use';
     case UserAuthentication = 'user_authentication';
