@@ -26,6 +26,7 @@ enum ClaimsEnum: string
     case BackgroundColor = 'background_color';
     case BackgroundImage = 'background_image';
     case BatchSize = 'batch_size';
+    case Claims = 'claims';
     case ClaimsSupported = 'claims_supported';
     case ClaimsParameterSupported = 'claims_parameter_supported';
     case ClientId = 'client_id';
@@ -35,6 +36,7 @@ enum ClaimsEnum: string
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
     case CredentialConfigurationsSupported = 'credential_configurations_supported';
+    case CredentialDefinition = 'credential_definition';
     case CredentialEndpoint = 'credential_endpoint';
     case CredentialIssuer = 'credential_issuer';
     case CredentialResponseEncryption = 'credential_response_encryption';
@@ -83,6 +85,7 @@ enum ClaimsEnum: string
     case Locale = 'locale';
     case Logo = 'logo';
     case LogoUri = 'logo_uri';
+    case Mandatory = 'mandatory';
     case Metadata = 'metadata';
     case MetadataPolicy = 'metadata_policy';
     // MetadataPolicyCritical
@@ -95,6 +98,7 @@ enum ClaimsEnum: string
     // OpenIDProviderTermsOfServiceUri
     case OpTosUri = 'op_tos_uri';
     case OrganizationName = 'organization_name';
+    case Path = 'path';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
     case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
@@ -132,6 +136,7 @@ enum ClaimsEnum: string
     case TokenEndpointAuthSigningAlgValuesSupported = 'token_endpoint_auth_signing_alg_values_supported';
     // Type
     case Typ = 'typ';
+    case Type = 'type';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
     case TrustMarkId = 'trust_mark_id';
