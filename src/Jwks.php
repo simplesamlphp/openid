@@ -8,6 +8,7 @@ use DateInterval;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
@@ -20,9 +21,9 @@ use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
-use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
@@ -40,7 +41,7 @@ class Jwks
 
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
 
-    protected ?JwsParser $jwsParser = null;
+    protected ?JwsDecoratorBuilder $jwsDecoratorBuilder = null;
 
     protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
 
@@ -54,7 +55,7 @@ class Jwks
 
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
 
-    protected ?JwsParserFactory $jwsParserFactory = null;
+    protected ?JwsDecoratorBuilderFactory $jwsDecoratorBuilderFactory = null;
 
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
 
@@ -65,6 +66,7 @@ class Jwks
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
 
     protected ?ClaimFactory $claimFactory = null;
+    protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -90,7 +92,7 @@ class Jwks
     public function signedJwksFactory(): SignedJwksFactory
     {
         return $this->signedJwksFactory ??= new SignedJwksFactory(
-            $this->jwsParser(),
+            $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
             $this->jwsSerializerManagerDecorator(),
@@ -128,6 +130,13 @@ class Jwks
         return $this->algorithmManagerDecoratorFactory;
     }
 
+    public function algorithmManagerDecorator(): AlgorithmManagerDecorator
+    {
+        return $this->algorithmManagerDecorator ??= $this->algorithmManagerDecoratorFactory()->build(
+            $this->supportedAlgorithms,
+        );
+    }
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
@@ -137,13 +146,13 @@ class Jwks
         return $this->jwsSerializerManagerDecoratorFactory;
     }
 
-    public function jwsParserFactory(): JwsParserFactory
+    public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
-        if (is_null($this->jwsParserFactory)) {
-            $this->jwsParserFactory = new JwsParserFactory();
+        if (is_null($this->jwsDecoratorBuilderFactory)) {
+            $this->jwsDecoratorBuilderFactory = new JwsDecoratorBuilderFactory();
         }
 
-        return $this->jwsParserFactory;
+        return $this->jwsDecoratorBuilderFactory;
     }
 
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
@@ -189,9 +198,11 @@ class Jwks
         );
     }
 
-    public function jwsParser(): JwsParser
+    public function jwsDecoratorBuilder(): JwsDecoratorBuilder
     {
-        return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
+        return $this->jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderFactory()->build(
+            $this->jwsSerializerManagerDecorator(),
+        );
     }
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator

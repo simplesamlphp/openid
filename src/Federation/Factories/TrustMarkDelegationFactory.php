@@ -12,7 +12,7 @@ class TrustMarkDelegationFactory extends ParsedJwsFactory
     public function fromToken(string $token): TrustMarkDelegation
     {
         return new TrustMarkDelegation(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

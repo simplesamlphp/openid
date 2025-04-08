@@ -8,7 +8,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -16,7 +16,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 class ParsedJwsFactory
 {
     public function __construct(
-        protected readonly JwsParser $jwsParser,
+        protected readonly JwsDecoratorBuilder $jwsDecoratorBuilder,
         protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
         protected readonly JwksFactory $jwksFactory,
         protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
@@ -32,7 +32,7 @@ class ParsedJwsFactory
     public function fromToken(string $token): ParsedJws
     {
         return new ParsedJws(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

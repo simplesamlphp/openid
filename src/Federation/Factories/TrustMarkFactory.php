@@ -15,7 +15,7 @@ class TrustMarkFactory extends ParsedJwsFactory
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): TrustMark {
         return new TrustMark(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

@@ -12,7 +12,7 @@ class ClientAssertionFactory extends ParsedJwsFactory
     public function fromToken(string $token): ClientAssertion
     {
         return new ClientAssertion(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

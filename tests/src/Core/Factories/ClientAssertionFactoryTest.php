@@ -17,7 +17,7 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -28,7 +28,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 #[UsesClass(ParsedJws::class)]
 final class ClientAssertionFactoryTest extends TestCase
 {
-    protected MockObject $jwsParserMock;
+    protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
 
@@ -70,8 +70,8 @@ final class ClientAssertionFactoryTest extends TestCase
         $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsParserMock = $this->createMock(JwsParser::class);
-        $this->jwsParserMock->method('parse')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
+        $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
@@ -94,7 +94,7 @@ final class ClientAssertionFactoryTest extends TestCase
     }
 
     protected function sut(
-        ?JwsParser $jwsParser = null,
+        ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
@@ -102,7 +102,7 @@ final class ClientAssertionFactoryTest extends TestCase
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
     ): ClientAssertionFactory {
-        $jwsParser ??= $this->jwsParserMock;
+        $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
@@ -111,7 +111,7 @@ final class ClientAssertionFactoryTest extends TestCase
         $claimFactory ??= $this->claimFactoryMock;
 
         return new ClientAssertionFactory(
-            $jwsParser,
+            $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
             $jwksFactory,
             $jwsSerializerManagerDecorator,

@@ -16,7 +16,7 @@ class RequestObjectFactory extends ParsedJwsFactory
     public function fromToken(string $token): RequestObject
     {
         return new RequestObject(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

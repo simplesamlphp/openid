@@ -15,7 +15,7 @@ class SignedJwksFactory extends ParsedJwsFactory
     public function fromToken(string $token): SignedJwks
     {
         return new SignedJwks(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
             $this->jwsSerializerManagerDecorator,

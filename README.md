@@ -7,6 +7,19 @@ The library is under development, and you can expect braking changes along the w
 
 The library provides some common tools that you might find useful when working with OpenID family of specifications.
 
+```
+/*
+ *
+ *       |   
+ *   \  ___  /                           _________
+ *  _  /   \  _    GÉANT                 |  * *  | Co-Funded by
+ *     | ~ |       Trust & Identity      | *   * | the European
+ *      \_/        Incubator             |__*_*__| Union
+ *       =
+ *
+ */
+```
+
 ## Installation
 
 Library can be installed by using Composer:
