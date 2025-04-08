@@ -202,6 +202,8 @@ class Jwks
     {
         return $this->jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderFactory()->build(
             $this->jwsSerializerManagerDecorator(),
+            $this->algorithmManagerDecorator(),
+            $this->helpers(),
         );
     }
 

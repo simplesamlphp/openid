@@ -16,8 +16,7 @@ class JwsDecoratorBuilderFactory
         JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         AlgorithmManagerDecorator $algorithmManagerDecorator,
         Helpers $helpers,
-    ): JwsDecoratorBuilder
-    {
+    ): JwsDecoratorBuilder {
         return new JwsDecoratorBuilder(
             $jwsSerializerManagerDecorator,
             new JWSBuilder($algorithmManagerDecorator->algorithmManager()),

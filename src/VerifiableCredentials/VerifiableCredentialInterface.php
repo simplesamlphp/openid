@@ -6,5 +6,4 @@ namespace SimpleSAML\OpenID\VerifiableCredentials;
 
 interface VerifiableCredentialInterface
 {
-
 }
