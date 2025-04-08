@@ -15,7 +15,7 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
@@ -33,7 +33,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerMock;
 
@@ -81,7 +81,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
@@ -103,7 +103,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
@@ -111,7 +111,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
     ): TrustMarkDelegationFactory {
         $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
@@ -120,7 +120,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         return new TrustMarkDelegationFactory(
             $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,

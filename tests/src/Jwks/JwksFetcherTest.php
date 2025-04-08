@@ -19,7 +19,7 @@ use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
@@ -30,7 +30,7 @@ final class JwksFetcherTest extends TestCase
 {
     protected MockObject $httpClientDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $signedJwksFactoryMock;
 
@@ -72,7 +72,7 @@ final class JwksFetcherTest extends TestCase
     protected function setUp(): void
     {
         $this->httpClientDecoratorMock = $this->createMock(HttpClientDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->signedJwksFactoryMock = $this->createMock(SignedJwksFactory::class);
         $this->maxCacheDurationDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -97,7 +97,7 @@ final class JwksFetcherTest extends TestCase
 
     protected function sut(
         ?HttpClientDecorator $httpClientDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?SignedJwksFactory $signedJwksFactory = null,
         ?DateIntervalDecorator $maxCacheDurationDecorator = null,
         ?Helpers $helpers = null,
@@ -106,7 +106,7 @@ final class JwksFetcherTest extends TestCase
         ?LoggerInterface $logger = null,
     ): JwksFetcher {
         $httpClientDecorator ??= $this->httpClientDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $signedJwksFactory ??= $this->signedJwksFactoryMock;
         $maxCacheDurationDecorator ??= $this->maxCacheDurationDecoratorMock;
         $helpers ??= $this->helpersMock;
@@ -116,7 +116,7 @@ final class JwksFetcherTest extends TestCase
 
         return new JwksFetcher(
             $httpClientDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $signedJwksFactory,
             $maxCacheDurationDecorator,
             $helpers,
@@ -149,7 +149,7 @@ final class JwksFetcherTest extends TestCase
             ->method('getValue')
             ->willReturn($this->jwksArraySample);
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->assertInstanceOf(JwksDecorator::class, $this->sut()->fromCache('uri'));
@@ -213,7 +213,7 @@ final class JwksFetcherTest extends TestCase
             ->method('getValue')
             ->willReturn($this->jwksArraySample);
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set')
@@ -274,7 +274,7 @@ final class JwksFetcherTest extends TestCase
             ->method('getValue')
             ->willReturn($this->jwksArraySample);
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set')
@@ -314,7 +314,7 @@ final class JwksFetcherTest extends TestCase
             ->method('getValue')
             ->willReturn($this->jwksArraySample);
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->assertInstanceOf(JwksDecorator::class, $this->sut()->fromCacheOrJwksUri('uri'));
@@ -340,7 +340,7 @@ final class JwksFetcherTest extends TestCase
             ->with($this->jwksArraySample)
             ->willReturn('jwks-json');
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set')
@@ -372,7 +372,7 @@ final class JwksFetcherTest extends TestCase
             ->with($this->jwksArraySample)
             ->willReturn('jwks-json');
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->maxCacheDurationDecoratorMock->expects($this->once())
@@ -417,7 +417,7 @@ final class JwksFetcherTest extends TestCase
             ->with($this->jwksArraySample)
             ->willReturn('jwks-json');
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set')
@@ -453,7 +453,7 @@ final class JwksFetcherTest extends TestCase
             ->with($this->jwksArraySample)
             ->willReturn('jwks-json');
 
-        $this->jwksFactoryMock->expects($this->once())->method('fromKeyData')
+        $this->jwksDecoratorFactoryMock->expects($this->once())->method('fromKeyData')
             ->with($this->jwksArraySample);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set')

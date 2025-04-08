@@ -7,7 +7,7 @@ namespace SimpleSAML\OpenID\Jws\Factories;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -18,7 +18,7 @@ class ParsedJwsFactory
     public function __construct(
         protected readonly JwsDecoratorBuilder $jwsDecoratorBuilder,
         protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
-        protected readonly JwksFactory $jwksFactory,
+        protected readonly JwksDecoratorFactory $jwksDecoratorFactory,
         protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly Helpers $helpers,
@@ -34,7 +34,7 @@ class ParsedJwsFactory
         return new ParsedJws(
             $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
-            $this->jwksFactory,
+            $this->jwksDecoratorFactory,
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,

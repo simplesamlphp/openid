@@ -10,7 +10,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
@@ -32,7 +32,7 @@ class ParsedJws
     public function __construct(
         protected readonly JwsDecorator $jwsDecorator,
         protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
-        protected readonly JwksFactory $jwksFactory,
+        protected readonly JwksDecoratorFactory $jwksDecoratorFactory,
         protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly Helpers $helpers,
@@ -139,7 +139,7 @@ class ParsedJws
         if (
             !$this->jwsVerifierDecorator->verifyWithKeySet(
                 $this->jwsDecorator,
-                $this->jwksFactory->fromKeyData($jwks),
+                $this->jwksDecoratorFactory->fromKeyData($jwks),
                 $signatureIndex,
             )
         ) {

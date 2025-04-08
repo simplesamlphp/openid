@@ -14,7 +14,7 @@ class ClientAssertionFactory extends ParsedJwsFactory
         return new ClientAssertion(
             $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
-            $this->jwksFactory,
+            $this->jwksDecoratorFactory,
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,

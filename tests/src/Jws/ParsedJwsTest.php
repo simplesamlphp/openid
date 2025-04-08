@@ -13,7 +13,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -26,7 +26,7 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
@@ -106,7 +106,7 @@ final class ParsedJwsTest extends TestCase
     {
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -135,7 +135,7 @@ final class ParsedJwsTest extends TestCase
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
         ?Helpers $helpers = null,
@@ -143,7 +143,7 @@ final class ParsedJwsTest extends TestCase
     ): ParsedJws {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
         $helpers ??= $this->helpersMock;
@@ -152,7 +152,7 @@ final class ParsedJwsTest extends TestCase
         return new ParsedJws(
             $jwsDecorator,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $timestampValidationLeewayMock,
             $helpers,
@@ -170,7 +170,7 @@ final class ParsedJwsTest extends TestCase
         $sut = new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
-            $this->jwksFactoryMock,
+            $this->jwksDecoratorFactoryMock,
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
@@ -198,7 +198,7 @@ final class ParsedJwsTest extends TestCase
         new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
-            $this->jwksFactoryMock,
+            $this->jwksDecoratorFactoryMock,
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,

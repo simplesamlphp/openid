@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -37,7 +37,7 @@ final class SignedJwksFactoryTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
@@ -93,7 +93,7 @@ final class SignedJwksFactoryTest extends TestCase
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -115,7 +115,7 @@ final class SignedJwksFactoryTest extends TestCase
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
@@ -123,7 +123,7 @@ final class SignedJwksFactoryTest extends TestCase
     ): SignedJwksFactory {
         $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
@@ -132,7 +132,7 @@ final class SignedJwksFactoryTest extends TestCase
         return new SignedJwksFactory(
             $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,

@@ -18,7 +18,7 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
@@ -45,7 +45,7 @@ class Jwks
 
     protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
 
-    protected ?JwksFactory $jwksFactory = null;
+    protected ?JwksDecoratorFactory $jwksDecoratorFactory = null;
 
     protected ?SignedJwksFactory $signedJwksFactory = null;
 
@@ -84,9 +84,9 @@ class Jwks
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($httpClient);
     }
 
-    public function jwksFactory(): JwksFactory
+    public function jwksDecoratorFactory(): JwksDecoratorFactory
     {
-        return $this->jwksFactory ??= new JwksFactory();
+        return $this->jwksDecoratorFactory ??= new JwksDecoratorFactory();
     }
 
     public function signedJwksFactory(): SignedJwksFactory
@@ -94,7 +94,7 @@ class Jwks
         return $this->signedJwksFactory ??= new SignedJwksFactory(
             $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
@@ -106,7 +106,7 @@ class Jwks
     {
         return $this->jwksFetcher ??= new JwksFetcher(
             $this->httpClientDecorator,
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->signedJwksFactory(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),

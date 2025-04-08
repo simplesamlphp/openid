@@ -8,13 +8,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Jwks;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
-#[CoversClass(JwksFactory::class)]
+#[CoversClass(JwksDecoratorFactory::class)]
 #[UsesClass(JwksDecorator::class)]
-#[UsesClass(JwksFactory::class)]
-final class JwksFactoryTest extends TestCase
+#[UsesClass(JwksDecoratorFactory::class)]
+final class JwksDecoratorFactoryTest extends TestCase
 {
     protected array $jwksArraySample = [
         'keys' => [
@@ -34,14 +34,14 @@ final class JwksFactoryTest extends TestCase
     {
     }
 
-    protected function sut(): JwksFactory
+    protected function sut(): JwksDecoratorFactory
     {
-        return new JwksFactory();
+        return new JwksDecoratorFactory();
     }
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(JwksFactory::class, $this->sut());
+        $this->assertInstanceOf(JwksDecoratorFactory::class, $this->sut());
     }
 
     public function testCanBuildFromKeyData(): void

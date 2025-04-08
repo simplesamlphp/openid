@@ -16,7 +16,7 @@ use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
@@ -47,7 +47,7 @@ class Core
 
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
 
-    protected ?JwksFactory $jwksFactory = null;
+    protected ?JwksDecoratorFactory $jwksDecoratorFactory = null;
 
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
 
@@ -74,7 +74,7 @@ class Core
         return $this->requestObjectFactory ??= new RequestObjectFactory(
             $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
@@ -87,7 +87,7 @@ class Core
         return $this->clientAssertionFactory ??= new ClientAssertionFactory(
             $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
@@ -142,9 +142,9 @@ class Core
         return $this->jwsVerifierDecoratorFactory;
     }
 
-    public function jwksFactory(): JwksFactory
+    public function jwksDecoratorFactory(): JwksDecoratorFactory
     {
-        return $this->jwksFactory ??= new JwksFactory();
+        return $this->jwksDecoratorFactory ??= new JwksDecoratorFactory();
     }
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory

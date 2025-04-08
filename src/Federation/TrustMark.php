@@ -10,7 +10,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -21,7 +21,7 @@ class TrustMark extends ParsedJws
     public function __construct(
         JwsDecorator $jwsDecorator,
         JwsVerifierDecorator $jwsVerifierDecorator,
-        JwksFactory $jwksFactory,
+        JwksDecoratorFactory $jwksDecoratorFactory,
         JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         DateIntervalDecorator $timestampValidationLeeway,
         Helpers $helpers,
@@ -31,7 +31,7 @@ class TrustMark extends ParsedJws
         parent::__construct(
             $jwsDecorator,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $timestampValidationLeeway,
             $helpers,
