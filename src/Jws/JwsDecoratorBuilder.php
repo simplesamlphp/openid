@@ -40,7 +40,7 @@ class JwsDecoratorBuilder
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function fromData(
-        JwkDecorator $signatureJwkDecorator,
+        JwkDecorator $signingKey,
         SignatureAlgorithmEnum $signatureAlgorithm,
         array $payload,
         array $header,
@@ -55,7 +55,7 @@ class JwsDecoratorBuilder
                 $this->jwsBuilder->create()->withPayload(
                     $this->helpers->json()->encode($payload),
                 )->addSignature(
-                    $signatureJwkDecorator->jwk(),
+                    $signingKey->jwk(),
                     $header,
                 )->build(),
             );
