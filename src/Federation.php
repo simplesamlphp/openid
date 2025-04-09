@@ -101,6 +101,7 @@ class Federation
     protected ?TrustMarkValidator $trustMarkValidator = null;
 
     protected ?TrustMarkFetcher $trustMarkFetcher = null;
+
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
     public function __construct(

@@ -52,6 +52,7 @@ class Core
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
 
     protected ?ClaimFactory $claimFactory = null;
+
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
     public function __construct(

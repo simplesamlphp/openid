@@ -66,6 +66,7 @@ class Jwks
     protected ?HttpClientDecoratorFactory $httpClientDecoratorFactory = null;
 
     protected ?ClaimFactory $claimFactory = null;
+
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
     public function __construct(

@@ -20,7 +20,10 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 final class JwsDecoratorBuilderTest extends TestCase
 {
     protected MockObject $jwsSerializerManagerDecoratorMock;
+
     protected MockObject $jwsBuilderMock;
+
+    protected MockObject $helpersMock;
 
     protected MockObject $jwsDecoratorMock;
 
