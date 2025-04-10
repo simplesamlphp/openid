@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\Factories;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
@@ -40,6 +41,8 @@ class TrustMarkFactory extends ParsedJwsFactory
         array $header,
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
     ): TrustMark {
+        $header[ClaimsEnum::Typ->value] = $expectedJwtType;
+
         return new TrustMark(
             $this->jwsDecoratorBuilder->fromData(
                 $signingKey,

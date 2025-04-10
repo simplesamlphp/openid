@@ -41,10 +41,7 @@ class EntityStatementFactory extends ParsedJwsFactory
         array $payload,
         array $header,
     ): EntityStatement {
-
-        if (!array_key_exists(ClaimsEnum::Typ->value, $header)) {
-            $header[ClaimsEnum::Typ->value] = JwtTypesEnum::EntityStatementJwt->value;
-        }
+        $header[ClaimsEnum::Typ->value] = JwtTypesEnum::EntityStatementJwt->value;
 
         return new EntityStatement(
             $this->jwsDecoratorBuilder->fromData(

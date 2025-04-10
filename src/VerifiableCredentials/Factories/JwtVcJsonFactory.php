@@ -35,6 +35,9 @@ class JwtVcJsonFactory extends ParsedJwsFactory
         array $payload,
         array $header,
     ): JwtVcJson {
+        // TODO mivanci Set type header
+//        $header[ClaimsEnum::Typ->value] = JwtTypesEnum::->value;
+
         return new JwtVcJson(
             $this->jwsDecoratorBuilder->fromData(
                 $signingKey,
