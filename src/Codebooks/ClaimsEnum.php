@@ -148,4 +148,6 @@ enum ClaimsEnum: string
     case Use = 'use';
     case UserAuthentication = 'user_authentication';
     case UserinfoEndpoint = 'userinfo_endpoint';
+    // VerifiableCredential
+    case Vc = 'vc';
 }
