@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\Factories;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -39,6 +41,11 @@ class EntityStatementFactory extends ParsedJwsFactory
         array $payload,
         array $header,
     ): EntityStatement {
+
+        if (!array_key_exists(ClaimsEnum::Typ->value, $header)) {
+            $header[ClaimsEnum::Typ->value] = JwtTypesEnum::EntityStatementJwt->value;
+        }
+
         return new EntityStatement(
             $this->jwsDecoratorBuilder->fromData(
                 $signingKey,
