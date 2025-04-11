@@ -6,6 +6,10 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ClaimsEnum: string
 {
+    // @context
+    case AtContext = '@context';
+    // @type
+    case AtType = '@type';
     case AcrValuesSupported = 'acr_values_supported';
     // Algorithm
     case Alg = 'alg';
@@ -42,6 +46,7 @@ enum ClaimsEnum: string
     case CredentialResponseEncryption = 'credential_response_encryption';
     // CredentialSigningAlgorithmValuesSupported
     case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
+    case CredentialSubject = 'credential_subject';
     case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
     case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
     case Delegation = 'delegation';

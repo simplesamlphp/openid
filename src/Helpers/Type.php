@@ -24,9 +24,11 @@ class Type
             return (string)$value;
         }
 
-        $error = 'Unsafe string casting, aborting.';
-        $error .= is_string($context) ? ' Context: ' . $context : '';
-        $error .= ' Value was: ' . var_export($value, true);
+        $error = $this->prepareErrorMessage(
+            'Unsafe string casting, aborting.',
+            $value,
+            $context,
+        );
 
         throw new InvalidValueException($error);
     }
@@ -43,9 +45,11 @@ class Type
             return $value;
         }
 
-        $error = 'Empty string value encountered, aborting.';
-        $error .= is_string($context) ? ' Context: ' . $context : '';
-        $error .= ' Value was: ' . var_export($value, true);
+        $error = $this->prepareErrorMessage(
+            'Empty string value encountered, aborting.',
+            $value,
+            $context,
+        );
 
         throw new InvalidValueException($error);
     }
@@ -73,9 +77,11 @@ class Type
             // Converts object properties to an array
         }
 
-        $error = 'Unsafe array casting, aborting.';
-        $error .= is_string($context) ? 'Context: ' . $context : '';
-        $error .= ' Value was: ' . var_export($value, true);
+        $error = $this->prepareErrorMessage(
+            'Unsafe array casting, aborting.',
+            $value,
+            $context,
+        );
 
         throw new InvalidValueException($error);
     }
@@ -203,10 +209,148 @@ class Type
             return (int)$value;
         }
 
-        $error = 'Unsafe integer casting, aborting.';
-        $error .= is_string($context) ? 'Context: ' . $context : '';
-        $error .= ' Value was: ' . var_export($value, true);
+        $error = $this->prepareErrorMessage(
+            'Unsafe integer casting, aborting.',
+            $value,
+            $context,
+        );
 
         throw new InvalidValueException($error);
+    }
+
+    /**
+     * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceRegex(
+        mixed $value,
+        string $pattern,
+        ?string $context = null,
+    ): string {
+        $value = $this->ensureNonEmptyString($value, $context);
+
+        $error = $this->prepareErrorMessage(
+            'Regex match failed, aborting.',
+            $value,
+            $context,
+        );
+
+        preg_match($pattern, $value) || throw new InvalidValueException($error);
+
+        return $value;
+    }
+
+    /**
+     * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceUri(
+        mixed $value,
+        ?string $context = null,
+        string $pattern = '/^[^:]+:\/\/?([^\s\/$.?#].[^\s]*)?$/',
+    ): string {
+        try {
+            $value = $this->enforceRegex($value, $pattern, $context);
+        } catch (InvalidValueException) {
+            $error = $this->prepareErrorMessage(
+                'URI regex match failed, aborting.',
+                $value,
+                $context,
+            );
+
+            throw new InvalidValueException($error);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param mixed[] $array
+     * @return array<mixed[]>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceArrayOfArrays(array $array, ?string $context = null): array
+    {
+        foreach ($array as $value) {
+            if (!is_array($value)) {
+                $error = $this->prepareErrorMessage(
+                    'Non-array value encountered, aborting.',
+                    $array,
+                    $context,
+                );
+
+                throw new InvalidValueException($error);
+            }
+        }
+
+        /** @var array<mixed[]> $array */
+        return $array;
+    }
+
+    /**
+     * @param mixed[] $array
+     * @return non-empty-array<mixed>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNonEmptyArray(array $array, ?string $context = null): array
+    {
+        if ($array === []) {
+            $error = $this->prepareErrorMessage(
+                'Empty array encountered, aborting.',
+                $array,
+                $context,
+            );
+            throw new InvalidValueException($error);
+        }
+
+        return $array;
+    }
+
+    /**
+     * @param mixed[] $array
+     * @return non-empty-array<non-empty-string>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNonEmptyArrayWithValuesAsNonEmptyStrings(array $array, ?string $context = null): array
+    {
+        $array = $this->ensureArrayWithValuesAsNonEmptyStrings($array, $context);
+        $array = $this->enforceNonEmptyArray($array, $context);
+
+        /** @var non-empty-array<non-empty-string> $array */
+        return $array;
+    }
+
+    /**
+     * @param mixed[] $array
+     * @return non-empty-array<non-empty-array>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNonEmptyArrayOfNonEmptyArrays(array $array, ?string $context = null): array
+    {
+        $array = $this->enforceNonEmptyArray($array, $context);
+
+        foreach ($array as $value) {
+            if (!is_array($value)) {
+                $error = $this->prepareErrorMessage(
+                    'Non-array value encountered, aborting.',
+                    $array,
+                    $context,
+                );
+
+                throw new InvalidValueException($error);
+            }
+
+            $this->enforceNonEmptyArray($value, $context);
+        }
+
+        /** @var non-empty-array<non-empty-array> $array */
+        return $array;
+    }
+
+    protected function prepareErrorMessage(string $message, mixed $value, ?string $context = null): string
+    {
+        return $message .
+        (is_string($context) ? ' Context: ' . $context : '') .
+        ' Value was: ' . var_export($value, true);
     }
 }

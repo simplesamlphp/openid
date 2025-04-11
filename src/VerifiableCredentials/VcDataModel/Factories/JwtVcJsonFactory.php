@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\VerifiableCredentials\Factories;
+namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
-use SimpleSAML\OpenID\VerifiableCredentials\JwtVcJson;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\JwtVcJson;
 
 class JwtVcJsonFactory extends ParsedJwsFactory
 {

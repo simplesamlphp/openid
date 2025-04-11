@@ -95,6 +95,14 @@ class ParsedJws
         return $this->getPayload()[$key] ?? null;
     }
 
+    public function getNestedPayloadClaim(int|string ...$keys): mixed
+    {
+        return $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ...$keys,
+        );
+    }
+
     public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,

@@ -56,4 +56,28 @@ class Arr
 
         return $this->getNestedValue($nestedArray, ...$keys);
     }
+
+    /**
+     * @param mixed[] $array
+     */
+    public function isAssociative(array $array): bool
+    {
+        // Has at least one string key or non-sequential numeric keys
+        return array_keys($array) !== range(0, count($array) - 1);
+    }
+
+    /**
+     * Is array of arrays.
+     * @param mixed[] $array
+     */
+    public function isOfArrays(array $array): bool
+    {
+        foreach ($array as $value) {
+            if (!is_array($value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
