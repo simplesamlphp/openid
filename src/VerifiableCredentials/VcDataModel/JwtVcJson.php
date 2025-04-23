@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel;
 
+use DateTimeImmutable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
 class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
@@ -30,15 +33,23 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
     protected ?VcIssuerClaimValue $vcIssuerClaimValue = null;
 
+    protected ?DateTimeImmutable $vcIssuanceDate = null;
+
+    protected null|false|VcProofClaimValue $vcProofClaimValue = null;
+
+    protected null|false|DateTimeImmutable $vcExpirationDate = null;
+
+    protected null|false|VcCredentialStatusClaimValue $vcCredentialStatusClaimValue = null;
+
     public function getCredentialFormatIdentifier(): CredentialFormatIdentifiersEnum
     {
         return CredentialFormatIdentifiersEnum::JwtVcJson;
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
     public function getVc(): VcClaimValue
     {
@@ -60,6 +71,10 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcType(),
             $this->getVcCredentialSubject(),
             $this->getVcIssuer(),
+            $this->getVcIssuanceDate(),
+            $this->getVcProof(),
+            $this->getVcExpirationDate(),
+            $this->getVcCredentialStatus(),
         );
     }
 
@@ -141,7 +156,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             return $this->vcCredentialSubjectClaimBag;
         }
 
-        $claimKeys = [ClaimsEnum::Vc->value, ClaimsEnum::CredentialSubject->value];
+        $claimKeys = [ClaimsEnum::Vc->value, ClaimsEnum::Credential_Subject->value];
 
         $vcCredentialSubject = $this->getNestedPayloadClaim(...$claimKeys);
 
@@ -192,6 +207,120 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function getVcIssuanceDate(): DateTimeImmutable
+    {
+        if ($this->vcIssuanceDate instanceof DateTimeImmutable) {
+            return $this->vcIssuanceDate;
+        }
+
+        $issuanceDate = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Issuance_Date->value);
+
+        if (!is_string($issuanceDate)) {
+            throw new VcDataModelException('Invalid VC Issuance Date claim.');
+        }
+
+        try {
+            return $this->vcIssuanceDate = $this->helpers->dateTime()->parseXsDateTime($issuanceDate);
+        } catch (\Exception $exception) {
+            throw new VcDataModelException('Error parsing VC Issuance Date claim: ' . $exception->getMessage());
+        }
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function getVcProof(): ?VcProofClaimValue
+    {
+        if ($this->vcProofClaimValue === false) {
+            return null;
+        }
+
+        if ($this->vcProofClaimValue instanceof VcProofClaimValue) {
+            return $this->vcProofClaimValue;
+        }
+
+        $vcProof = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Proof->value);
+
+        if (is_null($vcProof)) {
+            $this->vcProofClaimValue = false;
+            return null;
+        }
+
+        if (is_array($vcProof)) {
+            return $this->vcProofClaimValue = $this->claimFactory->forVcDataModel()->buildVcProofClaimValue(
+                $this->helpers->type()->enforceNonEmptyArray($vcProof),
+            );
+        }
+
+        throw new VcDataModelException('Invalid VC Proof claim.');
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function getVcExpirationDate(): ?DateTimeImmutable
+    {
+        if ($this->vcExpirationDate === false) {
+            return null;
+        }
+
+        if ($this->vcExpirationDate instanceof DateTimeImmutable) {
+            return $this->vcExpirationDate;
+        }
+
+        $expirationDate = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Expiration_Date->value);
+
+        if (is_null($expirationDate)) {
+            $this->vcExpirationDate = false;
+            return null;
+        }
+
+        if (is_string($expirationDate)) {
+            try {
+                return $this->vcExpirationDate = $this->helpers->dateTime()->parseXsDateTime($expirationDate);
+            } catch (\Exception $exception) {
+                throw new VcDataModelException('Error parsing VC Expiration Date claim: ' . $exception->getMessage());
+            }
+        }
+
+        throw new VcDataModelException('Invalid VC Expiration Date claim.');
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcCredentialStatus(): ?VcCredentialStatusClaimValue
+    {
+        if ($this->vcCredentialStatusClaimValue === false) {
+            return null;
+        }
+
+        if ($this->vcCredentialStatusClaimValue instanceof VcCredentialStatusClaimValue) {
+            return $this->vcCredentialStatusClaimValue;
+        }
+
+        $credentialStatus = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Credential_Status->value);
+
+        if (is_null($credentialStatus)) {
+            $this->vcCredentialStatusClaimValue = false;
+            return null;
+        }
+
+        if (!is_array($credentialStatus)) {
+            throw new VcDataModelException('Invalid VC Credential Status Claim.');
+        }
+
+        return $this->vcCredentialStatusClaimValue = $this->claimFactory->forVcDataModel()
+            ->buildVcCredentialStatusClaimValue(
+                $this->helpers->type()->enforceNonEmptyArray($credentialStatus),
+            );
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     protected function validate(): void
@@ -203,6 +332,10 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcType(...),
             $this->getVcCredentialSubject(...),
             $this->getVcIssuer(...),
+            $this->getVcIssuanceDate(...),
+            $this->getVcProof(...),
+            $this->getVcExpirationDate(...),
+            $this->getVcCredentialStatus(...),
         );
     }
 }

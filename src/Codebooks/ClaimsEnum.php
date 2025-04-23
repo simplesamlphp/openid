@@ -46,7 +46,8 @@ enum ClaimsEnum: string
     case CredentialResponseEncryption = 'credential_response_encryption';
     // CredentialSigningAlgorithmValuesSupported
     case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
-    case CredentialSubject = 'credential_subject';
+    case Credential_Status = 'credentialStatus';
+    case Credential_Subject = 'credentialSubject';
     case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
     case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
     case Delegation = 'delegation';
@@ -55,6 +56,7 @@ enum ClaimsEnum: string
     case EndSessionEndpoint = 'end_session_endpoint';
     // ExpirationTime
     case Exp = 'exp';
+    case Expiration_Date = 'expirationDate';
     case EncryptionRequired = 'encryption_required';
     // EncryptionValuesSupported
     case EncValuesSupported = 'enc_values_supported';
@@ -76,6 +78,7 @@ enum ClaimsEnum: string
     'introspection_endpoint_auth_signing_alg_values_supported';
     // Issuer
     case Iss = 'iss';
+    case Issuance_Date = 'issuanceDate';
     case Issuer = 'issuer';
     // JWT ID
     case Jti = 'jti';
@@ -107,6 +110,7 @@ enum ClaimsEnum: string
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
     case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
+    case Proof = 'proof';
     // ProofSigningAlgorithmValuesSupported
     case ProofSigningAlgValuesSupported = 'proof_signing_alg_values_supported';
     case ProofTypesSupported = 'proof_types_supported';

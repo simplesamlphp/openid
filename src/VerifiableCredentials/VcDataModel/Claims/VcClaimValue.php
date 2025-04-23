@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
+use DateTimeImmutable;
 use JsonSerializable;
 
 class VcClaimValue implements JsonSerializable
@@ -18,8 +19,12 @@ class VcClaimValue implements JsonSerializable
         protected readonly null|string $id,
         /** @var non-empty-array<non-empty-string> */
         protected readonly array $type,
-        protected readonly VcCredentialSubjectClaimBag $vcCredentialSubjectClaimBag,
+        protected readonly VcCredentialSubjectClaimBag $credentialSubjectClaimBag,
         protected readonly VcIssuerClaimValue $issuerClaimValue,
+        protected readonly DateTimeImmutable $issuanceDate,
+        protected readonly ?VcProofClaimValue $proofClaimValue,
+        protected readonly ?DateTimeImmutable $expirationDate,
+        protected readonly ?VcCredentialStatusClaimValue $credentialStatusClaimValue,
     ) {
     }
 
@@ -55,11 +60,31 @@ class VcClaimValue implements JsonSerializable
 
     public function getCredentialSubject(): VcCredentialSubjectClaimBag
     {
-        return $this->vcCredentialSubjectClaimBag;
+        return $this->credentialSubjectClaimBag;
     }
 
     public function getIssuer(): VcIssuerClaimValue
     {
         return $this->issuerClaimValue;
+    }
+
+    public function getIssuanceDate(): DateTimeImmutable
+    {
+        return $this->issuanceDate;
+    }
+
+    public function getProof(): ?VcProofClaimValue
+    {
+        return $this->proofClaimValue;
+    }
+
+    public function getExpirationDate(): ?DateTimeImmutable
+    {
+        return $this->expirationDate;
+    }
+
+    public function getCredentialStatus(): ?VcCredentialStatusClaimValue
+    {
+        return $this->credentialStatusClaimValue;
     }
 }
