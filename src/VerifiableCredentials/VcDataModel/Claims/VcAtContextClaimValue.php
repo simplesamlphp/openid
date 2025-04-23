@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
-use JsonSerializable;
+use SimpleSAML\OpenID\Claims\ClaimInterface;
 use SimpleSAML\OpenID\Codebooks\AtContextsEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 
-class VcAtContextClaimValue implements JsonSerializable
+class VcAtContextClaimValue implements ClaimInterface
 {
     /**
      * @param mixed[] $otherContexts
@@ -32,10 +33,7 @@ class VcAtContextClaimValue implements JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return [
-            $this->baseContext,
-            ...$this->otherContexts,
-        ];
+        return $this->getValue();
     }
 
     public function getBaseContext(): string
@@ -49,5 +47,21 @@ class VcAtContextClaimValue implements JsonSerializable
     public function getOtherContexts(): array
     {
         return $this->otherContexts;
+    }
+
+    public function getName(): string
+    {
+        return ClaimsEnum::AtContext->name;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getValue(): array
+    {
+        return[
+            $this->baseContext,
+            ...$this->otherContexts,
+        ];
     }
 }

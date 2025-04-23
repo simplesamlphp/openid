@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
-use JsonSerializable;
+use SimpleSAML\OpenID\Claims\ClaimInterface;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
-class VcCredentialSubjectClaimBag implements JsonSerializable
+class VcCredentialSubjectClaimBag implements ClaimInterface
 {
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue[] */
     protected array $vcCredentialSubjectClaimValueValues;
@@ -25,6 +26,19 @@ class VcCredentialSubjectClaimBag implements JsonSerializable
      * @return mixed[]
      */
     public function jsonSerialize(): array
+    {
+        return $this->getValue();
+    }
+
+    public function getName(): string
+    {
+        return ClaimsEnum::Credential_Subject->value;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getValue(): array
     {
         return array_map(
             fn(

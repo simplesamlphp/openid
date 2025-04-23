@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
 use DateTimeImmutable;
-use JsonSerializable;
+use SimpleSAML\OpenID\Claims\ClaimInterface;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
-class VcClaimValue implements JsonSerializable
+class VcClaimValue implements ClaimInterface
 {
     /**
      * @param null|non-empty-string $id
@@ -33,8 +34,7 @@ class VcClaimValue implements JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        // TODO: Implement jsonSerialize() method.
-        return [];
+        return $this->getValue();
     }
 
     public function getAtContext(): VcAtContextClaimValue
@@ -86,5 +86,19 @@ class VcClaimValue implements JsonSerializable
     public function getCredentialStatus(): ?VcCredentialStatusClaimValue
     {
         return $this->credentialStatusClaimValue;
+    }
+
+    public function getName(): string
+    {
+        return ClaimsEnum::Vc->value;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getValue(): array
+    {
+        // TODO: Implement getValue() method.
+        return [];
     }
 }
