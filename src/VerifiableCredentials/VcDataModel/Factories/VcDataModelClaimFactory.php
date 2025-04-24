@@ -11,6 +11,8 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue;
@@ -39,6 +41,7 @@ class VcDataModelClaimFactory
         ?VcProofClaimValue $vcProofClaimValue,
         ?DateTimeImmutable $vcExpirationDate,
         ?VcCredentialStatusClaimValue $vcCredentialStatusClaimValue,
+        ?VcCredentialSchemaClaimBag $vcCredentialSchemaClaimBag,
     ): VcClaimValue {
         return new VcClaimValue(
             $vcAtContextClaimValue,
@@ -50,6 +53,7 @@ class VcDataModelClaimFactory
             $vcProofClaimValue,
             $vcExpirationDate,
             $vcCredentialStatusClaimValue,
+            $vcCredentialSchemaClaimBag,
         );
     }
 
@@ -71,10 +75,17 @@ class VcDataModelClaimFactory
     }
 
     /**
-     * @param non-empty-array<non-empty-array<mixed>> $data
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function buildVcCredentialSubjectClaimBag(array $data): VcCredentialSubjectClaimBag
     {
+        if ($this->helpers->arr()->isAssociative($data)) {
+            $data = [$data];
+        }
+
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
         $vcCredentialSubjectClaimValueData =  array_shift($data);
 
         $vcCredentialSubjectClaimValue = $this->buildVcCredentialSubjectClaimValue($vcCredentialSubjectClaimValueData);
@@ -91,14 +102,14 @@ class VcDataModelClaimFactory
     }
 
     /**
-     * @param non-empty-array<mixed> $data
+     * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function buildVcIssuerClaimValue(array $data): VcIssuerClaimValue
     {
         $id = $data[ClaimsEnum::Id->value] ?? throw new VcDataModelException(
-            'No Issuer ID claim value available.',
+            'No ID claim value available.',
         );
 
         $id = $this->helpers->type()->enforceUri($id);
@@ -107,7 +118,7 @@ class VcDataModelClaimFactory
     }
 
     /**
-     * @param non-empty-array<mixed> $data
+     * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
@@ -123,14 +134,14 @@ class VcDataModelClaimFactory
     }
 
     /**
-     * @param non-empty-array<mixed> $data
+     * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
     public function buildVcCredentialStatusClaimValue(array $data): VcCredentialStatusClaimValue
     {
         $id = $data[ClaimsEnum::Id->value] ?? throw new VcDataModelException(
-            'No Issuer ID claim value available.',
+            'No ID claim value available.',
         );
         $id = $this->helpers->type()->enforceUri($id);
 
@@ -140,5 +151,53 @@ class VcDataModelClaimFactory
         $type = $this->helpers->type()->ensureNonEmptyString($type);
 
         return new VcCredentialStatusClaimValue($id, $type, $data);
+    }
+
+    /**
+     * @param non-empty-array<mixed> $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcCredentialSchemaClaimValue(array $data): VcCredentialSchemaClaimValue
+    {
+        $id = $data[ClaimsEnum::Id->value] ?? throw new VcDataModelException(
+            'No ID claim value available.',
+        );
+        $id = $this->helpers->type()->enforceUri($id);
+
+        $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
+            'No Type claim value available.',
+        );
+        $type = $this->helpers->type()->ensureNonEmptyString($type);
+
+        return new VcCredentialSchemaClaimValue($id, $type, $data);
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcCredentialSchemaClaimBag(array $data): VcCredentialSchemaClaimBag
+    {
+        if ($this->helpers->arr()->isAssociative($data)) {
+            $data = [$data];
+        }
+
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
+        $vcCredentialSchemaClaimValueData =  array_shift($data);
+
+        $vcCredentialSchemaClaimValue = $this->buildVcCredentialSchemaClaimValue($vcCredentialSchemaClaimValueData);
+
+        $vcCredentialSchemaClaimValues = array_map(
+            fn (array $data): VcCredentialSchemaClaimValue => $this->buildVcCredentialSchemaClaimValue($data),
+            $data,
+        );
+
+        return new VcCredentialSchemaClaimBag(
+            $vcCredentialSchemaClaimValue,
+            ...$vcCredentialSchemaClaimValues,
+        );
     }
 }

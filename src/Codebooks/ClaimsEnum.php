@@ -44,6 +44,7 @@ enum ClaimsEnum: string
     case CredentialEndpoint = 'credential_endpoint';
     case CredentialIssuer = 'credential_issuer';
     case CredentialResponseEncryption = 'credential_response_encryption';
+    case Credential_Schema = 'credentialSchema';
     // CredentialSigningAlgorithmValuesSupported
     case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
     case Credential_Status = 'credentialStatus';

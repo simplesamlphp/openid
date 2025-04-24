@@ -26,6 +26,7 @@ class VcClaimValue implements ClaimInterface
         protected readonly ?VcProofClaimValue $proofClaimValue,
         protected readonly ?DateTimeImmutable $expirationDate,
         protected readonly ?VcCredentialStatusClaimValue $credentialStatusClaimValue,
+        protected readonly ?VcCredentialSchemaClaimBag $credentialSchemaClaimBag,
     ) {
     }
 
@@ -86,6 +87,11 @@ class VcClaimValue implements ClaimInterface
     public function getCredentialStatus(): ?VcCredentialStatusClaimValue
     {
         return $this->credentialStatusClaimValue;
+    }
+
+    public function getCredentialSchema(): ?VcCredentialSchemaClaimBag
+    {
+        return $this->credentialSchemaClaimBag;
     }
 
     public function getName(): string

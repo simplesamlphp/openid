@@ -6,10 +6,10 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
-class VcCredentialStatusClaimValue extends AbstractIdentifiedTypedClaimValue
+class VcCredentialSchemaClaimValue extends AbstractIdentifiedTypedClaimValue
 {
     public function getName(): string
     {
-        return ClaimsEnum::Credential_Status->value;
+        return ClaimsEnum::Credential_Schema->value;
     }
 }

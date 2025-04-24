@@ -11,6 +11,7 @@ use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
@@ -40,6 +41,8 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     protected null|false|DateTimeImmutable $vcExpirationDate = null;
 
     protected null|false|VcCredentialStatusClaimValue $vcCredentialStatusClaimValue = null;
+
+    protected null|false|VcCredentialSchemaClaimBag $vcCredentialSchemaClaimBag = null;
 
     public function getCredentialFormatIdentifier(): CredentialFormatIdentifiersEnum
     {
@@ -75,6 +78,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcProof(),
             $this->getVcExpirationDate(),
             $this->getVcCredentialStatus(),
+            $this->getVcCredentialSchema(),
         );
     }
 
@@ -164,14 +168,9 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid VC Credential Subject claim.');
         }
 
-        if ($this->helpers->arr()->isAssociative($vcCredentialSubject)) {
-            return $this->vcCredentialSubjectClaimBag = $this->claimFactory->forVcDataModel()
-                ->buildVcCredentialSubjectClaimBag([$vcCredentialSubject]);
-        }
-
         return $this->vcCredentialSubjectClaimBag = $this->claimFactory->forVcDataModel()
             ->buildVcCredentialSubjectClaimBag(
-                $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($vcCredentialSubject),
+                $vcCredentialSubject,
             );
     }
 
@@ -199,7 +198,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         if (is_array($vcIssuer)) {
             return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel()->buildVcIssuerClaimValue(
-                $this->helpers->type()->enforceNonEmptyArray($vcIssuer),
+                $vcIssuer,
             );
         }
 
@@ -251,7 +250,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         if (is_array($vcProof)) {
             return $this->vcProofClaimValue = $this->claimFactory->forVcDataModel()->buildVcProofClaimValue(
-                $this->helpers->type()->enforceNonEmptyArray($vcProof),
+                $vcProof,
             );
         }
 
@@ -316,7 +315,38 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         return $this->vcCredentialStatusClaimValue = $this->claimFactory->forVcDataModel()
             ->buildVcCredentialStatusClaimValue(
-                $this->helpers->type()->enforceNonEmptyArray($credentialStatus),
+                $credentialStatus,
+            );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcCredentialSchema(): ?VcCredentialSchemaClaimBag
+    {
+        if ($this->vcCredentialSchemaClaimBag === false) {
+            return null;
+        }
+
+        if ($this->vcCredentialSchemaClaimBag instanceof VcCredentialSchemaClaimBag) {
+            return $this->vcCredentialSchemaClaimBag;
+        }
+
+        $credentialSchema = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Credential_Schema->value);
+
+        if (is_null($credentialSchema)) {
+            $this->vcCredentialSchemaClaimBag = false;
+            return null;
+        }
+
+        if (!is_array($credentialSchema)) {
+            throw new VcDataModelException('Invalid VC Credential Schema claim.');
+        }
+
+        return $this->vcCredentialSchemaClaimBag = $this->claimFactory->forVcDataModel()
+            ->buildVcCredentialSchemaClaimBag(
+                $credentialSchema,
             );
     }
 
@@ -336,6 +366,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcProof(...),
             $this->getVcExpirationDate(...),
             $this->getVcCredentialStatus(...),
+            $this->getVcCredentialSchema(...),
         );
     }
 }
