@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
@@ -16,8 +17,14 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchem
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValue;
 
 class VcDataModelClaimFactory
 {
@@ -29,12 +36,11 @@ class VcDataModelClaimFactory
 
     /**
      * @param non-empty-string|null $vcId
-     * @param non-empty-array<non-empty-string> $vcType
      */
     public function buildVcClaimValue(
         VcAtContextClaimValue $vcAtContextClaimValue,
         null|string $vcId,
-        array $vcType,
+        TypeClaimValue $vcTypeClaimValue,
         VcCredentialSubjectClaimBag $vcCredentialSubjectClaimBag,
         VcIssuerClaimValue $vcIssuerClaimValue,
         DateTimeImmutable $vcIssuanceDate,
@@ -42,11 +48,14 @@ class VcDataModelClaimFactory
         ?DateTimeImmutable $vcExpirationDate,
         ?VcCredentialStatusClaimValue $vcCredentialStatusClaimValue,
         ?VcCredentialSchemaClaimBag $vcCredentialSchemaClaimBag,
+        ?VcRefreshServiceClaimBag $vcRefreshServiceClaimBag,
+        ?VcTermsOfUseClaimBag $vcTermsOfUseClaimBag,
+        ?VcEvidenceClaimBag $vcEvidenceClaimBag,
     ): VcClaimValue {
         return new VcClaimValue(
             $vcAtContextClaimValue,
             $vcId,
-            $vcType,
+            $vcTypeClaimValue,
             $vcCredentialSubjectClaimBag,
             $vcIssuerClaimValue,
             $vcIssuanceDate,
@@ -54,6 +63,9 @@ class VcDataModelClaimFactory
             $vcExpirationDate,
             $vcCredentialStatusClaimValue,
             $vcCredentialSchemaClaimBag,
+            $vcRefreshServiceClaimBag,
+            $vcTermsOfUseClaimBag,
+            $vcEvidenceClaimBag,
         );
     }
 
@@ -64,6 +76,27 @@ class VcDataModelClaimFactory
     public function buildVcAtContextClaimValue(string $baseContext, array $otherContexts): VcAtContextClaimValue
     {
         return new VcAtContextClaimValue($baseContext, $otherContexts);
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildTypeClaimValue(mixed $data): TypeClaimValue
+    {
+        if (is_string($data)) {
+            $data = [$data];
+        }
+
+        if (!is_array($data)) {
+            throw new VcDataModelException('Invalid Type claim value.');
+        }
+
+        return new TypeClaimValue(
+            $this->helpers->type()->enforceNonEmptyArrayWithValuesAsNonEmptyStrings(
+                $data,
+            ),
+        );
     }
 
     /**
@@ -128,9 +161,9 @@ class VcDataModelClaimFactory
             'No Type claim value available.',
         );
 
-        $type = $this->helpers->type()->ensureNonEmptyString($type);
+        $typeClaimValue = $this->buildTypeClaimValue($type);
 
-        return new VcProofClaimValue($type, $data);
+        return new VcProofClaimValue($typeClaimValue, $data);
     }
 
     /**
@@ -148,9 +181,9 @@ class VcDataModelClaimFactory
         $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
             'No Type claim value available.',
         );
-        $type = $this->helpers->type()->ensureNonEmptyString($type);
+        $typeClaimValue = $this->buildTypeClaimValue($type);
 
-        return new VcCredentialStatusClaimValue($id, $type, $data);
+        return new VcCredentialStatusClaimValue($id, $typeClaimValue, $data);
     }
 
     /**
@@ -168,9 +201,9 @@ class VcDataModelClaimFactory
         $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
             'No Type claim value available.',
         );
-        $type = $this->helpers->type()->ensureNonEmptyString($type);
+        $typeClaimValue = $this->buildTypeClaimValue($type);
 
-        return new VcCredentialSchemaClaimValue($id, $type, $data);
+        return new VcCredentialSchemaClaimValue($id, $typeClaimValue, $data);
     }
 
     /**
@@ -198,6 +231,142 @@ class VcDataModelClaimFactory
         return new VcCredentialSchemaClaimBag(
             $vcCredentialSchemaClaimValue,
             ...$vcCredentialSchemaClaimValues,
+        );
+    }
+
+    /**
+     * @param non-empty-array<mixed> $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcRefreshServiceClaimValue(array $data): VcRefreshServiceClaimValue
+    {
+        $id = $data[ClaimsEnum::Id->value] ?? throw new VcDataModelException(
+            'No ID claim value available.',
+        );
+        $id = $this->helpers->type()->enforceUri($id);
+
+        $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
+            'No Type claim value available.',
+        );
+        $typeClaimValue = $this->buildTypeClaimValue($type);
+
+        return new VcRefreshServiceClaimValue($id, $typeClaimValue, $data);
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcRefreshServiceClaimBag(array $data): VcRefreshServiceClaimBag
+    {
+        if ($this->helpers->arr()->isAssociative($data)) {
+            $data = [$data];
+        }
+
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
+        $vcRefreshServiceClaimValueData =  array_shift($data);
+
+        $vcRefreshServiceClaimValue = $this->buildVcRefreshServiceClaimValue($vcRefreshServiceClaimValueData);
+
+        $vcRefreshServiceClaimValues = array_map(
+            fn (array $data): VcRefreshServiceClaimValue => $this->buildVcRefreshServiceClaimValue($data),
+            $data,
+        );
+
+        return new VcRefreshServiceClaimBag(
+            $vcRefreshServiceClaimValue,
+            ...$vcRefreshServiceClaimValues,
+        );
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function buildVcTermsOfUseClaimValue(array $data): VcTermsOfUseClaimValue
+    {
+        $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
+            'No Type claim value available.',
+        );
+
+        $typeClaimValue = $this->buildTypeClaimValue($type);
+
+        return new VcTermsOfUseClaimValue($typeClaimValue, $data);
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcTermsOfUseClaimBag(array $data): VcTermsOfUseClaimBag
+    {
+        if ($this->helpers->arr()->isAssociative($data)) {
+            $data = [$data];
+        }
+
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
+        $vcTermsOfUseClaimValueData =  array_shift($data);
+
+        $vcTermsOfUseClaimValue = $this->buildVcTermsOfUseClaimValue($vcTermsOfUseClaimValueData);
+
+        $vcTermsOfUseClaimValues = array_map(
+            fn (array $data): VcTermsOfUseClaimValue => $this->buildVcTermsOfUseClaimValue($data),
+            $data,
+        );
+
+        return new VcTermsOfUseClaimBag(
+            $vcTermsOfUseClaimValue,
+            ...$vcTermsOfUseClaimValues,
+        );
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function buildVcEvidenceClaimValue(array $data): VcEvidenceClaimValue
+    {
+        $type = $data[ClaimsEnum::Type->value] ?? throw new VcDataModelException(
+            'No Type claim value available.',
+        );
+
+        $typeClaimValue = $this->buildTypeClaimValue($type);
+
+        return new VcEvidenceClaimValue($typeClaimValue, $data);
+    }
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcEvidenceClaimBag(array $data): VcEvidenceClaimBag
+    {
+        if ($this->helpers->arr()->isAssociative($data)) {
+            $data = [$data];
+        }
+
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
+        $vcEvidenceClaimValueData =  array_shift($data);
+
+        $vcEvidenceClaimValue = $this->buildVcEvidenceClaimValue($vcEvidenceClaimValueData);
+
+        $vcEvidenceClaimValues = array_map(
+            fn (array $data): VcEvidenceClaimValue => $this->buildVcEvidenceClaimValue($data),
+            $data,
+        );
+
+        return new VcEvidenceClaimBag(
+            $vcEvidenceClaimValue,
+            ...$vcEvidenceClaimValues,
         );
     }
 }

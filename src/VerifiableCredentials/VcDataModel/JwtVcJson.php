@@ -9,13 +9,17 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
 class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
@@ -27,8 +31,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     /** @var null|false|non-empty-string */
     protected null|false|string $vcId = null;
 
-    /** @var ?non-empty-array<non-empty-string>  */
-    protected ?array $vcType = null;
+    protected ?TypeClaimValue $vcTypeClaimValue = null;
 
     protected ?VcCredentialSubjectClaimBag $vcCredentialSubjectClaimBag = null;
 
@@ -44,6 +47,12 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
     protected null|false|VcCredentialSchemaClaimBag $vcCredentialSchemaClaimBag = null;
 
+    protected null|false|VcRefreshServiceClaimBag $vcRefreshServiceClaimBag = null;
+
+    protected null|false|VcTermsOfUseClaimBag $vcTermsOfUseClaimBag = null;
+
+    protected null|false|VcEvidenceClaimBag $vcEvidenceClaimBag = null;
+
     public function getCredentialFormatIdentifier(): CredentialFormatIdentifiersEnum
     {
         return CredentialFormatIdentifiersEnum::JwtVcJson;
@@ -56,7 +65,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
      */
     public function getVc(): VcClaimValue
     {
-        if ($this->vcClaimValue instanceof \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue) {
+        if ($this->vcClaimValue instanceof VcClaimValue) {
             return  $this->vcClaimValue;
         }
 
@@ -79,6 +88,9 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcExpirationDate(),
             $this->getVcCredentialStatus(),
             $this->getVcCredentialSchema(),
+            $this->getVcRefreshService(),
+            $this->getVcTermsOfUse(),
+            $this->getVcEvidence(),
         );
     }
 
@@ -128,14 +140,13 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     }
 
     /**
-     * @return non-empty-array<non-empty-string>
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function getVcType(): array
+    public function getVcType(): TypeClaimValue
     {
-        if ($this->vcType !== null) {
-            return $this->vcType;
+        if ($this->vcTypeClaimValue instanceof TypeClaimValue) {
+            return $this->vcTypeClaimValue;
         }
 
         $claimKeys = [ClaimsEnum::Vc->value, ClaimsEnum::Type->value];
@@ -143,11 +154,11 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         $vcType = $this->getNestedPayloadClaim(...$claimKeys) ?? $this->getNestedPayloadClaim(...$claimKeys2);
 
-        if ((!is_array($vcType)) || $vcType === []) {
+        if (is_null($vcType)) {
             throw new VcDataModelException('Invalid VC Type claim.');
         }
 
-        return $this->vcType = $this->helpers->type()->enforceNonEmptyArrayWithValuesAsNonEmptyStrings($vcType);
+        return $this->vcTypeClaimValue = $this->claimFactory->forVcDataModel()->buildTypeClaimValue($vcType);
     }
 
     /**
@@ -351,6 +362,99 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcRefreshService(): ?VcRefreshServiceClaimBag
+    {
+        if ($this->vcRefreshServiceClaimBag === false) {
+            return null;
+        }
+
+        if ($this->vcRefreshServiceClaimBag instanceof VcRefreshServiceClaimBag) {
+            return $this->vcRefreshServiceClaimBag;
+        }
+
+        $refreshService = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Refresh_Service->value);
+
+        if (is_null($refreshService)) {
+            $this->vcRefreshServiceClaimBag = false;
+            return null;
+        }
+
+        if (!is_array($refreshService)) {
+            throw new VcDataModelException('Invalid VC Refresh Service claim.');
+        }
+
+        return $this->vcRefreshServiceClaimBag = $this->claimFactory->forVcDataModel()
+            ->buildVcRefreshServiceClaimBag(
+                $refreshService,
+            );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcTermsOfUse(): ?VcTermsOfUseClaimBag
+    {
+        if ($this->vcTermsOfUseClaimBag === false) {
+            return null;
+        }
+
+        if ($this->vcTermsOfUseClaimBag instanceof VcTermsOfUseClaimBag) {
+            return $this->vcTermsOfUseClaimBag;
+        }
+
+        $termsOfUse = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Terms_Of_Use->value);
+
+        if (is_null($termsOfUse)) {
+            $this->vcTermsOfUseClaimBag = false;
+            return null;
+        }
+
+        if (!is_array($termsOfUse)) {
+            throw new VcDataModelException('Invalid VC Terms Of Use claim.');
+        }
+
+        return $this->vcTermsOfUseClaimBag = $this->claimFactory->forVcDataModel()
+            ->buildVcTermsOfUseClaimBag(
+                $termsOfUse,
+            );
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcEvidence(): ?VcEvidenceClaimBag
+    {
+        if ($this->vcEvidenceClaimBag === false) {
+            return null;
+        }
+
+        if ($this->vcEvidenceClaimBag instanceof VcEvidenceClaimBag) {
+            return $this->vcEvidenceClaimBag;
+        }
+
+        $evidence = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Evidence->value);
+
+        if (is_null($evidence)) {
+            $this->vcEvidenceClaimBag = false;
+            return null;
+        }
+
+        if (!is_array($evidence)) {
+            throw new VcDataModelException('Invalid VC Evidence claim.');
+        }
+
+        return $this->vcEvidenceClaimBag = $this->claimFactory->forVcDataModel()
+            ->buildVcEvidenceClaimBag(
+                $evidence,
+            );
+    }
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     protected function validate(): void
@@ -367,6 +471,9 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcExpirationDate(...),
             $this->getVcCredentialStatus(...),
             $this->getVcCredentialSchema(...),
+            $this->getVcRefreshService(...),
+            $this->getVcTermsOfUse(...),
+            $this->getVcEvidence(...),
         );
     }
 }

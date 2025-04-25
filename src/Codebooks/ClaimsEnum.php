@@ -55,12 +55,13 @@ enum ClaimsEnum: string
     case Description = 'description';
     case Display = 'display';
     case EndSessionEndpoint = 'end_session_endpoint';
-    // ExpirationTime
-    case Exp = 'exp';
-    case Expiration_Date = 'expirationDate';
     case EncryptionRequired = 'encryption_required';
     // EncryptionValuesSupported
     case EncValuesSupported = 'enc_values_supported';
+    case Evidence = 'evidence';
+    // ExpirationTime
+    case Exp = 'exp';
+    case Expiration_Date = 'expirationDate';
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
@@ -117,6 +118,7 @@ enum ClaimsEnum: string
     case ProofTypesSupported = 'proof_types_supported';
     // Reference
     case Ref = 'ref';
+    case Refresh_Service = 'refreshService';
     // PublicKeyUse
     case RedirectUris = 'redirect_uris';
     case RegistrationEndpoint = 'registration_endpoint';
@@ -139,6 +141,7 @@ enum ClaimsEnum: string
     // Subject
     case Sub = 'sub';
     case SubjectTypesSupported = 'subject_types_supported';
+    case Terms_Of_Use = 'termsOfUse';
     case TextColor = 'text_color';
     case TokenEndpoint = 'token_endpoint';
     case TokenEndpointAuthMethod = 'token_endpoint_auth_method';

@@ -12,14 +12,12 @@ class VcClaimValue implements ClaimInterface
 {
     /**
      * @param null|non-empty-string $id
-     * @param non-empty-array<non-empty-string> $type
      */
     public function __construct(
         protected readonly VcAtContextClaimValue $atContextClaimValue,
         /** @var null|non-empty-string */
         protected readonly null|string $id,
-        /** @var non-empty-array<non-empty-string> */
-        protected readonly array $type,
+        protected readonly TypeClaimValue $typeClaimValue,
         protected readonly VcCredentialSubjectClaimBag $credentialSubjectClaimBag,
         protected readonly VcIssuerClaimValue $issuerClaimValue,
         protected readonly DateTimeImmutable $issuanceDate,
@@ -27,6 +25,9 @@ class VcClaimValue implements ClaimInterface
         protected readonly ?DateTimeImmutable $expirationDate,
         protected readonly ?VcCredentialStatusClaimValue $credentialStatusClaimValue,
         protected readonly ?VcCredentialSchemaClaimBag $credentialSchemaClaimBag,
+        protected readonly ?VcRefreshServiceClaimBag $refreshServiceClaimBag,
+        protected readonly ?VcTermsOfUseClaimBag $termsOfUseClaimBag,
+        protected readonly ?VcEvidenceClaimBag $evidenceClaimBag,
     ) {
     }
 
@@ -51,12 +52,9 @@ class VcClaimValue implements ClaimInterface
         return $this->id;
     }
 
-    /**
-     * @return non-empty-array<non-empty-string>
-     */
-    public function getType(): array
+    public function getType(): TypeClaimValue
     {
-        return $this->type;
+        return $this->typeClaimValue;
     }
 
     public function getCredentialSubject(): VcCredentialSubjectClaimBag

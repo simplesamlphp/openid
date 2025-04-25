@@ -19,7 +19,6 @@ class VcIssuerClaimValue implements ClaimInterface
     public function __construct(
         protected string $id,
         array $otherClaims = [],
-        protected readonly string $name = ClaimsEnum::Issuer->value,
     ) {
         $this->data = array_merge(
             $otherClaims,
@@ -42,7 +41,7 @@ class VcIssuerClaimValue implements ClaimInterface
 
     public function getName(): string
     {
-        return $this->name;
+        return ClaimsEnum::Issuer->value;
     }
 
     /**
