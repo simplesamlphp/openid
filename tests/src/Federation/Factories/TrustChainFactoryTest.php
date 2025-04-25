@@ -137,4 +137,18 @@ final class TrustChainFactoryTest extends TestCase
             $this->sut()->fromTokens('token', 'token2', 'tokent3'),
         );
     }
+
+    public function testCanBuildForTrustAnchor(): void
+    {
+        $expirationTime = time() + 60;
+
+        $trustAnchor = $this->createMock(EntityStatement::class);
+        $trustAnchor->method('isConfiguration')->willReturn(true);
+        $trustAnchor->method('getExpirationTime')->willReturn($expirationTime);
+
+        $this->assertInstanceOf(
+            TrustChain::class,
+            $this->sut()->forTrustAnchor($trustAnchor),
+        );
+    }
 }

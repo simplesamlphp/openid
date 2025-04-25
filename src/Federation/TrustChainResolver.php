@@ -225,32 +225,44 @@ class TrustChainResolver
                 ];
                 $this->logger?->debug('Start resolving for configuration chain.', $debugConfigChainResolveInfo);
                 try {
-                    // Reverse order so we can start from the Trust Anchor.
-                    $configurationChain = array_reverse($configurationChain);
-                    $currenChainElements = [];
-                    $previousEntity = null;
-                    foreach ($configurationChain as $id => $configurationStatement) {
-                        if (array_key_first($configurationChain) === $id) {
-                            // This is Trust Anchor configuration statement, we need to add it.
-                            array_unshift($currenChainElements, $configurationStatement);
-                        } elseif (!is_null($previousEntity)) {
-                            // We have moved on from the first configuration entity in the chain, so we need to start
-                            // populating subordinate statements.
-                            array_unshift(
-                                $currenChainElements,
-                                $this->entityStatementFetcher->fromCacheOrFetchEndpoint($id, $previousEntity),
-                            );
+                    // If we only have one element in the configuration chain, check if we are dealing with the
+                    // Trust Chain for Trust Anchor itself.
+                    if (
+                        (count($configurationChain) === 1) &&
+                        (array_key_first($configurationChain) === $entityId)
+                    ) {
+                        // Handle the special Trust Anchor Trust Chain case.
+                        $trustAnchorStatement = current($configurationChain);
+                        $resolvedChains[] = $this->trustChainFactory->forTrustAnchor($trustAnchorStatement);
+                    } else {
+                        // Handle normal Trust Chain resolution.
+                        // Reverse order so we can start from the Trust Anchor.
+                        $configurationChain = array_reverse($configurationChain);
+                        $currenChainElements = [];
+                        $previousEntity = null;
+                        foreach ($configurationChain as $id => $configurationStatement) {
+                            if (array_key_first($configurationChain) === $id) {
+                                // This is Trust Anchor configuration statement, we need to add it.
+                                array_unshift($currenChainElements, $configurationStatement);
+                            } elseif (!is_null($previousEntity)) {
+                                // We have moved on from the first configuration entity in the chain, so we need to
+                                // start populating subordinate statements.
+                                array_unshift(
+                                    $currenChainElements,
+                                    $this->entityStatementFetcher->fromCacheOrFetchEndpoint($id, $previousEntity),
+                                );
+                            }
+
+                            // We need to add leaf entity configuration statement as the last item in the trust chain.
+                            if (array_key_last($configurationChain) === $id) {
+                                array_unshift($currenChainElements, $configurationStatement);
+                            }
+
+                            $previousEntity = $configurationStatement;
                         }
 
-                        // We need to add leaf entity configuration statement as the last item in the trust chain.
-                        if (array_key_last($configurationChain) === $id) {
-                            array_unshift($currenChainElements, $configurationStatement);
-                        }
-
-                        $previousEntity = $configurationStatement;
+                        $resolvedChains[] = $this->trustChainFactory->fromStatements(...$currenChainElements);
                     }
-
-                    $resolvedChains[] = $this->trustChainFactory->fromStatements(...$currenChainElements);
                 } catch (Throwable $exception) {
                     $this->logger?->error(
                         sprintf(

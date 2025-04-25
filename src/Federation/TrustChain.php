@@ -98,14 +98,11 @@ class TrustChain implements JsonSerializable
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
-    public function getResolvedImmediateSuperior(): EntityStatement
+    public function getResolvedImmediateSuperior(): ?EntityStatement
     {
         $this->validateIsResolved();
 
-        ($immediateSuperior = $this->entities[1] ?? null)  ||
-        throw new TrustChainException('Empty immediate superior statement encountered.');
-
-        return $immediateSuperior;
+        return $this->entities[1] ?? null;
     }
 
     /**
@@ -200,6 +197,27 @@ class TrustChain implements JsonSerializable
         $this->validateIsNotResolved();
         $this->validateIsNotEmpty();
         $this->validateAtLeastNumberOfEntities(2);
+        $this->validateConfigurationStatement($entityStatement);
+
+        $this->entities[] = $entityStatement;
+        $this->updateExpirationTime($entityStatement);
+
+        $this->isResolved = true;
+    }
+
+    /**
+     * Add a Trust Anchor Entity Configuration to create a single entity statement chain. This accommodates a special
+     * case for the Trust Chain of the Trust Anchor itself.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     *
+     * @internal
+     */
+    public function addForTrustAnchorOnly(EntityStatement $entityStatement): void
+    {
+        $this->validateIsNotResolved();
+        $this->validateIsEmpty();
         $this->validateConfigurationStatement($entityStatement);
 
         $this->entities[] = $entityStatement;
@@ -400,7 +418,7 @@ class TrustChain implements JsonSerializable
         // When an Entity participates in a federation or federations with one or more Entity Types, its Entity
         // Configuration MUST contain a metadata claim with JSON object values for each of the corresponding
         // Entity Type Identifiers, even if the values are the empty JSON object {} (when the Entity Type
-        // has no associated metadata or Immediate Superiors supply any needed metadata).
+        // has no associated metadata or Immediate Superiors supply any necessary metadata).
         $leafMetadata = $this->getResolvedLeaf()->getMetadata();
         if (
             (!is_array($leafMetadata)) || // Claim 'metadata' is optional.
@@ -422,7 +440,7 @@ class TrustChain implements JsonSerializable
         // subject's Entity Configuration. If both metadata and metadata_policy
         // appear in a Subordinate Statement, then the stated metadata MUST
         // be applied before the metadata_policy.
-        $immediateSuperiorMetadata = $this->getResolvedImmediateSuperior()->getMetadata();
+        $immediateSuperiorMetadata = $this->getResolvedImmediateSuperior()?->getMetadata();
         if (
             is_array($immediateSuperiorMetadata) &&
             isset($immediateSuperiorMetadata[$entityTypeEnum->value]) &&

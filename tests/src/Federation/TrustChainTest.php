@@ -105,6 +105,22 @@ final class TrustChainTest extends TestCase
         $this->assertNull($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
+    public function testCanCreateTrustChainForTrustAnchorOnly(): void
+    {
+        $sut = $this->sut();
+        $sut->addForTrustAnchorOnly($this->trustAnchorMock);
+
+        $this->assertFalse($sut->isEmpty());
+        $this->assertCount(1, $sut->getEntities());
+        $this->assertSame(1, $sut->getResolvedLength());
+        $this->assertNotEmpty($sut->jsonSerialize());
+        $this->assertSame($this->expirationTime, $sut->getResolvedExpirationTime());
+        $this->assertSame($this->trustAnchorMock, $sut->getResolvedLeaf());
+        $this->assertSame($this->trustAnchorMock, $sut->getResolvedTrustAnchor());
+        $this->assertNotInstanceOf(EntityStatement::class, $sut->getResolvedImmediateSuperior());
+        $this->assertNull($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
+    }
+
     public function testThrowsForNonConfigurationStatementForLeaf(): void
     {
         $this->expectException(EntityStatementException::class);
@@ -267,7 +283,7 @@ final class TrustChainTest extends TestCase
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
-    public function testThrowsOnAttemtpToAddMultipleLeafs(): void
+    public function testThrowsOnAttemptToAddMultipleLeafs(): void
     {
         $this->expectException(TrustChainException::class);
         $this->expectExceptionMessage('empty');
@@ -286,7 +302,7 @@ final class TrustChainTest extends TestCase
         $sut->addSubordinate($this->subordinateMock);
     }
 
-    public function testThrowsOnAttemtpToAddTrustAnchorWithoutSubordinate(): void
+    public function testThrowsOnAttemptToAddTrustAnchorWithoutSubordinate(): void
     {
         $this->expectException(TrustChainException::class);
         $this->expectExceptionMessage('at least');
