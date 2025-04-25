@@ -259,6 +259,21 @@ final class TrustChainResolverTest extends TestCase
         $this->sut()->for('l', ['i', 't']);
     }
 
+    public function testCanResolveTrustChainForTrustAnchorOnly(): void
+    {
+        $this->entityStatementFetcherMock
+            ->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(fn(string $entityId) =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
+
+        $this->trustChainFactoryMock->expects($this->once())->method('forTrustAnchor');
+
+        $this->trustChainBagFactoryMock->expects($this->once())->method('build');
+        $this->cacheDecoratorMock->expects($this->once())->method('set');
+
+        $this->sut()->for('t', ['t']);
+    }
+
     public function testTrustChainResolveChecksCacheFirst(): void
     {
         $this->cacheDecoratorMock

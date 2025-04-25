@@ -77,4 +77,17 @@ class TrustChainFactory
 
         return $this->fromStatements(...$statements);
     }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     */
+    public function forTrustAnchor(EntityStatement $trustAnchorStatement): TrustChain
+    {
+        $trustChain = $this->empty();
+
+        $trustChain->addForTrustAnchorOnly($trustAnchorStatement);
+
+        return $trustChain;
+    }
 }
