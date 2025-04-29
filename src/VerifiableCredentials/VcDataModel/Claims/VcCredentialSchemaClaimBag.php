@@ -27,7 +27,12 @@ class VcCredentialSchemaClaimBag implements ClaimInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return array_map(
+            fn(
+                VcCredentialSchemaClaimValue $vcCredentialSchemaClaimValue,
+            ): array => $vcCredentialSchemaClaimValue->jsonSerialize(),
+            $this->getValue(),
+        );
     }
 
     public function getName(): string
@@ -36,15 +41,10 @@ class VcCredentialSchemaClaimBag implements ClaimInterface
     }
 
     /**
-     * @return mixed[]
+     * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimValue[]
      */
     public function getValue(): array
     {
-        return array_map(
-            fn(
-                VcCredentialSchemaClaimValue $vcCredentialSchemaClaimValue,
-            ): array => $vcCredentialSchemaClaimValue->jsonSerialize(),
-            $this->vcCredentialSchemaClaimValueValues,
-        );
+        return $this->vcCredentialSchemaClaimValueValues;
     }
 }

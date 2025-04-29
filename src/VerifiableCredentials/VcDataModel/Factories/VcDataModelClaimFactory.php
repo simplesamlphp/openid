@@ -102,7 +102,7 @@ class VcDataModelClaimFactory
     /**
      * @param non-empty-array<mixed> $data
      */
-    public function buildVcCredentialSubjectClaimValue(array $data): VcCredentialSubjectClaimValue
+    public function buildVcCredentialSubjectClaimValue(array $data, ?string $id = null): VcCredentialSubjectClaimValue
     {
         return new VcCredentialSubjectClaimValue($data);
     }
@@ -110,16 +110,37 @@ class VcDataModelClaimFactory
     /**
      * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
-    public function buildVcCredentialSubjectClaimBag(array $data): VcCredentialSubjectClaimBag
-    {
+    public function buildVcCredentialSubjectClaimBag(
+        array $data,
+        ?string $subClaimValue = null,
+    ): VcCredentialSubjectClaimBag {
         if ($this->helpers->arr()->isAssociative($data)) {
             $data = [$data];
         }
 
         $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
 
+        if (is_string($subClaimValue) && (count($data) !== 1)) {
+            throw new VcDataModelException(
+                'Refusing to set credentialSubject ID claim value for multiple subjects.',
+            );
+        }
+
         $vcCredentialSubjectClaimValueData =  array_shift($data);
+
+        // If we have the 'sub' claim in JWT, we must use it as the credentialSubject ID value. However, we can't do
+        // that if we have more than one credentialSubject.
+        if (is_string($subClaimValue)) {
+            if ($data === []) {
+                $vcCredentialSubjectClaimValueData[ClaimsEnum::Id->value] = $subClaimValue;
+            } else {
+                throw new VcDataModelException(
+                    'Refusing to set credentialSubject ID claim value for multiple subjects.',
+                );
+            }
+        }
 
         $vcCredentialSubjectClaimValue = $this->buildVcCredentialSubjectClaimValue($vcCredentialSubjectClaimValueData);
 

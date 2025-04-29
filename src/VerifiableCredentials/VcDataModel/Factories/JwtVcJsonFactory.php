@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\JwtVcJson;
@@ -35,8 +37,7 @@ class JwtVcJsonFactory extends ParsedJwsFactory
         array $payload,
         array $header,
     ): JwtVcJson {
-        // TODO mivanci Set type header
-//        $header[ClaimsEnum::Typ->value] = JwtTypesEnum::->value;
+        $header[ClaimsEnum::Typ->value] = JwtTypesEnum::Jwt->value;
 
         return new JwtVcJson(
             $this->jwsDecoratorBuilder->fromData(

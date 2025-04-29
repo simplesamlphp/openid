@@ -27,7 +27,12 @@ class VcTermsOfUseClaimBag implements ClaimInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return array_map(
+            fn(
+                VcTermsOfUseClaimValue $vcTermsOfUseClaimValue,
+            ): array => $vcTermsOfUseClaimValue->jsonSerialize(),
+            $this->getValue(),
+        );
     }
 
     public function getName(): string
@@ -36,15 +41,10 @@ class VcTermsOfUseClaimBag implements ClaimInterface
     }
 
     /**
-     * @return mixed[]
+     * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValue[]
      */
     public function getValue(): array
     {
-        return array_map(
-            fn(
-                VcTermsOfUseClaimValue $vcTermsOfUseClaimValue,
-            ): array => $vcTermsOfUseClaimValue->jsonSerialize(),
-            $this->vcTermsOfUseClaimValueValues,
-        );
+        return $this->vcTermsOfUseClaimValueValues;
     }
 }

@@ -102,6 +102,9 @@ enum ClaimsEnum: string
     case MetadataPolicyCrit = 'metadata_policy_crit';
     case Name = 'name';
     case NonceEndpoint = 'nonce_endpoint';
+    // NotBefore
+    case Nbf = 'nbf';
+    case Notification = 'notification';
     case NotificationEndpoint = 'notification_endpoint';
     // OpenIDProviderPolicyUri
     case OpPolicyUri = 'op_policy_uri';

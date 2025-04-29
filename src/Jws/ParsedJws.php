@@ -156,8 +156,9 @@ class ParsedJws
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getIssuer(): ?string
     {
@@ -171,8 +172,9 @@ class ParsedJws
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getSubject(): ?string
     {
@@ -184,8 +186,9 @@ class ParsedJws
     }
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?string[]
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getAudience(): ?array
     {
@@ -210,6 +213,7 @@ class ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @return ?non-empty-string
      */
     public function getJwtId(): ?string
@@ -240,6 +244,27 @@ class ParsedJws
         }
 
         return $exp;
+    }
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getNotBefore(): ?int
+    {
+        $nbf = $this->getPayloadClaim(ClaimsEnum::Nbf->value);
+
+        if (is_null($nbf)) {
+            return null;
+        }
+
+        $nbf = $this->helpers->type()->ensureInt($nbf);
+
+        if ($nbf - $this->timestampValidationLeeway->getInSeconds() > time()) {
+            throw new JwsException(sprintf('Not Before claim (%d) is higher than current time.', $nbf));
+        }
+
+        return $nbf;
     }
 
     /**

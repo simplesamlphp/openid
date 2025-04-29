@@ -27,7 +27,12 @@ class VcEvidenceClaimBag implements ClaimInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return array_map(
+            fn(
+                VcEvidenceClaimValue $vcEvidenceClaimValue,
+            ): array => $vcEvidenceClaimValue->jsonSerialize(),
+            $this->getValue(),
+        );
     }
 
     public function getName(): string
@@ -36,15 +41,10 @@ class VcEvidenceClaimBag implements ClaimInterface
     }
 
     /**
-     * @return mixed[]
+     * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimValue[]
      */
     public function getValue(): array
     {
-        return array_map(
-            fn(
-                VcEvidenceClaimValue $vcEvidenceClaimValue,
-            ): array => $vcEvidenceClaimValue->jsonSerialize(),
-            $this->vcEvidenceClaimValueValues,
-        );
+        return $this->vcEvidenceClaimValueValues;
     }
 }

@@ -27,7 +27,12 @@ class VcRefreshServiceClaimBag implements ClaimInterface
      */
     public function jsonSerialize(): array
     {
-        return $this->getValue();
+        return array_map(
+            fn(
+                VcRefreshServiceClaimValue $vcRefreshServiceClaimValue,
+            ): array => $vcRefreshServiceClaimValue->jsonSerialize(),
+            $this->getValue(),
+        );
     }
 
     public function getName(): string
@@ -36,15 +41,10 @@ class VcRefreshServiceClaimBag implements ClaimInterface
     }
 
     /**
-     * @return mixed[]
+     * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimValue[]
      */
     public function getValue(): array
     {
-        return array_map(
-            fn(
-                VcRefreshServiceClaimValue $vcRefreshServiceClaimValue,
-            ): array => $vcRefreshServiceClaimValue->jsonSerialize(),
-            $this->vcRefreshServiceClaimValueValues,
-        );
+        return $this->vcRefreshServiceClaimValueValues;
     }
 }

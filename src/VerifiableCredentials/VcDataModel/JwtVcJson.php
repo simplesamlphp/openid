@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel;
 
 use DateTimeImmutable;
+use Exception;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
@@ -121,12 +122,20 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
     /**
      * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getVcId(): ?string
     {
         if ($this->vcId === false) {
             return null;
+        }
+
+        $jti = $this->getJwtId();
+
+        if (is_string($jti)) {
+            return $this->vcId = $this->helpers->type()->enforceUri($jti);
         }
 
         $vcId = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Id->value);
@@ -164,6 +173,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getVcCredentialSubject(): VcCredentialSubjectClaimBag
     {
@@ -182,17 +192,27 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         return $this->vcCredentialSubjectClaimBag = $this->claimFactory->forVcDataModel()
             ->buildVcCredentialSubjectClaimBag(
                 $vcCredentialSubject,
+                $this->getSubject(),
             );
     }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getVcIssuer(): VcIssuerClaimValue
     {
         if ($this->vcIssuerClaimValue instanceof VcIssuerClaimValue) {
             return $this->vcIssuerClaimValue;
+        }
+
+        $iss = $this->getIssuer();
+
+        if (is_string($iss)) {
+            return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel()->buildVcIssuerClaimValue(
+                [ClaimsEnum::Id->value => $iss],
+            );
         }
 
         $vcIssuer = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Issuer->value);
@@ -217,12 +237,24 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
     public function getVcIssuanceDate(): DateTimeImmutable
     {
         if ($this->vcIssuanceDate instanceof DateTimeImmutable) {
             return $this->vcIssuanceDate;
+        }
+
+        $nbf = $this->getNotBefore();
+
+        if (is_int($nbf)) {
+            try {
+                return $this->vcIssuanceDate = $this->helpers->dateTime()->fromTimestamp($nbf);
+            } catch (Exception $e) {
+                throw new VcDataModelException('Error parsing Not Before claim: ' . $e->getMessage());
+            }
         }
 
         $issuanceDate = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Issuance_Date->value);
@@ -232,8 +264,8 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         }
 
         try {
-            return $this->vcIssuanceDate = $this->helpers->dateTime()->parseXsDateTime($issuanceDate);
-        } catch (\Exception $exception) {
+            return $this->vcIssuanceDate = $this->helpers->dateTime()->fromXsDateTime($issuanceDate);
+        } catch (Exception $exception) {
             throw new VcDataModelException('Error parsing VC Issuance Date claim: ' . $exception->getMessage());
         }
     }
@@ -269,6 +301,8 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
     }
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
     public function getVcExpirationDate(): ?DateTimeImmutable
@@ -281,6 +315,18 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             return $this->vcExpirationDate;
         }
 
+        // Try to get it from the exp claim.
+        $exp = $this->getExpirationTime();
+
+        if (is_int($exp)) {
+            try {
+                return $this->vcExpirationDate = $this->helpers->dateTime()->fromTimestamp($exp);
+            } catch (Exception $e) {
+                throw new VcDataModelException('Error parsing Expiration Time date claim: ' . $e->getMessage());
+            }
+        }
+
+        // Try to get it from the vc claim.
         $expirationDate = $this->getNestedPayloadClaim(ClaimsEnum::Vc->value, ClaimsEnum::Expiration_Date->value);
 
         if (is_null($expirationDate)) {
@@ -290,8 +336,8 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         if (is_string($expirationDate)) {
             try {
-                return $this->vcExpirationDate = $this->helpers->dateTime()->parseXsDateTime($expirationDate);
-            } catch (\Exception $exception) {
+                return $this->vcExpirationDate = $this->helpers->dateTime()->fromXsDateTime($expirationDate);
+            } catch (Exception $exception) {
                 throw new VcDataModelException('Error parsing VC Expiration Date claim: ' . $exception->getMessage());
             }
         }
@@ -474,6 +520,12 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $this->getVcRefreshService(...),
             $this->getVcTermsOfUse(...),
             $this->getVcEvidence(...),
+            $this->getExpirationTime(...),
+            $this->getIssuer(...),
+            $this->getNotBefore(...),
+            $this->getJwtId(...),
+            $this->getSubject(...),
+            $this->getAudience(...),
         );
     }
 }
