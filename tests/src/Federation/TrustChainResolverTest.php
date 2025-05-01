@@ -172,7 +172,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
@@ -201,7 +201,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->loggerMock
@@ -220,7 +220,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
@@ -245,7 +245,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
@@ -263,7 +263,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->trustChainFactoryMock->expects($this->once())->method('forTrustAnchor');
@@ -320,7 +320,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->entityStatementFetcherMock
@@ -349,7 +349,7 @@ final class TrustChainResolverTest extends TestCase
     {
         $this->entityStatementFetcherMock
             ->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) =>
+            ->willReturnCallback(fn(string $entityId): \SimpleSAML\OpenID\Federation\EntityStatement =>
                 $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->leafEntityConfigurationMock
