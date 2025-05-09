@@ -22,6 +22,7 @@ enum ClaimsEnum: string
     case Aud = 'aud';
     case AuthorityHints = 'authority_hints';
     case AuthorizationEndpoint = 'authorization_endpoint';
+    case AuthorizationServer = 'authorization_server';
     case AuthorizationServers = 'authorization_servers';
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
     case BackChannelLogoutSupported = 'backchannel_logout_supported';
@@ -39,6 +40,7 @@ enum ClaimsEnum: string
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
+    case CredentialConfigurationIds = 'credential_configuration_ids';
     case CredentialConfigurationsSupported = 'credential_configurations_supported';
     case CredentialDefinition = 'credential_definition';
     case CredentialEndpoint = 'credential_endpoint';
@@ -66,6 +68,7 @@ enum ClaimsEnum: string
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
     case Format = 'format';
+    case Grants = 'grants';
     case GrantTypes = 'grant_types';
     case GrantTypesSupported = 'grant_types_supported';
     case HomepageUri = 'homepage_uri';
@@ -73,6 +76,7 @@ enum ClaimsEnum: string
     case Iat = 'iat';
     // Identifier
     case Id = 'id';
+    case InputMode = 'input_mode';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
     case IntrospectionEndpoint = 'introspection_endpoint';
     case IntrospectionEndpointAuthMethodsSupported = 'introspection_endpoint_auth_methods_supported';
@@ -82,6 +86,7 @@ enum ClaimsEnum: string
     case Iss = 'iss';
     case Issuance_Date = 'issuanceDate';
     case Issuer = 'issuer';
+    case IssuerState = 'issuer_state';
     // JWT ID
     case Jti = 'jti';
     // JsonWebKeySet
@@ -92,6 +97,7 @@ enum ClaimsEnum: string
     case KeyAttestationsRequired = 'key_attestations_required';
     case KeyStorage = 'key_storage';
     case Keys = 'keys';
+    case Length = 'length';
     case Locale = 'locale';
     case Logo = 'logo';
     case LogoUri = 'logo_uri';
@@ -114,6 +120,7 @@ enum ClaimsEnum: string
     case Path = 'path';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
+    case PreAuthorizedCode = 'pre-authorized_code';
     case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
     case Proof = 'proof';
     // ProofSigningAlgorithmValuesSupported
@@ -158,6 +165,8 @@ enum ClaimsEnum: string
     case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarks = 'trust_marks';
+    // TransactionCode
+    case TxCode = 'tx_code';
     // UserInterfaceLocalesSupported
     case UiLocalesSupported = 'ui_locales_supported';
     case Uri = 'uri';

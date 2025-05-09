@@ -19,6 +19,7 @@ use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\ClaimsPathPointerResolver;
+use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
 
 class VerifiableCredentials
@@ -52,6 +53,8 @@ class VerifiableCredentials
     protected ?JwsDecoratorBuilder $jwsDecoratorBuilder = null;
 
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
+
+    protected ?CredentialOfferFactory $credentialOfferFactory = null;
 
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -150,6 +153,13 @@ class VerifiableCredentials
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
             $this->claimFactory(),
+        );
+    }
+
+    public function credentialOfferFactory(): CredentialOfferFactory
+    {
+        return $this->credentialOfferFactory ??= new CredentialOfferFactory(
+            $this->helpers(),
         );
     }
 }
