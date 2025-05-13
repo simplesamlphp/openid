@@ -27,6 +27,7 @@ enum ParamsEnum: string
     case MaxAge = 'max_age';
     case Nonce = 'nonce';
     case PostLogoutRedirectUri = 'post_logout_redirect_uri';
+    case PreAuthorizedCode = 'pre-authorized_code';
     case Prompt = 'prompt';
     case RedirectUri = 'redirect_uri';
     case Request = 'request';
@@ -36,5 +37,7 @@ enum ParamsEnum: string
     case State = 'state';
     case TrustMarked = 'trust_marked';
     case TrustMarkId = 'trust_mark_id';
+    // TransactionCode
+    case TxCode = 'tx_code';
     case UiLocales = 'ui_locales';
 }
