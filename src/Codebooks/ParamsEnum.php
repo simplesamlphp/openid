@@ -8,6 +8,7 @@ enum ParamsEnum: string
 {
     case AcrValues = 'acr_values';
     case Assertion = 'assertion';
+    case AuthorizationDetails = 'authorization_details';
     case Claims = 'claims';
     case ClientAssertion = 'client_assertion';
     case ClientAssertionType = 'client_assertion_type';
