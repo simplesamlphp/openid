@@ -145,8 +145,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             return null;
         }
 
-//        return $this->vcId = $this->helpers->type()->enforceUri($vcId);
-        return $this->vcId = $this->helpers->type()->ensureNonEmptyString($vcId);
+        return $this->vcId = $this->helpers->type()->enforceUri($vcId);
     }
 
     /**

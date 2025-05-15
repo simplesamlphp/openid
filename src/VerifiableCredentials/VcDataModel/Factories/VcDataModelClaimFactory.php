@@ -166,7 +166,8 @@ class VcDataModelClaimFactory
             'No ID claim value available.',
         );
 
-        $id = $this->helpers->type()->enforceUri($id);
+//        $id = $this->helpers->type()->enforceUri($id);
+        $id = $this->helpers->type()->ensureNonEmptyString($id);
 
         return new VcIssuerClaimValue($id, $data);
     }
