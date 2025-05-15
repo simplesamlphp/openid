@@ -247,7 +247,7 @@ class Type
     public function enforceUri(
         mixed $value,
         ?string $context = null,
-        string $pattern = '/^[^:]+:\/\/?([^\s\/$.?#].[^\s]*)?$/',
+        string $pattern = '/^[a-zA-Z][a-zA-Z0-9+.-]*:[^\s]*$/',
     ): string {
         try {
             $value = $this->enforceRegex($value, $pattern, $context);
