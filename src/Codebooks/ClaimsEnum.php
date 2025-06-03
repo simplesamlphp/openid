@@ -40,10 +40,12 @@ enum ClaimsEnum: string
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
+    case CredentialConfigurationId = 'credential_configuration_id';
     case CredentialConfigurationIds = 'credential_configuration_ids';
     case CredentialConfigurationsSupported = 'credential_configurations_supported';
     case CredentialDefinition = 'credential_definition';
     case CredentialEndpoint = 'credential_endpoint';
+    case CredentialIdentifier = 'credential_identifier';
     case CredentialIssuer = 'credential_issuer';
     case CredentialResponseEncryption = 'credential_response_encryption';
     case Credential_Schema = 'credentialSchema';
@@ -123,6 +125,7 @@ enum ClaimsEnum: string
     case PreAuthorizedCode = 'pre-authorized_code';
     case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
     case Proof = 'proof';
+    case Proofs = 'proofs';
     // ProofSigningAlgorithmValuesSupported
     case ProofSigningAlgValuesSupported = 'proof_signing_alg_values_supported';
     case ProofTypesSupported = 'proof_types_supported';
