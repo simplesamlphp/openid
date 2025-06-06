@@ -22,6 +22,7 @@
     },
     "require": {
         "php": "^8.2",
+        "ext-gmp": "*",
         "ext-filter": "*",
 
         "guzzlehttp/guzzle": "^7.8",

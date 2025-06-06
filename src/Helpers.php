@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID;
 
 use SimpleSAML\OpenID\Helpers\Arr;
+use SimpleSAML\OpenID\Helpers\Base64Url;
 use SimpleSAML\OpenID\Helpers\DateTime;
 use SimpleSAML\OpenID\Helpers\Json;
 use SimpleSAML\OpenID\Helpers\Type;
@@ -21,6 +22,8 @@ class Helpers
     protected static ?Type $type = null;
 
     protected static ?DateTime $dateTime = null;
+
+    protected static ?Base64Url $base64Url = null;
 
     public function url(): Url
     {
@@ -45,5 +48,10 @@ class Helpers
     public function dateTime(): DateTime
     {
         return self::$dateTime ??= new DateTime();
+    }
+
+    public function base64Url(): Base64Url
+    {
+        return self::$base64Url ??= new Base64Url();
     }
 }

@@ -216,7 +216,7 @@ class ParsedJws
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @return ?non-empty-string
      */
-    public function                  getJwtId(): ?string
+    public function getJwtId(): ?string
     {
         $claimKey = ClaimsEnum::Jti->value;
 
