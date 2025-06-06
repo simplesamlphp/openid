@@ -47,4 +47,9 @@ enum SignatureAlgorithmEnum: string
             self::RS512 => new RS512(),
         };
     }
+
+    public function isNone(): bool
+    {
+        return $this === SignatureAlgorithmEnum::none;
+    }
 }

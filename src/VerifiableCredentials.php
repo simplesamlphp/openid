@@ -20,6 +20,7 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\ClaimsPathPointerResolver;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
 
 class VerifiableCredentials
@@ -55,6 +56,8 @@ class VerifiableCredentials
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
     protected ?CredentialOfferFactory $credentialOfferFactory = null;
+
+    protected ?OpenId4VciProofFactory $openId4VciProofFactory = null;
 
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -160,6 +163,19 @@ class VerifiableCredentials
     {
         return $this->credentialOfferFactory ??= new CredentialOfferFactory(
             $this->helpers(),
+        );
+    }
+
+    public function openId4VciProofFactory(): OpenId4VciProofFactory
+    {
+        return $this->openId4VciProofFactory ??= new OpenId4VciProofFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
         );
     }
 }

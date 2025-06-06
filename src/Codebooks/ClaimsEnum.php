@@ -91,6 +91,8 @@ enum ClaimsEnum: string
     case IssuerState = 'issuer_state';
     // JWT ID
     case Jti = 'jti';
+    // JsonWebKey
+    case Jwk = 'jwk';
     // JsonWebKeySet
     case Jwks = 'jwks';
     case JwksUri = 'jwks_uri';
@@ -109,6 +111,7 @@ enum ClaimsEnum: string
     // MetadataPolicyCritical
     case MetadataPolicyCrit = 'metadata_policy_crit';
     case Name = 'name';
+    case Nonce = 'nonce';
     case NonceEndpoint = 'nonce_endpoint';
     // NotBefore
     case Nbf = 'nbf';
@@ -178,4 +181,6 @@ enum ClaimsEnum: string
     case UserinfoEndpoint = 'userinfo_endpoint';
     // VerifiableCredential
     case Vc = 'vc';
+    // X509certificateChain
+    case X5c = 'x5c';
 }

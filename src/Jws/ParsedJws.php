@@ -269,6 +269,7 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getIssuedAt(): ?int
     {
@@ -290,6 +291,7 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getIdentifier(): ?string
     {
@@ -305,6 +307,7 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getKeyId(): ?string
     {
@@ -318,10 +321,25 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getType(): ?string
     {
         $claimKey = ClaimsEnum::Typ->value;
+
+        $typ = $this->getHeaderClaim($claimKey);
+
+        return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);
+    }
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getAlgorithm(): ?string
+    {
+        $claimKey = ClaimsEnum::Alg->value;
 
         $typ = $this->getHeaderClaim($claimKey);
 
