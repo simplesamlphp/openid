@@ -147,12 +147,26 @@ class ParsedJws
         if (
             !$this->jwsVerifierDecorator->verifyWithKeySet(
                 $this->jwsDecorator,
-                $this->jwksDecoratorFactory->fromKeyData($jwks),
+                $this->jwksDecoratorFactory->fromKeySetData($jwks),
                 $signatureIndex,
             )
         ) {
             throw new JwsException('Could not verify JWS signature.');
         }
+    }
+
+    /**
+     * @param mixed[] $key
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     *
+     */
+    public function verifyWithKey(array $key): void
+    {
+        $this->verifyWithKeySet([
+            'keys' => [
+                $key,
+            ],
+        ]);
     }
 
     /**

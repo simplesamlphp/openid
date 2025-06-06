@@ -92,7 +92,7 @@ class JwksFetcher
 
         $this->logger?->debug('JWKS JSON decoded, proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
-        return $this->jwksDecoratorFactory->fromKeyData($jwks);
+        return $this->jwksDecoratorFactory->fromKeySetData($jwks);
     }
 
     /**
@@ -152,7 +152,7 @@ class JwksFetcher
 
         $this->logger?->debug('Proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
-        return $this->jwksDecoratorFactory->fromKeyData($jwks);
+        return $this->jwksDecoratorFactory->fromKeySetData($jwks);
     }
 
     /**
@@ -216,6 +216,6 @@ class JwksFetcher
             );
         }
 
-        return $this->jwksDecoratorFactory->fromKeyData($signedJwks->jsonSerialize());
+        return $this->jwksDecoratorFactory->fromKeySetData($signedJwks->jsonSerialize());
     }
 }

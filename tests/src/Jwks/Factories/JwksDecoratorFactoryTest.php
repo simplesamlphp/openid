@@ -46,6 +46,6 @@ final class JwksDecoratorFactoryTest extends TestCase
 
     public function testCanBuildFromKeyData(): void
     {
-        $this->assertInstanceOf(Jwks\JwksDecorator::class, $this->sut()->fromKeyData($this->jwksArraySample));
+        $this->assertInstanceOf(Jwks\JwksDecorator::class, $this->sut()->fromKeySetData($this->jwksArraySample));
     }
 }

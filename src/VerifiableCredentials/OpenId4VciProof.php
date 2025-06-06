@@ -109,6 +109,10 @@ class OpenId4VciProof extends ParsedJws
         return is_null($nonce) ? null : $this->helpers->type()->ensureNonEmptyString($nonce, $claimKey);
     }
 
+    // TODO
+    // key_attestation: OPTIONAL
+    // trust_chain: OPTIONAL
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
@@ -124,9 +128,7 @@ class OpenId4VciProof extends ParsedJws
             $this->getIssuer(...),
             $this->getAudience(...),
             $this->getIssuedAt(...),
-            // TODO
-            // key_attestation: OPTIONAL
-            // trust_chain: OPTIONAL
+            $this->getExpirationTime(...),
         );
     }
 }
