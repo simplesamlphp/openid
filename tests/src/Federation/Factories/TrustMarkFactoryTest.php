@@ -61,7 +61,7 @@ final class TrustMarkFactoryTest extends TestCase
         'nbf' => 1734016912,
         'exp' => 1734020512,
         // phpcs:ignore
-        'trust_mark_id' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
+        'trust_mark_type' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/trust-mark/member',
         'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ABTrustAnchor/',
         'sub' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];

@@ -26,15 +26,15 @@ class FederationClaimFactory
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function buildTrustMarksClaimValue(
-        mixed $trustMarkId,
+        mixed $trustMarkType,
         mixed $trustMark,
         mixed $otherClaims = [],
     ): TrustMarksClaimValue {
-        $trustMarkId = $this->helpers->type()->ensureNonEmptyString($trustMarkId);
+        $trustMarkType = $this->helpers->type()->ensureNonEmptyString($trustMarkType);
         $trustMark = $this->helpers->type()->ensureNonEmptyString($trustMark);
         $otherClaims = $this->helpers->type()->ensureArrayWithKeysAsNonEmptyStrings($otherClaims);
 
-        return new TrustMarksClaimValue($trustMarkId, $trustMark, $otherClaims);
+        return new TrustMarksClaimValue($trustMarkType, $trustMark, $otherClaims);
     }
 
     /**
@@ -47,12 +47,12 @@ class FederationClaimFactory
         $trustMarksClaimData = $this->helpers->type()->ensureArray($trustMarksClaimData);
 
         // Each JSON object MUST contain the following two claims and MAY contain other claims.
-        // trust_mark_id
-        // The Trust Mark identifier. It MUST be the same value as the id claim contained in the Trust Mark JWT.
+        // trust_mark_type
+        // The Trust Mark Type identifier. It MUST be the same value as the id claim contained in the Trust Mark JWT.
         // trust_mark
         // A signed JSON Web Token that represents a Trust Mark.
-        $trustMarkId = $trustMarksClaimData[ClaimsEnum::TrustMarkId->value] ?? throw new TrustMarkException(
-            'No ID present in Trust Mark claim.',
+        $trustMarkType = $trustMarksClaimData[ClaimsEnum::TrustMarkType->value] ?? throw new TrustMarkException(
+            'No type present in Trust Mark claim.',
         );
 
         $trustMark = $trustMarksClaimData[ClaimsEnum::TrustMark->value] ?? throw new TrustMarkException(
@@ -61,11 +61,11 @@ class FederationClaimFactory
 
         $otherClaims = array_diff_key(
             $trustMarksClaimData,
-            [ClaimsEnum::TrustMarkId->value => true, ClaimsEnum::TrustMark->value => true],
+            [ClaimsEnum::TrustMarkType->value => true, ClaimsEnum::TrustMark->value => true],
         );
 
         return $this->buildTrustMarksClaimValue(
-            $trustMarkId,
+            $trustMarkType,
             $trustMark,
             $otherClaims,
         );
@@ -77,18 +77,18 @@ class FederationClaimFactory
     }
 
     public function buildTrustMarkOwnersClaimValue(
-        mixed $trustMarkId,
+        mixed $trustMarkType,
         mixed $subject,
         mixed $jwks,
         mixed $otherClaims = [],
     ): TrustMarkOwnersClaimValue {
-        $trustMarkId = $this->helpers->type()->ensureNonEmptyString($trustMarkId);
+        $trustMarkType = $this->helpers->type()->ensureNonEmptyString($trustMarkType);
         $subject = $this->helpers->type()->ensureNonEmptyString($subject);
         $jwksClaim = $this->claimFactory->buildJwks($jwks);
         $otherClaims = $this->helpers->type()->ensureArrayWithKeysAsNonEmptyStrings($otherClaims);
 
         return new TrustMarkOwnersClaimValue(
-            $trustMarkId,
+            $trustMarkType,
             $subject,
             $jwksClaim,
             $otherClaims,
@@ -105,7 +105,7 @@ class FederationClaimFactory
 
         $trustMarkOwnersClaimValues = [];
 
-        // It is a JSON object with member names that are Trust Mark identifiers and each corresponding value
+        // It is a JSON object with member names that are Trust Mark Type identifiers and each corresponding value
         // being a JSON object with these members:
         // sub
         // REQUIRED Identifier of the Trust Mark Owner.
@@ -114,7 +114,7 @@ class FederationClaimFactory
         // for signing.
         // Other members MAY also be defined and used.
 
-        foreach ($trustMarkOwnersClaimData as $trustMarkId => $trustMarkOwnersClaim) {
+        foreach ($trustMarkOwnersClaimData as $trustMarkType => $trustMarkOwnersClaim) {
             $trustMarkOwnersClaim = $this->helpers->type()->ensureArray($trustMarkOwnersClaim);
 
 
@@ -127,11 +127,11 @@ class FederationClaimFactory
 
             $otherClaims = array_diff_key(
                 $trustMarkOwnersClaim,
-                [ClaimsEnum::TrustMarkId->value => true, ClaimsEnum::TrustMark->value => true],
+                [ClaimsEnum::TrustMarkType->value => true, ClaimsEnum::TrustMark->value => true],
             );
 
             $trustMarkOwnersClaimValues[] = $this->buildTrustMarkOwnersClaimValue(
-                $trustMarkId,
+                $trustMarkType,
                 $subject,
                 $jwks,
                 $otherClaims,

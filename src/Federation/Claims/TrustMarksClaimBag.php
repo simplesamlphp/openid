@@ -32,21 +32,21 @@ class TrustMarksClaimBag implements JsonSerializable
     }
 
     /**
-     * @param non-empty-string $trustMarkId
+     * @param non-empty-string $trustMarkType
      * @return \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue[]
      */
-    public function getAllFor(string $trustMarkId): array
+    public function getAllFor(string $trustMarkType): array
     {
         return array_values(array_filter(
             $this->trustMarksClaimValues,
-            fn(TrustMarksClaimValue $trustMarkClaim): bool => $trustMarkClaim->getTrustMarkId() === $trustMarkId,
+            fn(TrustMarksClaimValue $trustMarkClaim): bool => $trustMarkClaim->getTrustMarkType() === $trustMarkType,
         ));
     }
 
-    public function getFirstFor(string $trustMarkId): ?TrustMarksClaimValue
+    public function getFirstFor(string $trustMarkType): ?TrustMarksClaimValue
     {
         foreach ($this->trustMarksClaimValues as $trustMarkClaim) {
-            if ($trustMarkClaim->getTrustMarkId() === $trustMarkId) {
+            if ($trustMarkClaim->getTrustMarkType() === $trustMarkType) {
                 return $trustMarkClaim;
             }
         }

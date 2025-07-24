@@ -139,8 +139,8 @@ enum ClaimsEnum: string
     case Type = 'type';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
-    case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
+    case TrustMarkType = 'trust_mark_type';
     case TrustMarks = 'trust_marks';
     // UserInterfaceLocalesSupported
     case UiLocalesSupported = 'ui_locales_supported';

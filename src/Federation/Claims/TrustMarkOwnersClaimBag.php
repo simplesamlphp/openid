@@ -19,19 +19,19 @@ class TrustMarkOwnersClaimBag implements JsonSerializable
     public function add(TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValues): void
     {
         foreach ($trustMarkOwnersClaimValues as $trustMarkOwnersClaimValue) {
-            $this->trustMarkOwnersClaimValues[$trustMarkOwnersClaimValue->getTrustMarkId()] =
+            $this->trustMarkOwnersClaimValues[$trustMarkOwnersClaimValue->getTrustMarkType()] =
             $trustMarkOwnersClaimValue;
         }
     }
 
-    public function has(string $trustMarkId): bool
+    public function has(string $trustMarkType): bool
     {
-        return isset($this->trustMarkOwnersClaimValues[$trustMarkId]);
+        return isset($this->trustMarkOwnersClaimValues[$trustMarkType]);
     }
 
-    public function get(string $trustMarkId): ?TrustMarkOwnersClaimValue
+    public function get(string $trustMarkType): ?TrustMarkOwnersClaimValue
     {
-        return $this->trustMarkOwnersClaimValues[$trustMarkId] ?? null;
+        return $this->trustMarkOwnersClaimValues[$trustMarkType] ?? null;
     }
 
     /**

@@ -210,8 +210,8 @@ class EntityStatement extends ParsedJws
     public function getTrustMarkOwners(): ?TrustMarkOwnersClaimBag
     {
         // trust_mark_owners
-        // OPTIONAL. It is a JSON object with member names that are Trust Mark identifiers and each
-        // corresponding value being a JSON object with members: sub, jwks and optionally other members.
+        // OPTIONAL. It is a JSON object with member names that are Trust Mark Type identifiers, and each
+        // corresponding value is a JSON object with members: sub, jwks and optionally other members.
 
         $claimKey = ClaimsEnum::TrustMarkOwners->value;
         $trustMarkOwnersClaimData = $this->getPayloadClaim($claimKey);

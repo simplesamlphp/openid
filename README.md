@@ -207,8 +207,8 @@ Federation tools expose Trust Mark Fetcher which you can use to dynamically fetc
 
 /** @var \SimpleSAML\OpenID\Federation $federationTools */
 
-// Trust Mark ID that you want to fetch. 
-$trustMarkId = 'https://example.com/trust-mark/member';
+// Trust Mark Type that you want to fetch. 
+$trustMarkType = 'https://example.com/trust-mark/member';
 // ID of Subject for which to fetch the Trust Mark.
 $subjectId = 'https://leaf-entity.org'
 // ID of the Trust Mark Issuer from which to fetch the Trust Mark.
@@ -222,7 +222,7 @@ try {
 
     // Fetch the Trust Mark from Issuer.
     $trustMarkEntity = $federationTools->trustMarkFetcher()->fromCacheOrFederationTrustMarkEndpoint(
-        $trustMarkId,
+        $trustMarkType,
         $subjectId,
         $trustMarkIssuerConfigurationStatement
     );
@@ -237,7 +237,7 @@ try {
 ### Validating Trust Marks
 
 Federation tools expose Trust Mark Validator with several methods for validating Trust Marks, with the most common
-one being the one to validate Trust Mark for some entity simply based on the Trust Mark ID.
+one being the one to validate Trust Mark for some entity simply based on the Trust Mark Type.
 
 If cache is utilized, Trust Mark validation will be cached with cache TTL being the minimum expiration
 time of Trust Mark, Leaf Entity Statement or `maxCacheDuration`, whatever is smaller.
@@ -249,8 +249,8 @@ time of Trust Mark, Leaf Entity Statement or `maxCacheDuration`, whatever is sma
 /** @var \SimpleSAML\OpenID\Federation\TrustChain $trustChain */
 
 
-// Trust Mark ID that you want to validate. 
-$trustMarkId = 'https://example.com/trust-mark/member';
+// Trust Mark Type that you want to validate. 
+$trustMarkType = 'https://example.com/trust-mark/member';
 // Leaf for which you want to validate the Trust Mark with ID above.
 $leafEntityConfigurationStatement = $trustChain->getResolvedLeaf();
 // Trust Anchor under which you want to validate Trust Mark.
@@ -258,16 +258,16 @@ $trustAnchorConfigurationStatement = $trustChain->getResolvedTrustAnchor();
 
 try {
     // Example which queries cache for previously validated Trust Mark, and does formal validation if not cached.
-    $federationTools->trustMarkValidator()->fromCacheOrDoForTrustMarkId(
-        $trustMarkId,
+    $federationTools->trustMarkValidator()->fromCacheOrDoForTrustMarkType(
+        $trustMarkType,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
         $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
     
     // Example which always does formal validation (does not use cache).
-    $federationTools->trustMarkValidator()->doForTrustMarkId(
-        $trustMarkId,
+    $federationTools->trustMarkValidator()->doForTrustMarkType(
+        $trustMarkType,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
         $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,

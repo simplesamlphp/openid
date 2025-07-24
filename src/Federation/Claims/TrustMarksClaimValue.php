@@ -14,12 +14,12 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 class TrustMarksClaimValue implements JsonSerializable
 {
     /**
-     * @param non-empty-string $trustMarkId
+     * @param non-empty-string $trustMarkType
      * @param non-empty-string $trustMark
      * @param array<non-empty-string,mixed> $otherClaims
      */
     public function __construct(
-        protected readonly string $trustMarkId,
+        protected readonly string $trustMarkType,
         protected readonly string $trustMark,
         protected readonly array $otherClaims = [],
     ) {
@@ -28,9 +28,9 @@ class TrustMarksClaimValue implements JsonSerializable
     /**
      * @return non-empty-string
      */
-    public function getTrustMarkId(): string
+    public function getTrustMarkType(): string
     {
-        return $this->trustMarkId;
+        return $this->trustMarkType;
     }
 
     /**
@@ -56,7 +56,7 @@ class TrustMarksClaimValue implements JsonSerializable
     {
         return array_merge(
             [
-                ClaimsEnum::TrustMarkId->value => $this->trustMarkId,
+                ClaimsEnum::TrustMarkType->value => $this->trustMarkType,
                 ClaimsEnum::TrustMark->value => $this->trustMark,
             ],
             $this->otherClaims,

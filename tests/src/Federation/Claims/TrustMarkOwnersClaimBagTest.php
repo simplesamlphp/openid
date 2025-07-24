@@ -18,7 +18,7 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
     protected function setUp(): void
     {
         $this->trustMarkOwnersClaimValueMock = $this->createMock(TrustMarkOwnersClaimValue::class);
-        $this->trustMarkOwnersClaimValueMock->method('getTrustMarkId')->willReturn('trustMarkId');
+        $this->trustMarkOwnersClaimValueMock->method('getTrustMarkType')->willReturn('trustMarkType');
         $this->trustMarkOwnersClaimValueMock->method('getSubject')->willReturn('subject');
     }
 
@@ -38,21 +38,21 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
         $this->assertEmpty($this->sut()->getAll());
         $sut = $this->sut($this->trustMarkOwnersClaimValueMock);
         $this->assertCount(1, $sut->getAll());
-        $this->assertTrue($sut->has('trustMarkId'));
-        $this->assertSame($this->trustMarkOwnersClaimValueMock, $sut->get('trustMarkId'));
+        $this->assertTrue($sut->has('trustMarkType'));
+        $this->assertSame($this->trustMarkOwnersClaimValueMock, $sut->get('trustMarkType'));
 
         $trustMarkClaimValueMock2 = $this->createMock(TrustMarkOwnersClaimValue::class);
-        $trustMarkClaimValueMock2->method('getTrustMarkId')->willReturn('trustMarkId2');
+        $trustMarkClaimValueMock2->method('getTrustMarkType')->willReturn('trustMarkType2');
         $sut->add($trustMarkClaimValueMock2);
         $this->assertCount(2, $sut->getAll());
-        $this->assertTrue($sut->has('trustMarkId2'));
-        $this->assertSame($trustMarkClaimValueMock2, $sut->get('trustMarkId2'));
+        $this->assertTrue($sut->has('trustMarkType2'));
+        $this->assertSame($trustMarkClaimValueMock2, $sut->get('trustMarkType2'));
     }
 
     public function testCanJsonSerialize(): void
     {
         $trustMarkClaimValueMock2 = $this->createMock(TrustMarkOwnersClaimValue::class);
-        $trustMarkClaimValueMock2->method('getTrustMarkId')->willReturn('trustMarkId2');
+        $trustMarkClaimValueMock2->method('getTrustMarkType')->willReturn('trustMarkType2');
         $this->trustMarkOwnersClaimValueMock->method('getSubject')->willReturn('subject2');
 
         $sut = $this->sut(
@@ -60,7 +60,7 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
             $trustMarkClaimValueMock2,
         );
 
-        $this->assertArrayHasKey('trustMarkId', $sut->jsonSerialize());
-        $this->assertArrayHasKey('trustMarkId2', $sut->jsonSerialize());
+        $this->assertArrayHasKey('trustMarkType', $sut->jsonSerialize());
+        $this->assertArrayHasKey('trustMarkType2', $sut->jsonSerialize());
     }
 }
