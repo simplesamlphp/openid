@@ -47,6 +47,7 @@ enum ClaimsEnum: string
     case Delegation = 'delegation';
     case Description = 'description';
     case Display = 'display';
+    case DisplayName = 'display_name';
     case EndSessionEndpoint = 'end_session_endpoint';
     // ExpirationTime
     case Exp = 'exp';
@@ -65,6 +66,7 @@ enum ClaimsEnum: string
     // Identifier
     case Id = 'id';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
+    case InformationUri = 'information_uri';
     case IntrospectionEndpoint = 'introspection_endpoint';
     case IntrospectionEndpointAuthMethodsSupported = 'introspection_endpoint_auth_methods_supported';
     case IntrospectionEndpointAuthSigningAlgValuesSupported =
@@ -77,6 +79,7 @@ enum ClaimsEnum: string
     // JsonWebKeySet
     case Jwks = 'jwks';
     case JwksUri = 'jwks_uri';
+    case Keywords = 'keywords';
     // KeyId
     case Kid = 'kid';
     case KeyAttestationsRequired = 'key_attestations_required';
@@ -98,6 +101,7 @@ enum ClaimsEnum: string
     // OpenIDProviderTermsOfServiceUri
     case OpTosUri = 'op_tos_uri';
     case OrganizationName = 'organization_name';
+    case OrganizationUri = 'organization_uri';
     case Path = 'path';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
