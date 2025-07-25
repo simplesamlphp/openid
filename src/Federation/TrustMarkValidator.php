@@ -304,7 +304,7 @@ class TrustMarkValidator
         $this->logger?->debug(
             'Validating Trust Mark claim value.',
             [
-                'id' => $trustMarksClaimValue->getTrustMarkType(),
+                'type' => $trustMarksClaimValue->getTrustMarkType(),
                 'trustMark' => $trustMarksClaimValue->getTrustMark(),
                 'otherClaims' => $trustMarksClaimValue->getOtherClaims(),
             ],
@@ -326,7 +326,7 @@ class TrustMarkValidator
         if ($trustMarksClaimValue->getTrustMarkType() !== $trustMark->getTrustMarkType()) {
             throw new TrustMarkException(
                 sprintf(
-                    'Invalid TrustMark identifier: %s != %s.',
+                    'Invalid Trust Mark Type identifier: %s != %s.',
                     $trustMarksClaimValue->getTrustMarkType(),
                     $trustMark->getTrustMarkType(),
                 ),
@@ -336,7 +336,7 @@ class TrustMarkValidator
         // All the claims in the JSON object MUST have the same values as those contained in the Trust Mark JWT.
         $commonClaims = array_intersect_key($trustMarksClaimValue->getOtherClaims(), $trustMarkPayload);
         $this->logger?->debug(
-            'Validating common values from Trust Mark instance and claim itselt.',
+            'Validating common values from Trust Mark instance and claim itself.',
             ['commonClaims' => $commonClaims],
         );
 
@@ -415,7 +415,7 @@ class TrustMarkValidator
         $this->validateSubjectClaim($trustMark, $leafEntityConfiguration);
 
         // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve chain, as Trust Anchor is trusted
-        // out of band. Otherwise, we have to resolve trust for Trust Mark Issuer.
+        // out-of-band. Otherwise, we have to resolve trust for Trust Mark Issuer.
         $trustMarkIssuerEntityConfiguration =
         $trustMark->getIssuer() === $trustAnchorEntityConfiguration->getIssuer() ?
         $trustAnchorEntityConfiguration :
@@ -701,7 +701,7 @@ class TrustMarkValidator
 
         $this->logger?->debug('Trust Mark Issuer claim validated.');
 
-        // The ID of the delegation JWT MUST match the id value in the Trust Mark.
+        // The Type of the delegation JWT MUST match the Type value in the Trust Mark.
         $this->logger?->debug('Validating Trust Mark Type claim.');
         if ($trustMark->getTrustMarkType() !== $trustMarkDelegation->getTrustMarkType()) {
             $error = sprintf(
