@@ -15,7 +15,7 @@ Library can be installed by using Composer:
 composer require simplesamlphp/openid
 ```
 
-## OpenID Federation (draft 42)
+## OpenID Federation (draft 43)
 
 The initial functionality of the library revolves around the OpenID Federation specification. To use it, create an
 instance of the class `\SimpleSAML\OpenID\Federation`
