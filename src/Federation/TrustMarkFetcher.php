@@ -45,7 +45,7 @@ class TrustMarkFetcher extends JwsFetcher
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function fromCacheOrFederationTrustMarkEndpoint(
-        string $trustMarkId,
+        string $trustMarkType,
         string $subjectId,
         EntityStatement $entityConfiguration,
     ): TrustMark {
@@ -54,14 +54,14 @@ class TrustMarkFetcher extends JwsFetcher
 
         $this->logger?->debug(
             'Trust Mark fetch from cache or federation trust mark endpoint.',
-            ['trustMarkId' => $trustMarkId, 'subjectId' => $subjectId, 'trustMarkEndpoint' => $trustMarkEndpoint],
+            ['trustMarkType' => $trustMarkType, 'subjectId' => $subjectId, 'trustMarkEndpoint' => $trustMarkEndpoint],
         );
 
         return $this->fromCacheOrNetwork(
             $this->helpers->url()->withParams(
                 $trustMarkEndpoint,
                 [
-                    ClaimsEnum::TrustMarkId->value => $trustMarkId,
+                    ClaimsEnum::TrustMarkType->value => $trustMarkType,
                     ClaimsEnum::Sub->value => $subjectId,
                 ],
             ),

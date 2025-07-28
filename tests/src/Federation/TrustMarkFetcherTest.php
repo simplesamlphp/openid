@@ -105,7 +105,7 @@ final class TrustMarkFetcherTest extends TestCase
             ->with('token');
 
         $this->sut()->fromCacheOrFederationTrustMarkEndpoint(
-            'trustMarkId',
+            'trustMarkType',
             'entityId',
             $this->entityStatementMock,
         );
@@ -127,7 +127,7 @@ final class TrustMarkFetcherTest extends TestCase
         $this->trustMarkFactoryMock->expects($this->once())->method('fromToken');
 
         $this->sut()->fromCacheOrFederationTrustMarkEndpoint(
-            'trustMarkId',
+            'trustMarkType',
             'entityId',
             $this->entityStatementMock,
         );
@@ -143,7 +143,7 @@ final class TrustMarkFetcherTest extends TestCase
         $this->expectExceptionMessage('endpoint');
 
         $this->sut()->fromCacheOrFederationTrustMarkEndpoint(
-            'trustMarkId',
+            'trustMarkType',
             'entityId',
             $this->entityStatementMock,
         );

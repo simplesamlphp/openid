@@ -35,6 +35,6 @@ enum ParamsEnum: string
     case Scope = 'scope';
     case State = 'state';
     case TrustMarked = 'trust_marked';
-    case TrustMarkId = 'trust_mark_id';
+    case TrustMarkType = 'trust_mark_type';
     case UiLocales = 'ui_locales';
 }

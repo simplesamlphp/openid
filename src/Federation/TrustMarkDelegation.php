@@ -35,15 +35,15 @@ class TrustMarkDelegation extends ParsedJws
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function getTrustMarkId(): string
+    public function getTrustMarkType(): string
     {
-        $claimKey = ClaimsEnum::TrustMarkId->value;
+        $claimKey = ClaimsEnum::TrustMarkType->value;
 
-        $trustMarkId = $this->getPayloadClaim($claimKey) ?? throw new TrustMarkDelegationException(
-            'No Trust Mark ID claim found.',
+        $trustMarkType = $this->getPayloadClaim($claimKey) ?? throw new TrustMarkDelegationException(
+            'No Trust Mark Type claim found.',
         );
 
-        return $this->helpers->type()->ensureNonEmptyString($trustMarkId);
+        return $this->helpers->type()->ensureNonEmptyString($trustMarkType);
     }
 
     /**
@@ -104,7 +104,7 @@ class TrustMarkDelegation extends ParsedJws
         $this->validateByCallbacks(
             $this->getIssuer(...),
             $this->getSubject(...),
-            $this->getTrustMarkId(...),
+            $this->getTrustMarkType(...),
             $this->getIssuedAt(...),
             $this->getExpirationTime(...),
             $this->getReference(...),
