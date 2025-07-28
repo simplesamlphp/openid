@@ -18,7 +18,7 @@ final class TrustMarksClaimBagTest extends TestCase
     protected function setUp(): void
     {
         $this->trustMarkClaimMock = $this->createMock(TrustMarksClaimValue::class);
-        $this->trustMarkClaimMock->method('getTrustMarkId')->willReturn('trustMarkId');
+        $this->trustMarkClaimMock->method('getTrustMarkType')->willReturn('trustMarkType');
         $this->trustMarkClaimMock->method('getTrustMark')->willReturn('token');
     }
 
@@ -48,37 +48,37 @@ final class TrustMarksClaimBagTest extends TestCase
     public function testCanGetAllFor(): void
     {
         $firstTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
-        $firstTrustMarkClaim->method('getTrustMarkId')->willReturn('first');
+        $firstTrustMarkClaim->method('getTrustMarkType')->willReturn('first');
         $secondTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
-        $secondTrustMarkClaim->method('getTrustMarkId')->willReturn('second');
+        $secondTrustMarkClaim->method('getTrustMarkType')->willReturn('second');
 
         $sut = $this->sut($firstTrustMarkClaim, $secondTrustMarkClaim);
 
         $allForSecond = $sut->getAllFor('second');
 
         $this->assertCount(1, $allForSecond);
-        $this->assertSame($secondTrustMarkClaim->getTrustMarkId(), $allForSecond[0]->getTrustMarkId());
+        $this->assertSame($secondTrustMarkClaim->getTrustMarkType(), $allForSecond[0]->getTrustMarkType());
     }
 
     public function testCanGetFirstFor(): void
     {
         $firstTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
-        $firstTrustMarkClaim->method('getTrustMarkId')->willReturn('first');
+        $firstTrustMarkClaim->method('getTrustMarkType')->willReturn('first');
         $secondTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
-        $secondTrustMarkClaim->method('getTrustMarkId')->willReturn('second');
+        $secondTrustMarkClaim->method('getTrustMarkType')->willReturn('second');
 
         $sut = $this->sut($firstTrustMarkClaim, $secondTrustMarkClaim);
 
         $second = $sut->getFirstFor('second');
         $this->assertInstanceof(\SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue::class, $second);
-        $this->assertSame($secondTrustMarkClaim->getTrustMarkId(), $second->getTrustMarkId());
+        $this->assertSame($secondTrustMarkClaim->getTrustMarkType(), $second->getTrustMarkType());
     }
 
     public function testGetFirstForReturnNullIfNoneFound(): void
     {
 
         $firstTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
-        $firstTrustMarkClaim->method('getTrustMarkId')->willReturn('first');
+        $firstTrustMarkClaim->method('getTrustMarkType')->willReturn('first');
 
         $sut = $this->sut($firstTrustMarkClaim);
 

@@ -73,7 +73,7 @@ final class FederationClaimFactoryTest extends TestCase
     public function testCanBuildTrustMarksClaimValue(): void
     {
         $this->assertInstanceOf(TrustMarksClaimValue::class, $this->sut()->buildTrustMarksClaimValue(
-            'trustMarkId',
+            'trustMarkType',
             'trustMark',
         ));
     }
@@ -81,7 +81,7 @@ final class FederationClaimFactoryTest extends TestCase
     public function testCanBuildTrustMarksClaimValueFrom(): void
     {
         $trustMarksClaimData = [
-            ClaimsEnum::TrustMarkId->value => 'trustMarkId',
+            ClaimsEnum::TrustMarkType->value => 'trustMarkType',
             ClaimsEnum::TrustMark->value => 'trustMark',
             'something' => 'else',
         ];
@@ -103,7 +103,7 @@ final class FederationClaimFactoryTest extends TestCase
     public function testCanBuildTrustMarkOwnersClaimValue(): void
     {
         $this->assertInstanceOf(TrustMarkOwnersClaimValue::class, $this->sut()->buildTrustMarkOwnersClaimValue(
-            'trustMarkId',
+            'trustMarkType',
             'subject',
             $this->jwksArraySample,
         ));
@@ -112,7 +112,7 @@ final class FederationClaimFactoryTest extends TestCase
     public function testCanBuildTrustMarkOwnersClaimBagFrom(): void
     {
         $trustMarkOwnersClaimData = [
-            'trustMarkId' => [
+            'trustMarkType' => [
                 ClaimsEnum::Sub->value => 'subject',
                 ClaimsEnum::Jwks->value => $this->jwksArraySample,
             ],

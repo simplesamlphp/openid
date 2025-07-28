@@ -58,6 +58,7 @@ enum ClaimsEnum: string
     case Delegation = 'delegation';
     case Description = 'description';
     case Display = 'display';
+    case DisplayName = 'display_name';
     case EndSessionEndpoint = 'end_session_endpoint';
     case EncryptionRequired = 'encryption_required';
     // EncryptionValuesSupported
@@ -80,6 +81,7 @@ enum ClaimsEnum: string
     case Id = 'id';
     case InputMode = 'input_mode';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
+    case InformationUri = 'information_uri';
     case IntrospectionEndpoint = 'introspection_endpoint';
     case IntrospectionEndpointAuthMethodsSupported = 'introspection_endpoint_auth_methods_supported';
     case IntrospectionEndpointAuthSigningAlgValuesSupported =
@@ -96,6 +98,7 @@ enum ClaimsEnum: string
     // JsonWebKeySet
     case Jwks = 'jwks';
     case JwksUri = 'jwks_uri';
+    case Keywords = 'keywords';
     // KeyId
     case Kid = 'kid';
     case KeyAttestationsRequired = 'key_attestations_required';
@@ -122,6 +125,7 @@ enum ClaimsEnum: string
     // OpenIDProviderTermsOfServiceUri
     case OpTosUri = 'op_tos_uri';
     case OrganizationName = 'organization_name';
+    case OrganizationUri = 'organization_uri';
     case Path = 'path';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
@@ -168,8 +172,8 @@ enum ClaimsEnum: string
     case Type = 'type';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
-    case TrustMarkId = 'trust_mark_id';
     case TrustMarkOwners = 'trust_mark_owners';
+    case TrustMarkType = 'trust_mark_type';
     case TrustMarks = 'trust_marks';
     // TransactionCode
     case TxCode = 'tx_code';

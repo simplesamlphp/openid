@@ -8,7 +8,6 @@ enum ParamsEnum: string
 {
     case AcrValues = 'acr_values';
     case Assertion = 'assertion';
-    case AuthorizationDetails = 'authorization_details';
     case Claims = 'claims';
     case ClientAssertion = 'client_assertion';
     case ClientAssertionType = 'client_assertion_type';
@@ -28,7 +27,6 @@ enum ParamsEnum: string
     case MaxAge = 'max_age';
     case Nonce = 'nonce';
     case PostLogoutRedirectUri = 'post_logout_redirect_uri';
-    case PreAuthorizedCode = 'pre-authorized_code';
     case Prompt = 'prompt';
     case RedirectUri = 'redirect_uri';
     case Request = 'request';
@@ -37,7 +35,7 @@ enum ParamsEnum: string
     case Scope = 'scope';
     case State = 'state';
     case TrustMarked = 'trust_marked';
-    case TrustMarkId = 'trust_mark_id';
+    case TrustMarkType = 'trust_mark_type';
     // TransactionCode
     case TxCode = 'tx_code';
     case UiLocales = 'ui_locales';

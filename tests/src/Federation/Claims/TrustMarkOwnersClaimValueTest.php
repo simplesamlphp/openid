@@ -13,7 +13,7 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 #[CoversClass(TrustMarkOwnersClaimValue::class)]
 final class TrustMarkOwnersClaimValueTest extends TestCase
 {
-    protected string $trustMarkId;
+    protected string $trustMarkType;
 
     protected string $subject = 'subject';
 
@@ -23,25 +23,25 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->trustMarkId = 'trustMarkId';
+        $this->trustMarkType = 'trustMarkType';
         $this->subject = 'subject';
         $this->jwksClaimMock = $this->createMock(JwksClaim::class);
         $this->otherClaims = ['key' => 'value'];
     }
 
     protected function sut(
-        ?string $trustMarkId = null,
+        ?string $trustMarkType = null,
         ?string $subject = null,
         ?JwksClaim $jwksClaim = null,
         ?array $otherClaims = null,
     ): TrustMarkOwnersClaimValue {
-        $trustMarkId ??= $this->trustMarkId;
+        $trustMarkType ??= $this->trustMarkType;
         $subject ??= $this->subject;
         $jwksClaim ??= $this->jwksClaimMock;
         $otherClaims ??= $this->otherClaims;
 
         return new TrustMarkOwnersClaimValue(
-            $trustMarkId,
+            $trustMarkType,
             $subject,
             $jwksClaim,
             $otherClaims,
@@ -56,7 +56,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
     public function testCanGetProperties(): void
     {
         $sut = $this->sut();
-        $this->assertSame($this->trustMarkId, $sut->getTrustMarkId());
+        $this->assertSame($this->trustMarkType, $sut->getTrustMarkType());
         $this->assertSame($this->subject, $sut->getSubject());
         $this->assertSame($this->jwksClaimMock, $sut->getJwks());
         $this->assertSame($this->otherClaims, $sut->getOtherClaims());
@@ -66,7 +66,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
     {
         $this->assertSame(
             [
-                'trust_mark_id' => $this->trustMarkId,
+                'trust_mark_type' => $this->trustMarkType,
                 'sub' => $this->subject,
                 'jwks' => [],
                 'key' => 'value',

@@ -296,7 +296,7 @@ final class EntityStatementTest extends TestCase
     public function testTrustMarkOwnersIsBuildUsingFactoryOptional(): void
     {
         $this->validPayload['trust_mark_owners'] = [
-            'trustMarkId' => [
+            'trustMarkType' => [
                 'sub' => 'subject',
                 'jwks' => ['keys' => [['key' => 'value']]],
             ],
