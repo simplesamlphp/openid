@@ -80,4 +80,76 @@ final class ArrTest extends TestCase
         $arr = [];
         $this->sut()->getNestedValue($arr, ...range(0, 100));
     }
+
+    public function testCanGetNestedValueReference(): void
+    {
+        $arr = [];
+        $this->sut()->getNestedValueReference($arr, 'a', 'b', 'c');
+        $this->assertIsArray($arr['a']['b']);
+        $this->assertIsArray($arr['a']['b']['c']);
+
+        $arr = ['a' => ['b' => 'c']];
+        $reference = $this->sut()->getNestedValueReference($arr, 'a', 'b');
+        $this->assertSame('c', $reference);
+    }
+
+    public function testGetNestedValueThrowsForNonArrayPathElements(): void
+    {
+        $this->expectException(OpenIDException::class);
+        $this->expectExceptionMessage('non-array');
+
+        $arr = ['a' => ['b' => 'c']];
+        $this->sut()->getNestedValueReference($arr, 'a', 'b', 'c');
+    }
+
+    public function testCanSetNestedValue(): void
+    {
+        $arr = [];
+        $this->sut()->setNestedValue($arr, 'b');
+        $this->assertSame([], $arr);
+
+        $arr = [];
+        $this->sut()->setNestedValue($arr, 'b', 'a');
+        $this->assertSame(['a' => 'b'], $arr);
+
+        $arr = [];
+        $this->sut()->setNestedValue($arr, 'c', 'a', 'b');
+        $this->assertSame(['a' => ['b' => 'c']], $arr);
+    }
+
+    public function testCanAddNestedValue(): void
+    {
+        $arr = [];
+        $this->sut()->addNestedValue($arr, 'b');
+        $this->assertSame(['b'], $arr);
+
+        $arr = [];
+        $this->sut()->addNestedValue($arr, 'b', 'a');
+        $this->assertSame(['a' => ['b']], $arr);
+
+        $arr = ['a' => []];
+        $this->sut()->addNestedValue($arr, 'b', 'a');
+        $this->assertSame(['a' => ['b']], $arr);
+
+        $arr = ['a' => ['b']];
+        $this->sut()->addNestedValue($arr, 'c', 'a');
+        $this->assertSame(['a' => ['b', 'c']], $arr);
+
+        $arr = ['a' => ['b']];
+        $this->sut()->addNestedValue($arr, 'c', 'a', 'b');
+        $this->assertSame(['a' => ['b', 'b' => ['c']]], $arr);
+
+        $arr = ['a' => ['b']];
+        $this->sut()->addNestedValue($arr, ['c'], 'a', 'b');
+        $this->assertSame(['a' => ['b', 'b' => [['c']]]], $arr);
+    }
+
+    public function testAddNestedValueThrowsForNonArrayPathElements(): void
+    {
+        $this->expectException(OpenIDException::class);
+        $this->expectExceptionMessage('non-array');
+
+        $arr = ['a' => 'b'];
+        $this->sut()->addNestedValue($arr, 'c', 'a');
+    }
 }

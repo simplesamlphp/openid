@@ -48,9 +48,12 @@ class MetadataPolicyApplicator
                         continue;
                     }
 
-                    $this->helpers->arr()->ensureArrayDepth($metadata, $policyParameterName);
-                    $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
-                        $operatorValue,
+                    $this->helpers->arr()->setNestedValue(
+                        $metadata,
+                        $this->resolveParameterValueAfterPolicy(
+                            $operatorValue,
+                            $policyParameterName,
+                        ),
                         $policyParameterName,
                     );
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {

@@ -6,7 +6,6 @@ namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
@@ -16,9 +15,11 @@ use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(MetadataPolicyResolver::class)]
 #[UsesClass(MetadataPolicyOperatorsEnum::class)]
+#[UsesClass(Helpers::class)]
+#[UsesClass(Helpers\Arr::class)]
 final class MetadataPolicyResolverTest extends TestCase
 {
-    protected MockObject $helpersMock;
+    protected Helpers $helpers;
 
     protected array $trustAnchorMetadataPolicySample = [
         'openid_relying_party' => [
@@ -62,13 +63,13 @@ final class MetadataPolicyResolverTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->helpers = new Helpers();
     }
 
     protected function sut(
         ?Helpers $helpers = null,
     ): MetadataPolicyResolver {
-        $helpers ??= $this->helpersMock;
+        $helpers ??= $this->helpers;
 
         return new MetadataPolicyResolver($helpers);
     }

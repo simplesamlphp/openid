@@ -8,14 +8,34 @@ use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
 class Arr
 {
+    public const MAX_DEPTH = 99;
+
     /**
-     * @phpstan-ignore missingType.iterableValue (We can handle mixed type)
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function validateMaxDepth(int $depth): void
+    {
+        if ($depth > self::MAX_DEPTH) {
+            throw new OpenIdException(
+                sprintf(
+                    'Refusing to recurse to given depth %s. Max depth is %s.',
+                    $depth,
+                    self::MAX_DEPTH,
+                ),
+            );
+        }
+    }
+
+    /**
+     * Ensure the existence of nested arrays for given keys. Note that this will create / overwrite any non-array
+     * nested values and make them an array.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function ensureArrayDepth(array &$array, int|string ...$keys): void
     {
-        if (count($keys) > 99) {
-            throw new OpenIdException('Refusing to recurse to given depth.');
-        }
+        $this->validateMaxDepth(count($keys));
 
         $key = array_shift($keys);
 
@@ -28,6 +48,79 @@ class Arr
         }
 
         $this->ensureArrayDepth($array[$key], ...$keys);
+    }
+
+    /**
+     * Get nested value reference at a given path. Creates nested arrays dynamically if the key is not present.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException If a non-array value exists on the path.
+     */
+    public function &getNestedValueReference(array &$array, int|string ...$keys): mixed
+    {
+        $this->validateMaxDepth(count($keys));
+
+        $nested = &$array;
+
+        foreach ($keys as $key) {
+            if (!is_array($nested)) {
+                throw new OpenIdException(
+                    sprintf(
+                        'Refusing to operate on non-array value for key: %s, path: %s, array: %s.',
+                        $key,
+                        implode('.', $keys),
+                        var_export($array, true),
+                    ),
+                );
+            }
+
+            if (!isset($nested[$key])) {
+                $nested[$key] = [];
+            }
+
+            $nested = &$nested[$key];
+        }
+
+        return $nested;
+    }
+
+    /**
+     * Set a value at a path.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function setNestedValue(array &$array, mixed $value, int|string ...$keys): void
+    {
+        if (count($keys) < 1) {
+            return;
+        }
+
+        $reference =& $this->getNestedValueReference($array, ...$keys);
+
+        $reference = $value;
+    }
+
+    /**
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function addNestedValue(array &$array, mixed $value, int|string ...$keys): void
+    {
+        $reference =& $this->getNestedValueReference($array, ...$keys);
+
+        if (!is_array($reference)) {
+            throw new OpenIdException(
+                sprintf(
+                    'Refusing to add value to non-array value. Array: %s, path: %s, value: %s.',
+                    var_export($array, true),
+                    implode('.', $keys),
+                    var_export($value, true),
+                ),
+            );
+        }
+
+        $reference[] = $value;
     }
 
     /**

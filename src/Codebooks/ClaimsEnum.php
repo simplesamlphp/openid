@@ -6,6 +6,10 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ClaimsEnum: string
 {
+    // _SelectiveDisclosure
+    case _Sd = '_sd';
+    // _SelectiveDisclosureAlgorithm
+    case _SdAlg = '_sd_alg';
     // @context
     case AtContext = '@context';
     // @type
@@ -38,6 +42,8 @@ enum ClaimsEnum: string
     case ClientName = 'client_name';
     case ClientRegistrationTypes = 'client_registration_types';
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
+    // Confirmation
+    case Cnf = 'cnf';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
     case CredentialConfigurationId = 'credential_configuration_id';
@@ -59,6 +65,7 @@ enum ClaimsEnum: string
     case Description = 'description';
     case Display = 'display';
     case DisplayName = 'display_name';
+    case DotDotDot = '...';
     case EndSessionEndpoint = 'end_session_endpoint';
     case EncryptionRequired = 'encryption_required';
     // EncryptionValuesSupported
@@ -185,6 +192,8 @@ enum ClaimsEnum: string
     case UserinfoEndpoint = 'userinfo_endpoint';
     // VerifiableCredential
     case Vc = 'vc';
+    // VerifiableCredentialType
+    case Vct = 'vct';
     // X509certificateChain
     case X5c = 'x5c';
 }
