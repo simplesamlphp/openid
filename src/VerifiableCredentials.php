@@ -17,6 +17,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\SdJwt\Factories\DisclosureBagFactory;
 use SimpleSAML\OpenID\SdJwt\Factories\DisclosureFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\ClaimsPathPointerResolver;
@@ -64,6 +65,8 @@ class VerifiableCredentials
     protected ?DisclosureFactory $disclosureFactory = null;
 
     protected ?SdJwtVcFactory $sdJwtVcFactory = null;
+
+    protected ?DisclosureBagFactory $disclosureBagFactory = null;
 
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -190,6 +193,11 @@ class VerifiableCredentials
         return $this->disclosureFactory ??= new DisclosureFactory(
             $this->helpers(),
         );
+    }
+
+    public function disclosureBagFactory(): DisclosureBagFactory
+    {
+        return $this->disclosureBagFactory ??= new DisclosureBagFactory();
     }
 
     public function sdJwtVcFactory(): SdJwtVcFactory
