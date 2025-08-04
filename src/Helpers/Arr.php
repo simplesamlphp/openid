@@ -173,4 +173,24 @@ class Arr
 
         return true;
     }
+
+    /**
+     * Recursively check if an array contains the key, at any level.
+     *
+     * @param mixed[] $array
+     */
+    public function containsKey(array $array, string|int $key): bool
+    {
+        foreach ($array as $currentKey => $value) {
+            if ($currentKey === $key) {
+                return true;
+            }
+
+            if (is_array($value) && $this->containsKey($value, $key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

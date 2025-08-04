@@ -17,10 +17,12 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\SdJwt\Factories\DisclosureFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\ClaimsPathPointerResolver;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
 
 class VerifiableCredentials
@@ -58,6 +60,10 @@ class VerifiableCredentials
     protected ?CredentialOfferFactory $credentialOfferFactory = null;
 
     protected ?OpenId4VciProofFactory $openId4VciProofFactory = null;
+
+    protected ?DisclosureFactory $disclosureFactory = null;
+
+    protected ?SdJwtVcFactory $sdJwtVcFactory = null;
 
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -176,6 +182,27 @@ class VerifiableCredentials
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
             $this->claimFactory(),
+        );
+    }
+
+    public function disclosureFactory(): DisclosureFactory
+    {
+        return $this->disclosureFactory ??= new DisclosureFactory(
+            $this->helpers(),
+        );
+    }
+
+    public function sdJwtVcFactory(): SdJwtVcFactory
+    {
+        return $this->sdJwtVcFactory ??= new SdJwtVcFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
+            $this->disclosureFactory(),
         );
     }
 }

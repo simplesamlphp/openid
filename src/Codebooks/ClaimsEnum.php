@@ -165,6 +165,7 @@ enum ClaimsEnum: string
     case ServiceDocumentation = 'service_documentation';
     case SignedJwksUri = 'signed_jwks_uri';
     case SignedMetadata = 'signed_metadata';
+    case Status = 'status';
     // Subject
     case Sub = 'sub';
     case SubjectTypesSupported = 'subject_types_supported';

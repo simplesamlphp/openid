@@ -14,4 +14,5 @@ enum JwtTypesEnum: string
     case OpenId4VciProofJwt = 'openid4vci-proof+jwt';
     case TrustMarkJwt = 'trust-mark+jwt';
     case TrustMarkDelegationJwt = 'trust-mark-delegation+jwt';
+    case VcSdJwt = 'vc+sd-jwt';
 }
