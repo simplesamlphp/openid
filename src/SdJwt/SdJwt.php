@@ -87,16 +87,12 @@ class SdJwt extends ParsedJws
         return $this->kbJwt;
     }
 
-    /**
-     * @throws \JsonException
-     */
-    public function getDisclosedToken(
+    public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
         ?DisclosureBag $disclosureBag = null,
     ): string {
-        $token = $this->getToken($jwsSerializerEnum, $signatureIndex) . self::TILDE;
-
+        $token = parent::getToken($jwsSerializerEnum, $signatureIndex) . self::TILDE;
         $disclosures = $this->disclosureBag?->all() ?? [];
 
         if ($disclosureBag instanceof DisclosureBag) {
@@ -119,8 +115,14 @@ class SdJwt extends ParsedJws
         return $token;
     }
 
-
-
+    /**
+     */
+    public function getUndisclosedToken(
+        JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
+        ?int $signatureIndex = null,
+    ): string {
+        return parent::getToken($jwsSerializerEnum, $signatureIndex);
+    }
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
