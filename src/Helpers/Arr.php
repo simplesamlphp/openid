@@ -160,7 +160,7 @@ class Arr
     }
 
     /**
-     * Is array of arrays.
+     * Is an array of arrays.
      * @param mixed[] $array
      */
     public function isOfArrays(array $array): bool
@@ -192,5 +192,30 @@ class Arr
         }
 
         return false;
+    }
+
+    /**
+     * Recursively sort an array by keys if keys are strings and values if keys are numeric.
+     *
+     * @param mixed[] $array
+     */
+    public function hybridSort(array &$array): void
+    {
+        // Determine if keys are numeric or string
+        $allNumeric = array_keys($array) === array_keys(array_values($array));
+
+        // Sort appropriately
+        if ($allNumeric) {
+            sort($array); // numeric indexes: sort by value
+        } else {
+            ksort($array); // string keys: sort by key
+        }
+
+        // Recurse into nested arrays
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $this->hybridSort($value);
+            }
+        }
     }
 }

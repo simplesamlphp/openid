@@ -115,8 +115,6 @@ class SdJwt extends ParsedJws
         return $token;
     }
 
-    /**
-     */
     public function getUndisclosedToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
