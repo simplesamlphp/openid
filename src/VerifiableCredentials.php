@@ -23,6 +23,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\ClaimsPathPointerResolver;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\Factories\TxCodeFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
 
@@ -67,6 +68,8 @@ class VerifiableCredentials
     protected ?SdJwtVcFactory $sdJwtVcFactory = null;
 
     protected ?DisclosureBagFactory $disclosureBagFactory = null;
+
+    protected ?TxCodeFactory $txCodeFactory = null;
 
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -212,5 +215,10 @@ class VerifiableCredentials
             $this->claimFactory(),
             $this->disclosureFactory(),
         );
+    }
+
+    public function txCodeFactory(): TxCodeFactory
+    {
+        return $this->txCodeFactory ??= new TxCodeFactory();
     }
 }
