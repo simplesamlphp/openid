@@ -14,20 +14,20 @@ class TxCode implements \JsonSerializable
     protected readonly int $length;
 
     public function __construct(
-        protected readonly int|string $txCode,
+        protected readonly int|string $code,
         protected readonly string $description,
     ) {
-        if (is_numeric($this->txCode) && $this->txCode < 0) {
+        if (is_numeric($this->code) && $this->code < 0) {
             throw new \InvalidArgumentException('TxCode must be a positive integer or a string.');
         }
 
-        $this->inputMode = is_numeric($this->txCode) ? TxCodeInputModeEnum::Numeric : TxCodeInputModeEnum::Text;
-        $this->length = mb_strlen((string)$this->txCode);
+        $this->inputMode = is_numeric($this->code) ? TxCodeInputModeEnum::Numeric : TxCodeInputModeEnum::Text;
+        $this->length = mb_strlen((string)$this->code);
     }
 
-    public function getTxCode(): int|string
+    public function getCode(): int|string
     {
-        return $this->txCode;
+        return $this->code;
     }
 
     public function getDescription(): string
@@ -55,5 +55,10 @@ class TxCode implements \JsonSerializable
             ClaimsEnum::Length->value => $this->length,
             ClaimsEnum::Description->value => $this->description,
         ];
+    }
+
+    public function getTxCodeAsString(): string
+    {
+        return (string)$this->code;
     }
 }
