@@ -30,6 +30,11 @@ class TxCode implements \JsonSerializable
         return $this->code;
     }
 
+    public function getCodeAsString(): string
+    {
+        return (string)$this->code;
+    }
+
     public function getDescription(): string
     {
         return $this->description;
@@ -55,10 +60,5 @@ class TxCode implements \JsonSerializable
             ClaimsEnum::Length->value => $this->length,
             ClaimsEnum::Description->value => $this->description,
         ];
-    }
-
-    public function getTxCodeAsString(): string
-    {
-        return (string)$this->code;
     }
 }
