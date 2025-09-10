@@ -60,6 +60,7 @@ enum ClaimsEnum: string
     case Credential_Status = 'credentialStatus';
     case Credential_Subject = 'credentialSubject';
     case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
+    case CryptographicSuitesSupported= 'cryptographic_suites_supported';
     case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
     case Delegation = 'delegation';
     case Description = 'description';
