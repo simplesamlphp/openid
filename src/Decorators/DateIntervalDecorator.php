@@ -11,10 +11,12 @@ class DateIntervalDecorator
 {
     public int $inSeconds;
 
+
     public function __construct(public readonly DateInterval $dateInterval)
     {
         $this->inSeconds = self::toSeconds($this->dateInterval);
     }
+
 
     public function lowestInSecondsComparedToExpirationTime(int $expirationTime): int
     {
@@ -24,6 +26,7 @@ class DateIntervalDecorator
         return min($this->inSeconds, $expirationInSeconds);
     }
 
+
     public static function toSeconds(DateInterval $dateInterval): int
     {
         $reference = new DateTimeImmutable();
@@ -31,6 +34,7 @@ class DateIntervalDecorator
 
         return $endTime->getTimestamp() - $reference->getTimestamp();
     }
+
 
     public function getInSeconds(): int
     {

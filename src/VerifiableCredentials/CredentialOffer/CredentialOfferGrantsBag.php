@@ -11,10 +11,12 @@ class CredentialOfferGrantsBag implements \JsonSerializable
      */
     public readonly array $credentialOfferGrantsValues;
 
+
     public function __construct(CredentialOfferGrantsValue ...$credentialOfferGrantsValues)
     {
         $this->credentialOfferGrantsValues = $credentialOfferGrantsValues;
     }
+
 
     /**
      * @return array<string, mixed>

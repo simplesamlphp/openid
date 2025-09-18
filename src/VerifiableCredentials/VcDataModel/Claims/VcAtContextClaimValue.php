@@ -28,6 +28,7 @@ class VcAtContextClaimValue implements ClaimInterface
         }
     }
 
+
     /**
      * @return mixed[]
      */
@@ -36,10 +37,12 @@ class VcAtContextClaimValue implements ClaimInterface
         return $this->getValue();
     }
 
+
     public function getBaseContext(): string
     {
         return $this->baseContext;
     }
+
 
     /**
      * @return mixed[]
@@ -49,10 +52,12 @@ class VcAtContextClaimValue implements ClaimInterface
         return $this->otherContexts;
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::AtContext->name;
     }
+
 
     /**
      * @return mixed[]

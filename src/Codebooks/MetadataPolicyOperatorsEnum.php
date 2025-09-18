@@ -20,6 +20,7 @@ enum MetadataPolicyOperatorsEnum: string
     case SupersetOf = 'superset_of';
     case Essential = 'essential';
 
+
     /**
      * @return string[]
      */
@@ -27,6 +28,7 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return array_column(self::cases(), 'value');
     }
+
 
     /**
      * @return string[]
@@ -60,6 +62,7 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+
     /**
      * @return string[]
      */
@@ -87,6 +90,7 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+
     /**
      * @return string[]
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
@@ -104,6 +108,7 @@ enum MetadataPolicyOperatorsEnum: string
             self::Value, self::Default, self::Essential => throw new MetadataPolicyException('Not implemented.'),
         };
     }
+
 
     /**
      * @return string[]
@@ -124,6 +129,7 @@ enum MetadataPolicyOperatorsEnum: string
         };
     }
 
+
     /**
      * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
      */
@@ -133,6 +139,7 @@ enum MetadataPolicyOperatorsEnum: string
 
         return array_diff($value, $superset) === [];
     }
+
 
     /**
      * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
@@ -144,6 +151,7 @@ enum MetadataPolicyOperatorsEnum: string
         // Like subset, but from different perspective.
         return array_diff($subset, $value) === [];
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
@@ -169,6 +177,7 @@ enum MetadataPolicyOperatorsEnum: string
         return true;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
      */
@@ -192,6 +201,7 @@ enum MetadataPolicyOperatorsEnum: string
 
         return true;
     }
+
 
     /**
      * @return string[]
@@ -255,6 +265,7 @@ enum MetadataPolicyOperatorsEnum: string
         ];
     }
 
+
     /**
      * @param string[] $operatorKeys
      */
@@ -262,6 +273,7 @@ enum MetadataPolicyOperatorsEnum: string
     {
         return array_diff($operatorKeys, $this->getSupportedOperatorCombinations()) === [];
     }
+
 
     /**
      * Validate general parameter operation rules like operator combinations and operator value type.
@@ -306,6 +318,7 @@ enum MetadataPolicyOperatorsEnum: string
             }
         }
     }
+
 
     /**
      * @param array<string,mixed> $parameterOperations
@@ -504,6 +517,7 @@ enum MetadataPolicyOperatorsEnum: string
             }
         }
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException

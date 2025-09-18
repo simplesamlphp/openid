@@ -43,6 +43,7 @@ final class TrustMarkFetcherTest extends TestCase
 
     protected MockObject $entityStatementMock;
 
+
     protected function setUp(): void
     {
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
@@ -56,6 +57,7 @@ final class TrustMarkFetcherTest extends TestCase
 
         $this->entityStatementMock = $this->createMock(EntityStatement::class);
     }
+
 
     protected function sut(
         ?TrustMarkFactory $trustMarkFactoryMock = null,
@@ -79,10 +81,12 @@ final class TrustMarkFetcherTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarkFetcher::class, $this->sut());
     }
+
 
     public function testHasRightExpectedContentTypeHttpHeader(): void
     {
@@ -91,6 +95,7 @@ final class TrustMarkFetcherTest extends TestCase
             $this->sut()->getExpectedContentTypeHttpHeader(),
         );
     }
+
 
     public function testCanFetchFromCacheOrTrustMarkEndpointWhenCached(): void
     {
@@ -110,6 +115,7 @@ final class TrustMarkFetcherTest extends TestCase
             $this->entityStatementMock,
         );
     }
+
 
     public function testCanFetchFromCacheOrTrustMarkEndpointWhenNotCached(): void
     {
@@ -133,6 +139,7 @@ final class TrustMarkFetcherTest extends TestCase
         );
     }
 
+
     public function testFetchFromCacheOrTrustMarkEndpointThrowsIfNoFetchEndpoint(): void
     {
         $this->entityStatementMock->expects($this->once())
@@ -148,6 +155,7 @@ final class TrustMarkFetcherTest extends TestCase
             $this->entityStatementMock,
         );
     }
+
 
     public function testCanFetchFromCache(): void
     {

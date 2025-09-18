@@ -10,6 +10,7 @@ class Arr
 {
     public const MAX_DEPTH = 99;
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
@@ -25,6 +26,7 @@ class Arr
             );
         }
     }
+
 
     /**
      * Ensure the existence of nested arrays for given keys. Note that this will create / overwrite any non-array
@@ -49,6 +51,7 @@ class Arr
 
         $this->ensureArrayDepth($array[$key], ...$keys);
     }
+
 
     /**
      * Get nested value reference at a given path. Creates nested arrays dynamically if the key is not present.
@@ -84,6 +87,7 @@ class Arr
         return $nested;
     }
 
+
     /**
      * Set a value at a path.
      *
@@ -100,6 +104,7 @@ class Arr
 
         $reference = $value;
     }
+
 
     /**
      * @param mixed[] $array
@@ -122,6 +127,7 @@ class Arr
 
         $reference[] = $value;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
@@ -150,6 +156,7 @@ class Arr
         return $this->getNestedValue($nestedArray, ...$keys);
     }
 
+
     /**
      * @param mixed[] $array
      */
@@ -158,6 +165,7 @@ class Arr
         // Has at least one string key or non-sequential numeric keys
         return array_keys($array) !== range(0, count($array) - 1);
     }
+
 
     /**
      * Is an array of arrays.
@@ -173,6 +181,7 @@ class Arr
 
         return true;
     }
+
 
     /**
      * Recursively check if an array contains the key, at any level.
@@ -193,6 +202,7 @@ class Arr
 
         return false;
     }
+
 
     /**
      * Recursively sort an array by keys if keys are strings and values if keys are numeric.

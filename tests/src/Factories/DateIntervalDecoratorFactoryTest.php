@@ -17,20 +17,24 @@ final class DateIntervalDecoratorFactoryTest extends TestCase
 {
     protected DateInterval $dateInterval;
 
+
     protected function setUp(): void
     {
         $this->dateInterval = new DateInterval('P1D');
     }
+
 
     protected function sut(): DateIntervalDecoratorFactory
     {
         return new DateIntervalDecoratorFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(DateIntervalDecoratorFactory::class, $this->sut());
     }
+
 
     public function testCanBuild(): void
     {

@@ -19,6 +19,7 @@ class CredentialOfferFactory
     ) {
     }
 
+
     /**
      * @param mixed[]|null $parameters
      * @throws \SimpleSAML\OpenID\Exceptions\CredentialOfferException

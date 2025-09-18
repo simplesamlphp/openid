@@ -33,6 +33,7 @@ class Type
         throw new InvalidValueException($error);
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -53,6 +54,7 @@ class Type
 
         throw new InvalidValueException($error);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -86,6 +88,7 @@ class Type
         throw new InvalidValueException($error);
     }
 
+
     /**
      * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -103,6 +106,7 @@ class Type
             $value,
         );
     }
+
 
     /**
      * @return array<non-empty-string,mixed>
@@ -122,6 +126,7 @@ class Type
         );
     }
 
+
     /**
      * @return string[]
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -137,6 +142,7 @@ class Type
         );
     }
 
+
     /**
      * @return non-empty-string[]
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -151,6 +157,7 @@ class Type
             array_fill(0, count($value), $context),
         );
     }
+
 
     /**
      * @return array<string,string>
@@ -174,6 +181,7 @@ class Type
         );
     }
 
+
     /**
      * @return array<non-empty-string,non-empty-string>
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -195,6 +203,7 @@ class Type
             ),
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -218,6 +227,7 @@ class Type
         throw new InvalidValueException($error);
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -239,6 +249,7 @@ class Type
 
         return $value;
     }
+
 
     /**
      * @return non-empty-string
@@ -264,6 +275,7 @@ class Type
         return $value;
     }
 
+
     /**
      * @param mixed[] $array
      * @return array<mixed[]>
@@ -287,6 +299,7 @@ class Type
         return $array;
     }
 
+
     /**
      * @param mixed[] $array
      * @return non-empty-array<mixed>
@@ -306,6 +319,7 @@ class Type
         return $array;
     }
 
+
     /**
      * @param mixed[] $array
      * @return non-empty-array<non-empty-string>
@@ -319,6 +333,7 @@ class Type
         /** @var non-empty-array<non-empty-string> $array */
         return $array;
     }
+
 
     /**
      * @param mixed[] $array
@@ -346,6 +361,7 @@ class Type
         /** @var non-empty-array<non-empty-array> $array */
         return $array;
     }
+
 
     protected function prepareErrorMessage(string $message, mixed $value, ?string $context = null): string
     {

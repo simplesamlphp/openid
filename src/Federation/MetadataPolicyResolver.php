@@ -16,6 +16,7 @@ class MetadataPolicyResolver
     ) {
     }
 
+
     /**
      * @return array<string,array<string,array<string,mixed>>>
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
@@ -53,6 +54,7 @@ class MetadataPolicyResolver
         /** @var array<string,array<string,array<string,mixed>>> $metadataPolicies */
         return $metadataPolicies;
     }
+
 
     /**
      * @param array<array<string,array<string,array<string,mixed>>>> $metadataPolicies

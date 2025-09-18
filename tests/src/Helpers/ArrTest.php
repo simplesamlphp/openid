@@ -17,6 +17,7 @@ final class ArrTest extends TestCase
         return new Arr();
     }
 
+
     public function testCanEnsureArrayDepth(): void
     {
         $arr = [];
@@ -28,6 +29,7 @@ final class ArrTest extends TestCase
         $this->assertIsArray($arr[1][2]);
     }
 
+
     public function testThrowsIfTooDeepArrayDepth(): void
     {
         $this->expectException(OpenIDException::class);
@@ -36,6 +38,7 @@ final class ArrTest extends TestCase
         $arr = [];
         $this->sut()->ensureArrayDepth($arr, ...range(0, 100));
     }
+
 
     public function testCanGetNestedValue(): void
     {
@@ -72,6 +75,7 @@ final class ArrTest extends TestCase
         );
     }
 
+
     public function testGetNestedValueThrowsIfTooDeep(): void
     {
         $this->expectException(OpenIDException::class);
@@ -80,6 +84,7 @@ final class ArrTest extends TestCase
         $arr = [];
         $this->sut()->getNestedValue($arr, ...range(0, 100));
     }
+
 
     public function testCanGetNestedValueReference(): void
     {
@@ -93,6 +98,7 @@ final class ArrTest extends TestCase
         $this->assertSame('c', $reference);
     }
 
+
     public function testGetNestedValueThrowsForNonArrayPathElements(): void
     {
         $this->expectException(OpenIDException::class);
@@ -101,6 +107,7 @@ final class ArrTest extends TestCase
         $arr = ['a' => ['b' => 'c']];
         $this->sut()->getNestedValueReference($arr, 'a', 'b', 'c');
     }
+
 
     public function testCanSetNestedValue(): void
     {
@@ -116,6 +123,7 @@ final class ArrTest extends TestCase
         $this->sut()->setNestedValue($arr, 'c', 'a', 'b');
         $this->assertSame(['a' => ['b' => 'c']], $arr);
     }
+
 
     public function testCanAddNestedValue(): void
     {
@@ -143,6 +151,7 @@ final class ArrTest extends TestCase
         $this->sut()->addNestedValue($arr, ['c'], 'a', 'b');
         $this->assertSame(['a' => ['b', 'b' => [['c']]]], $arr);
     }
+
 
     public function testAddNestedValueThrowsForNonArrayPathElements(): void
     {

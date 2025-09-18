@@ -83,6 +83,7 @@ class CredentialOfferGrantsValue implements JsonSerializable
         }
     }
 
+
     /**
      * @return array<string, mixed[]>
      */

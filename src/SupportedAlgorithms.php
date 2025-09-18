@@ -19,6 +19,7 @@ class SupportedAlgorithms
     ) {
     }
 
+
     public function getSignatureAlgorithmBag(): SignatureAlgorithmBag
     {
         return $this->signatureAlgorithmBag;

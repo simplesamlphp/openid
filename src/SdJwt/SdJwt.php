@@ -23,6 +23,7 @@ class SdJwt extends ParsedJws
 {
     public const TILDE = '~';
 
+
     public function __construct(
         JwsDecorator $jwsDecorator,
         JwsVerifierDecorator $jwsVerifierDecorator,
@@ -61,6 +62,7 @@ class SdJwt extends ParsedJws
         HashAlgorithmsEnum::from($this->helpers->type()->ensureNonEmptyString($_sdAlg, $claimKey));
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -77,15 +79,18 @@ class SdJwt extends ParsedJws
         $this->helpers->type()->ensureArray($cnf, $claimKey);
     }
 
+
     public function getDisclosureBag(): ?DisclosureBag
     {
         return $this->disclosureBag;
     }
 
+
     public function getKbJwt(): ?KbJwt
     {
         return $this->kbJwt;
     }
+
 
     public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
@@ -115,12 +120,14 @@ class SdJwt extends ParsedJws
         return $token;
     }
 
+
     public function getUndisclosedToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
     ): string {
         return parent::getToken($jwsSerializerEnum, $signatureIndex);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

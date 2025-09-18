@@ -39,10 +39,12 @@ final class ClaimsPathPointerResolverTest extends TestCase
         'nationalities' => ['British', 'Betelgeusian'],
     ];
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(ClaimsPathPointerResolver::class, $this->sut());
     }
+
 
     protected function sut(
         ?Helpers $helpers = null,
@@ -52,11 +54,13 @@ final class ClaimsPathPointerResolverTest extends TestCase
         return new ClaimsPathPointerResolver($helpers);
     }
 
+
     protected function setUp(): void
     {
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->helpersMock->method('arr')->willReturn(new Helpers\Arr());
     }
+
 
     public function testCanResolveForJsonBased(): void
     {
@@ -94,6 +98,7 @@ final class ClaimsPathPointerResolverTest extends TestCase
         );
     }
 
+
     public function testThrowsForInvalidPathComponent(): void
     {
         $this->expectException(ClaimsPathPointerException::class);
@@ -101,6 +106,7 @@ final class ClaimsPathPointerResolverTest extends TestCase
 
         $this->sut()->forJsonBased($this->jsonDataSample, [false]);
     }
+
 
     public function testThrowsForNonObjectInStringPathComponent(): void
     {
@@ -110,6 +116,7 @@ final class ClaimsPathPointerResolverTest extends TestCase
         $this->sut()->forJsonBased($this->jsonDataSample, ['nationalities', 'invalid']);
     }
 
+
     public function testThrowsForNonArrayInNullPathComponent(): void
     {
         $this->expectException(ClaimsPathPointerException::class);
@@ -118,6 +125,7 @@ final class ClaimsPathPointerResolverTest extends TestCase
         $this->sut()->forJsonBased($this->jsonDataSample, ['address', null]);
     }
 
+
     public function testThrowsForNonArrayInIntegerPathComponent(): void
     {
         $this->expectException(ClaimsPathPointerException::class);
@@ -125,6 +133,7 @@ final class ClaimsPathPointerResolverTest extends TestCase
 
         $this->sut()->forJsonBased($this->jsonDataSample, ['address', 0]);
     }
+
 
     public function testThrowsForEmptySelection(): void
     {

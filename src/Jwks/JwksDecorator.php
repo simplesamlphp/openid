@@ -15,10 +15,12 @@ class JwksDecorator implements JsonSerializable
     {
     }
 
+
     public function jwks(): JWKSet
     {
         return $this->jwks;
     }
+
 
     /**
      * @return array{keys:array<array<string,mixed>>}

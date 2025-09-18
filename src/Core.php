@@ -55,6 +55,7 @@ class Core
 
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
+
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
             new SignatureAlgorithmBag(
@@ -70,6 +71,7 @@ class Core
             ->build($timestampValidationLeeway);
     }
 
+
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
@@ -82,6 +84,7 @@ class Core
             $this->claimFactory(),
         );
     }
+
 
     public function clientAssertionFactory(): ClientAssertionFactory
     {
@@ -96,10 +99,12 @@ class Core
         );
     }
 
+
     public function helpers(): Helpers
     {
         return $this->helpers ??= new Helpers();
     }
+
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
@@ -110,11 +115,13 @@ class Core
         return $this->algorithmManagerDecoratorFactory;
     }
 
+
     public function algorithmManagerDecorator(): AlgorithmManagerDecorator
     {
         return $this->algorithmManagerDecorator ??= $this->algorithmManagerDecoratorFactory()
             ->build($this->supportedAlgorithms);
     }
+
 
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
@@ -125,6 +132,7 @@ class Core
         return $this->jwsSerializerManagerDecoratorFactory;
     }
 
+
     public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
         if (is_null($this->jwsDecoratorBuilderFactory)) {
@@ -133,6 +141,7 @@ class Core
 
         return $this->jwsDecoratorBuilderFactory;
     }
+
 
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
@@ -143,10 +152,12 @@ class Core
         return $this->jwsVerifierDecoratorFactory;
     }
 
+
     public function jwksDecoratorFactory(): JwksDecoratorFactory
     {
         return $this->jwksDecoratorFactory ??= new JwksDecoratorFactory();
     }
+
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
@@ -157,6 +168,7 @@ class Core
         return $this->dateIntervalDecoratorFactory;
     }
 
+
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
         if (is_null($this->jwsSerializerManagerDecorator)) {
@@ -166,6 +178,7 @@ class Core
 
         return $this->jwsSerializerManagerDecorator;
     }
+
 
     public function jwsDecoratorBuilder(): JwsDecoratorBuilder
     {
@@ -180,6 +193,7 @@ class Core
         return $this->jwsDecoratorBuilder;
     }
 
+
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
         if (is_null($this->jwsVerifierDecorator)) {
@@ -190,6 +204,7 @@ class Core
 
         return $this->jwsVerifierDecorator;
     }
+
 
     public function claimFactory(): ClaimFactory
     {

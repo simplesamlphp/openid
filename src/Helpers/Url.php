@@ -12,6 +12,7 @@ class Url
         return (bool)filter_var($url, FILTER_VALIDATE_URL);
     }
 
+
     /**
      * Add (new) params to URL while preserving existing ones (if any).
      * @param array<string,mixed> $params

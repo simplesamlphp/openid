@@ -19,6 +19,7 @@ final class TypeTest extends TestCase
         return new Type();
     }
 
+
     public function testCanEnsureString(): void
     {
         $this->assertSame('a', $this->sut()->ensureString('a'));
@@ -28,6 +29,7 @@ final class TypeTest extends TestCase
         $this->assertSame('', $this->sut()->ensureString(false));
     }
 
+
     public function testEnsureStringThrowsForNonScalar(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -35,6 +37,7 @@ final class TypeTest extends TestCase
 
         $this->sut()->ensureString(null);
     }
+
 
     public function testEnsureStringThrowsForNonStringableObject(): void
     {
@@ -44,11 +47,13 @@ final class TypeTest extends TestCase
         $this->sut()->ensureString(new \stdClass());
     }
 
+
     public function testCanEnsureNonEmptyString(): void
     {
         $this->assertSame('a', $this->sut()->ensureNonEmptyString('a'));
         $this->assertSame('1', $this->sut()->ensureNonEmptyString(true));
     }
+
 
     public function testEnsureNonEmptyStringThrowsForEmptyString(): void
     {
@@ -58,6 +63,7 @@ final class TypeTest extends TestCase
         $this->sut()->ensureNonEmptyString('');
     }
 
+
     public function testEnsureNonEmptyStringThrowsForNull(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -66,6 +72,7 @@ final class TypeTest extends TestCase
         $this->sut()->ensureNonEmptyString(null);
     }
 
+
     public function testEnsureNonEmptyStringThrowsForFalse(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -73,6 +80,7 @@ final class TypeTest extends TestCase
 
         $this->sut()->ensureNonEmptyString(false);
     }
+
 
     public function testCanEnsureArray(): void
     {
@@ -114,6 +122,7 @@ final class TypeTest extends TestCase
         );
     }
 
+
     public function testEnsureArrayThrowsForUnsafeCasting(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -121,6 +130,7 @@ final class TypeTest extends TestCase
 
         $this->sut()->ensureArray(null);
     }
+
 
     public function testCanEnsureArrayWithKeysAsStrings(): void
     {
@@ -147,6 +157,7 @@ final class TypeTest extends TestCase
         );
     }
 
+
     public function testCanEnsureArrayWithKeysAsNonEmptyStrings(): void
     {
         $this->assertSame(
@@ -172,6 +183,7 @@ final class TypeTest extends TestCase
         );
     }
 
+
     public function testCanEnsureArrayWithValuesAsStrings(): void
     {
         $this->assertSame(
@@ -179,6 +191,7 @@ final class TypeTest extends TestCase
             $this->sut()->ensureArrayWithValuesAsStrings([0, 1, 2]),
         );
     }
+
 
     public function testCanEnsureArrayWithValuesAsNonEmptyStrings(): void
     {
@@ -188,6 +201,7 @@ final class TypeTest extends TestCase
         );
     }
 
+
     public function testCanEnsureArrayWithKeysAndValuesAsStrings(): void
     {
         $this->assertSame(
@@ -195,6 +209,7 @@ final class TypeTest extends TestCase
             $this->sut()->ensureArrayWithKeysAndValuesAsStrings([0, 1, 2]),
         );
     }
+
 
     public function testCanEnsureArrayWithKeysAndValuesAsNonEmptyStrings(): void
     {
@@ -213,11 +228,13 @@ final class TypeTest extends TestCase
         );
     }
 
+
     public function testCanEnsureInt(): void
     {
         $this->assertSame(1, $this->sut()->ensureInt(1));
         $this->assertSame(1, $this->sut()->ensureInt('1'));
     }
+
 
     public function testEnsureIntThrowsForNonNull(): void
     {

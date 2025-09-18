@@ -44,6 +44,7 @@ final class TrustChainResolverTest extends TestCase
 
     protected array $configChainSample = [];
 
+
     protected function setUp(): void
     {
         $this->entityStatementFetcherMock = $this->createMock(EntityStatementFetcher::class);
@@ -65,6 +66,7 @@ final class TrustChainResolverTest extends TestCase
             't' => $this->trustAnchorEntityConfigurationMock,
         ];
     }
+
 
     protected function sut(
         ?EntityStatementFetcher $entityStatementFetcher = null,
@@ -97,10 +99,12 @@ final class TrustChainResolverTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustChainResolver::class, $this->sut());
     }
+
 
     public function testCanGetConfigurationChains(): void
     {
@@ -130,6 +134,7 @@ final class TrustChainResolverTest extends TestCase
         $this->assertCount(3, $configurationChains[0]);
     }
 
+
     public function testWontStartGettingConfigurationChainsIfNoTrustAnchorIds(): void
     {
         $this->loggerMock
@@ -139,6 +144,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->assertEmpty($this->sut()->getConfigurationChains('l', []));
     }
+
 
     public function testCanLimitMaximumConfigurationChainDepth(): void
     {
@@ -168,6 +174,7 @@ final class TrustChainResolverTest extends TestCase
         $this->assertEmpty($sut->getConfigurationChains('l', ['t']));
     }
 
+
     public function testCanDetectLoopInConfigurationChains(): void
     {
         $this->entityStatementFetcherMock
@@ -187,6 +194,7 @@ final class TrustChainResolverTest extends TestCase
         $this->assertEmpty($this->sut()->getConfigurationChains('l', ['t']));
     }
 
+
     public function testConfigurationChainIsEmptyOnConfigurationFetchError(): void
     {
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
@@ -194,6 +202,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->assertEmpty($this->sut()->getConfigurationChains('l', ['t']));
     }
+
 
     public function testCanBailOnMaxAuthorityHintsRule(): void
     {
@@ -215,6 +224,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->assertEmpty($sut->getConfigurationChains('l', ['t']));
     }
+
 
     public function testCanResolveTrustChain(): void
     {
@@ -241,6 +251,7 @@ final class TrustChainResolverTest extends TestCase
         $this->sut()->for('l', ['t']);
     }
 
+
     public function testCanResolveMultipleTrustChains(): void
     {
         $this->entityStatementFetcherMock
@@ -259,6 +270,7 @@ final class TrustChainResolverTest extends TestCase
         $this->sut()->for('l', ['i', 't']);
     }
 
+
     public function testCanResolveTrustChainForTrustAnchorOnly(): void
     {
         $this->entityStatementFetcherMock
@@ -273,6 +285,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->sut()->for('t', ['t']);
     }
+
 
     public function testTrustChainResolveChecksCacheFirst(): void
     {
@@ -293,6 +306,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->sut()->for('l', ['t']);
     }
+
 
     public function testCanWarnOnCacheErrorDuringTrustChainResolution(): void
     {
@@ -315,6 +329,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->sut()->for('l', ['t']);
     }
+
 
     public function testCanWarnOnTrustChainResolutionSubordinateStatementFetchError(): void
     {
@@ -345,6 +360,7 @@ final class TrustChainResolverTest extends TestCase
         $this->sut()->for('l', ['t']);
     }
 
+
     public function testTrustChainResolveThrowsOnTrustChainBagFactoryError(): void
     {
         $this->entityStatementFetcherMock
@@ -373,6 +389,7 @@ final class TrustChainResolverTest extends TestCase
 
         $this->sut()->for('l', ['t']);
     }
+
 
     public function testTrustChainResolveThrowsOnValidationStartError(): void
     {

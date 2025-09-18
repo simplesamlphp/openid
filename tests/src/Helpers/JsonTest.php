@@ -16,6 +16,7 @@ final class JsonTest extends TestCase
         return new Json();
     }
 
+
     public function testEncodeDecode(): void
     {
         $arr = ['a' => 'b'];

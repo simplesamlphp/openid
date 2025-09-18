@@ -35,8 +35,8 @@ final class JwsFetcherTest extends TestCase
 
     protected MockObject $responseMock;
 
-
     protected MockObject $parsedJwsMock;
+
 
     protected function setUp(): void
     {
@@ -53,6 +53,7 @@ final class JwsFetcherTest extends TestCase
 
         $this->parsedJwsMock = $this->createMock(ParsedJws::class);
     }
+
 
     protected function sut(
         ?ParsedJwsFactory $parsedJwsFactory = null,
@@ -76,10 +77,12 @@ final class JwsFetcherTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsFetcher::class, $this->sut());
     }
+
 
     public function testCanFetchFromCache(): void
     {
@@ -92,6 +95,7 @@ final class JwsFetcherTest extends TestCase
 
         $this->assertInstanceOf(ParsedJws::class, $this->sut()->fromCache('uri'));
     }
+
 
     public function testCanFetchFromCacheOrNetwork(): void
     {
@@ -111,6 +115,7 @@ final class JwsFetcherTest extends TestCase
         );
     }
 
+
     public function testFetchFromNetworkThrowsForInvalidResponseStatusCode(): void
     {
         $this->artifactFetcherMock->expects($this->once())->method('fromNetwork')
@@ -126,6 +131,7 @@ final class JwsFetcherTest extends TestCase
 
         $this->sut()->fromNetwork('uri');
     }
+
 
     public function testChecksForExpectedContentTypeHttpHeader(): void
     {
@@ -149,6 +155,7 @@ final class JwsFetcherTest extends TestCase
 
         $sut->fromNetwork('uri');
     }
+
 
     public function testWillUseJwsExpirationTimeWhenConsideringTtlForCaching(): void
     {

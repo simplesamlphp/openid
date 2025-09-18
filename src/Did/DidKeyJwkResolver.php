@@ -18,6 +18,7 @@ class DidKeyJwkResolver
     ) {
     }
 
+
     /**
      * Extract JWK from a did:key value.
      *
@@ -88,6 +89,7 @@ class DidKeyJwkResolver
             throw new DidException('Error processing did:key: ' . $exception->getMessage(), 0, $exception);
         }
     }
+
 
     /**
      * Decode a variable integer (varint) from bytes.
@@ -223,6 +225,7 @@ class DidKeyJwkResolver
         ];
     }
 
+
     /**
      * Create a JWK for an X25519 public key.
      *
@@ -238,6 +241,7 @@ class DidKeyJwkResolver
             'use' => 'enc',
         ];
     }
+
 
     /**
      * Create a JWK for a Secp256k1 public key.
@@ -271,6 +275,7 @@ class DidKeyJwkResolver
             'use' => 'sig',
         ];
     }
+
 
     /**
      * Create a JWK for a P-256 (NIST) public key.
@@ -310,6 +315,7 @@ class DidKeyJwkResolver
         ];
     }
 
+
     /**
      * Create a JWK for a P-384 (NIST) public key.
      *
@@ -338,6 +344,7 @@ class DidKeyJwkResolver
         ];
     }
 
+
     /**
      * Create a JWK for a P-521 (NIST) public key.
      *
@@ -364,6 +371,7 @@ class DidKeyJwkResolver
             'use' => 'sig',
         ];
     }
+
 
     /**
      * Create a JWK from raw JSON data.

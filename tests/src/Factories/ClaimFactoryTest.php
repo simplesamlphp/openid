@@ -38,10 +38,12 @@ final class ClaimFactoryTest extends TestCase
         ],
     ];
 
+
     protected function setUp(): void
     {
         $this->helpers = new Helpers();
     }
+
 
     protected function sut(
         ?Helpers $helpers = null,
@@ -53,15 +55,18 @@ final class ClaimFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(ClaimFactory::class, $this->sut());
     }
 
+
     public function testCanGetForFederation(): void
     {
         $this->assertInstanceOf(FederationClaimFactory::class, $this->sut()->forFederation());
     }
+
 
     public function testCanBuildGeneric(): void
     {
@@ -71,6 +76,7 @@ final class ClaimFactoryTest extends TestCase
         );
     }
 
+
     public function testCanBuildJwks(): void
     {
         $this->assertInstanceOf(
@@ -79,6 +85,7 @@ final class ClaimFactoryTest extends TestCase
         );
     }
 
+
     public function testBuildJwksThrowsIfNoKeysKey(): void
     {
         $this->expectException(JwksException::class);
@@ -86,6 +93,7 @@ final class ClaimFactoryTest extends TestCase
 
         $this->sut()->buildJwks([]);
     }
+
 
     public function testBuildJwksThrowsIfNoJwkKey(): void
     {

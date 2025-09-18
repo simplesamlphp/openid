@@ -15,9 +15,11 @@ class HttpClientDecorator
 {
     public const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
 
+
     public function __construct(public readonly Client $client = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG))
     {
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\HttpException

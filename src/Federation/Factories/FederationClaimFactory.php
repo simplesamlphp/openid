@@ -21,6 +21,7 @@ class FederationClaimFactory
     ) {
     }
 
+
     /**
      * @param array<array-key,mixed> $otherClaims
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -36,6 +37,7 @@ class FederationClaimFactory
 
         return new TrustMarksClaimValue($trustMarkType, $trustMark, $otherClaims);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
@@ -71,10 +73,12 @@ class FederationClaimFactory
         );
     }
 
+
     public function buildTrustMarksClaimBag(TrustMarksClaimValue ...$trustMarksClaimValues): TrustMarksClaimBag
     {
         return new TrustMarksClaimBag(...$trustMarksClaimValues);
     }
+
 
     public function buildTrustMarkOwnersClaimValue(
         mixed $trustMarkType,
@@ -94,6 +98,7 @@ class FederationClaimFactory
             $otherClaims,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -140,6 +145,7 @@ class FederationClaimFactory
 
         return $this->buildTrustMarkOwnersClaimBag(...$trustMarkOwnersClaimValues);
     }
+
 
     public function buildTrustMarkOwnersClaimBag(
         TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValues,

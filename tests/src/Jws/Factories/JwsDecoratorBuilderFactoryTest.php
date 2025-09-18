@@ -27,6 +27,7 @@ final class JwsDecoratorBuilderFactoryTest extends TestCase
 
     protected MockObject $helpersMock;
 
+
     protected function setUp(): void
     {
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
@@ -38,15 +39,18 @@ final class JwsDecoratorBuilderFactoryTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
     }
 
+
     protected function sut(): JwsDecoratorBuilderFactory
     {
         return new JwsDecoratorBuilderFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsDecoratorBuilderFactory::class, $this->sut());
     }
+
 
     public function testCanBuild(): void
     {

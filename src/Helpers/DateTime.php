@@ -39,6 +39,7 @@ class DateTime
         return new DateTimeImmutable($input, $tz);
     }
 
+
     /**
      * @throws \Exception
      */
@@ -46,6 +47,7 @@ class DateTime
     {
         return new DateTimeImmutable($datetime, new DateTimeZone('UTC'));
     }
+
 
     /**
      * @throws \Exception

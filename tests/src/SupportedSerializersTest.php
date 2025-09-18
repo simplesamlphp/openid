@@ -15,10 +15,12 @@ final class SupportedSerializersTest extends TestCase
 {
     protected MockObject $jwsSerializerBagMock;
 
+
     protected function setUp(): void
     {
         $this->jwsSerializerBagMock = $this->createMock(JwsSerializerBag::class);
     }
+
 
     protected function sut(
         ?JwsSerializerBag $jwsSerializerBag = null,
@@ -28,10 +30,12 @@ final class SupportedSerializersTest extends TestCase
         return new SupportedSerializers($jwsSerializerBag);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(SupportedSerializers::class, $this->sut());
     }
+
 
     public function testCanGetJwsSerializerBag(): void
     {

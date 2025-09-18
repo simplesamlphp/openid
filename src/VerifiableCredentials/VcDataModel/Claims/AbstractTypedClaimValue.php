@@ -12,6 +12,7 @@ abstract class AbstractTypedClaimValue implements ClaimInterface
     /** @var non-empty-array<mixed> */
     protected readonly array $data;
 
+
     /**
      * @param mixed[] $otherClaims
      */
@@ -25,17 +26,21 @@ abstract class AbstractTypedClaimValue implements ClaimInterface
         );
     }
 
+
     public function getType(): TypeClaimValue
     {
         return $this->typeClaimValue;
     }
+
 
     public function getKey(int|string $key): mixed
     {
         return $this->data[$key] ?? null;
     }
 
+
     abstract public function getName(): string;
+
 
     /**
      * @return non-empty-array<mixed>
@@ -44,6 +49,7 @@ abstract class AbstractTypedClaimValue implements ClaimInterface
     {
         return $this->data;
     }
+
 
     /**
      * @return non-empty-array<mixed>

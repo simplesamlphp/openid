@@ -15,11 +15,13 @@ final class GenericClaimTest extends TestCase
 
     protected string $nameSample;
 
+
     protected function setUp(): void
     {
         $this->valueSample = 'sample-value';
         $this->nameSample = 'sample-name';
     }
+
 
     protected function sut(
         mixed $value = null,
@@ -34,10 +36,12 @@ final class GenericClaimTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(GenericClaim::class, $this->sut());
     }
+
 
     public function testCanGetProperties(): void
     {

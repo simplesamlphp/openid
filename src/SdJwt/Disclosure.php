@@ -22,6 +22,7 @@ class Disclosure implements JsonSerializable
         ClaimsEnum::DotDotDot->value,
     ];
 
+
     /**
      * @var non-empty-string|null
      */
@@ -31,6 +32,7 @@ class Disclosure implements JsonSerializable
      * @var non-empty-string|null
      */
     protected ?string $digest = null;
+
 
     /**
      * @param array<non-empty-string> $path
@@ -53,20 +55,24 @@ class Disclosure implements JsonSerializable
         }
     }
 
+
     public function getSalt(): string
     {
         return $this->salt;
     }
+
 
     public function getValue(): mixed
     {
         return $this->value;
     }
 
+
     public function getName(): ?string
     {
         return $this->name;
     }
+
 
     /**
      * @return array<non-empty-string>
@@ -75,6 +81,7 @@ class Disclosure implements JsonSerializable
     {
         return $this->path;
     }
+
 
     /**
      * @return array<mixed>
@@ -88,6 +95,7 @@ class Disclosure implements JsonSerializable
         return [$this->salt, $this->name, $this->value];
     }
 
+
     public function getType(): SdJwtDisclosureType
     {
         if ($this->name === null) {
@@ -96,6 +104,7 @@ class Disclosure implements JsonSerializable
 
         return SdJwtDisclosureType::ObjectProperty;
     }
+
 
     public function getEncoded(): string
     {
@@ -107,6 +116,7 @@ class Disclosure implements JsonSerializable
             ),
         );
     }
+
 
     /**
      * @return non-empty-string
@@ -124,6 +134,7 @@ class Disclosure implements JsonSerializable
             ),
         );
     }
+
 
     /**
      * @return non-empty-string|array{"...": non-empty-string}

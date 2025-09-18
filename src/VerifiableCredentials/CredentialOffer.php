@@ -15,6 +15,7 @@ class CredentialOffer implements \JsonSerializable
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\CredentialOfferException
      * @return string|mixed[]

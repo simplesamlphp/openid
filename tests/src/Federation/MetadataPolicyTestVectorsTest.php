@@ -31,6 +31,7 @@ final class MetadataPolicyTestVectorsTest extends TestCase
 
     protected static MetadataPolicyApplicator $metadataPolicyApplicator;
 
+
     public static function setUpBeforeClass(): void
     {
         self::$testVectors = json_decode(
@@ -45,10 +46,12 @@ final class MetadataPolicyTestVectorsTest extends TestCase
         self::$metadataPolicyApplicator = new MetadataPolicyApplicator($helpers);
     }
 
+
     public function testCanLoadTestVectors(): void
     {
         $this->assertNotEmpty(self::$testVectors);
     }
+
 
     public function testConformsToAllTestVectors(): void
     {

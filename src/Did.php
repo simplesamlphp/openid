@@ -12,12 +12,14 @@ class Did
 
     protected ?Helpers $helpers = null;
 
+
     public function didKeyResolver(): DidKeyJwkResolver
     {
         return $this->didKeyResolver ??= new DidKeyJwkResolver(
             $this->helpers(),
         );
     }
+
 
     public function helpers(): Helpers
     {

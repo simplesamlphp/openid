@@ -12,6 +12,7 @@ class VcIssuerClaimValue implements ClaimInterface
     /** @var non-empty-array<mixed> */
     protected array $data;
 
+
     /**
      * @param non-empty-string $id
      * @param mixed[] $otherClaims
@@ -26,6 +27,7 @@ class VcIssuerClaimValue implements ClaimInterface
         );
     }
 
+
     /**
      * @return non-empty-string
      */
@@ -34,15 +36,18 @@ class VcIssuerClaimValue implements ClaimInterface
         return $this->id;
     }
 
+
     public function getKey(int|string $key): mixed
     {
         return $this->data[$key] ?? null;
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Issuer->value;
     }
+
 
     /**
      * @return non-empty-array<mixed>
@@ -51,6 +56,7 @@ class VcIssuerClaimValue implements ClaimInterface
     {
         return $this->data;
     }
+
 
     /**
      * @return non-empty-array<mixed>

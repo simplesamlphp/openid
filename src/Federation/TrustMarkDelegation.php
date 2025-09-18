@@ -21,6 +21,7 @@ class TrustMarkDelegation extends ParsedJws
         return parent::getIssuer() ?? throw new TrustMarkDelegationException('No Issuer claim found.');
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -31,6 +32,7 @@ class TrustMarkDelegation extends ParsedJws
     {
         return parent::getSubject() ?? throw new TrustMarkDelegationException('No Subject claim found.');
     }
+
 
     /**
      * @return non-empty-string
@@ -48,6 +50,7 @@ class TrustMarkDelegation extends ParsedJws
         return $this->helpers->type()->ensureNonEmptyString($trustMarkType);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
@@ -56,6 +59,7 @@ class TrustMarkDelegation extends ParsedJws
     {
         return parent::getIssuedAt() ?? throw new TrustMarkDelegationException('No Issued At claim found.');
     }
+
 
     /**
      * @return ?non-empty-string
@@ -71,6 +75,7 @@ class TrustMarkDelegation extends ParsedJws
         $this->helpers->type()->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -80,6 +85,7 @@ class TrustMarkDelegation extends ParsedJws
     {
         return parent::getKeyId() ?? throw new TrustMarkDelegationException('No KeyId header claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
@@ -96,6 +102,7 @@ class TrustMarkDelegation extends ParsedJws
 
         return $typ;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

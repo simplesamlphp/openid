@@ -53,6 +53,7 @@ final class CoreTest extends TestCase
 
     protected MockObject $loggerMock;
 
+
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
@@ -60,6 +61,7 @@ final class CoreTest extends TestCase
         $this->timestampValidationLeeway = new DateInterval('PT1M');
         $this->loggerMock = $this->createMock(LoggerInterface::class);
     }
+
 
     protected function sut(
         ?SupportedAlgorithms $supportedAlgorithms = null,
@@ -80,6 +82,7 @@ final class CoreTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(
@@ -87,6 +90,7 @@ final class CoreTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testCanBuildTools(): void
     {

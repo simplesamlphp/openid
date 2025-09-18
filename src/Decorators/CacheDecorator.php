@@ -13,6 +13,7 @@ class CacheDecorator
     {
     }
 
+
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -20,6 +21,7 @@ class CacheDecorator
     {
         return $this->cache->get(self::keyFor($keyElement, ...$keyElements), $default);
     }
+
 
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
@@ -29,6 +31,7 @@ class CacheDecorator
         $this->cache->set(self::keyFor($keyElement, ...$keyElements), $value, $ttl);
     }
 
+
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -37,6 +40,7 @@ class CacheDecorator
         return $this->cache->has(self::keyFor($keyElement, ...$keyElements));
     }
 
+
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
@@ -44,6 +48,7 @@ class CacheDecorator
     {
         return $this->cache->delete(self::keyFor($keyElement, ...$keyElements));
     }
+
 
     public static function keyFor(string $element, string ...$elements): string
     {

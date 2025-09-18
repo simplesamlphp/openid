@@ -31,8 +31,6 @@ final class TrustMarkFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
-
     protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -46,7 +44,6 @@ final class TrustMarkFactoryTest extends TestCase
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
-
 
     protected MockObject $claimFactoryMock;
 
@@ -67,6 +64,7 @@ final class TrustMarkFactoryTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -103,6 +101,7 @@ final class TrustMarkFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -131,10 +130,12 @@ final class TrustMarkFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarkFactory::class, $this->sut());
     }
+
 
     public function testCanBuild(): void
     {

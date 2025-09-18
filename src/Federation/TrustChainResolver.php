@@ -18,6 +18,7 @@ class TrustChainResolver
 
     protected int $maxAuthorityHints;
 
+
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
         protected readonly TrustChainFactory $trustChainFactory,
@@ -31,6 +32,7 @@ class TrustChainResolver
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
         $this->maxAuthorityHints = min(12, max(1, $maxAuthorityHints));
     }
+
 
     /**
      * Get entity configuration statements chains up to given Trust Anchors.
@@ -161,6 +163,7 @@ class TrustChainResolver
 
         return $configurationChains;
     }
+
 
     /**
      * Resolve trust chains for given entity and trust anchor IDs.
@@ -301,6 +304,7 @@ class TrustChainResolver
         return $trustChainBag;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @phpstan-ignore missingType.iterableValue (We validate it here)
@@ -324,10 +328,12 @@ class TrustChainResolver
         }
     }
 
+
     public function getMaxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
     }
+
 
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException

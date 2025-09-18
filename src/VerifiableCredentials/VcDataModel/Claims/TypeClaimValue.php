@@ -17,10 +17,12 @@ class TypeClaimValue implements ClaimInterface
     ) {
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Type->value;
     }
+
 
     /**
      * @return non-empty-string[]
@@ -29,6 +31,7 @@ class TypeClaimValue implements ClaimInterface
     {
         return $this->types;
     }
+
 
     /**
      * @return non-empty-string|non-empty-string[]
@@ -43,6 +46,7 @@ class TypeClaimValue implements ClaimInterface
 
         return $value;
     }
+
 
     /**
      * @param non-empty-string $type

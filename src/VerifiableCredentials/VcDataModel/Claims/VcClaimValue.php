@@ -31,6 +31,7 @@ class VcClaimValue implements ClaimInterface
     ) {
     }
 
+
     /**
      * @return mixed[]
      */
@@ -39,10 +40,12 @@ class VcClaimValue implements ClaimInterface
         return $this->getValue();
     }
 
+
     public function getAtContext(): VcAtContextClaimValue
     {
         return $this->atContextClaimValue;
     }
+
 
     /**
      * @return non-empty-string|null
@@ -52,50 +55,60 @@ class VcClaimValue implements ClaimInterface
         return $this->id;
     }
 
+
     public function getType(): TypeClaimValue
     {
         return $this->typeClaimValue;
     }
+
 
     public function getCredentialSubject(): VcCredentialSubjectClaimBag
     {
         return $this->credentialSubjectClaimBag;
     }
 
+
     public function getIssuer(): VcIssuerClaimValue
     {
         return $this->issuerClaimValue;
     }
+
 
     public function getIssuanceDate(): DateTimeImmutable
     {
         return $this->issuanceDate;
     }
 
+
     public function getProof(): ?VcProofClaimValue
     {
         return $this->proofClaimValue;
     }
+
 
     public function getExpirationDate(): ?DateTimeImmutable
     {
         return $this->expirationDate;
     }
 
+
     public function getCredentialStatus(): ?VcCredentialStatusClaimValue
     {
         return $this->credentialStatusClaimValue;
     }
+
 
     public function getCredentialSchema(): ?VcCredentialSchemaClaimBag
     {
         return $this->credentialSchemaClaimBag;
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Vc->value;
     }
+
 
     /**
      * @return mixed[]

@@ -21,7 +21,6 @@ final class AlgorithmManagerDecoratorFactoryTest extends TestCase
     protected MockObject $supportedAlgorithmsMock;
 
 
-
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
@@ -36,10 +35,12 @@ final class AlgorithmManagerDecoratorFactoryTest extends TestCase
             ]);
     }
 
+
     protected function sut(): AlgorithmManagerDecoratorFactory
     {
         return new AlgorithmManagerDecoratorFactory();
     }
+
 
     public function testCanCreateInstance(): void
     {
@@ -48,6 +49,7 @@ final class AlgorithmManagerDecoratorFactoryTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testCanBuild(): void
     {

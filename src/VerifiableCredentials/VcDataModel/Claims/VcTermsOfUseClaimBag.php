@@ -12,6 +12,7 @@ class VcTermsOfUseClaimBag implements ClaimInterface
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValue[] */
     protected array $vcTermsOfUseClaimValueValues;
 
+
     public function __construct(
         VcTermsOfUseClaimValue $vcTermsOfUseClaimValue,
         VcTermsOfUseClaimValue ...$vcTermsOfUseClaimValueValues,
@@ -21,6 +22,7 @@ class VcTermsOfUseClaimBag implements ClaimInterface
             ...$vcTermsOfUseClaimValueValues,
         ];
     }
+
 
     /**
      * @return mixed[]
@@ -35,10 +37,12 @@ class VcTermsOfUseClaimBag implements ClaimInterface
         );
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Terms_Of_Use->value;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValue[]

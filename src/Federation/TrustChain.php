@@ -55,6 +55,7 @@ class TrustChain implements JsonSerializable
      */
     protected array $resolvedMetadata = [];
 
+
     public function __construct(
         protected readonly DateIntervalDecorator $timestampValidationLeewayDecorator,
         protected readonly MetadataPolicyResolver $metadataPolicyResolver,
@@ -63,6 +64,7 @@ class TrustChain implements JsonSerializable
     ) {
     }
 
+
     /**
      * Check if the trust chain is (currently) empty, meaning there are no entity statements present in the chain.
      */
@@ -70,6 +72,7 @@ class TrustChain implements JsonSerializable
     {
         return $this->entities === [];
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -81,6 +84,7 @@ class TrustChain implements JsonSerializable
 
         return $this->expirationTime ?? throw new TrustChainException('Empty expiration time encountered.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -95,6 +99,7 @@ class TrustChain implements JsonSerializable
         return $leaf;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -104,6 +109,7 @@ class TrustChain implements JsonSerializable
 
         return $this->entities[1] ?? null;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -119,6 +125,7 @@ class TrustChain implements JsonSerializable
 
         return $trustAnchor;
     }
+
 
     /**
      * @return ?array<string,mixed>
@@ -140,6 +147,7 @@ class TrustChain implements JsonSerializable
         return $this->resolvedMetadata[$entityTypeEnum->value] ?? null;
     }
 
+
     /**
      * Get resolved chain length.
      *
@@ -151,6 +159,7 @@ class TrustChain implements JsonSerializable
 
         return count($this->entities);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -167,6 +176,7 @@ class TrustChain implements JsonSerializable
         $this->entities[] = $entityStatement;
         $this->updateExpirationTime($entityStatement);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -186,6 +196,7 @@ class TrustChain implements JsonSerializable
         $this->gatherMetadataPolicies($entityStatement);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -204,6 +215,7 @@ class TrustChain implements JsonSerializable
 
         $this->isResolved = true;
     }
+
 
     /**
      * Add a Trust Anchor Entity Configuration to create a single entity statement chain. This accommodates a special
@@ -226,6 +238,7 @@ class TrustChain implements JsonSerializable
         $this->isResolved = true;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -244,6 +257,7 @@ class TrustChain implements JsonSerializable
         $this->validateExpirationTime();
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -260,6 +274,7 @@ class TrustChain implements JsonSerializable
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -269,6 +284,7 @@ class TrustChain implements JsonSerializable
             throw new TrustChainException('Trust Chain is expected to be resolved at this point.');
         }
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -280,6 +296,7 @@ class TrustChain implements JsonSerializable
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -290,6 +307,7 @@ class TrustChain implements JsonSerializable
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -299,6 +317,7 @@ class TrustChain implements JsonSerializable
             throw new TrustChainException('Trust Chain is expected to be non-empty at this point.');
         }
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -313,6 +332,7 @@ class TrustChain implements JsonSerializable
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -326,6 +346,7 @@ class TrustChain implements JsonSerializable
         // Verify with own keys from configuration.
         $entityStatement->verifyWithKeySet();
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -356,6 +377,7 @@ class TrustChain implements JsonSerializable
         $previousStatement->verifyWithKeySet($entityStatement->getJwks()->getValue());
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      *
@@ -371,6 +393,7 @@ class TrustChain implements JsonSerializable
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -382,6 +405,7 @@ class TrustChain implements JsonSerializable
 
         $this->criticalMetadataPolicyOperators = array_merge($this->criticalMetadataPolicyOperators, $operators);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -397,6 +421,7 @@ class TrustChain implements JsonSerializable
             array_unshift($this->metadataPolicies, $policy);
         }
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
@@ -469,6 +494,7 @@ class TrustChain implements JsonSerializable
             $leafMetadataEntityType,
         );
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\Federation\EntityStatement[]

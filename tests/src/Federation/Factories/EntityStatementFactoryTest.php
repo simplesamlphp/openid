@@ -45,7 +45,6 @@ final class EntityStatementFactoryTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -100,6 +99,7 @@ final class EntityStatementFactoryTest extends TestCase
 
     protected array $validPayload;
 
+
     protected function setUp(): void
     {
         $this->signatureMock = $this->createMock(Signature::class);
@@ -135,6 +135,7 @@ final class EntityStatementFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -163,10 +164,12 @@ final class EntityStatementFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(EntityStatementFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromToken(): void
     {

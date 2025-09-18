@@ -17,6 +17,7 @@ class ClaimsPathPointerResolver
     ) {
     }
 
+
     /**
      * @see https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-processing
      *

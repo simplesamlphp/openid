@@ -15,15 +15,18 @@ class GenericClaim implements ClaimInterface
     ) {
     }
 
+
     public function getValue(): mixed
     {
         return $this->value;
     }
 
+
     public function getName(): string
     {
         return $this->name;
     }
+
 
     /**
      * @return array<non-empty-string,mixed>

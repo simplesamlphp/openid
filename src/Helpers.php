@@ -31,40 +31,48 @@ class Helpers
 
     protected static ?Random $random = null;
 
+
     public function url(): Url
     {
         return self::$url ??= new Url();
     }
+
 
     public function json(): Json
     {
         return self::$json ??= new Json();
     }
 
+
     public function arr(): Arr
     {
         return self::$arr ??= new Arr();
     }
+
 
     public function type(): Type
     {
         return self::$type ??= new Type();
     }
 
+
     public function dateTime(): DateTime
     {
         return self::$dateTime ??= new DateTime();
     }
+
 
     public function base64Url(): Base64Url
     {
         return self::$base64Url ??= new Base64Url();
     }
 
+
     public function hash(): Hash
     {
         return self::$hash ??= new Hash();
     }
+
 
     public function random(): Random
     {

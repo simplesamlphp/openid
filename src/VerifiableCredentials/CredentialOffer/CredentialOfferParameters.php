@@ -19,6 +19,7 @@ class CredentialOfferParameters implements \JsonSerializable
     ) {
     }
 
+
     /**
      * @return array<string, mixed>
      */

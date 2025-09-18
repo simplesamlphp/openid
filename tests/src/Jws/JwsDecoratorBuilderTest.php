@@ -27,6 +27,7 @@ final class JwsDecoratorBuilderTest extends TestCase
 
     protected MockObject $jwsDecoratorMock;
 
+
     protected function setUp(): void
     {
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
@@ -34,6 +35,7 @@ final class JwsDecoratorBuilderTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
     }
+
 
     protected function sut(
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
@@ -51,10 +53,12 @@ final class JwsDecoratorBuilderTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsDecoratorBuilder::class, $this->sut());
     }
+
 
     public function testCanParseToken(): void
     {
@@ -63,6 +67,7 @@ final class JwsDecoratorBuilderTest extends TestCase
 
         $this->assertInstanceOf(JwsDecorator::class, $this->sut()->fromToken('token'));
     }
+
 
     public function testThrowsOnTokenParseError(): void
     {

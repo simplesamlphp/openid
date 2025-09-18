@@ -34,6 +34,7 @@ class VcDataModelClaimFactory
     ) {
     }
 
+
     /**
      * @param non-empty-string|null $vcId
      */
@@ -69,6 +70,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param mixed[] $otherContexts
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -77,6 +79,7 @@ class VcDataModelClaimFactory
     {
         return new VcAtContextClaimValue($baseContext, $otherContexts);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -99,6 +102,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param non-empty-array<mixed> $data
      */
@@ -106,6 +110,7 @@ class VcDataModelClaimFactory
     {
         return new VcCredentialSubjectClaimValue($data);
     }
+
 
     /**
      * @param mixed[] $data
@@ -155,6 +160,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -171,6 +177,7 @@ class VcDataModelClaimFactory
         return new VcIssuerClaimValue($id, $data);
     }
 
+
     /**
      * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -186,6 +193,7 @@ class VcDataModelClaimFactory
 
         return new VcProofClaimValue($typeClaimValue, $data);
     }
+
 
     /**
      * @param mixed[] $data
@@ -207,6 +215,7 @@ class VcDataModelClaimFactory
         return new VcCredentialStatusClaimValue($id, $typeClaimValue, $data);
     }
 
+
     /**
      * @param non-empty-array<mixed> $data
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -226,6 +235,7 @@ class VcDataModelClaimFactory
 
         return new VcCredentialSchemaClaimValue($id, $typeClaimValue, $data);
     }
+
 
     /**
      * @param mixed[] $data
@@ -255,6 +265,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param non-empty-array<mixed> $data
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -274,6 +285,7 @@ class VcDataModelClaimFactory
 
         return new VcRefreshServiceClaimValue($id, $typeClaimValue, $data);
     }
+
 
     /**
      * @param mixed[] $data
@@ -303,6 +315,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -318,6 +331,7 @@ class VcDataModelClaimFactory
 
         return new VcTermsOfUseClaimValue($typeClaimValue, $data);
     }
+
 
     /**
      * @param mixed[] $data
@@ -347,6 +361,7 @@ class VcDataModelClaimFactory
         );
     }
 
+
     /**
      * @param mixed[] $data
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -362,6 +377,7 @@ class VcDataModelClaimFactory
 
         return new VcEvidenceClaimValue($typeClaimValue, $data);
     }
+
 
     /**
      * @param mixed[] $data

@@ -28,6 +28,7 @@ class ParsedJwsFactory
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -43,6 +44,7 @@ class ParsedJwsFactory
             $this->claimFactory,
         );
     }
+
 
     /**
      * @param array<non-empty-string,mixed> $payload

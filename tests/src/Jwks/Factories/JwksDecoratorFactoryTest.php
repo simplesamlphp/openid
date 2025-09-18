@@ -30,19 +30,23 @@ final class JwksDecoratorFactoryTest extends TestCase
         ],
     ];
 
+
     protected function setUp(): void
     {
     }
+
 
     protected function sut(): JwksDecoratorFactory
     {
         return new JwksDecoratorFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwksDecoratorFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromKeyData(): void
     {

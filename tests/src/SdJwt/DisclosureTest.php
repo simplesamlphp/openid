@@ -28,6 +28,7 @@ final class DisclosureTest extends TestCase
 
     protected HashAlgorithmsEnum $selectiveDisclosureAlgorithm;
 
+
     protected function setUp(): void
     {
         $this->helpers = new Helpers();
@@ -37,6 +38,7 @@ final class DisclosureTest extends TestCase
         $this->path = ['path'];
         $this->selectiveDisclosureAlgorithm = HashAlgorithmsEnum::SHA_256;
     }
+
 
     protected function sut(
         ?Helpers $helpers = null,
@@ -63,10 +65,12 @@ final class DisclosureTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(Disclosure::class, $this->sut());
     }
+
 
     public function testThrowsForInvalidName(): void
     {
@@ -77,6 +81,7 @@ final class DisclosureTest extends TestCase
             name: ClaimsEnum::_Sd->value,
         );
     }
+
 
     public function testThrowsForEmptyNameAndPath(): void
     {
@@ -89,6 +94,7 @@ final class DisclosureTest extends TestCase
         );
     }
 
+
     public function testCanGetCommonProperties(): void
     {
         $sut = $this->sut();
@@ -98,6 +104,7 @@ final class DisclosureTest extends TestCase
         $this->assertSame($this->name, $sut->getName());
         $this->assertSame($this->path, $sut->getPath());
     }
+
 
     public function testHasProperSerialization(): void
     {
@@ -111,6 +118,7 @@ final class DisclosureTest extends TestCase
             $this->sut(name: false)->jsonSerialize(),
         );
     }
+
 
     public function testHasProperType(): void
     {

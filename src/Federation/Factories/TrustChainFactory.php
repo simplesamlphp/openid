@@ -23,6 +23,7 @@ class TrustChainFactory
     ) {
     }
 
+
     public function empty(): TrustChain
     {
         return new TrustChain(
@@ -32,6 +33,7 @@ class TrustChainFactory
             $this->helpers,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -64,6 +66,7 @@ class TrustChainFactory
         return $trustChain;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -77,6 +80,7 @@ class TrustChainFactory
 
         return $this->fromStatements(...$statements);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

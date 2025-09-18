@@ -13,6 +13,7 @@ class TxCode implements \JsonSerializable
 
     protected readonly int $length;
 
+
     public function __construct(
         protected readonly int|string $code,
         protected readonly string $description,
@@ -25,30 +26,36 @@ class TxCode implements \JsonSerializable
         $this->length = mb_strlen((string)$this->code);
     }
 
+
     public function getCode(): int|string
     {
         return $this->code;
     }
+
 
     public function getCodeAsString(): string
     {
         return (string)$this->code;
     }
 
+
     public function getDescription(): string
     {
         return $this->description;
     }
+
 
     public function getInputMode(): TxCodeInputModeEnum
     {
         return $this->inputMode;
     }
 
+
     public function getLength(): int
     {
         return $this->length;
     }
+
 
     /**
      * @return array<string, mixed>

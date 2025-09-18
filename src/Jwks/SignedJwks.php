@@ -44,6 +44,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
         return $ensuredKeys;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
@@ -54,6 +55,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
         return parent::getIssuer() ?? throw new SignedJwksException('No Issuer claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
@@ -63,6 +65,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
     {
         return parent::getSubject() ?? throw new SignedJwksException('No Subject claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\SignedJwksException
@@ -80,6 +83,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
         return $typ;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -94,6 +98,7 @@ class SignedJwks extends ParsedJws implements JsonSerializable
             $this->getType(...),
         );
     }
+
 
     /**
      * @return array{keys: array<array<string, mixed>>}

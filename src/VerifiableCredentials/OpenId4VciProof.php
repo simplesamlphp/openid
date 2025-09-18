@@ -34,6 +34,7 @@ class OpenId4VciProof extends ParsedJws
         return $alg;
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -52,6 +53,7 @@ class OpenId4VciProof extends ParsedJws
         return $typ;
     }
 
+
     /**
      * @return ?mixed[]
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -65,6 +67,7 @@ class OpenId4VciProof extends ParsedJws
 
         return is_null($jwk) ? null : $this->helpers->type()->ensureArray($jwk, $claimKey);
     }
+
 
     /**
      * @return ?non-empty-string[]
@@ -80,6 +83,7 @@ class OpenId4VciProof extends ParsedJws
         return is_null($x5c) ? null : $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($x5c, $claimKey);
     }
 
+
     /**
      * @return string[]
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -91,10 +95,12 @@ class OpenId4VciProof extends ParsedJws
         return parent::getAudience() ?? throw new OpenId4VciProofException('No Audience claim found.');
     }
 
+
     public function getIssuedAt(): int
     {
         return parent::getIssuedAt() ?? throw new OpenId4VciProofException('No IssuedAt claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

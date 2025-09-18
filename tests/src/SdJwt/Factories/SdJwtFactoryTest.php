@@ -83,6 +83,7 @@ final class SdJwtFactoryTest extends TestCase
 
     protected array $validPayload;
 
+
     protected function setUp(): void
     {
         $signatureMock = $this->createMock(Signature::class);
@@ -123,6 +124,7 @@ final class SdJwtFactoryTest extends TestCase
         $this->disclosureFactoryMock = $this->createMock(DisclosureFactory::class);
     }
 
+
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -154,10 +156,12 @@ final class SdJwtFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(SdJwtFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromData(): void
     {
@@ -172,6 +176,7 @@ final class SdJwtFactoryTest extends TestCase
             ),
         );
     }
+
 
     public function testCanUpdatePayloadWithDisclosures(): void
     {

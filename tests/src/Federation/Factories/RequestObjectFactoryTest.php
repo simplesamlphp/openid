@@ -31,8 +31,6 @@ final class RequestObjectFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
-
     protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -46,7 +44,6 @@ final class RequestObjectFactoryTest extends TestCase
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
-
 
     protected MockObject $claimFactoryMock;
 
@@ -69,6 +66,7 @@ final class RequestObjectFactoryTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -104,6 +102,7 @@ final class RequestObjectFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -132,10 +131,12 @@ final class RequestObjectFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(RequestObjectFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromToken(): void
     {

@@ -22,6 +22,7 @@ class ArtifactFetcher
     ) {
     }
 
+
     public function fromCacheAsString(string $keyElement, string ...$keyElements): ?string
     {
         if (is_null($this->cacheDecorator)) {
@@ -66,6 +67,7 @@ class ArtifactFetcher
         return null;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
@@ -89,6 +91,7 @@ class ArtifactFetcher
         return $response;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
@@ -105,6 +108,7 @@ class ArtifactFetcher
 
         return $artifact;
     }
+
 
     public function cacheIt(string $artifact, int|DateInterval $ttl, string $keyElement, string ...$keyElements): void
     {

@@ -27,10 +27,13 @@ enum HashAlgorithmsEnum: string
     case BLAKE2B_512 = 'blake2b-512';
     case K12_256 = 'k12-256';
     case K12_512 = 'k12-512';
+
+
     public function ianaName(): string
     {
         return $this->value;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException

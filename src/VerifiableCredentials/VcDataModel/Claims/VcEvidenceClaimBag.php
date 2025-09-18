@@ -12,6 +12,7 @@ class VcEvidenceClaimBag implements ClaimInterface
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimValue[] */
     protected array $vcEvidenceClaimValueValues;
 
+
     public function __construct(
         VcEvidenceClaimValue $vcEvidenceClaimValue,
         VcEvidenceClaimValue ...$vcEvidenceClaimValueValues,
@@ -21,6 +22,7 @@ class VcEvidenceClaimBag implements ClaimInterface
             ...$vcEvidenceClaimValueValues,
         ];
     }
+
 
     /**
      * @return mixed[]
@@ -35,10 +37,12 @@ class VcEvidenceClaimBag implements ClaimInterface
         );
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Evidence->value;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimValue[]

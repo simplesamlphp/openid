@@ -15,10 +15,12 @@ final class SupportedAlgorithmsTest extends TestCase
 {
     protected MockObject $signatureAlgorithmBagMock;
 
+
     protected function setUp(): void
     {
         $this->signatureAlgorithmBagMock = $this->createMock(SignatureAlgorithmBag::class);
     }
+
 
     protected function sut(
         ?SignatureAlgorithmBag $signatureAlgorithmBag = null,
@@ -28,10 +30,12 @@ final class SupportedAlgorithmsTest extends TestCase
         return new SupportedAlgorithms($signatureAlgorithmBag);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(SupportedAlgorithms::class, $this->sut());
     }
+
 
     public function testCanGetSignatureAlgorithmBag(): void
     {

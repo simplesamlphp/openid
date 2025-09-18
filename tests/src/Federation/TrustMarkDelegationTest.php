@@ -26,7 +26,6 @@ final class TrustMarkDelegationTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
     protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -40,7 +39,6 @@ final class TrustMarkDelegationTest extends TestCase
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
-
 
     protected MockObject $claimFactoryMock;
 
@@ -62,6 +60,7 @@ final class TrustMarkDelegationTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -95,6 +94,7 @@ final class TrustMarkDelegationTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -123,6 +123,7 @@ final class TrustMarkDelegationTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -133,6 +134,7 @@ final class TrustMarkDelegationTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testReferenceIsOptional(): void
     {

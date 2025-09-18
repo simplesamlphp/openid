@@ -19,6 +19,7 @@ final class JwsVerifierDecoratorFactoryTest extends TestCase
 {
     protected AlgorithmManagerDecorator $algorithmManagerDecorator;
 
+
     protected function setUp(): void
     {
         // Includes final class, so can't mock.
@@ -27,10 +28,12 @@ final class JwsVerifierDecoratorFactoryTest extends TestCase
         );
     }
 
+
     protected function sut(): JwsVerifierDecoratorFactory
     {
         return new JwsVerifierDecoratorFactory();
     }
+
 
     public function testCanCreateInstance(): void
     {
@@ -39,6 +42,7 @@ final class JwsVerifierDecoratorFactoryTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testCanBuild(): void
     {

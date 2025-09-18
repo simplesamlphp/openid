@@ -28,7 +28,6 @@ final class TrustMarkTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
     protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -42,7 +41,6 @@ final class TrustMarkTest extends TestCase
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
-
 
     protected MockObject $claimFactoryMock;
 
@@ -65,6 +63,7 @@ final class TrustMarkTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -100,6 +99,7 @@ final class TrustMarkTest extends TestCase
         $this->expectedJwtType = JwtTypesEnum::TrustMarkJwt;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -131,6 +131,7 @@ final class TrustMarkTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -141,6 +142,7 @@ final class TrustMarkTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testThrowsOnUnexpectedJwtType(): void
     {

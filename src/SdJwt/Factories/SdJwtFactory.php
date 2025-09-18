@@ -45,6 +45,7 @@ class SdJwtFactory extends ParsedJwsFactory
         );
     }
 
+
     /**
      * @param array<non-empty-string,mixed> $payload
      * @param array<non-empty-string,mixed> $header
@@ -86,6 +87,7 @@ class SdJwtFactory extends ParsedJwsFactory
             $kbJwt,
         );
     }
+
 
     /**
      * @param array<non-empty-string,mixed> $payload

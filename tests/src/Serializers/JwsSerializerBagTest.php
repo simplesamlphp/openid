@@ -14,8 +14,9 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 #[UsesClass(JwsSerializerEnum::class)]
 final class JwsSerializerBagTest extends TestCase
 {
-    /** @var JwsSerializerEnum[] */
+    /** @var \SimpleSAML\OpenID\Serializers\JwsSerializerEnum[] */
     protected array $jwsSerializers;
+
 
     protected function setUp(): void
     {
@@ -24,8 +25,9 @@ final class JwsSerializerBagTest extends TestCase
         ];
     }
 
+
     /**
-     * @param ?JwsSerializerEnum[] $jwsSerializers
+     * @param ?\SimpleSAML\OpenID\Serializers\JwsSerializerEnum[] $jwsSerializers
      */
     protected function sut(
         ?array $jwsSerializers = null,
@@ -35,10 +37,12 @@ final class JwsSerializerBagTest extends TestCase
         return new JwsSerializerBag(...$jwsSerializers);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsSerializerBag::class, $this->sut());
     }
+
 
     public function testCanAddAndGet(): void
     {

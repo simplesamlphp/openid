@@ -26,6 +26,7 @@ class Base64Url
         return rtrim(strtr($base64, '+/', '-_'), '=');
     }
 
+
     /**
      * Decode data from Base64URL format.
      *

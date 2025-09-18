@@ -16,10 +16,12 @@ class VcCredentialSubjectClaimValue implements ClaimInterface
     {
     }
 
+
     public function get(int|string $key): mixed
     {
         return $this->data[$key] ?? null;
     }
+
 
     /**
      * @return non-empty-array<mixed>
@@ -29,10 +31,12 @@ class VcCredentialSubjectClaimValue implements ClaimInterface
         return $this->getValue();
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Credential_Subject->value;
     }
+
 
     /**
      * @return non-empty-array<mixed>

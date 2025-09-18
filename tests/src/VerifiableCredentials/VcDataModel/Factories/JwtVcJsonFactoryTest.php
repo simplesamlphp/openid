@@ -45,7 +45,6 @@ final class JwtVcJsonFactoryTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     // https://www.w3.org/TR/vc-data-model/#example-jwt-header-of-a-jwt-based-verifiable-credential-using-jws-as-a-proof-non-normative
@@ -80,6 +79,7 @@ final class JwtVcJsonFactoryTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -118,6 +118,7 @@ final class JwtVcJsonFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -146,10 +147,12 @@ final class JwtVcJsonFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwtVcJsonFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromToken(): void
     {

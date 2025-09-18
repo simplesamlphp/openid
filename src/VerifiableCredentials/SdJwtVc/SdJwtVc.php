@@ -27,6 +27,7 @@ class SdJwtVc extends SdJwt
         ClaimsEnum::Status->value,
     ];
 
+
     public function getType(): string
     {
         $typ = parent::getType() ?? throw new SdJwtVcException('No Type header claim found.');
@@ -37,6 +38,7 @@ class SdJwtVc extends SdJwt
 
         return $typ;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -53,6 +55,7 @@ class SdJwtVc extends SdJwt
 
         return $this->helpers->type()->ensureNonEmptyString($vct, $claimKey);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\SdJwtVcException
@@ -80,6 +83,7 @@ class SdJwtVc extends SdJwt
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\SdJwtVcException
@@ -104,6 +108,7 @@ class SdJwtVc extends SdJwt
             );
         }
     }
+
 
     protected function validate(): void
     {

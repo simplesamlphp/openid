@@ -42,6 +42,7 @@ final class EntityStatementFetcherTest extends TestCase
 
     protected MockObject $entityStatementMock;
 
+
     protected function setUp(): void
     {
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
@@ -55,6 +56,7 @@ final class EntityStatementFetcherTest extends TestCase
 
         $this->entityStatementMock = $this->createMock(EntityStatement::class);
     }
+
 
     protected function sut(
         ?EntityStatementFactory $entityStatementFactory = null,
@@ -78,10 +80,12 @@ final class EntityStatementFetcherTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(EntityStatementFetcher::class, $this->sut());
     }
+
 
     public function testHasRightExpectedContentTypeHttpHeader(): void
     {
@@ -90,6 +94,7 @@ final class EntityStatementFetcherTest extends TestCase
             $this->sut()->getExpectedContentTypeHttpHeader(),
         );
     }
+
 
     public function testCanFetchFromCacheOrWellKnownEndpoint(): void
     {
@@ -109,6 +114,7 @@ final class EntityStatementFetcherTest extends TestCase
         );
     }
 
+
     public function testCanFetchFromCacheOrFetchEndpoint(): void
     {
         $this->entityStatementMock->expects($this->once())
@@ -124,6 +130,7 @@ final class EntityStatementFetcherTest extends TestCase
         $this->sut()->fromCacheOrFetchEndpoint('entityId', $this->entityStatementMock);
     }
 
+
     public function testFetchFromCacheOrFetchEndpointThrowsIfNoFetchEndpoint(): void
     {
         $this->entityStatementMock->expects($this->once())
@@ -135,6 +142,7 @@ final class EntityStatementFetcherTest extends TestCase
 
         $this->sut()->fromCacheOrFetchEndpoint('entityId', $this->entityStatementMock);
     }
+
 
     public function testCanFetchFromCache(): void
     {

@@ -14,15 +14,18 @@ class JwsSerializerManagerDecorator
     ) {
     }
 
+
     public function jwsSerializerManager(): JWSSerializerManager
     {
         return $this->jwsSerializerManager;
     }
 
+
     public function serialize(string $name, JwsDecorator $jwsDecorator, ?int $signatureIndex = null): string
     {
         return $this->jwsSerializerManager()->serialize($name, $jwsDecorator->jws(), $signatureIndex);
     }
+
 
     public function unserialize(string $input, ?string &$name = null): JwsDecorator
     {

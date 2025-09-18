@@ -16,6 +16,7 @@ class DisclosureFactory
     ) {
     }
 
+
     /**
      * @param array<non-empty-string> $path
      * @param string[] $saltBlacklist
@@ -43,6 +44,7 @@ class DisclosureFactory
             $selectiveDisclosureAlgorithm,
         );
     }
+
 
     /**
      * @param array<non-empty-string> $path

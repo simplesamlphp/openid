@@ -10,6 +10,7 @@ class Jwk
 {
     protected ?JwkDecoratorFactory $jwkDecoratorFactory = null;
 
+
     public function jwkDecoratorFactory(): JwkDecoratorFactory
     {
         return $this->jwkDecoratorFactory ??= new JwkDecoratorFactory();

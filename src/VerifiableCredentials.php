@@ -71,6 +71,7 @@ class VerifiableCredentials
 
     protected ?TxCodeFactory $txCodeFactory = null;
 
+
     public function __construct(
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -81,15 +82,18 @@ class VerifiableCredentials
             ->build($timestampValidationLeeway);
     }
 
+
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
         return $this->dateIntervalDecoratorFactory ??= new DateIntervalDecoratorFactory();
     }
 
+
     public function helpers(): Helpers
     {
         return $this->helpers ??= new Helpers();
     }
+
 
     public function claimsPathPointerResolver(): ClaimsPathPointerResolver
     {
@@ -98,15 +102,18 @@ class VerifiableCredentials
         );
     }
 
+
     public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
         return $this->jwsDecoratorBuilderFactory ??= new JwsDecoratorBuilderFactory();
     }
 
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         return $this->jwsSerializerManagerDecoratorFactory ??= new JwsSerializerManagerDecoratorFactory();
     }
+
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
@@ -114,16 +121,19 @@ class VerifiableCredentials
             ->build($this->supportedSerializers);
     }
 
+
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
         return $this->algorithmManagerDecoratorFactory ??= new AlgorithmManagerDecoratorFactory();
     }
+
 
     public function algorithmManagerDecorator(): AlgorithmManagerDecorator
     {
         return $this->algorithmManagerDecorator ??= $this->algorithmManagerDecoratorFactory()
             ->build($this->supportedAlgorithms);
     }
+
 
     public function jwsDecoratorBuilder(): JwsDecoratorBuilder
     {
@@ -134,10 +144,12 @@ class VerifiableCredentials
         );
     }
 
+
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
         return $this->jwsVerifierDecoratorFactory ??= new JwsVerifierDecoratorFactory();
     }
+
 
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
@@ -146,10 +158,12 @@ class VerifiableCredentials
         );
     }
 
+
     public function jwksDecoratorFactory(): JwksDecoratorFactory
     {
         return $this->jwksDecoratorFactory ??= new JwksDecoratorFactory();
     }
+
 
     public function claimFactory(): ClaimFactory
     {
@@ -157,6 +171,7 @@ class VerifiableCredentials
             $this->helpers(),
         );
     }
+
 
     public function jwtVcJsonFactory(): JwtVcJsonFactory
     {
@@ -171,12 +186,14 @@ class VerifiableCredentials
         );
     }
 
+
     public function credentialOfferFactory(): CredentialOfferFactory
     {
         return $this->credentialOfferFactory ??= new CredentialOfferFactory(
             $this->helpers(),
         );
     }
+
 
     public function openId4VciProofFactory(): OpenId4VciProofFactory
     {
@@ -191,6 +208,7 @@ class VerifiableCredentials
         );
     }
 
+
     public function disclosureFactory(): DisclosureFactory
     {
         return $this->disclosureFactory ??= new DisclosureFactory(
@@ -198,10 +216,12 @@ class VerifiableCredentials
         );
     }
 
+
     public function disclosureBagFactory(): DisclosureBagFactory
     {
         return $this->disclosureBagFactory ??= new DisclosureBagFactory();
     }
+
 
     public function sdJwtVcFactory(): SdJwtVcFactory
     {
@@ -216,6 +236,7 @@ class VerifiableCredentials
             $this->disclosureFactory(),
         );
     }
+
 
     public function txCodeFactory(): TxCodeFactory
     {

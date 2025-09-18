@@ -16,6 +16,7 @@ final class JwksClaimTest extends TestCase
 
     protected string $nameSample;
 
+
     protected function setUp(): void
     {
         $this->valueSample = [
@@ -34,6 +35,7 @@ final class JwksClaimTest extends TestCase
         $this->nameSample = ClaimsEnum::Jwks->value;
     }
 
+
     protected function sut(
         ?array $value = null,
         ?string $name = null,
@@ -47,10 +49,12 @@ final class JwksClaimTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwksClaim::class, $this->sut());
     }
+
 
     public function testCanGetProperties(): void
     {

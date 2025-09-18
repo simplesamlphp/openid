@@ -12,6 +12,7 @@ class VcCredentialSubjectClaimBag implements ClaimInterface
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue[] */
     protected array $vcCredentialSubjectClaimValueValues;
 
+
     public function __construct(
         VcCredentialSubjectClaimValue $vcCredentialSubjectClaimValue,
         VcCredentialSubjectClaimValue ...$vcCredentialSubjectClaimValueValues,
@@ -21,6 +22,7 @@ class VcCredentialSubjectClaimBag implements ClaimInterface
             ...$vcCredentialSubjectClaimValueValues,
         ];
     }
+
 
     /**
      * @return mixed[]
@@ -35,10 +37,12 @@ class VcCredentialSubjectClaimBag implements ClaimInterface
         );
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Credential_Subject->value;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue[]

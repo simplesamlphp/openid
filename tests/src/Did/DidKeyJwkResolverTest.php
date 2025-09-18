@@ -22,6 +22,7 @@ final class DidKeyJwkResolverTest extends TestCase
 {
     private MockObject $helpersMock;
 
+
     protected function setUp(): void
     {
         $base64UrlMock = $this->createMock(Base64Url::class);
@@ -35,6 +36,7 @@ final class DidKeyJwkResolverTest extends TestCase
             ->willReturn($base64UrlMock);
     }
 
+
     protected function sut(
         ?Helpers $helpers = null,
     ): DidKeyJwkResolver {
@@ -42,6 +44,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         return new DidKeyJwkResolver($helpers);
     }
+
 
     /**
      * Test that invalid did:key format throws an exception
@@ -53,6 +56,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->extractJwkFromDidKey('invalid:key:value');
     }
+
 
     /**
      * Test that unsupported multibase encoding throws an exception
@@ -67,6 +71,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->sut()->extractJwkFromDidKey('did:key:a123'); // 'a' prefix is not supported
     }
 
+
     /**
      * Test base58BtcDecode method with invalid character
      */
@@ -77,6 +82,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->base58BtcDecode('invalid*string'); // '*' is not in the base58 alphabet
     }
+
 
     /**
      * Test base58BtcDecode method with valid input
@@ -89,6 +95,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->assertSame("\0\0\0", $result);
     }
+
 
     /**
      * Test createEd25519Jwk method
@@ -110,6 +117,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedJwk, $jwk);
     }
 
+
     /**
      * Test createX25519Jwk method
      */
@@ -129,6 +137,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->assertSame($expectedJwk, $jwk);
     }
+
 
     /**
      * Test createSecp256k1Jwk method with valid uncompressed point
@@ -154,6 +163,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedJwk, $jwk);
     }
 
+
     /**
      * Test createSecp256k1Jwk method with invalid key format
      */
@@ -168,6 +178,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->sut()->createSecp256k1Jwk($rawKeyBytes);
     }
 
+
     /**
      * Test createSecp256k1Jwk method with compressed point format
      */
@@ -181,6 +192,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->createSecp256k1Jwk($rawKeyBytes);
     }
+
 
     /**
      * Test createP256Jwk method with valid uncompressed point
@@ -205,6 +217,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedJwk, $jwk);
     }
 
+
     /**
      * Test createP256Jwk method with invalid key format
      */
@@ -218,6 +231,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->createP256Jwk($rawKeyBytes);
     }
+
 
     /**
      * Test createP384Jwk method with valid uncompressed point
@@ -242,6 +256,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedJwk, $jwk);
     }
 
+
     /**
      * Test createP384Jwk method with invalid key format
      */
@@ -255,6 +270,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->createP384Jwk($rawKeyBytes);
     }
+
 
     /**
      * Test createP521Jwk method with valid uncompressed point
@@ -279,6 +295,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedJwk, $jwk);
     }
 
+
     /**
      * Test createP521Jwk method with invalid key format
      */
@@ -292,6 +309,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->sut()->createP521Jwk($rawKeyBytes);
     }
+
 
     public function testExtractJwkFromDidKeyWithUnsupportedMulticodecIdentifier(): void
     {
@@ -309,6 +327,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $resolverMock->extractJwkFromDidKey('did:key:z123');
     }
+
 
     /**
      * Test extractJwkFromDidKey with an Ed25519 key
@@ -347,6 +366,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertEquals($expectedJwk, $jwk);
     }
 
+
     /**
      * Test the integrated flow of extractJwkFromDidKey
      */
@@ -373,6 +393,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertArrayHasKey('x', $jwk);
     }
 
+
     /**
      * Test that an exception in base58BtcDecode is properly wrapped
      */
@@ -394,6 +415,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $resolverMock->extractJwkFromDidKey('did:key:z123');
     }
 
+
     /**
      * Test extraction with real Ed25519 did:key value
      */
@@ -413,6 +435,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertEquals('sig', $jwk['use']);
         $this->assertArrayHasKey('x', $jwk);
     }
+
 
     /**
      * Test extraction with the provided sample did:key value
@@ -462,6 +485,7 @@ final class DidKeyJwkResolverTest extends TestCase
         }
     }
 
+
     /**
      * Data provider for real did:key values
      */
@@ -479,6 +503,7 @@ final class DidKeyJwkResolverTest extends TestCase
         ];
     }
 
+
     public function testRealDidKeys(): void
     {
         $sut = $this->sut(new Helpers());
@@ -494,6 +519,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertEquals('bURU-YbrZLmNob1ecG4obRvs4RRQV4u0PWiR3j8qgoQ', $jwk['y']);
         $this->assertEquals('sig', $jwk['use']);
     }
+
 
     public function testCreateJwkFromRawJson(): void
     {
@@ -511,6 +537,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertEquals('sig', $jwk['use']);
     }
 
+
     public function testCreateJwkFromInvalidJsonThrows(): void
     {
         $sut = $this->sut(new Helpers());
@@ -521,6 +548,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $invalidJson = '{"crv":"P-256","kty":"EC",';
         $sut->createJwkFromRawJson($invalidJson);
     }
+
 
     public function testCreateJwkFromInvalidJwkFormatThrows(): void
     {
@@ -533,6 +561,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $sut->createJwkFromRawJson($invalidJwk);
     }
 
+
     public function testCreateJwkFromInvalidEcJwkFormatThrows(): void
     {
         $sut = $this->sut(new Helpers());
@@ -544,6 +573,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $sut->createJwkFromRawJson($invalidEcJwk);
     }
 
+
     #[DataProvider('varintValidDataProvider')]
     public function testVarintDecodeValid(string $bytes, int $expectedValue, int $expectedLength): void
     {
@@ -551,6 +581,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->assertSame($expectedValue, $value, "Decoded value mismatch for input: " . bin2hex($bytes));
         $this->assertSame($expectedLength, $length, "Decoded length mismatch for input: " . bin2hex($bytes));
     }
+
 
     public static function varintValidDataProvider(): \Iterator
     {
@@ -589,6 +620,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->sut()->varintDecode($bytes);
     }
 
+
     public static function varintInvalidDataProvider(): \Iterator
     {
         yield 'empty string' => ['', 'Invalid varint: input is empty'];
@@ -618,6 +650,7 @@ final class DidKeyJwkResolverTest extends TestCase
         ];
     }
 
+
     #[DataProvider('base58DecodeValidDataProvider')]
     public function testBase58BtcDecodeValidInputs(string $base58encoded, string $expectedDecoded): void
     {
@@ -637,6 +670,7 @@ final class DidKeyJwkResolverTest extends TestCase
 
         $this->assertSame($expectedDecoded, $actualDecoded, "Failed for input: " . $base58encoded);
     }
+
 
     public static function base58DecodeValidDataProvider(): \Iterator
     {
@@ -667,6 +701,7 @@ final class DidKeyJwkResolverTest extends TestCase
         yield 'bs58 lib vector 1' => ['111233QC4', "\x00\x00\x00\x28\x7f\xb4\xcd"];
     }
 
+
     #[DataProvider('base58DecodeInvalidCharDataProvider')]
     public function testBase58BtcDecodeThrowsOnInvalidCharacter(string $base58invalid): void
     {
@@ -675,6 +710,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $this->expectExceptionMessage('Invalid');
         $this->sut()->base58BtcDecode($base58invalid);
     }
+
 
     public static function base58DecodeInvalidCharDataProvider(): \Iterator
     {

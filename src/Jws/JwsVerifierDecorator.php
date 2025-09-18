@@ -14,10 +14,12 @@ class JwsVerifierDecorator
     ) {
     }
 
+
     public function jwsVerifier(): JWSVerifier
     {
         return $this->jwsVerifier;
     }
+
 
     public function verifyWithKeySet(
         JwsDecorator $jwsDecorator,

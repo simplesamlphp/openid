@@ -11,10 +11,12 @@ class TrustMarkOwnersClaimBag implements JsonSerializable
     /** @var array<non-empty-string,\SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue>  */
     protected array $trustMarkOwnersClaimValues = [];
 
+
     public function __construct(TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValues)
     {
         $this->add(...$trustMarkOwnersClaimValues);
     }
+
 
     public function add(TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValues): void
     {
@@ -24,15 +26,18 @@ class TrustMarkOwnersClaimBag implements JsonSerializable
         }
     }
 
+
     public function has(string $trustMarkType): bool
     {
         return isset($this->trustMarkOwnersClaimValues[$trustMarkType]);
     }
 
+
     public function get(string $trustMarkType): ?TrustMarkOwnersClaimValue
     {
         return $this->trustMarkOwnersClaimValues[$trustMarkType] ?? null;
     }
+
 
     /**
      * @return array<non-empty-string,\SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue>
@@ -41,6 +46,7 @@ class TrustMarkOwnersClaimBag implements JsonSerializable
     {
         return $this->trustMarkOwnersClaimValues;
     }
+
 
     /**
      * @return array<non-empty-string,array<mixed>>

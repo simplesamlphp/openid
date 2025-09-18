@@ -18,20 +18,24 @@ final class TrustChainBagFactoryTest extends TestCase
 {
     protected MockObject $trustChainMock;
 
+
     protected function setUp(): void
     {
         $this->trustChainMock = $this->createMock(TrustChain::class);
     }
+
 
     protected function sut(): TrustChainBagFactory
     {
         return new TrustChainBagFactory();
     }
 
+
     public function tetCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustChainBag::class, $this->sut());
     }
+
 
     public function testCanBuildTrustChainBag(): void
     {

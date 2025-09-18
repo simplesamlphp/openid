@@ -31,6 +31,7 @@ enum SignatureAlgorithmEnum: string
     case RS384 = 'RS384';
     case RS512 = 'RS512';
 
+
     public function instance(): SignatureAlgorithm
     {
         return match ($this) {
@@ -47,6 +48,7 @@ enum SignatureAlgorithmEnum: string
             self::RS512 => new RS512(),
         };
     }
+
 
     public function isNone(): bool
     {

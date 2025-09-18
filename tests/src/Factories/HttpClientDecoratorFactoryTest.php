@@ -18,20 +18,24 @@ final class HttpClientDecoratorFactoryTest extends TestCase
 {
     protected MockObject $clientMock;
 
+
     protected function setUp(): void
     {
         $this->clientMock = $this->createMock(Client::class);
     }
+
 
     protected function sut(): HttpClientDecoratorFactory
     {
         return new HttpClientDecoratorFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(HttpClientDecoratorFactory::class, $this->sut());
     }
+
 
     public function testCanBuild(): void
     {

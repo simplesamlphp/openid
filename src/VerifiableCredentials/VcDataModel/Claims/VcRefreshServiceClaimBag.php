@@ -12,6 +12,7 @@ class VcRefreshServiceClaimBag implements ClaimInterface
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimValue[] */
     protected array $vcRefreshServiceClaimValueValues;
 
+
     public function __construct(
         VcRefreshServiceClaimValue $vcRefreshServiceClaimValue,
         VcRefreshServiceClaimValue ...$vcRefreshServiceClaimValueValues,
@@ -21,6 +22,7 @@ class VcRefreshServiceClaimBag implements ClaimInterface
             ...$vcRefreshServiceClaimValueValues,
         ];
     }
+
 
     /**
      * @return mixed[]
@@ -35,10 +37,12 @@ class VcRefreshServiceClaimBag implements ClaimInterface
         );
     }
 
+
     public function getName(): string
     {
         return ClaimsEnum::Refresh_Service->value;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimValue[]

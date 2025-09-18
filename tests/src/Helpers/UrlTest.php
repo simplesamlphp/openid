@@ -16,11 +16,13 @@ final class UrlTest extends TestCase
         return new Url();
     }
 
+
     public function testCanCheckUrl(): void
     {
         $this->assertTrue($this->sut()->isValid('https://example.com/'));
         $this->assertFalse($this->sut()->isValid('abc123'));
     }
+
 
     public function testCanAddParams(): void
     {

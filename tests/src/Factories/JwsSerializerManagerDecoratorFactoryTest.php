@@ -21,7 +21,6 @@ final class JwsSerializerManagerDecoratorFactoryTest extends TestCase
     protected MockObject $supportedSerializersMock;
 
 
-
     protected function setUp(): void
     {
         $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
@@ -35,10 +34,12 @@ final class JwsSerializerManagerDecoratorFactoryTest extends TestCase
             ->willReturn([$jwsSerializerMock]);
     }
 
+
     protected function sut(): JwsSerializerManagerDecoratorFactory
     {
         return new JwsSerializerManagerDecoratorFactory();
     }
+
 
     public function testCanCreateInstance(): void
     {
@@ -47,6 +48,7 @@ final class JwsSerializerManagerDecoratorFactoryTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testCanBuild(): void
     {

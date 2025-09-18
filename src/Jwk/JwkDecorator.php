@@ -13,6 +13,7 @@ class JwkDecorator
     ) {
     }
 
+
     public function jwk(): JWK
     {
         return $this->jwk;

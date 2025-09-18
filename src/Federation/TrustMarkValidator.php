@@ -26,6 +26,7 @@ class TrustMarkValidator
     ) {
     }
 
+
     /**
      * If cached, validation has already been performed.
      *
@@ -84,6 +85,7 @@ class TrustMarkValidator
         return false;
     }
 
+
     /**
      * @param non-empty-string $trustMarkType
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -115,6 +117,7 @@ class TrustMarkValidator
             $expectedJwtType,
         );
     }
+
 
     /**
      * @param non-empty-string $trustMarkType
@@ -236,6 +239,7 @@ class TrustMarkValidator
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -269,6 +273,7 @@ class TrustMarkValidator
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -292,6 +297,7 @@ class TrustMarkValidator
             $trustAnchorEntityConfiguration,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -358,6 +364,7 @@ class TrustMarkValidator
         return $trustMark;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -388,6 +395,7 @@ class TrustMarkValidator
             $trustAnchorEntityConfiguration,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -475,6 +483,7 @@ class TrustMarkValidator
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -505,6 +514,7 @@ class TrustMarkValidator
             ),
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -553,6 +563,7 @@ class TrustMarkValidator
         return $trustMarkIssuerChain;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -581,6 +592,7 @@ class TrustMarkValidator
 
         $this->logger?->debug('Trust Mark signature validated.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

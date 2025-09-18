@@ -24,6 +24,7 @@ class RequestObjectFactory extends ParsedJwsFactory
         );
     }
 
+
     /**
      * @param array<non-empty-string,mixed> $payload
      * @param array<non-empty-string,mixed> $header

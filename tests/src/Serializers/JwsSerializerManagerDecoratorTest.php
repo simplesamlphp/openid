@@ -23,6 +23,7 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
 
     protected JWSSerializerManager $jwsSerializerManager;
 
+
     protected function setUp(): void
     {
         $this->jwsSerializerMock = $this->createMock(JWSSerializer::class);
@@ -36,6 +37,7 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
         ]);
     }
 
+
     protected function sut(
         ?JWSSerializerManager $jwsSerializerManager = null,
     ): JwsSerializerManagerDecorator {
@@ -46,10 +48,12 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsSerializerManagerDecorator::class, $this->sut());
     }
+
 
     public function testCanSerialize(): void
     {
@@ -60,6 +64,7 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
             $this->sut()->serialize('mockSerializer', $this->jwsDecoratorMock),
         );
     }
+
 
     public function testCanUnserialize(): void
     {

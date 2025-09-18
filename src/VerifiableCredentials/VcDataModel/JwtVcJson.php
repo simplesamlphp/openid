@@ -54,10 +54,12 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
     protected null|false|VcEvidenceClaimBag $vcEvidenceClaimBag = null;
 
+
     public function getCredentialFormatIdentifier(): CredentialFormatIdentifiersEnum
     {
         return CredentialFormatIdentifiersEnum::JwtVcJson;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -95,6 +97,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
@@ -119,6 +122,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             $vcContext,
         );
     }
+
 
     /**
      * @return ?non-empty-string
@@ -148,6 +152,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         return $this->vcId = $this->helpers->type()->enforceUri($vcId);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -169,6 +174,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         return $this->vcTypeClaimValue = $this->claimFactory->forVcDataModel()->buildTypeClaimValue($vcType);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -195,6 +201,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
                 $this->getSubject(),
             );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -236,6 +243,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         throw new VcDataModelException('Invalid VC Issuer claim.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -270,6 +278,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -299,6 +308,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 
         throw new VcDataModelException('Invalid VC Proof claim.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -345,6 +355,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         throw new VcDataModelException('Invalid VC Expiration Date claim.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -375,6 +386,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
                 $credentialStatus,
             );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -407,6 +419,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -437,6 +450,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
                 $refreshService,
             );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
@@ -469,6 +483,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -499,6 +514,7 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
                 $evidence,
             );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

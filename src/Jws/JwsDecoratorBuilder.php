@@ -22,6 +22,7 @@ class JwsDecoratorBuilder
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -33,6 +34,7 @@ class JwsDecoratorBuilder
             throw new JwsException('Unable to parse token.', (int)$throwable->getCode(), $throwable);
         }
     }
+
 
     /**
      * @param array<non-empty-string,mixed> $payload

@@ -36,6 +36,7 @@ final class TrustChainTest extends TestCase
 
     protected int $expirationTime;
 
+
     protected function setUp(): void
     {
         $this->timestampValidationLeewayDecoratorMock = $this->createMock(DateIntervalDecorator::class);
@@ -57,6 +58,7 @@ final class TrustChainTest extends TestCase
         $this->trustAnchorMock->method('getExpirationTime')->willReturn($this->expirationTime);
     }
 
+
     protected function sut(
         ?DateIntervalDecorator $timestampValidationLeewayDecorator = null,
         ?MetadataPolicyResolver $metadataPolicyResolver = null,
@@ -76,16 +78,19 @@ final class TrustChainTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustChain::class, $this->sut());
     }
+
 
     public function testCanCheckIfEmpty(): void
     {
         $this->assertTrue($this->sut()->isEmpty());
         $this->assertEmpty($this->sut()->getEntities());
     }
+
 
     public function testCanCreateBasicTrustChain(): void
     {
@@ -105,6 +110,7 @@ final class TrustChainTest extends TestCase
         $this->assertNull($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
+
     public function testCanCreateTrustChainForTrustAnchorOnly(): void
     {
         $sut = $this->sut();
@@ -121,6 +127,7 @@ final class TrustChainTest extends TestCase
         $this->assertNull($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
+
     public function testThrowsForNonConfigurationStatementForLeaf(): void
     {
         $this->expectException(EntityStatementException::class);
@@ -128,6 +135,7 @@ final class TrustChainTest extends TestCase
 
         $this->sut()->addLeaf($this->subordinateMock);
     }
+
 
     public function testThrowsForConfigurationStatementForSubordinate(): void
     {
@@ -138,6 +146,7 @@ final class TrustChainTest extends TestCase
         $sut->addLeaf($this->leafMock);
         $sut->addSubordinate($this->leafMock);
     }
+
 
     public function testThrowsForInvalidSubordinateSubject(): void
     {
@@ -151,11 +160,13 @@ final class TrustChainTest extends TestCase
         $sut->addSubordinate($this->subordinateMock);
     }
 
+
     public function testCanValidateExpirationTimeOnEmptyTrustChain(): void
     {
         $this->sut()->validateExpirationTime();
         $this->addToAssertionCount(1);
     }
+
 
     public function testThrowsForInvalidExpirationTime(): void
     {
@@ -170,6 +181,7 @@ final class TrustChainTest extends TestCase
         $sut->addLeaf($leafMock);
     }
 
+
     public function testThrowsForNonResolvedState(): void
     {
         $this->expectException(TrustChainException::class);
@@ -177,6 +189,7 @@ final class TrustChainTest extends TestCase
 
         $this->sut()->getResolvedLength();
     }
+
 
     public function testThrowsForResolvedState(): void
     {
@@ -190,6 +203,7 @@ final class TrustChainTest extends TestCase
 
         $sut->addTrustAnchor($this->trustAnchorMock);
     }
+
 
     public function testCanGetResolvedMetadata(): void
     {
@@ -253,6 +267,7 @@ final class TrustChainTest extends TestCase
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
+
     public function testCanGetResolvedMetadataIfNoPoliciesAreDefined(): void
     {
         $leafMetadata = [
@@ -283,6 +298,7 @@ final class TrustChainTest extends TestCase
         $this->assertIsArray($sut->getResolvedMetadata(EntityTypesEnum::OpenIdRelyingParty));
     }
 
+
     public function testThrowsOnAttemptToAddMultipleLeafs(): void
     {
         $this->expectException(TrustChainException::class);
@@ -293,6 +309,7 @@ final class TrustChainTest extends TestCase
         $sut->addLeaf($this->leafMock);
     }
 
+
     public function testThrowsOnAttemtpToAddSubodrinateWithoutLeaf(): void
     {
         $this->expectException(TrustChainException::class);
@@ -301,6 +318,7 @@ final class TrustChainTest extends TestCase
         $sut = $this->sut();
         $sut->addSubordinate($this->subordinateMock);
     }
+
 
     public function testThrowsOnAttemptToAddTrustAnchorWithoutSubordinate(): void
     {

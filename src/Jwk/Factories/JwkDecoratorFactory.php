@@ -20,6 +20,7 @@ class JwkDecoratorFactory
         );
     }
 
+
     /**
      * @param non-empty-string $path
      * @param mixed[] $additionalData
@@ -33,6 +34,7 @@ class JwkDecoratorFactory
             JWKFactory::createFromKeyFile($path, $password, $additionalData),
         );
     }
+
 
     /**
      * @param non-empty-string $key
@@ -48,6 +50,7 @@ class JwkDecoratorFactory
         );
     }
 
+
     /**
      * @param non-empty-string $path
      * @param mixed[] $additionalData
@@ -62,6 +65,7 @@ class JwkDecoratorFactory
         );
     }
 
+
     /**
      * @param non-empty-string $path
      * @param mixed[] $additionalData
@@ -74,6 +78,7 @@ class JwkDecoratorFactory
             JWKFactory::createFromCertificateFile($path, $additionalData),
         );
     }
+
 
     /**
      * @param non-empty-string $certificate

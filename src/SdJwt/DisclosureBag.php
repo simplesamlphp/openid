@@ -13,10 +13,12 @@ class DisclosureBag
      */
     protected array $disclosures;
 
+
     public function __construct(Disclosure ...$disclosures)
     {
         $this->disclosures = $disclosures;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\SdJwtException
@@ -32,6 +34,7 @@ class DisclosureBag
         }
     }
 
+
     /**
      * @return \SimpleSAML\OpenID\SdJwt\Disclosure[]
      */
@@ -39,6 +42,7 @@ class DisclosureBag
     {
         return $this->disclosures;
     }
+
 
     /**
      * @return string[]

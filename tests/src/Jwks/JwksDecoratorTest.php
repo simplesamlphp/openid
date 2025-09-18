@@ -16,7 +16,6 @@ final class JwksDecoratorTest extends TestCase
 {
     protected MockObject $jwkSetMock;
 
-
     protected array $jwkArraySample = [
         'alg' => 'RS256',
         'use' => 'sig',
@@ -27,6 +26,7 @@ final class JwksDecoratorTest extends TestCase
         'kid' => 'F4VFObNusj3PHmrHxpqh4GNiuFHlfh-2s6xMJ95fLYA',
     ];
 
+
     protected function setUp(): void
     {
         $jwkMock = $this->createMock(JWK::class);
@@ -34,6 +34,7 @@ final class JwksDecoratorTest extends TestCase
         $this->jwkSetMock = $this->createMock(JWKSet::class);
         $this->jwkSetMock->method('all')->willReturn([$jwkMock]);
     }
+
 
     protected function sut(
         ?JWKSet $jwkSet = null,
@@ -45,15 +46,18 @@ final class JwksDecoratorTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwksDecorator::class, $this->sut());
     }
 
+
     public function testCanGetJwkSet(): void
     {
         $this->assertSame($this->jwkSetMock, $this->sut()->jwks());
     }
+
 
     public function testCanJsonSerialize(): void
     {
