@@ -10,11 +10,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
@@ -62,6 +64,8 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
     protected array $validPayload;
 
+    protected MockObject $jwkDecoratorMock;
+
 
     protected function setUp(): void
     {
@@ -77,6 +81,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
         $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorBuilderMock->method('fromData')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
@@ -96,6 +101,8 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
+
+        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
@@ -142,6 +149,23 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         $this->assertInstanceOf(
             TrustMarkDelegation::class,
             $this->sut()->fromToken('token'),
+        );
+    }
+
+
+    public function testCanBuildFromData(): void
+    {
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        $this->assertInstanceOf(
+            TrustMarkDelegation::class,
+            $this->sut()->fromData(
+                $this->jwkDecoratorMock,
+                SignatureAlgorithmEnum::ES256,
+                $this->validPayload,
+                $this->sampleHeader,
+            ),
         );
     }
 }

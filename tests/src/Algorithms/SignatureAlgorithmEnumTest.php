@@ -71,4 +71,20 @@ final class SignatureAlgorithmEnumTest extends TestCase
             SignatureAlgorithmEnum::RS512->instance(),
         );
     }
+
+
+    public function testIsNone(): void
+    {
+        $this->assertTrue(SignatureAlgorithmEnum::none->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::EdDSA->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::ES256->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::ES384->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::ES512->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::PS256->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::PS384->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::PS512->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::RS256->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::RS384->isNone());
+        $this->assertFalse(SignatureAlgorithmEnum::RS512->isNone());
+    }
 }
