@@ -15,6 +15,7 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
 {
     protected MockObject $trustMarkOwnersClaimValueMock;
 
+
     protected function setUp(): void
     {
         $this->trustMarkOwnersClaimValueMock = $this->createMock(TrustMarkOwnersClaimValue::class);
@@ -22,16 +23,19 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
         $this->trustMarkOwnersClaimValueMock->method('getSubject')->willReturn('subject');
     }
 
+
     protected function sut(
         TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValue,
     ): TrustMarkOwnersClaimBag {
         return new TrustMarkOwnersClaimBag(...$trustMarkOwnersClaimValue);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarkOwnersClaimBag::class, $this->sut());
     }
+
 
     public function testCanAddAndGet(): void
     {
@@ -48,6 +52,7 @@ final class TrustMarkOwnersClaimBagTest extends TestCase
         $this->assertTrue($sut->has('trustMarkType2'));
         $this->assertSame($trustMarkClaimValueMock2, $sut->get('trustMarkType2'));
     }
+
 
     public function testCanJsonSerialize(): void
     {

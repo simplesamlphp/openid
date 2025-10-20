@@ -15,6 +15,7 @@ final class AlgorithmManagerDecoratorTest extends TestCase
 {
     protected AlgorithmManager $algorithmManager;
 
+
     protected function setUp(): void
     {
         $signatureAlgorithmMock = $this->createMock(SignatureAlgorithm::class);
@@ -22,6 +23,7 @@ final class AlgorithmManagerDecoratorTest extends TestCase
 
         $this->algorithmManager = new AlgorithmManager($signatureAlgorithmMocks);
     }
+
 
     protected function sut(
         ?AlgorithmManager $algorithmManager = null,
@@ -31,10 +33,12 @@ final class AlgorithmManagerDecoratorTest extends TestCase
         return new AlgorithmManagerDecorator($algorithmManager);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(AlgorithmManagerDecorator::class, $this->sut());
     }
+
 
     public function testCanGetAlgorithmManager(): void
     {

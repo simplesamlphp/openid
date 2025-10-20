@@ -16,10 +16,12 @@ final class TrustChainBagTest extends TestCase
 {
     protected MockObject $trustChainMock;
 
+
     protected function setUp(): void
     {
         $this->trustChainMock = $this->createMock(TrustChain::class);
     }
+
 
     protected function sut(
         ?TrustChain $trustChain = null,
@@ -29,10 +31,12 @@ final class TrustChainBagTest extends TestCase
         return new TrustChainBag($trustChain);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustChainBag::class, $this->sut());
     }
+
 
     public function testCanAdd(): void
     {
@@ -41,6 +45,7 @@ final class TrustChainBagTest extends TestCase
         $sut->add($this->trustChainMock);
         $this->assertCount(2, $sut->getAll());
     }
+
 
     public function testCanGetShortest(): void
     {
@@ -64,6 +69,7 @@ final class TrustChainBagTest extends TestCase
         $this->assertCount(3, $sut->getAll());
         $this->assertSame(2, $sut->getShortest()->getResolvedLength());
     }
+
 
     public function testCanGetShortestByTrustAnchorPriority(): void
     {
@@ -98,6 +104,7 @@ final class TrustChainBagTest extends TestCase
         // Returns null if Trust Anchor is unknown.
         $this->assertNotInstanceOf(TrustChain::class, $sut->getShortestByTrustAnchorPriority('unknown'));
     }
+
 
     public function testCanGetCount(): void
     {

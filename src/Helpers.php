@@ -19,20 +19,24 @@ class Helpers
 
     protected static ?Type $type = null;
 
+
     public function url(): Url
     {
         return self::$url ??= new Url();
     }
+
 
     public function json(): Json
     {
         return self::$json ??= new Json();
     }
 
+
     public function arr(): Arr
     {
         return self::$arr ??= new Arr();
     }
+
 
     public function type(): Type
     {

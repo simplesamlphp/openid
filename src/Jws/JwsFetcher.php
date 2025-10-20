@@ -24,6 +24,7 @@ class JwsFetcher extends AbstractJwsFetcher
         parent::__construct($artifactFetcher, $maxCacheDuration, $helpers, $logger);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -32,10 +33,12 @@ class JwsFetcher extends AbstractJwsFetcher
         return $this->parsedJwsFactory->fromToken($token);
     }
 
+
     public function getExpectedContentTypeHttpHeader(): ?string
     {
         return null;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -45,6 +48,7 @@ class JwsFetcher extends AbstractJwsFetcher
     {
         return $this->fromCache($uri) ?? $this->fromNetwork($uri);
     }
+
 
     /**
      * Fetch JWS from cache, if available. URI is used as cache key.
@@ -72,6 +76,7 @@ class JwsFetcher extends AbstractJwsFetcher
 
         return $this->buildJwsInstance($jws);
     }
+
 
     /**
      * Fetch JWS from network. Each successful fetch will be cached, with URI being used as a cache key.

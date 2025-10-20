@@ -14,10 +14,12 @@ final class DateIntervalDecoratorTest extends TestCase
 {
     protected DateInterval $dateInterval;
 
+
     protected function setUp(): void
     {
         $this->dateInterval = new DateInterval('P1D');
     }
+
 
     protected function sut(
         ?DateInterval $dateInterval = null,
@@ -27,15 +29,18 @@ final class DateIntervalDecoratorTest extends TestCase
         return new DateIntervalDecorator($dateInterval);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(DateIntervalDecorator::class, $this->sut());
     }
 
+
     public function testCanGetInSeconds(): void
     {
         $this->assertSame(86400, $this->sut()->getInSeconds());
     }
+
 
     public function testCanGetLowestInSecondsComparedToExpirationTime(): void
     {

@@ -13,6 +13,7 @@ class AlgorithmManagerDecorator
     ) {
     }
 
+
     public function algorithmManager(): AlgorithmManager
     {
         return $this->algorithmManager;

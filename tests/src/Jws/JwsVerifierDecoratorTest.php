@@ -21,6 +21,7 @@ final class JwsVerifierDecoratorTest extends TestCase
 
     protected MockObject $jwksDecoratorMock;
 
+
     protected function setUp(): void
     {
         $this->jwsVerifierMock = $this->createMock(JWSVerifier::class);
@@ -28,6 +29,7 @@ final class JwsVerifierDecoratorTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwksDecoratorMock = $this->createMock(JwksDecorator::class);
     }
+
 
     protected function sut(
         ?JWSVerifier $jwsVerifier = null,
@@ -39,15 +41,18 @@ final class JwsVerifierDecoratorTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsVerifierDecorator::class, $this->sut());
     }
 
+
     public function testCanGetJwsVerifier(): void
     {
         $this->assertInstanceOf(JwsVerifier::class, $this->sut()->jwsVerifier());
     }
+
 
     public function testCanVerifyWithKeySet(): void
     {

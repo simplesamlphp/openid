@@ -39,6 +39,7 @@ class TrustMark extends ParsedJws
         );
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -49,6 +50,7 @@ class TrustMark extends ParsedJws
         return parent::getIssuer() ?? throw new TrustMarkException('No Issuer claim found.');
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -58,6 +60,7 @@ class TrustMark extends ParsedJws
     {
         return parent::getSubject() ?? throw new TrustMarkException('No Subject claim found.');
     }
+
 
     /**
      * @return non-empty-string
@@ -74,6 +77,7 @@ class TrustMark extends ParsedJws
         return $this->helpers->type()->ensureNonEmptyString($trustMarkType);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
@@ -82,6 +86,7 @@ class TrustMark extends ParsedJws
     {
         return parent::getIssuedAt() ?? throw new TrustMarkException('No Issued At claim found.');
     }
+
 
     /**
      * @return ?non-empty-string
@@ -97,6 +102,7 @@ class TrustMark extends ParsedJws
         $this->helpers->type()->ensureNonEmptyString($logoUri, ClaimsEnum::LogoUri->value);
     }
 
+
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -110,6 +116,7 @@ class TrustMark extends ParsedJws
         null :
         $this->helpers->type()->ensureNonEmptyString($ref, ClaimsEnum::Ref->value);
     }
+
 
     /**
      * @return ?non-empty-string
@@ -125,6 +132,7 @@ class TrustMark extends ParsedJws
         $this->helpers->type()->ensureNonEmptyString($delegation, ClaimsEnum::Delegation->value);
     }
 
+
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -134,6 +142,7 @@ class TrustMark extends ParsedJws
     {
         return parent::getKeyId() ?? throw new TrustMarkException('No KeyId header claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
@@ -154,6 +163,7 @@ class TrustMark extends ParsedJws
 
         return $typ;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

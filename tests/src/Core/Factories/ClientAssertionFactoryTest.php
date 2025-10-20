@@ -42,7 +42,6 @@ final class ClientAssertionFactoryTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $expiredPayload = [
@@ -60,6 +59,7 @@ final class ClientAssertionFactoryTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -93,6 +93,7 @@ final class ClientAssertionFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsParser $jwsParser = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -120,6 +121,7 @@ final class ClientAssertionFactoryTest extends TestCase
             $claimFactory,
         );
     }
+
 
     public function testCanCreateInstance(): void
     {

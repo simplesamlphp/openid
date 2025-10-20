@@ -30,8 +30,6 @@ final class RequestObjectFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
-
     protected MockObject $jwsParserMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -44,7 +42,6 @@ final class RequestObjectFactoryTest extends TestCase
 
     protected MockObject $helpersMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -52,6 +49,7 @@ final class RequestObjectFactoryTest extends TestCase
         'typ' => 'jwt',
         'kid' => 'LfgZECDYkSTHmbllBD5_Tkwvy3CtOpNYQ7-DfQawTww',
     ];
+
 
     protected function setUp(): void
     {
@@ -77,6 +75,7 @@ final class RequestObjectFactoryTest extends TestCase
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
+
 
     protected function sut(
         ?JwsParser $jwsParser = null,
@@ -105,6 +104,7 @@ final class RequestObjectFactoryTest extends TestCase
             $claimFactory,
         );
     }
+
 
     public function testCanCreateInstance(): void
     {

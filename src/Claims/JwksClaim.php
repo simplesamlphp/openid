@@ -18,6 +18,7 @@ class JwksClaim implements ClaimInterface
     ) {
     }
 
+
     /**
      * @return array{keys:non-empty-array<array<string,mixed>>}
      */
@@ -26,6 +27,7 @@ class JwksClaim implements ClaimInterface
         return $this->value;
     }
 
+
     /**
      * @return non-empty-string
      */
@@ -33,6 +35,7 @@ class JwksClaim implements ClaimInterface
     {
         return $this->name;
     }
+
 
     /**
      * @return array<non-empty-string,array{keys:non-empty-array<array<string,mixed>>}>

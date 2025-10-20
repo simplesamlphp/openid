@@ -46,11 +46,13 @@ final class FederationClaimFactoryTest extends TestCase
         ],
     ];
 
+
     protected function setUp(): void
     {
         $this->helpers = new Helpers();
         $this->claimFactory = new ClaimFactory($this->helpers);
     }
+
 
     public function sut(
         ?Helpers $helpers = null,
@@ -65,10 +67,12 @@ final class FederationClaimFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(FederationClaimFactory::class, $this->sut());
     }
+
 
     public function testCanBuildTrustMarksClaimValue(): void
     {
@@ -77,6 +81,7 @@ final class FederationClaimFactoryTest extends TestCase
             'trustMark',
         ));
     }
+
 
     public function testCanBuildTrustMarksClaimValueFrom(): void
     {
@@ -92,6 +97,7 @@ final class FederationClaimFactoryTest extends TestCase
         );
     }
 
+
     public function testCanBuildTrustMarksClaimBag(): void
     {
         $this->assertInstanceOf(
@@ -99,6 +105,7 @@ final class FederationClaimFactoryTest extends TestCase
             $this->sut()->buildTrustMarksClaimBag(),
         );
     }
+
 
     public function testCanBuildTrustMarkOwnersClaimValue(): void
     {
@@ -108,6 +115,7 @@ final class FederationClaimFactoryTest extends TestCase
             $this->jwksArraySample,
         ));
     }
+
 
     public function testCanBuildTrustMarkOwnersClaimBagFrom(): void
     {

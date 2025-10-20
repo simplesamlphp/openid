@@ -18,15 +18,18 @@ final class CacheDecoratorFactoryTest extends TestCase
 {
     protected MockObject $cacheInterfaceMock;
 
+
     protected function setUp(): void
     {
         $this->cacheInterfaceMock = $this->createMock(CacheInterface::class);
     }
 
+
     protected function sut(): CacheDecoratorFactory
     {
         return new CacheDecoratorFactory();
     }
+
 
     public function testCacnCreateInstance(): void
     {
@@ -35,6 +38,7 @@ final class CacheDecoratorFactoryTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testCanBuild(): void
     {

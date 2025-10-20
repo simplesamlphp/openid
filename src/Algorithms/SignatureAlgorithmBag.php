@@ -11,15 +11,18 @@ class SignatureAlgorithmBag
     /** @var \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]  */
     protected array $algorithms;
 
+
     public function __construct(SignatureAlgorithmEnum $algorithm, SignatureAlgorithmEnum ...$algorithms)
     {
         $this->algorithms = [$algorithm, ...$algorithms];
     }
 
+
     public function add(SignatureAlgorithmEnum $algorithm): void
     {
         $this->algorithms[] = $algorithm;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]
@@ -28,6 +31,7 @@ class SignatureAlgorithmBag
     {
         return $this->algorithms;
     }
+
 
     /**
      * @return \Jose\Component\Signature\Algorithm\SignatureAlgorithm[]

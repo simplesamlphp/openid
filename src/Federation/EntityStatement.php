@@ -25,6 +25,7 @@ class EntityStatement extends ParsedJws
         return parent::getIssuer() ?? throw new EntityStatementException('No Issuer claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -35,6 +36,7 @@ class EntityStatement extends ParsedJws
         return parent::getSubject() ?? throw new EntityStatementException('No Subject claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -43,6 +45,7 @@ class EntityStatement extends ParsedJws
     {
         return parent::getIssuedAt() ?? throw new EntityStatementException('No Issued At claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -53,6 +56,7 @@ class EntityStatement extends ParsedJws
     {
         return parent::getExpirationTime() ?? throw new EntityStatementException('No Expiration Time claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -69,6 +73,7 @@ class EntityStatement extends ParsedJws
         return $this->claimFactory->buildJwks($jwks);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -84,6 +89,7 @@ class EntityStatement extends ParsedJws
 
         return $typ;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -119,6 +125,7 @@ class EntityStatement extends ParsedJws
         return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($authorityHints, $claimKey);
     }
 
+
     /**
      * @return ?array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -141,6 +148,7 @@ class EntityStatement extends ParsedJws
 
         return $this->helpers->type()->ensureArrayWithKeysAsStrings($metadata);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -169,6 +177,7 @@ class EntityStatement extends ParsedJws
 
         return $metadataPolicy;
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -202,6 +211,7 @@ class EntityStatement extends ParsedJws
         return $trustMarkClaimBag;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -223,6 +233,7 @@ class EntityStatement extends ParsedJws
         return $this->claimFactory->forFederation()->buildTrustMarkOwnersClaimBagFrom($trustMarkOwnersClaimData);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -232,6 +243,7 @@ class EntityStatement extends ParsedJws
     {
         return parent::getKeyId() ?? throw new EntityStatementException('No KeyId header claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -256,6 +268,7 @@ class EntityStatement extends ParsedJws
         return $this->helpers->type()->ensureNonEmptyString($federationFetchEndpoint);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -279,6 +292,7 @@ class EntityStatement extends ParsedJws
         return $this->helpers->type()->ensureNonEmptyString($federationTrustMarkEndpoint);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -287,6 +301,7 @@ class EntityStatement extends ParsedJws
     {
         return $this->getIssuer() === $this->getSubject();
     }
+
 
     /**
      * @param array<mixed>|null $jwks
@@ -302,6 +317,7 @@ class EntityStatement extends ParsedJws
 
         parent::verifyWithKeySet($jwks, $signatureIndex);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

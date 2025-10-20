@@ -17,6 +17,7 @@ final class ArrTest extends TestCase
         return new Arr();
     }
 
+
     public function testCanEnsureArrayDepth(): void
     {
         $arr = [];
@@ -28,6 +29,7 @@ final class ArrTest extends TestCase
         $this->assertIsArray($arr[1][2]);
     }
 
+
     public function testThrowsIfTooDeepArrayDepth(): void
     {
         $this->expectException(OpenIDException::class);
@@ -36,6 +38,7 @@ final class ArrTest extends TestCase
         $arr = [];
         $this->sut()->ensureArrayDepth($arr, ...range(0, 100));
     }
+
 
     public function testCanGetNestedValue(): void
     {
@@ -71,6 +74,7 @@ final class ArrTest extends TestCase
             $this->sut()->getNestedValue([]),
         );
     }
+
 
     public function testGetNestedValueThrowsIfTooDeep(): void
     {

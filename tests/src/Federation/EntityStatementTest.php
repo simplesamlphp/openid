@@ -28,7 +28,6 @@ final class EntityStatementTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
     protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -44,7 +43,6 @@ final class EntityStatementTest extends TestCase
     protected MockObject $jsonHelperMock;
 
     protected MockObject $arrHelperMock;
-
 
     protected MockObject $claimFactoryMock;
 
@@ -109,6 +107,7 @@ final class EntityStatementTest extends TestCase
 
     protected array $validPayload;
 
+
     protected function setUp(): void
     {
         $this->signatureMock = $this->createMock(Signature::class);
@@ -146,6 +145,7 @@ final class EntityStatementTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -174,6 +174,7 @@ final class EntityStatementTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -184,6 +185,7 @@ final class EntityStatementTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testThrowsOnInvalidJwks(): void
     {
@@ -198,6 +200,7 @@ final class EntityStatementTest extends TestCase
         $this->sut();
     }
 
+
     public function testIsConfiguration(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -205,6 +208,7 @@ final class EntityStatementTest extends TestCase
 
         $this->assertTrue($this->sut()->isConfiguration());
     }
+
 
     public function testIsNotConfiguration(): void
     {
@@ -218,6 +222,7 @@ final class EntityStatementTest extends TestCase
         $this->assertFalse($this->sut()->isConfiguration());
     }
 
+
     public function testVerifyWithKeySetRuns(): void
     {
         $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
@@ -228,6 +233,7 @@ final class EntityStatementTest extends TestCase
 
         $this->sut()->verifyWithKeySet();
     }
+
 
     public function testThrowsOnInvalidAuthorityHints(): void
     {
@@ -242,6 +248,7 @@ final class EntityStatementTest extends TestCase
         $this->sut();
     }
 
+
     public function testThrowsOnEmptyAuthorityHints(): void
     {
         $this->validPayload['authority_hints'] = [];
@@ -255,6 +262,7 @@ final class EntityStatementTest extends TestCase
         $this->sut();
     }
 
+
     public function testThrowsIfAuthorityHintsNotInConfigurationStatement(): void
     {
         $this->validPayload['iss'] = 'something-else';
@@ -267,6 +275,7 @@ final class EntityStatementTest extends TestCase
 
         $this->sut();
     }
+
 
     public function testTrustMarksAreOptional(): void
     {
@@ -282,6 +291,7 @@ final class EntityStatementTest extends TestCase
         );
     }
 
+
     public function testTrustMarkOwnersIsOptional(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -292,6 +302,7 @@ final class EntityStatementTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testTrustMarkOwnersIsBuildUsingFactoryOptional(): void
     {
@@ -311,6 +322,7 @@ final class EntityStatementTest extends TestCase
         $this->sut()->getTrustMarkOwners();
     }
 
+
     public function testThrowsOnInvalidTrustMarks(): void
     {
         $this->validPayload['trust_marks'] = 'invalid';
@@ -324,6 +336,7 @@ final class EntityStatementTest extends TestCase
         $this->sut();
     }
 
+
     public function testThrowsOnInvalidTypeHeader(): void
     {
         $this->sampleHeader['typ'] = 'invalid';
@@ -336,6 +349,7 @@ final class EntityStatementTest extends TestCase
 
         $this->sut();
     }
+
 
     public function testCanGetFederationFetchEndpoint(): void
     {
@@ -356,6 +370,7 @@ final class EntityStatementTest extends TestCase
         $this->assertSame('uri', $this->sut()->getFederationFetchEndpoint());
     }
 
+
     public function testFederationFetchEndpointIsOptional(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
@@ -364,6 +379,7 @@ final class EntityStatementTest extends TestCase
 
         $this->assertNull($this->sut()->getFederationFetchEndpoint());
     }
+
 
     public function testCanGetFederationTrustMarkEndpoint(): void
     {
@@ -384,6 +400,7 @@ final class EntityStatementTest extends TestCase
         $this->assertSame('uri', $this->sut()->getFederationTrustMarkEndpoint());
     }
 
+
     public function testMetadataIsOptional(): void
     {
         $payload = $this->validPayload;
@@ -394,6 +411,7 @@ final class EntityStatementTest extends TestCase
 
         $this->assertNull($this->sut()->getMetadata());
     }
+
 
     public function testThrowsForInvalidMetadataClaim(): void
     {
@@ -408,6 +426,7 @@ final class EntityStatementTest extends TestCase
 
         $this->sut()->getMetadata();
     }
+
 
     public function testCanGetMetadataPolicyClaim(): void
     {
@@ -428,6 +447,7 @@ final class EntityStatementTest extends TestCase
         $this->assertSame($payload['metadata_policy'], $this->sut()->getMetadataPolicy());
     }
 
+
     public function testThrowsForInvalidMetadataPolicyClaim(): void
     {
         $payload = $this->validPayload;
@@ -443,6 +463,7 @@ final class EntityStatementTest extends TestCase
 
         $this->sut()->getMetadataPolicy();
     }
+
 
     public function testThrowsIfMetadataPolicyIsSetInConfigurationStatement(): void
     {

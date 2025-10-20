@@ -30,6 +30,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testItHasProperSupportedOperatorValueTypes(): void
     {
         $this->assertSame(
@@ -92,6 +93,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             MetadataPolicyOperatorsEnum::Essential->getSupportedOperatorValueTypes(),
         );
     }
+
 
     public function testItHasProperSupportedParameterValueTypes(): void
     {
@@ -164,6 +166,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testItHasProperSupportedOperatorContainedValueTypes(): void
     {
         $this->assertSame(
@@ -211,11 +214,13 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testSupportedOperatorContainedValueTypesThrowsForValue(): void
     {
         $this->expectException(MetadataPolicyException::class);
         MetadataPolicyOperatorsEnum::Value->getSupportedOperatorContainedValueTypes();
     }
+
 
     public function testSupportedOperatorContainedValueTypesThrowsForDefault(): void
     {
@@ -223,11 +228,13 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         MetadataPolicyOperatorsEnum::Default->getSupportedOperatorContainedValueTypes();
     }
 
+
     public function testSupportedOperatorContainedValueTypesThrowsForEssential(): void
     {
         $this->expectException(MetadataPolicyException::class);
         MetadataPolicyOperatorsEnum::Essential->getSupportedOperatorContainedValueTypes();
     }
+
 
     public function testItHasProperSupportedParameterContainedValueTypes(): void
     {
@@ -265,11 +272,13 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testSupportedParameterContainedValueTypesThrowsForValue(): void
     {
         $this->expectException(MetadataPolicyException::class);
         MetadataPolicyOperatorsEnum::Value->getSupportedParameterContainedValueTypes();
     }
+
 
     public function testSupportedParameterContainedValueTypesThrowsForDefault(): void
     {
@@ -277,17 +286,20 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         MetadataPolicyOperatorsEnum::Default->getSupportedParameterContainedValueTypes();
     }
 
+
     public function testSupportedParameterContainedValueTypesThrowsForOneOf(): void
     {
         $this->expectException(MetadataPolicyException::class);
         MetadataPolicyOperatorsEnum::OneOf->getSupportedParameterContainedValueTypes();
     }
 
+
     public function testSupportedParameterContainedValueTypesThrowsForEssential(): void
     {
         $this->expectException(MetadataPolicyException::class);
         MetadataPolicyOperatorsEnum::Essential->getSupportedParameterContainedValueTypes();
     }
+
 
     public function testCanCheckIsValueSubsetOf(): void
     {
@@ -313,6 +325,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testCanCheckIsValueSupersetOf(): void
     {
         $this->assertFalse(
@@ -336,6 +349,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             ),
         );
     }
+
 
     public function testCanCheckIsOperatorValueTypeSupported(): void
     {
@@ -400,6 +414,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             [null, false,],
         ));
     }
+
 
     public function testCanCheckIsParameterValueTypeSupported(): void
     {
@@ -467,6 +482,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             [null, false,],
         ));
     }
+
 
     public function testCanGetSupportedOperatorCombinations(): void
     {
@@ -556,6 +572,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testCanCheckIsOperatorCombinationSupported(): void
     {
         // We have ensured proper operator combinations above, so just take a few cases to check that this method works.
@@ -585,6 +602,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testCanValidateGeneralParameterOperationRules(): void
     {
         // We have already ensured rules above, so just take a few cases to check that this method works in happy flow.
@@ -604,6 +622,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+
     public function testValidateGeneralParameterOperationRulesThrowsForNonSupportedOperatorValue(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -615,6 +634,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             ],
         );
     }
+
 
     public function testValidateGeneralParameterOperationRulesThrowsForNonSupportedOperatorCombinations(): void
     {
@@ -628,6 +648,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             ],
         );
     }
+
 
     public function testValidateSpecificParameterOperationRulesForAddAndSubsetOf(): void
     {
@@ -650,6 +671,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
         );
     }
 
+
     public function testValidateSpecificParameterOperationRulesForSubsetOfAndSupersetOf(): void
     {
         // If subset_of is combined with superset_of, the values of subset_of MUST be a superset of the values of
@@ -670,6 +692,7 @@ final class MetadataPolicyOperatorsEnumTest extends TestCase
             ],
         );
     }
+
 
     public function testCanValidateMetadataParameterValueType(): void
     {

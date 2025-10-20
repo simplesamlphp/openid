@@ -54,6 +54,7 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkDelegationMock;
 
+
     protected function setUp(): void
     {
         $this->trustChainResolverMock = $this->createMock(TrustChainResolver::class);
@@ -78,6 +79,7 @@ final class TrustMarkValidatorTest extends TestCase
 
         $this->trustMarkDelegationMock = $this->createMock(TrustMarkDelegation::class);
     }
+
 
     protected function sut(
         ?TrustChainResolver $trustChainResolver = null,
@@ -104,10 +106,12 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarkValidator::class, $this->sut());
     }
+
 
     public function testCanGetIsValidationCachedFor(): void
     {
@@ -129,6 +133,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testIsValidationCachedForReturnsFalseIfNotCached(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -149,6 +154,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testIsValidationCachedForReturnsFalseIfNoCacheInstance(): void
     {
         $sut = new TrustMarkValidator(
@@ -166,6 +172,7 @@ final class TrustMarkValidatorTest extends TestCase
             ),
         );
     }
+
 
     public function testFromCacheOrDoForTrustMarkTypeChecksCache(): void
     {
@@ -185,6 +192,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testFromCacheOrDoForTrustMarkTypeRuns(): void
     {
@@ -211,6 +219,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testDoForTrustMarkTypeThrowsIfNoTrustMarks(): void
     {
         $this->cacheDecoratorMock->expects($this->never())->method('get');
@@ -226,6 +235,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testDoForTrustMarkTypeThrowsIfNoTrustMarkWithGivenId(): void
     {
@@ -246,6 +256,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testDoForTrustMarkTypeThrowsForInvalidClaimValue(): void
     {
@@ -268,6 +279,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testFromCacheOrDoForTrustMarksClaimValueChecksCache(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -286,6 +298,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testFromCacheOrDoForTrustMarksClaimValueRuns(): void
     {
@@ -307,6 +320,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testValidateTrustMarksClaimValueThrowsForDifferentPayloadValues(): void
     {
         $this->trustMarksClaimValueMock->method('getTrustMarkType')->willReturn('trustMarkType');
@@ -325,6 +339,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustMarksClaimValueMock,
         );
     }
+
 
     public function testFromCacheOrDoForTrustMarkChecksCache(): void
     {
@@ -346,6 +361,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testFromCacheOrDoForTrustMarkRuns(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get');
@@ -362,6 +378,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testDoForTrustMarkTakesIntoAccountTrustMarkExpirationForCacheTtl(): void
     {
@@ -387,6 +404,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testDoForTrustMarksLogsCacheError(): void
     {
@@ -426,6 +444,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testValidateSubjectClaimThrowsForInvalidSubject(): void
     {
         $this->trustMarkMock->method('getSubject')->willReturn('invalidSubject');
@@ -438,6 +457,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->leafEntityConfigurationMock,
         );
     }
+
 
     public function testValidateTrustChainForTrustMarkIssuerThrowsForInvalidChain(): void
     {
@@ -456,6 +476,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testValidateTrustMarkSignatureThrowsForInvalidSignature(): void
     {
         $this->trustMarkMock->expects($this->once())
@@ -472,6 +493,7 @@ final class TrustMarkValidatorTest extends TestCase
             $trustMarkIssuerEntityConfiguration,
         );
     }
+
 
     public function testCanValidateTrustMarkDelegation(): void
     {
@@ -507,6 +529,7 @@ final class TrustMarkValidatorTest extends TestCase
         );
     }
 
+
     public function testValidateTrustMarkDelegationSkipsIfTrustMarkOwnerNotDefinedOnTrustAnchor(): void
     {
         $this->trustAnchorConfigurationMock->expects($this->once())
@@ -534,6 +557,7 @@ final class TrustMarkValidatorTest extends TestCase
         $this->assertTrue($debugMessageContainedSkipped);
     }
 
+
     public function testValidateTrustMarkDelegationThrowsForMissingDelegationClaim(): void
     {
         $this->trustAnchorConfigurationMock->expects($this->once())
@@ -555,6 +579,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testValidateTrustMarkDelegationThrowsForInvalidSignature(): void
     {
@@ -585,6 +610,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testValidateTrustMarkDelegationThrowsForInvalidDelegationIssuer(): void
     {
@@ -617,6 +643,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testValidateTrustMarkDelegationThrowsForInvalidTrustMarkIssuer(): void
     {
@@ -652,6 +679,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustAnchorConfigurationMock,
         );
     }
+
 
     public function testValidateTrustMarkDelegationThrowsForInvalidTrustMarkType(): void
     {

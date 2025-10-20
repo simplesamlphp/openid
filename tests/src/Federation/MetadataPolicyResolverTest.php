@@ -60,10 +60,12 @@ final class MetadataPolicyResolverTest extends TestCase
         ],
     ];
 
+
     protected function setUp(): void
     {
         $this->helpersMock = $this->createMock(Helpers::class);
     }
+
 
     protected function sut(
         ?Helpers $helpers = null,
@@ -73,10 +75,12 @@ final class MetadataPolicyResolverTest extends TestCase
         return new MetadataPolicyResolver($helpers);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(MetadataPolicyResolver::class, $this->sut());
     }
+
 
     public function testForHappyFlow(): void
     {
@@ -91,6 +95,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $this->assertNotEmpty($metadataPolicy);
     }
 
+
     public function testReturnsEmptyArrayIfEntityTypeNotPresent(): void
     {
         $this->assertEmpty(
@@ -103,6 +108,7 @@ final class MetadataPolicyResolverTest extends TestCase
             ),
         );
     }
+
 
     public function testThrowsInCaseOfDifferentValueOperatorValue(): void
     {
@@ -121,6 +127,7 @@ final class MetadataPolicyResolverTest extends TestCase
         );
     }
 
+
     public function testThrowsForInvalidEssentialOperatorValueChange(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -137,6 +144,7 @@ final class MetadataPolicyResolverTest extends TestCase
             ],
         );
     }
+
 
     public function testSetsEssentialOperatorValueInCaseOfCurrentFalseValue(): void
     {
@@ -157,6 +165,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $this->assertTrue($metadataPolicy['token_endpoint_auth_method']['essential']);
     }
 
+
     public function testThrowsForUnsupportedCriticalOperator(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -175,6 +184,7 @@ final class MetadataPolicyResolverTest extends TestCase
         );
     }
 
+
     public function testThrowsForEmptyIntersectionForOneOf(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -192,6 +202,7 @@ final class MetadataPolicyResolverTest extends TestCase
         );
     }
 
+
     public function testCanEnsureFormat(): void
     {
         $this->assertSame(
@@ -199,6 +210,7 @@ final class MetadataPolicyResolverTest extends TestCase
             $this->sut()->ensureFormat($this->intermediateMetadataPolicySample),
         );
     }
+
 
     public function testEnsureFormatThrowsOnNonStringForEntityTypeKey(): void
     {
@@ -209,6 +221,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $this->sut()->ensureFormat($policy);
     }
 
+
     public function testEnsureFormatThrowsOnNonSArrayForEntityTypeValue(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -217,6 +230,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $policy = ['a' => 'b'];
         $this->sut()->ensureFormat($policy);
     }
+
 
     public function testEnsureFormatThrowsOnNonStringForParameterKey(): void
     {
@@ -227,6 +241,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $this->sut()->ensureFormat($policy);
     }
 
+
     public function testEnsureFormatThrowsOnNonStringForParameterValue(): void
     {
         $this->expectException(MetadataPolicyException::class);
@@ -235,6 +250,7 @@ final class MetadataPolicyResolverTest extends TestCase
         $policy = ['a' => ['b' => 'c']];
         $this->sut()->ensureFormat($policy);
     }
+
 
     public function testEnsureFormatThrowsOnNonStringForOperatorKey(): void
     {

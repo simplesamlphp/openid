@@ -27,15 +27,18 @@ class TrustMarkFetcher extends JwsFetcher
         parent::__construct($parsedJwsFactory, $artifactFetcher, $maxCacheDuration, $helpers, $logger);
     }
 
+
     protected function buildJwsInstance(string $token): TrustMark
     {
         return $this->parsedJwsFactory->fromToken($token);
     }
 
+
     public function getExpectedContentTypeHttpHeader(): string
     {
         return ContentTypesEnum::ApplicationTrustMarkJwt->value;
     }
+
 
     /**
      * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the
@@ -68,6 +71,7 @@ class TrustMarkFetcher extends JwsFetcher
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
@@ -76,6 +80,7 @@ class TrustMarkFetcher extends JwsFetcher
     {
         return $this->fromCache($uri) ?? $this->fromNetwork($uri);
     }
+
 
     /**
      * Fetch Trust Mark from cache, if available. URI is used as cache key.
@@ -105,6 +110,7 @@ class TrustMarkFetcher extends JwsFetcher
         throw new FetchException($message);
         // @codeCoverageIgnoreEnd
     }
+
 
     /**
      * Fetch Trust Mark from network. Each successful fetch will be cached, with URI being used as a cache key.

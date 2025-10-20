@@ -20,11 +20,13 @@ final class HttpClientDecoratorTest extends TestCase
 
     protected MockObject $responseInterfaceMock;
 
+
     protected function setUp(): void
     {
         $this->clientMock = $this->createMock(Client::class);
         $this->responseInterfaceMock = $this->createMock(ResponseInterface::class);
     }
+
 
     protected function sut(
         ?Client $client = null,
@@ -34,10 +36,12 @@ final class HttpClientDecoratorTest extends TestCase
         return new HttpClientDecorator($client);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(HttpClientDecorator::class, $this->sut());
     }
+
 
     public function testRequestThrowsForRequestError(): void
     {
@@ -48,6 +52,7 @@ final class HttpClientDecoratorTest extends TestCase
         $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
     }
 
+
     public function testRequestThrowsForNon200Response(): void
     {
         $this->responseInterfaceMock->method('getStatusCode')->willReturn(500);
@@ -57,6 +62,7 @@ final class HttpClientDecoratorTest extends TestCase
 
         $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
     }
+
 
     public function testCanRequest(): void
     {

@@ -15,10 +15,12 @@ class ClaimFactory
 {
     protected FederationClaimFactory $federationClaimFactory;
 
+
     public function __construct(
         protected readonly Helpers $helpers,
     ) {
     }
+
 
     public function forFederation(): FederationClaimFactory
     {
@@ -27,6 +29,7 @@ class ClaimFactory
             $this,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -38,6 +41,7 @@ class ClaimFactory
             $this->helpers->type()->ensureNonEmptyString($name, 'ClaimName'),
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException

@@ -95,6 +95,7 @@ final class FederationTest extends TestCase
 
     protected MockObject $clientMock;
 
+
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
@@ -106,6 +107,7 @@ final class FederationTest extends TestCase
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->clientMock = $this->createMock(Client::class);
     }
+
 
     protected function sut(
         ?SupportedAlgorithms $supportedAlgorithms = null,
@@ -138,10 +140,12 @@ final class FederationTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(Federation::class, $this->sut());
     }
+
 
     public function testCanBuildTools(): void
     {

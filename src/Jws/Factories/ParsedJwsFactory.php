@@ -26,6 +26,7 @@ class ParsedJwsFactory
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */

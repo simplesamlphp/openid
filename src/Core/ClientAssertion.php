@@ -26,6 +26,7 @@ class ClientAssertion extends ParsedJws
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
@@ -39,6 +40,7 @@ class ClientAssertion extends ParsedJws
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
@@ -48,6 +50,7 @@ class ClientAssertion extends ParsedJws
     {
         return parent::getIssuer() ?? throw new ClientAssertionException('No Issuer claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -59,6 +62,7 @@ class ClientAssertion extends ParsedJws
         return parent::getSubject() ?? throw new ClientAssertionException('No Subject claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
@@ -69,6 +73,7 @@ class ClientAssertion extends ParsedJws
         return parent::getAudience() ?? throw new ClientAssertionException('No Audience claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
@@ -77,6 +82,7 @@ class ClientAssertion extends ParsedJws
     {
         return parent::getJwtId() ?? throw new ClientAssertionException('No JWT ID claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException

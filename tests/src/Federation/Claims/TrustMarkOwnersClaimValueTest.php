@@ -21,6 +21,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
 
     protected array $otherClaims;
 
+
     protected function setUp(): void
     {
         $this->trustMarkType = 'trustMarkType';
@@ -28,6 +29,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
         $this->jwksClaimMock = $this->createMock(JwksClaim::class);
         $this->otherClaims = ['key' => 'value'];
     }
+
 
     protected function sut(
         ?string $trustMarkType = null,
@@ -48,10 +50,12 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarkOwnersClaimValue::class, $this->sut());
     }
+
 
     public function testCanGetProperties(): void
     {
@@ -61,6 +65,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
         $this->assertSame($this->jwksClaimMock, $sut->getJwks());
         $this->assertSame($this->otherClaims, $sut->getOtherClaims());
     }
+
 
     public function testCanJsonSerialize(): void
     {

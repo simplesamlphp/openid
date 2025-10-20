@@ -66,6 +66,7 @@ class Jwks
 
     protected ?ClaimFactory $claimFactory = null;
 
+
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -82,10 +83,12 @@ class Jwks
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($httpClient);
     }
 
+
     public function jwksFactory(): JwksFactory
     {
         return $this->jwksFactory ??= new JwksFactory();
     }
+
 
     public function signedJwksFactory(): SignedJwksFactory
     {
@@ -99,6 +102,7 @@ class Jwks
             $this->claimFactory(),
         );
     }
+
 
     public function jwksFetcher(): JwksFetcher
     {
@@ -114,10 +118,12 @@ class Jwks
         );
     }
 
+
     public function helpers(): Helpers
     {
         return $this->helpers ??= new Helpers();
     }
+
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
@@ -128,6 +134,7 @@ class Jwks
         return $this->algorithmManagerDecoratorFactory;
     }
 
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
@@ -136,6 +143,7 @@ class Jwks
 
         return $this->jwsSerializerManagerDecoratorFactory;
     }
+
 
     public function jwsParserFactory(): JwsParserFactory
     {
@@ -146,6 +154,7 @@ class Jwks
         return $this->jwsParserFactory;
     }
 
+
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
         if (is_null($this->jwsVerifierDecoratorFactory)) {
@@ -154,6 +163,7 @@ class Jwks
 
         return $this->jwsVerifierDecoratorFactory;
     }
+
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
@@ -164,6 +174,7 @@ class Jwks
         return $this->dateIntervalDecoratorFactory;
     }
 
+
     public function cacheDecoratorFactory(): CacheDecoratorFactory
     {
         if (is_null($this->cacheDecoratorFactory)) {
@@ -172,6 +183,7 @@ class Jwks
 
         return $this->cacheDecoratorFactory;
     }
+
 
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
@@ -182,6 +194,7 @@ class Jwks
         return $this->httpClientDecoratorFactory;
     }
 
+
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
         return $this->jwsVerifierDecorator ??= $this->jwsVerifierDecoratorFactory()->build(
@@ -189,16 +202,19 @@ class Jwks
         );
     }
 
+
     public function jwsParser(): JwsParser
     {
         return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
     }
+
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
         return $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
             ->build($this->supportedSerializers);
     }
+
 
     public function claimFactory(): ClaimFactory
     {

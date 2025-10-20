@@ -14,10 +14,12 @@ final class JwsDecoratorTest extends TestCase
 {
     protected \PHPUnit\Framework\MockObject\MockObject $jwsMock;
 
+
     protected function setUp(): void
     {
         $this->jwsMock = $this->createMock(JWS::class);
     }
+
 
     protected function sut(
         ?JWS $jws = null,
@@ -27,10 +29,12 @@ final class JwsDecoratorTest extends TestCase
         return new JwsDecorator($jws);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsDecorator::class, $this->sut());
     }
+
 
     public function testCanGetJws(): void
     {

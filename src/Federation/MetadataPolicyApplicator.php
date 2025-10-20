@@ -16,6 +16,7 @@ class MetadataPolicyApplicator
     ) {
     }
 
+
     /**
      * @param array<string,array<string,mixed>> $resolvedMetadataPolicy Resolved (validated) metadata policy.
      * @param array<string,mixed> $metadata
@@ -186,6 +187,7 @@ class MetadataPolicyApplicator
         return $metadata;
     }
 
+
     /**
      * @param array<string,mixed> $metadata
      */
@@ -200,6 +202,7 @@ class MetadataPolicyApplicator
 
         return $value;
     }
+
 
     protected function resolveParameterValueAfterPolicy(mixed $value, string $parameter): mixed
     {

@@ -40,7 +40,6 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -102,6 +101,7 @@ final class ParsedJwsTest extends TestCase
 
     protected array $validPayload;
 
+
     protected function setUp(): void
     {
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
@@ -132,6 +132,7 @@ final class ParsedJwsTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -160,10 +161,12 @@ final class ParsedJwsTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(ParsedJws::class, $this->sut());
     }
+
 
     public function testCanValidateByCallbacks(): void
     {
@@ -181,6 +184,7 @@ final class ParsedJwsTest extends TestCase
                 $this->validateByCallbacks($this->simulateOk(...));
             }
 
+
             protected function simulateOk(): void
             {
             }
@@ -188,6 +192,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->assertInstanceOf(ParsedJws::class, $sut);
     }
+
 
     public function testThrowsOnValidateByCallbacksError(): void
     {
@@ -209,6 +214,7 @@ final class ParsedJwsTest extends TestCase
                 $this->validateByCallbacks($this->simulateError(...));
             }
 
+
             protected function simulateError(): never
             {
                 throw new \Exception('Error');
@@ -216,12 +222,14 @@ final class ParsedJwsTest extends TestCase
         };
     }
 
+
     public function testCanGetHeader(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
         $this->assertSame($this->sampleHeader, $this->sut()->getHeader());
     }
+
 
     public function testCanGetHeaderClaims(): void
     {
@@ -232,6 +240,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame($this->sampleHeader['typ'], $this->sut()->getType());
     }
 
+
     public function testThrowsOnGetHeaderError(): void
     {
         $this->jwsMock->method('getSignature')->willThrowException(new \Exception('Error'));
@@ -241,6 +250,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->sut()->getHeader();
     }
+
 
     public function testCanGetPayload(): void
     {
@@ -254,6 +264,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame($this->validPayload, $sut->getPayload());
     }
 
+
     public function testCanGetEmptyPayload(): void
     {
         $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('');
@@ -261,6 +272,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->sut()->getPayload();
     }
+
 
     public function testThrowsOnPayloadDecodingError(): void
     {
@@ -273,6 +285,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->sut()->getPayload();
     }
+
 
     public function testCanGetPayloadClaims(): void
     {
@@ -287,6 +300,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame($this->validPayload['exp'], $sut->getExpirationTime());
         $this->assertSame($this->validPayload['iat'], $sut->getIssuedAt());
     }
+
 
     public function testCanGetEmptyPayloadClaims(): void
     {
@@ -303,6 +317,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertNull($sut->getIssuer());
     }
 
+
     public function testCanGetAudienceArrayFromString(): void
     {
         $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
@@ -312,6 +327,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame(['sample'], $this->sut()->getAudience());
     }
 
+
     public function testCanGetAudienceArrayFromArray(): void
     {
         $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
@@ -320,6 +336,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->assertSame(['sample'], $this->sut()->getAudience());
     }
+
 
     public function testThrowsOnInvalidAudienceValue(): void
     {
@@ -333,6 +350,7 @@ final class ParsedJwsTest extends TestCase
         $this->sut()->getAudience();
     }
 
+
     public function testCanSerializeToToken(): void
     {
         $this->jwsSerializerManagerDecoratorMock->expects($this->once())->method('serialize')
@@ -345,6 +363,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame('token', $sut->getToken());
     }
 
+
     public function testCanVerifyWithKeySet(): void
     {
         $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
@@ -352,6 +371,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->sut()->verifyWithKeySet(['jwks']);
     }
+
 
     public function testThrowsOnVerifyWithKeySetError(): void
     {
@@ -364,6 +384,7 @@ final class ParsedJwsTest extends TestCase
         $this->sut()->verifyWithKeySet(['jwks']);
     }
 
+
     public function testThrowsIfExpired(): void
     {
         $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
@@ -374,6 +395,7 @@ final class ParsedJwsTest extends TestCase
 
         $this->sut()->getExpirationTime();
     }
+
 
     public function testThrowsIfIssuedAtInTheFuture(): void
     {

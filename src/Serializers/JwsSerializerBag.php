@@ -13,15 +13,18 @@ class JwsSerializerBag
      */
     protected array $jwsSerializers;
 
+
     public function __construct(JwsSerializerEnum ...$jwsSerializers)
     {
         $this->jwsSerializers = $jwsSerializers;
     }
 
+
     public function add(JwsSerializerEnum $jwsSerializer): void
     {
         $this->jwsSerializers[] = $jwsSerializer;
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\Serializers\JwsSerializerEnum[]
@@ -30,6 +33,7 @@ class JwsSerializerBag
     {
         return $this->jwsSerializers;
     }
+
 
     /**
      * @return \Jose\Component\Signature\Serializer\JWSSerializer[]

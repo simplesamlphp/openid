@@ -30,6 +30,7 @@ class Arr
         $this->ensureArrayDepth($array[$key], ...$keys);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      * @param mixed[] $array

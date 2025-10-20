@@ -32,6 +32,7 @@ final class TrustChainFactoryTest extends TestCase
 
     protected MockObject $helpersMock;
 
+
     protected function setUp(): void
     {
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
@@ -40,6 +41,7 @@ final class TrustChainFactoryTest extends TestCase
         $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
     }
+
 
     protected function sut(
         ?EntityStatementFactory $entityStatementFactory = null,
@@ -63,15 +65,18 @@ final class TrustChainFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustChainFactory::class, $this->sut());
     }
 
+
     public function testCanBuildEmptyTrustChain(): void
     {
         $this->assertInstanceOf(TrustChain::class, $this->sut()->empty());
     }
+
 
     public function testCanBuildFromStatements(): void
     {
@@ -94,6 +99,7 @@ final class TrustChainFactoryTest extends TestCase
         $this->assertFalse($trustChain->isEmpty());
     }
 
+
     public function testBuildFromStatementsThrowsForLessThanThreeEntityStatements(): void
     {
         $expirationTime = time() + 60;
@@ -111,6 +117,7 @@ final class TrustChainFactoryTest extends TestCase
 
         $this->sut()->fromStatements($leaf, $subordinate);
     }
+
 
     public function testCanBuildFromTokens(): void
     {
@@ -137,6 +144,7 @@ final class TrustChainFactoryTest extends TestCase
             $this->sut()->fromTokens('token', 'token2', 'tokent3'),
         );
     }
+
 
     public function testCanBuildForTrustAnchor(): void
     {

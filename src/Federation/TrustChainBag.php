@@ -11,10 +11,12 @@ class TrustChainBag
     /** @var \SimpleSAML\OpenID\Federation\TrustChain[] */
     protected array $trustChains = [];
 
+
     public function __construct(TrustChain $trustChain, TrustChain ...$trustChains)
     {
         $this->add($trustChain, ...$trustChains);
     }
+
 
     public function add(TrustChain $trustChain, TrustChain ...$trustChains): void
     {
@@ -28,6 +30,7 @@ class TrustChainBag
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
      */
@@ -36,6 +39,7 @@ class TrustChainBag
         ($shortestChain = reset($this->trustChains)) || throw new TrustChainException('Invalid trust chain bag.');
         return $shortestChain;
     }
+
 
     /**
      * Get the shortest Trust Chain prioritized by Trust Anchor ID. Returns null if none of the given Trust Anchor IDs
@@ -65,6 +69,7 @@ class TrustChainBag
         $prioritizedChain : null;
     }
 
+
     /**
      * @return \SimpleSAML\OpenID\Federation\TrustChain[]
      */
@@ -72,6 +77,7 @@ class TrustChainBag
     {
         return $this->trustChains;
     }
+
 
     public function getCount(): int
     {

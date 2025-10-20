@@ -16,6 +16,7 @@ class SupportedSerializers
     ) {
     }
 
+
     public function getJwsSerializerBag(): JwsSerializerBag
     {
         return $this->jwsSerializerBag;

@@ -18,20 +18,24 @@ final class JwsParserFactoryTest extends TestCase
 {
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
+
     protected function setUp(): void
     {
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
     }
+
 
     protected function sut(): JwsParserFactory
     {
         return new JwsParserFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwsParserFactory::class, $this->sut());
     }
+
 
     public function testCanBuild(): void
     {

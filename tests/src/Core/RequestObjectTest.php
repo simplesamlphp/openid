@@ -27,7 +27,6 @@ final class RequestObjectTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-
     protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -40,8 +39,6 @@ final class RequestObjectTest extends TestCase
 
     protected MockObject $helpersMock;
 
-
-
     protected MockObject $claimFactoryMock;
 
     protected array $sampleHeader = [
@@ -49,6 +46,7 @@ final class RequestObjectTest extends TestCase
         'typ' => 'jwt',
         'kid' => 'LfgZECDYkSTHmbllBD5_Tkwvy3CtOpNYQ7-DfQawTww',
     ];
+
 
     protected function setUp(): void
     {
@@ -75,6 +73,7 @@ final class RequestObjectTest extends TestCase
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
+
 
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
@@ -104,10 +103,12 @@ final class RequestObjectTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(RequestObject::class, $this->sut());
     }
+
 
     public function testCanCheckIsProtected(): void
     {
@@ -115,6 +116,7 @@ final class RequestObjectTest extends TestCase
 
         $this->assertTrue($this->sut()->isProtected());
     }
+
 
     public function testCanCheckIsNotProtected(): void
     {
@@ -125,6 +127,7 @@ final class RequestObjectTest extends TestCase
 
         $this->assertFalse($this->sut()->isProtected());
     }
+
 
     public function testThrowsForNonExistingAlgHeader(): void
     {

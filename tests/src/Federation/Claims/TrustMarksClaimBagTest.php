@@ -15,6 +15,7 @@ final class TrustMarksClaimBagTest extends TestCase
 {
     protected MockObject $trustMarkClaimMock;
 
+
     protected function setUp(): void
     {
         $this->trustMarkClaimMock = $this->createMock(TrustMarksClaimValue::class);
@@ -22,17 +23,20 @@ final class TrustMarksClaimBagTest extends TestCase
         $this->trustMarkClaimMock->method('getTrustMark')->willReturn('token');
     }
 
+
     protected function sut(
         TrustMarksClaimValue ...$trustMarkClaims,
     ): TrustMarksClaimBag {
         return new TrustMarksClaimBag(...$trustMarkClaims);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarksClaimBag::class, $this->sut());
         $this->assertInstanceOf(TrustMarksClaimBag::class, $this->sut($this->trustMarkClaimMock));
     }
+
 
     public function testCanGetAll(): void
     {
@@ -44,6 +48,7 @@ final class TrustMarksClaimBagTest extends TestCase
         $sut->add($this->trustMarkClaimMock, $this->trustMarkClaimMock);
         $this->assertCount(3, $sut->getAll());
     }
+
 
     public function testCanGetAllFor(): void
     {
@@ -60,6 +65,7 @@ final class TrustMarksClaimBagTest extends TestCase
         $this->assertSame($secondTrustMarkClaim->getTrustMarkType(), $allForSecond[0]->getTrustMarkType());
     }
 
+
     public function testCanGetFirstFor(): void
     {
         $firstTrustMarkClaim = $this->createMock(TrustMarksClaimValue::class);
@@ -74,6 +80,7 @@ final class TrustMarksClaimBagTest extends TestCase
         $this->assertSame($secondTrustMarkClaim->getTrustMarkType(), $second->getTrustMarkType());
     }
 
+
     public function testGetFirstForReturnNullIfNoneFound(): void
     {
 
@@ -84,6 +91,7 @@ final class TrustMarksClaimBagTest extends TestCase
 
         $this->assertNotInstanceOf(TrustMarksClaimValue::class, $sut->getFirstFor('second'));
     }
+
 
     public function testCanJsonSerialize(): void
     {

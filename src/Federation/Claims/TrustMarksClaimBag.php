@@ -13,15 +13,18 @@ class TrustMarksClaimBag implements JsonSerializable
      */
     protected array $trustMarksClaimValues = [];
 
+
     public function __construct(TrustMarksClaimValue ...$trustMarksClaimValue)
     {
         $this->add(...$trustMarksClaimValue);
     }
 
+
     public function add(TrustMarksClaimValue ...$trustMarksClaimValue): void
     {
         $this->trustMarksClaimValues = array_merge($this->trustMarksClaimValues, $trustMarksClaimValue);
     }
+
 
     /**
      * @return \SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue[]
@@ -30,6 +33,7 @@ class TrustMarksClaimBag implements JsonSerializable
     {
         return $this->trustMarksClaimValues;
     }
+
 
     /**
      * @param non-empty-string $trustMarkType
@@ -43,6 +47,7 @@ class TrustMarksClaimBag implements JsonSerializable
         ));
     }
 
+
     public function getFirstFor(string $trustMarkType): ?TrustMarksClaimValue
     {
         foreach ($this->trustMarksClaimValues as $trustMarkClaim) {
@@ -53,6 +58,7 @@ class TrustMarksClaimBag implements JsonSerializable
 
         return null;
     }
+
 
     /**
      * @return array<mixed[]>

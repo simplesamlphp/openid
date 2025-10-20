@@ -52,6 +52,7 @@ class Core
 
     protected ?ClaimFactory $claimFactory = null;
 
+
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
             new SignatureAlgorithmBag(
@@ -67,6 +68,7 @@ class Core
             ->build($timestampValidationLeeway);
     }
 
+
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
@@ -79,6 +81,7 @@ class Core
             $this->claimFactory(),
         );
     }
+
 
     public function clientAssertionFactory(): ClientAssertionFactory
     {
@@ -93,10 +96,12 @@ class Core
         );
     }
 
+
     public function helpers(): Helpers
     {
         return $this->helpers ??= new Helpers();
     }
+
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
@@ -107,6 +112,7 @@ class Core
         return $this->algorithmManagerDecoratorFactory;
     }
 
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
@@ -115,6 +121,7 @@ class Core
 
         return $this->jwsSerializerManagerDecoratorFactory;
     }
+
 
     public function jwsParserFactory(): JwsParserFactory
     {
@@ -125,6 +132,7 @@ class Core
         return $this->jwsParserFactory;
     }
 
+
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
         if (is_null($this->jwsVerifierDecoratorFactory)) {
@@ -134,10 +142,12 @@ class Core
         return $this->jwsVerifierDecoratorFactory;
     }
 
+
     public function jwksFactory(): JwksFactory
     {
         return $this->jwksFactory ??= new JwksFactory();
     }
+
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
@@ -147,6 +157,7 @@ class Core
 
         return $this->dateIntervalDecoratorFactory;
     }
+
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
@@ -158,6 +169,7 @@ class Core
         return $this->jwsSerializerManagerDecorator;
     }
 
+
     public function jwsParser(): JwsParser
     {
         if (is_null($this->jwsParser)) {
@@ -166,6 +178,7 @@ class Core
 
         return $this->jwsParser;
     }
+
 
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
@@ -177,6 +190,7 @@ class Core
 
         return $this->jwsVerifierDecorator;
     }
+
 
     public function claimFactory(): ClaimFactory
     {

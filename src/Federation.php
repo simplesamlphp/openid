@@ -101,6 +101,7 @@ class Federation
 
     protected ?TrustMarkFetcher $trustMarkFetcher = null;
 
+
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -119,6 +120,7 @@ class Federation
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
     }
 
+
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
         return $this->jwsVerifierDecorator ??= $this->jwsVerifierDecoratorFactory()->build(
@@ -126,16 +128,19 @@ class Federation
         );
     }
 
+
     public function jwsParser(): JwsParser
     {
         return $this->jwsParser ??= $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
     }
+
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
         return $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
             ->build($this->supportedSerializers);
     }
+
 
     public function entityStatementFetcher(): EntityStatementFetcher
     {
@@ -148,15 +153,18 @@ class Federation
         );
     }
 
+
     public function metadataPolicyResolver(): MetadataPolicyResolver
     {
         return $this->metadataPolicyResolver ??= new MetadataPolicyResolver($this->helpers());
     }
 
+
     public function metadataPolicyApplicator(): MetadataPolicyApplicator
     {
         return $this->metadataPolicyApplicator ??= new MetadataPolicyApplicator($this->helpers());
     }
+
 
     public function trustChainFactory(): TrustChainFactory
     {
@@ -168,6 +176,7 @@ class Federation
             $this->helpers(),
         );
     }
+
 
     public function trustChainResolver(): TrustChainResolver
     {
@@ -182,6 +191,7 @@ class Federation
         );
     }
 
+
     public function entityStatementFactory(): EntityStatementFactory
     {
         return $this->entityStatementFactory ??= new EntityStatementFactory(
@@ -194,6 +204,7 @@ class Federation
             $this->claimFactory(),
         );
     }
+
 
     public function requestObjectFactory(): RequestObjectFactory
     {
@@ -208,6 +219,7 @@ class Federation
         );
     }
 
+
     public function trustMarkFactory(): TrustMarkFactory
     {
         return $this->trustMarkFactory ??= new TrustMarkFactory(
@@ -220,6 +232,7 @@ class Federation
             $this->claimFactory(),
         );
     }
+
 
     public function trustMarkDelegationFactory(): TrustMarkDelegationFactory
     {
@@ -234,6 +247,7 @@ class Federation
         );
     }
 
+
     public function trustMarkValidator(): TrustMarkValidator
     {
         return $this->trustMarkValidator ??= new TrustMarkValidator(
@@ -246,6 +260,7 @@ class Federation
         );
     }
 
+
     public function trustMarkFetcher(): TrustMarkFetcher
     {
         return $this->trustMarkFetcher ??= new TrustMarkFetcher(
@@ -257,35 +272,42 @@ class Federation
         );
     }
 
+
     public function helpers(): Helpers
     {
         return $this->helpers ??= new Helpers();
     }
+
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
         return $this->algorithmManagerDecoratorFactory ??= new AlgorithmManagerDecoratorFactory();
     }
 
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         return $this->jwsSerializerManagerDecoratorFactory ??= new JwsSerializerManagerDecoratorFactory();
     }
+
 
     public function jwsParserFactory(): JwsParserFactory
     {
         return $this->jwsParserFactory ??= new JwsParserFactory();
     }
 
+
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
         return $this->jwsVerifierDecoratorFactory ??= new JwsVerifierDecoratorFactory();
     }
 
+
     public function jwksFactory(): JwksFactory
     {
         return $this->jwksFactory ??= new JwksFactory();
     }
+
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
@@ -296,10 +318,12 @@ class Federation
         return $this->dateIntervalDecoratorFactory;
     }
 
+
     public function trustChainBagFactory(): TrustChainBagFactory
     {
         return $this->trustChainBagFactory ??= new TrustChainBagFactory();
     }
+
 
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
@@ -310,6 +334,7 @@ class Federation
         return $this->httpClientDecoratorFactory;
     }
 
+
     public function cacheDecoratorFactory(): CacheDecoratorFactory
     {
         if (is_null($this->cacheDecoratorFactory)) {
@@ -319,30 +344,36 @@ class Federation
         return $this->cacheDecoratorFactory;
     }
 
+
     public function maxCacheDurationDecorator(): DateIntervalDecorator
     {
         return $this->maxCacheDurationDecorator;
     }
+
 
     public function supportedAlgorithms(): SupportedAlgorithms
     {
         return $this->supportedAlgorithms;
     }
 
+
     public function supportedSerializers(): SupportedSerializers
     {
         return $this->supportedSerializers;
     }
+
 
     public function maxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
     }
 
+
     public function cacheDecorator(): ?CacheDecorator
     {
         return $this->cacheDecorator;
     }
+
 
     public function artifactFetcher(): ArtifactFetcher
     {
@@ -352,6 +383,7 @@ class Federation
             $this->logger,
         );
     }
+
 
     public function claimFactory(): ClaimFactory
     {

@@ -46,7 +46,6 @@ final class JwksFetcherTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $responseMock;
 
     protected MockObject $responseBodyMock;
@@ -68,6 +67,7 @@ final class JwksFetcherTest extends TestCase
             ],
         ],
     ];
+
 
     protected function setUp(): void
     {
@@ -94,6 +94,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->jwksClaimMock = $this->createMock(JwksClaim::class);
     }
+
 
     protected function sut(
         ?HttpClientDecorator $httpClientDecorator = null,
@@ -126,10 +127,12 @@ final class JwksFetcherTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwksFetcher::class, $this->sut());
     }
+
 
     public function testCanGetFromCache(): void
     {
@@ -155,6 +158,7 @@ final class JwksFetcherTest extends TestCase
         $this->assertInstanceOf(JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
 
+
     public function testLogsErrorInCaseOfCacheError(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -167,6 +171,7 @@ final class JwksFetcherTest extends TestCase
         $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
 
+
     public function testReturnsNullInCaseOfNonStringValueInCache(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -175,6 +180,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
+
 
     public function testLogsErrorInCaseOfCacheValueDecodeError(): void
     {
@@ -191,6 +197,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromCache('uri'));
     }
+
 
     public function testCanGetFromJwksUri(): void
     {
@@ -222,6 +229,7 @@ final class JwksFetcherTest extends TestCase
         $this->sut()->fromJwksUri('uri');
     }
 
+
     public function testJwksUriReturnsNullOnHttpError(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -233,6 +241,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromJwksUri('uri'));
     }
+
 
     public function testJwksUriReturnsNullOnJsonDecodeError(): void
     {
@@ -252,6 +261,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->assertNotInstanceOf(\SimpleSAML\OpenID\Jwks\JwksDecorator::class, $this->sut()->fromJwksUri('uri'));
     }
+
 
     public function testJwksUriLogsErrorInCaseOfCacheSetError(): void
     {
@@ -287,6 +297,7 @@ final class JwksFetcherTest extends TestCase
         $this->sut()->fromJwksUri('uri');
     }
 
+
     public function testCanGetFromCacheOrJwksUri(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -320,6 +331,7 @@ final class JwksFetcherTest extends TestCase
         $this->assertInstanceOf(JwksDecorator::class, $this->sut()->fromCacheOrJwksUri('uri'));
     }
 
+
     public function testCanGetFromSignedJwksUri(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -348,6 +360,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->sut()->fromSignedJwksUri('uri', ['not-important-for-sut']);
     }
+
 
     public function testSignedJwksUriTakesExpClaimIntoAccountForCaching(): void
     {
@@ -386,6 +399,7 @@ final class JwksFetcherTest extends TestCase
         $this->sut()->fromSignedJwksUri('uri', ['not-important-for-sut']);
     }
 
+
     public function testSignedJwksUriReturnsNullOnHttpError(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -397,6 +411,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->sut()->fromSignedJwksUri('uri', ['not-important-for-sut']);
     }
+
 
     public function testSignedJwksUriLogsErrorOnCacheSetError(): void
     {
@@ -429,6 +444,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->sut()->fromSignedJwksUri('uri', ['not-important-for-sut']);
     }
+
 
     public function testCanGetFromCacheOrSignedJwksUri(): void
     {

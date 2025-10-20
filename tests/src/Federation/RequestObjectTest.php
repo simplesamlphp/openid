@@ -39,7 +39,6 @@ final class RequestObjectTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $expiredPayload = [
@@ -55,6 +54,7 @@ final class RequestObjectTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -88,6 +88,7 @@ final class RequestObjectTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -116,6 +117,7 @@ final class RequestObjectTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
@@ -125,6 +127,7 @@ final class RequestObjectTest extends TestCase
             $this->sut(),
         );
     }
+
 
     public function testThrowsIfSubjectIsPresent(): void
     {
@@ -137,6 +140,7 @@ final class RequestObjectTest extends TestCase
         $this->sut();
     }
 
+
     public function testCanGetTrustChain(): void
     {
         $trustChain = ['token', 'token2'];
@@ -145,6 +149,7 @@ final class RequestObjectTest extends TestCase
 
         $this->assertSame($this->sut()->getTrustChain(), $trustChain);
     }
+
 
     public function testThrowsForInvalidTrustChainFormat(): void
     {

@@ -29,6 +29,7 @@ class ParsedJws
 
     protected ?string $token = null;
 
+
     public function __construct(
         protected readonly JwsDecorator $jwsDecorator,
         protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
@@ -41,9 +42,11 @@ class ParsedJws
         $this->validate();
     }
 
+
     protected function validate(): void
     {
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -65,6 +68,7 @@ class ParsedJws
         }
     }
 
+
     /**
      * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -78,6 +82,7 @@ class ParsedJws
         }
     }
 
+
     /**
      * @param non-empty-string $key
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -87,6 +92,7 @@ class ParsedJws
         return $this->getHeader()[$key] ?? null;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -94,6 +100,7 @@ class ParsedJws
     {
         return $this->getPayload()[$key] ?? null;
     }
+
 
     public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
@@ -105,6 +112,7 @@ class ParsedJws
             $signatureIndex,
         );
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -130,6 +138,7 @@ class ParsedJws
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
@@ -147,6 +156,7 @@ class ParsedJws
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?non-empty-string
@@ -162,6 +172,7 @@ class ParsedJws
         $this->helpers->type()->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?non-empty-string
@@ -174,6 +185,7 @@ class ParsedJws
 
         return is_null($sub) ? null : $this->helpers->type()->ensureNonEmptyString($sub, $claimKey);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -199,6 +211,7 @@ class ParsedJws
         throw new JwsException(sprintf('Invalid audience claim format: %s', var_export($aud, true)));
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
@@ -212,6 +225,7 @@ class ParsedJws
 
         return is_null($jti) ? null : $this->helpers->type()->ensureNonEmptyString($jti, $claimKey);
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -234,6 +248,7 @@ class ParsedJws
         return $exp;
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -254,6 +269,7 @@ class ParsedJws
         return $iat;
     }
 
+
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -269,6 +285,7 @@ class ParsedJws
         $this->helpers->type()->ensureNonEmptyString($id, $claimKey);
     }
 
+
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -281,6 +298,7 @@ class ParsedJws
 
         return is_null($kid) ? null : $this->helpers->type()->ensureNonEmptyString($kid, $claimKey);
     }
+
 
     /**
      * @return ?non-empty-string

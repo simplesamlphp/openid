@@ -15,6 +15,7 @@ class JwsParser
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */

@@ -28,15 +28,18 @@ class EntityStatementFetcher extends JwsFetcher
         parent::__construct($parsedJwsFactory, $artifactFetcher, $maxCacheDuration, $helpers, $logger);
     }
 
+
     protected function buildJwsInstance(string $token): EntityStatement
     {
         return $this->parsedJwsFactory->fromToken($token);
     }
 
+
     public function getExpectedContentTypeHttpHeader(): string
     {
         return ContentTypesEnum::ApplicationEntityStatementJwt->value;
     }
+
 
     /**
      * Fetch entity statement from a well-known URI. By default, this will be openid-federation (entity configuration).
@@ -58,6 +61,7 @@ class EntityStatementFetcher extends JwsFetcher
 
         return $this->fromCacheOrNetwork($wellKnownUri);
     }
+
 
     /**
      * @param \SimpleSAML\OpenID\Federation\EntityStatement $entityConfiguration Entity from which to use the fetch
@@ -87,6 +91,7 @@ class EntityStatementFetcher extends JwsFetcher
         );
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
@@ -95,6 +100,7 @@ class EntityStatementFetcher extends JwsFetcher
     {
         return $this->fromCache($uri) ?? $this->fromNetwork($uri);
     }
+
 
     /**
      * Fetch entity statement from cache, if available. URI is used as cache key.
@@ -124,6 +130,7 @@ class EntityStatementFetcher extends JwsFetcher
         throw new FetchException($message);
         // @codeCoverageIgnoreEnd
     }
+
 
     /**
      * Fetch entity statement from network. Each successful fetch will be cached, with URI being used as a cache key.

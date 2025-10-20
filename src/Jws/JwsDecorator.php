@@ -12,6 +12,7 @@ class JwsDecorator
     {
     }
 
+
     public function jws(): JWS
     {
         return $this->jws;

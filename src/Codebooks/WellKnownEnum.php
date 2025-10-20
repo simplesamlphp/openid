@@ -9,6 +9,7 @@ enum WellKnownEnum: string
     case Prefix = '.well-known';
     case OpenIdFederation = 'openid-federation';
 
+
     public function path(): string
     {
         if ($this === WellKnownEnum::Prefix) {
@@ -17,6 +18,7 @@ enum WellKnownEnum: string
 
         return self::Prefix->value . '/' . $this->value;
     }
+
 
     public function uriFor(string $entityId): string
     {

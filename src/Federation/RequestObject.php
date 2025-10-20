@@ -20,6 +20,7 @@ class RequestObject extends ParsedJws
         return parent::getAudience() ?? throw new RequestObjectException('No Audience claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
@@ -29,6 +30,7 @@ class RequestObject extends ParsedJws
     {
         return parent::getIssuer() ?? throw new RequestObjectException('No Issuer claim found.');
     }
+
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -46,6 +48,7 @@ class RequestObject extends ParsedJws
         }
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
@@ -56,6 +59,7 @@ class RequestObject extends ParsedJws
         return parent::getJwtId() ?? throw new RequestObjectException('No JWT ID claim found.');
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -64,6 +68,7 @@ class RequestObject extends ParsedJws
     {
         return parent::getExpirationTime() ?? throw new RequestObjectException('No Expiration Time claim found.');
     }
+
 
     /**
      * @return ?string[]

@@ -38,7 +38,6 @@ final class ClientAssertionTest extends TestCase
 
     protected MockObject $jsonHelperMock;
 
-
     protected MockObject $claimFactoryMock;
 
     protected array $expiredPayload = [
@@ -56,6 +55,7 @@ final class ClientAssertionTest extends TestCase
     ];
 
     protected array $validPayload;
+
 
     protected function setUp(): void
     {
@@ -86,6 +86,7 @@ final class ClientAssertionTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
     }
 
+
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
@@ -114,11 +115,13 @@ final class ClientAssertionTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
         $this->assertInstanceOf(ClientAssertion::class, $this->sut());
     }
+
 
     public function testCanGetPayloadClaims(): void
     {
@@ -129,6 +132,7 @@ final class ClientAssertionTest extends TestCase
         $this->assertSame($this->validPayload['iss'], $sut->getIssuer());
     }
 
+
     public function testThrowsOnExpiredJws(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->expiredPayload);
@@ -136,6 +140,7 @@ final class ClientAssertionTest extends TestCase
         $this->expectExceptionMessage('Expiration');
         $this->sut();
     }
+
 
     public function testThrowsOnNonSameIssuerAndSubject(): void
     {

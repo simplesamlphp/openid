@@ -71,6 +71,7 @@ final class JwksTest extends TestCase
 
     protected DateInterval $timestampValidationLeeway;
 
+
     protected function setUp(): void
     {
         $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
@@ -81,6 +82,7 @@ final class JwksTest extends TestCase
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->httpClientMock = $this->createMock(Client::class);
     }
+
 
     protected function sut(
         ?SupportedAlgorithms $supportedAlgorithms = null,
@@ -110,10 +112,12 @@ final class JwksTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(Jwks::class, $this->sut());
     }
+
 
     public function testCanBuildTools(): void
     {

@@ -19,6 +19,7 @@ final class WellKnownEnumTest extends TestCase
         );
     }
 
+
     public function testReturnsPrefixAndValueForNonPrefixCase(): void
     {
         $path = WellKnownEnum::OpenIdFederation->path();
@@ -32,6 +33,7 @@ final class WellKnownEnumTest extends TestCase
             $path,
         );
     }
+
 
     public function testCanGetWellKnownUri(): void
     {

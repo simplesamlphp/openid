@@ -17,12 +17,14 @@ final class TrustMarksClaimValueTest extends TestCase
 
     protected array $otherClaims = [];
 
+
     protected function setUp(): void
     {
         $this->trustMarkType = 'trustMarkType';
         $this->trustMark = 'token';
         $this->otherClaims = ['something' => 'else'];
     }
+
 
     protected function sut(
         ?string $trustMarkType = null,
@@ -36,10 +38,12 @@ final class TrustMarksClaimValueTest extends TestCase
         return new TrustMarksClaimValue($trustMarkType, $trustMark, $otherClaims);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(TrustMarksClaimValue::class, $this->sut());
     }
+
 
     public function testCanGetProperties(): void
     {
@@ -48,6 +52,7 @@ final class TrustMarksClaimValueTest extends TestCase
         $this->assertSame($this->trustMark, $sut->getTrustMark());
         $this->assertSame($this->otherClaims, $sut->getOtherClaims());
     }
+
 
     public function testCanJsonSerialize(): void
     {

@@ -36,6 +36,7 @@ final class ParsedJwsFactoryTest extends TestCase
 
     protected MockObject $claimFactoryMock;
 
+
     protected function setUp(): void
     {
         $this->jwsParserMock = $this->createMock(JwsParser::class);
@@ -46,6 +47,7 @@ final class ParsedJwsFactoryTest extends TestCase
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
+
 
     protected function sut(
         ?JwsParser $jwsParser = null,
@@ -75,10 +77,12 @@ final class ParsedJwsFactoryTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(ParsedJwsFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromToken(): void
     {

@@ -29,6 +29,7 @@ final class ArtifactFetcherTest extends TestCase
 
     protected MockObject $responseBodyMock;
 
+
     protected function setUp(): void
     {
         $this->httpClientDecoratorMock = $this->createMock(HttpClientDecorator::class);
@@ -39,6 +40,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->responseBodyMock = $this->createMock(StreamInterface::class);
         $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
     }
+
 
     protected function sut(
         ?HttpClientDecorator $httpClientDecorator = null,
@@ -56,10 +58,12 @@ final class ArtifactFetcherTest extends TestCase
         );
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(ArtifactFetcher::class, $this->sut());
     }
+
 
     public function testReturnsNullIfCacheNotAvailable(): void
     {
@@ -71,6 +75,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->assertNull($sut->fromCacheAsString('key'));
     }
 
+
     public function testReturnsNullIfNotInCache(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -80,6 +85,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->assertNull($this->sut()->fromCacheAsString('key'));
     }
 
+
     public function testReturnsArtifactIfString(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -88,6 +94,7 @@ final class ArtifactFetcherTest extends TestCase
 
         $this->assertSame('artifact', $this->sut()->fromCacheAsString('key'));
     }
+
 
     public function testReturnsNullIfNotString(): void
     {
@@ -101,6 +108,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->assertNull($this->sut()->fromCacheAsString('key'));
     }
 
+
     public function testReturnsNullOnCacheFailure(): void
     {
         $this->cacheDecoratorMock->expects($this->once())->method('get')
@@ -113,6 +121,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->assertNull($this->sut()->fromCacheAsString('key'));
     }
 
+
     public function testCanFetchFromNetwork(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -120,6 +129,7 @@ final class ArtifactFetcherTest extends TestCase
 
         $this->assertInstanceOf(ResponseInterface::class, $this->sut()->fromNetwork('uri'));
     }
+
 
     public function testFromNetworkThrowsOnNetworkError(): void
     {
@@ -135,6 +145,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->sut()->fromNetwork('uri');
     }
 
+
     public function testCanFetchFromNetworkAsString(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
@@ -143,6 +154,7 @@ final class ArtifactFetcherTest extends TestCase
 
         $this->assertSame('artifact', $this->sut()->fromNetworkAsString('uri'));
     }
+
 
     public function testCanCacheArtifact(): void
     {
@@ -155,6 +167,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->sut()->cacheIt('artifact', 60, 'key');
     }
 
+
     public function testSkipsCachingIfCacheNotAvailable(): void
     {
         $this->loggerMock->expects($this->once())->method('debug')
@@ -164,6 +177,7 @@ final class ArtifactFetcherTest extends TestCase
 
         $sut->cacheIt('artifact', 60, 'key');
     }
+
 
     public function testCanLogCacheError(): void
     {

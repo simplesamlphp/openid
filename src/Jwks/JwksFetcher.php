@@ -31,6 +31,7 @@ class JwksFetcher
     ) {
     }
 
+
     /**
      * @return array{keys:non-empty-array<array<string,mixed>>}
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
@@ -51,6 +52,7 @@ class JwksFetcher
 
         return $this->claimFactory->buildJwks($jwks)->getValue();
     }
+
 
     public function fromCache(string $uri): ?JwksDecorator
     {
@@ -95,12 +97,14 @@ class JwksFetcher
         return $this->jwksFactory->fromKeyData($jwks);
     }
 
+
     /**
      */
     public function fromCacheOrJwksUri(string $uri): ?JwksDecorator
     {
         return $this->fromCache($uri) ?? $this->fromJwksUri($uri);
     }
+
 
     /**
      */
@@ -155,6 +159,7 @@ class JwksFetcher
         return $this->jwksFactory->fromKeyData($jwks);
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
@@ -163,6 +168,7 @@ class JwksFetcher
     {
         return $this->fromCache($uri) ?? $this->fromSignedJwksUri($uri, $federationJwks);
     }
+
 
     /**
      * @param string $uri URI from which to fetch SignedJwks statement.

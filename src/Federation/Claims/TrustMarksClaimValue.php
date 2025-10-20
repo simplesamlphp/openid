@@ -25,6 +25,7 @@ class TrustMarksClaimValue implements JsonSerializable
     ) {
     }
 
+
     /**
      * @return non-empty-string
      */
@@ -32,6 +33,7 @@ class TrustMarksClaimValue implements JsonSerializable
     {
         return $this->trustMarkType;
     }
+
 
     /**
      * @return non-empty-string
@@ -41,6 +43,7 @@ class TrustMarksClaimValue implements JsonSerializable
         return $this->trustMark;
     }
 
+
     /**
      * @return array<non-empty-string,mixed>
      */
@@ -48,6 +51,7 @@ class TrustMarksClaimValue implements JsonSerializable
     {
         return $this->otherClaims;
     }
+
 
     /**
      * @return array<non-empty-string,mixed>

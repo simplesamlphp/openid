@@ -15,6 +15,7 @@ enum JwsSerializerEnum: string
     case JsonGeneral = 'jws_json_general';
     case JsonFlattened = 'jws_json_flattened';
 
+
     public function instance(): JWSSerializer
     {
         return match ($this) {

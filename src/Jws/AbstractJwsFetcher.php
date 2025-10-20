@@ -19,10 +19,12 @@ abstract class AbstractJwsFetcher
     ) {
     }
 
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     abstract protected function buildJwsInstance(string $token): ParsedJws;
+
 
     abstract public function getExpectedContentTypeHttpHeader(): ?string;
 }

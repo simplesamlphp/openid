@@ -16,10 +16,12 @@ final class SignatureAlgorithmBagTest extends TestCase
 {
     protected SignatureAlgorithmEnum $signatureAlgorithmEnumRs256;
 
+
     protected function setUp(): void
     {
         $this->signatureAlgorithmEnumRs256 = SignatureAlgorithmEnum::RS256;
     }
+
 
     protected function sut(SignatureAlgorithmEnum ...$signatureAlgorithmEnums): SignatureAlgorithmBag
     {
@@ -30,10 +32,12 @@ final class SignatureAlgorithmBagTest extends TestCase
         return new SignatureAlgorithmBag(...$signatureAlgorithmEnums);
     }
 
+
     public function testCanInstantiate(): void
     {
         $this->assertInstanceOf(SignatureAlgorithmBag::class, $this->sut());
     }
+
 
     public function testCanAddAndGetAll(): void
     {
@@ -43,6 +47,7 @@ final class SignatureAlgorithmBagTest extends TestCase
         $signatureAlgorithmBag->add(SignatureAlgorithmEnum::RS384);
         $this->assertCount(2, $signatureAlgorithmBag->getAll());
     }
+
 
     public function testCanGetAllInstances(): void
     {

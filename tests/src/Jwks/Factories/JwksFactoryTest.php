@@ -30,19 +30,23 @@ final class JwksFactoryTest extends TestCase
         ],
     ];
 
+
     protected function setUp(): void
     {
     }
+
 
     protected function sut(): JwksFactory
     {
         return new JwksFactory();
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwksFactory::class, $this->sut());
     }
+
 
     public function testCanBuildFromKeyData(): void
     {

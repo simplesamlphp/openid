@@ -69,6 +69,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         ],
     ];
 
+
     protected function sut(
         ?Helpers $helpers = null,
     ): MetadataPolicyApplicator {
@@ -77,15 +78,18 @@ final class MetadataPolicyApplicatorTest extends TestCase
         return new MetadataPolicyApplicator($helpers);
     }
 
+
     protected function setUp(): void
     {
         $this->helpersMock = $this->createMock(Helpers::class);
     }
 
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(MetadataPolicyApplicator::class, $this->sut());
     }
+
 
     public function testCanApplyBasicMetadataPolicy(): void
     {
@@ -118,6 +122,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         $this->assertSame($expectedResolvedMetadata, $resolvedMetadata);
     }
 
+
     public function testCanHandleScopeClaims(): void
     {
         $metadataPolicy = [
@@ -141,6 +146,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanUnsetMetadataValue(): void
     {
         $metadataPolicy = [
@@ -159,6 +165,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanAddNonExistingMetadataValue(): void
     {
         $metadataPolicy = [
@@ -175,6 +182,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testHasEmptyParameterOnNonExistingParameterForSubsetOf(): void
     {
         $metadataPolicy = [
@@ -189,6 +197,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
             $this->sut()->for($metadataPolicy, $metadata),
         );
     }
+
 
     public function testHasEmptyParameterOnNonExistingParameterForSupersetOf(): void
     {
@@ -205,6 +214,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testHasEmptyParameterOnNonEssentialParameter(): void
     {
         $metadataPolicy = [
@@ -219,6 +229,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
             $this->sut()->for($metadataPolicy, $metadata),
         );
     }
+
 
     public function testCanHandleValueRule(): void
     {
@@ -237,6 +248,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanHandleAddRule(): void
     {
         $metadataPolicy = [
@@ -254,6 +266,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanHandleDefaultRule(): void
     {
         $metadataPolicy = [
@@ -268,6 +281,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
             $this->sut()->for($metadataPolicy, $metadata),
         );
     }
+
 
     public function testCanHandleOneOfRule(): void
     {
@@ -286,6 +300,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanHandleOneOfBreakRule(): void
     {
         $metadataPolicy = [
@@ -302,6 +317,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
 
         $this->sut()->for($metadataPolicy, $metadata);
     }
+
 
     public function testCanHandleSubsetOfRule(): void
     {
@@ -320,6 +336,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanHandleSubsetOfBreakRule(): void
     {
         $metadataPolicy = [
@@ -336,6 +353,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
             $this->sut()->for($metadataPolicy, $metadata),
         );
     }
+
 
     public function testCanHandleSupersetOfRule(): void
     {
@@ -354,6 +372,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         );
     }
 
+
     public function testCanHandleSupersetOfBreakRule(): void
     {
         $metadataPolicy = [
@@ -371,6 +390,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
         $this->sut()->for($metadataPolicy, $metadata);
     }
 
+
     public function testCanHandleEssentialRule(): void
     {
         $metadataPolicy = [
@@ -387,6 +407,7 @@ final class MetadataPolicyApplicatorTest extends TestCase
             $this->sut()->for($metadataPolicy, $metadata),
         );
     }
+
 
     public function testCanHandleEssentialBreakRule(): void
     {
