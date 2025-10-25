@@ -255,7 +255,7 @@ class VcDataModelClaimFactory
         $vcCredentialSchemaClaimValue = $this->buildVcCredentialSchemaClaimValue($vcCredentialSchemaClaimValueData);
 
         $vcCredentialSchemaClaimValues = array_map(
-            fn (array $data): VcCredentialSchemaClaimValue => $this->buildVcCredentialSchemaClaimValue($data),
+            $this->buildVcCredentialSchemaClaimValue(...),
             $data,
         );
 
@@ -305,7 +305,7 @@ class VcDataModelClaimFactory
         $vcRefreshServiceClaimValue = $this->buildVcRefreshServiceClaimValue($vcRefreshServiceClaimValueData);
 
         $vcRefreshServiceClaimValues = array_map(
-            fn (array $data): VcRefreshServiceClaimValue => $this->buildVcRefreshServiceClaimValue($data),
+            $this->buildVcRefreshServiceClaimValue(...),
             $data,
         );
 
@@ -351,7 +351,7 @@ class VcDataModelClaimFactory
         $vcTermsOfUseClaimValue = $this->buildVcTermsOfUseClaimValue($vcTermsOfUseClaimValueData);
 
         $vcTermsOfUseClaimValues = array_map(
-            fn (array $data): VcTermsOfUseClaimValue => $this->buildVcTermsOfUseClaimValue($data),
+            $this->buildVcTermsOfUseClaimValue(...),
             $data,
         );
 
@@ -397,7 +397,7 @@ class VcDataModelClaimFactory
         $vcEvidenceClaimValue = $this->buildVcEvidenceClaimValue($vcEvidenceClaimValueData);
 
         $vcEvidenceClaimValues = array_map(
-            fn (array $data): VcEvidenceClaimValue => $this->buildVcEvidenceClaimValue($data),
+            $this->buildVcEvidenceClaimValue(...),
             $data,
         );
 

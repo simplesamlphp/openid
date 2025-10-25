@@ -28,7 +28,7 @@ final class DidKeyJwkResolverTest extends TestCase
         $base64UrlMock = $this->createMock(Base64Url::class);
 
         $base64UrlMock->method('encode')
-            ->willReturnCallback(fn(string $data): string => base64_encode($data));
+            ->willReturnCallback(base64_encode(...));
 
         $this->helpersMock = $this->createMock(Helpers::class);
 

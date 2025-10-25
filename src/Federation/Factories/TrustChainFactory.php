@@ -74,7 +74,7 @@ class TrustChainFactory
     public function fromTokens(string ...$tokens): TrustChain
     {
         $statements = array_map(
-            fn(string $token): EntityStatement => $this->entityStatementFactory->fromToken($token),
+            $this->entityStatementFactory->fromToken(...),
             $tokens,
         );
 
