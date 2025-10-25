@@ -11,25 +11,25 @@ class Random
 {
     /**
      * @param string[] $blacklist
-     * @return non-empty-string
+     * @return non-empty-string The generated random string in hexadecimal format.
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function string(
-        int $length = 40,
+        int $byteLength = 40,
         ?array $blacklist = null,
         ?string $prefix = null,
         ?string $suffix = null,
         int $maxTries = 5,
     ): string {
-        if ($length < 1) {
-            throw new OpenIdException('Random string length can not be less than 1.');
+        if ($byteLength < 1) {
+            throw new OpenIdException('Random byte length can not be less than 1.');
         }
 
         $errors = [];
 
         while ($maxTries-- > 0) {
             try {
-                $random = bin2hex(random_bytes($length));
+                $random = bin2hex(random_bytes($byteLength));
                 // @codeCoverageIgnoreStart
             } catch (Throwable $e) {
                 $errors[] = $e->getMessage();

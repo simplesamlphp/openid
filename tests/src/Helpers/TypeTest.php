@@ -147,7 +147,7 @@ final class TypeTest extends TestCase
             $this->sut()->ensureArrayWithKeysAsStrings([0, 1, 2]),
         );
 
-        // Test call for nested array
+        // Test call for a nested array
         $this->assertSame(
             [['0' => 0, '1' => 1], ['0' => 2, '1' => 3]],
             array_map(
@@ -173,7 +173,7 @@ final class TypeTest extends TestCase
             $this->sut()->ensureArrayWithKeysAsNonEmptyStrings([0, 1, 2]),
         );
 
-        // Test call for nested array
+        // Test call for a nested array
         $this->assertSame(
             [['0' => 0, '1' => 1], ['0' => 2, '1' => 3]],
             array_map(
@@ -218,7 +218,7 @@ final class TypeTest extends TestCase
             $this->sut()->ensureArrayWithKeysAndValuesAsNonEmptyStrings([0, 1, 2]),
         );
 
-        // Test call for nested array
+        // Test call for a nested array
         $this->assertSame(
             [['0' => '0', '1' => '1'], ['0' => '2', '1' => '3']],
             array_map(
@@ -242,5 +242,44 @@ final class TypeTest extends TestCase
         $this->expectExceptionMessage('Unsafe');
 
         $this->sut()->ensureInt(null);
+    }
+
+    public function testCanEnforceRegex(): void
+    {
+        $this->assertSame('a', $this->sut()->enforceRegex('a', '/^a$/'));
+    }
+
+    public function testEnforceRegexThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Regex');
+
+        $this->sut()->enforceRegex('a', '/^b$/');
+    }
+
+    public function testCanEnforceUri(): void
+    {
+        $this->assertSame('https://example.com', $this->sut()->enforceUri('https://example.com'));
+    }
+
+    public function testEnforceUriThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('URI');
+
+        $this->sut()->enforceUri('a');
+    }
+
+    public function testCanEnforceArrayOfArrays(): void
+    {
+        $a = ['a' => ['b' => 'c']];
+        $this->assertSame($a, $this->sut()->enforceArrayOfArrays($a));
+    }
+
+    public function testEnforceArrayOfArraysThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Non-array');
+        $this->sut()->enforceArrayOfArrays(['a' => 'b']);;
     }
 }
