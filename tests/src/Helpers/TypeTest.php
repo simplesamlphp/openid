@@ -244,10 +244,12 @@ final class TypeTest extends TestCase
         $this->sut()->ensureInt(null);
     }
 
+
     public function testCanEnforceRegex(): void
     {
         $this->assertSame('a', $this->sut()->enforceRegex('a', '/^a$/'));
     }
+
 
     public function testEnforceRegexThrowsForInvalidValue(): void
     {
@@ -257,10 +259,12 @@ final class TypeTest extends TestCase
         $this->sut()->enforceRegex('a', '/^b$/');
     }
 
+
     public function testCanEnforceUri(): void
     {
         $this->assertSame('https://example.com', $this->sut()->enforceUri('https://example.com'));
     }
+
 
     public function testEnforceUriThrowsForInvalidValue(): void
     {
@@ -270,16 +274,62 @@ final class TypeTest extends TestCase
         $this->sut()->enforceUri('a');
     }
 
+
     public function testCanEnforceArrayOfArrays(): void
     {
         $a = ['a' => ['b' => 'c']];
         $this->assertSame($a, $this->sut()->enforceArrayOfArrays($a));
     }
 
+
     public function testEnforceArrayOfArraysThrowsForInvalidValue(): void
     {
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage('Non-array');
-        $this->sut()->enforceArrayOfArrays(['a' => 'b']);;
+        $this->sut()->enforceArrayOfArrays(['a' => 'b']);
+        ;
+    }
+
+
+    public function testCanEnforceNonEmptyArray(): void
+    {
+        $this->assertSame(['a'], $this->sut()->enforceNonEmptyArray(['a']));
+    }
+
+
+    public function testEnforceNonEmptyArrayThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Empty');
+        $this->sut()->enforceNonEmptyArray([]);
+    }
+
+
+    public function testCanEnforceNonEmptyArrayWithValuesAsNonEmptyStrings(): void
+    {
+        $this->assertSame(['a'], $this->sut()->enforceNonEmptyArrayWithValuesAsNonEmptyStrings(['a']));
+    }
+
+
+    public function testEnforceNonEmptyArrayWithValuesAsNonEmptyStringsThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Empty');
+        $this->sut()->enforceNonEmptyArrayWithValuesAsNonEmptyStrings([]);
+    }
+
+
+    public function testCanEnforceNonEmptyArrayOfNonEmptyArrays(): void
+    {
+        $a = [['a' => 'b']];
+        $this->assertSame($a, $this->sut()->enforceNonEmptyArrayOfNonEmptyArrays($a));
+    }
+
+
+    public function testEnforceNonEmptyArrayOfNonEmptyArraysThrowsForInvalidValue(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Non-array');
+        $this->sut()->enforceNonEmptyArrayOfNonEmptyArrays(['a' => 'b']);
     }
 }
