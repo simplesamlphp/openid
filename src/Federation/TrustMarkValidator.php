@@ -421,8 +421,9 @@ class TrustMarkValidator
         );
 
         $this->validateSubjectClaim($trustMark, $leafEntityConfiguration);
+        $this->validateTrustMarkIssuers($trustMark, $trustAnchorEntityConfiguration);
 
-        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve chain, as Trust Anchor is trusted
+        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve a chain, as Trust Anchor is trusted
         // out-of-band. Otherwise, we have to resolve trust for Trust Mark Issuer.
         $trustMarkIssuerEntityConfiguration =
         $trustMark->getIssuer() === $trustAnchorEntityConfiguration->getIssuer() ?
@@ -511,6 +512,91 @@ class TrustMarkValidator
                 'Leaf entity %s is the subject of the Trust Mark %s.',
                 $leafEntityConfiguration->getIssuer(),
                 $trustMark->getTrustMarkType(),
+            ),
+        );
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function validateTrustMarkIssuers(
+        TrustMark $trustMark,
+        EntityStatement $trustAnchorEntityConfiguration,
+    ): void {
+        $this->logger?->debug('Validating Trust Mark Issuers.');
+
+        if (is_null($trustMarkIssuersClaimBag = $trustAnchorEntityConfiguration->getTrustMarkIssuers())) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s does not define Trust Mark Issuers. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                ),
+            );
+            return;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Anchor %s defines Trust Mark Issuers.',
+                $trustAnchorEntityConfiguration->getIssuer(),
+            ),
+            ['trustMarkIssuers' => $trustMarkIssuersClaimBag->jsonSerialize()],
+        );
+
+        $trustMarkIssuersClaimValue = $trustMarkIssuersClaimBag->get($trustMark->getTrustMarkType());
+
+        if (is_null($trustMarkIssuersClaimValue)) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s does not define issuers of Trust Mark %s. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                    $trustMark->getTrustMarkType(),
+                ),
+            );
+            return;
+        }
+
+        if ($trustMarkIssuersClaimValue->getTrustMarkIssuers() === []) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s defines any issuers of Trust Mark %s. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                    $trustMark->getTrustMarkType(),
+                ),
+            );
+            return;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Anchor %s defines issuers %s of Trust Mark %s.',
+                $trustAnchorEntityConfiguration->getIssuer(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustMark->getTrustMarkType(),
+            ),
+        );
+
+        if (!in_array($trustMark->getIssuer(), $trustMarkIssuersClaimValue->getTrustMarkIssuers(), true)) {
+            $error = sprintf(
+                'Trust Mark %s is not issued by any of the Trust Mark Issuers %s defined by Trust Anchor %s.',
+                $trustMark->getTrustMarkType(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            );
+
+            $this->logger?->error($error);
+            throw new TrustMarkException($error);
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Mark %s is issued by one of the Trust Mark Issuers %s defined by Trust Anchor %s.',
+                $trustMark->getTrustMarkType(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustAnchorEntityConfiguration->getIssuer(),
             ),
         );
     }

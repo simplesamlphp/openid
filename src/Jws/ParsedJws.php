@@ -125,7 +125,7 @@ class ParsedJws
         }
 
         $payloadString = $this->jwsDecorator->jws()->getPayload();
-        if ($payloadString === null || $payloadString === '' || $payloadString === '0') {
+        if (in_array($payloadString, [null, '', '0'], true)) {
             return $this->payload = [];
         }
 

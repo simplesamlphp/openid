@@ -323,6 +323,22 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testTrustMarkIssuersIsBuildUsingFactoryOptional(): void
+    {
+        $this->validPayload['trust_mark_issuers'] = [
+            'trustMarkType' => ['https://issuer1.org', 'https://issuer2.org'],
+        ];
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->federationClaimFactoryMock->expects($this->atLeastOnce())
+            ->method('buildTrustMarkIssuersClaimBagFrom')
+            ->with($this->validPayload['trust_mark_issuers']);
+
+        $this->sut()->getTrustMarkIssuers();
+    }
+
+
     public function testThrowsOnInvalidTrustMarks(): void
     {
         $this->validPayload['trust_marks'] = 'invalid';
