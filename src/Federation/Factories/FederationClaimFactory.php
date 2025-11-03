@@ -7,6 +7,8 @@ namespace SimpleSAML\OpenID\Federation\Factories;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
@@ -151,5 +153,49 @@ class FederationClaimFactory
         TrustMarkOwnersClaimValue ...$trustMarkOwnersClaimValues,
     ): TrustMarkOwnersClaimBag {
         return new TrustMarkOwnersClaimBag(...$trustMarkOwnersClaimValues);
+    }
+
+
+    public function buildTrustMarkIssuersClaimBagFrom(mixed $trustMarkIssuersClaimData): TrustMarkIssuersClaimBag
+    {
+        $trustMarkIssuersClaimData = $this->helpers->type()->ensureArrayWithKeysAsNonEmptyStrings(
+            $trustMarkIssuersClaimData,
+        );
+
+        $trustMarkIssuersClaimValues = [];
+
+        foreach ($trustMarkIssuersClaimData as $trustMarkType => $trustMarkIssuersClaim) {
+            $trustMarkIssuersClaim = $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings(
+                $trustMarkIssuersClaim,
+            );
+
+            $trustMarkIssuersClaimValues[] = $this->buildTrustMarkIssuersClaimValue(
+                $trustMarkType,
+                $trustMarkIssuersClaim,
+            );
+        }
+
+        return $this->buildTrustMarkIssuerClaimBag(...$trustMarkIssuersClaimValues);
+    }
+
+
+    public function buildTrustMarkIssuersClaimValue(
+        mixed $trustMarkType,
+        mixed $trustMarkIssuers,
+    ): TrustMarkIssuersClaimValue {
+        $trustMarkType = $this->helpers->type()->ensureNonEmptyString($trustMarkType);
+        $trustMarkIssuers = $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($trustMarkIssuers);
+
+        return new TrustMarkIssuersClaimValue(
+            $trustMarkType,
+            $trustMarkIssuers,
+        );
+    }
+
+
+    public function buildTrustMarkIssuerClaimBag(
+        TrustMarkIssuersClaimValue ...$trustMarkIssuersClaimValues,
+    ): TrustMarkIssuersClaimBag {
+        return new TrustMarkIssuersClaimBag(...$trustMarkIssuersClaimValues);
     }
 }

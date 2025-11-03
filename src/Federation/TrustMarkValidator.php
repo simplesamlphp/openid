@@ -422,7 +422,7 @@ class TrustMarkValidator
 
         $this->validateSubjectClaim($trustMark, $leafEntityConfiguration);
 
-        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve chain, as Trust Anchor is trusted
+        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve a chain, as Trust Anchor is trusted
         // out-of-band. Otherwise, we have to resolve trust for Trust Mark Issuer.
         $trustMarkIssuerEntityConfiguration =
         $trustMark->getIssuer() === $trustAnchorEntityConfiguration->getIssuer() ?

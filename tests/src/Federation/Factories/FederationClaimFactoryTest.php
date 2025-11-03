@@ -10,6 +10,8 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
@@ -26,6 +28,8 @@ use SimpleSAML\OpenID\Helpers;
 #[UsesClass(TrustMarksClaimBag::class)]
 #[UsesClass(TrustMarkOwnersClaimValue::class)]
 #[UsesClass(TrustMarkOwnersClaimBag::class)]
+#[UsesClass(TrustMarkIssuersClaimBag::class)]
+#[UsesClass(TrustMarkIssuersClaimValue::class)]
 final class FederationClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
@@ -129,6 +133,19 @@ final class FederationClaimFactoryTest extends TestCase
         $this->assertInstanceOf(
             TrustMarkOwnersClaimBag::class,
             $this->sut()->buildTrustMarkOwnersClaimBagFrom($trustMarkOwnersClaimData),
+        );
+    }
+
+
+    public function testCanBuildTrustMarkIssuersClaimBagFrom(): void
+    {
+        $trustMarkIssuersClaimData = [
+            'trustMarkType' => ['https://issuer1.org', 'https://issuer2.org'],
+        ];
+
+        $this->assertInstanceOf(
+            TrustMarkIssuersClaimBag::class,
+            $this->sut()->buildTrustMarkIssuersClaimBagFrom($trustMarkIssuersClaimData),
         );
     }
 }
