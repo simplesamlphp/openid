@@ -98,7 +98,7 @@ jobs:
 
       - name: Save coverage data
         if: ${{ matrix.php-versions == '8.5' && matrix.jwt-version == '^4.0.2' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-data
           path: ${{ github.workspace }}/build
@@ -159,6 +159,7 @@ jobs:
 
   quality:
     name: Quality control
+    needs: [unit-tests-linux]
     runs-on: [ubuntu-latest]
 
     steps:
@@ -217,7 +218,9 @@ jobs:
 
   security:
     name: Security checks
+    needs: [unit-tests-linux]
     runs-on: [ubuntu-latest]
+
     steps:
       - name: Setup PHP, with composer and extensions
         # https://github.com/shivammathur/setup-php
@@ -263,7 +266,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: coverage-data
           path: ${{ github.workspace }}/build
