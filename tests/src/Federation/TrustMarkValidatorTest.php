@@ -11,6 +11,8 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
@@ -54,6 +56,10 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkDelegationMock;
 
+    protected MockObject $trustMarkIssuersClaimBagMock;
+
+    protected MockObject $trustMarkIssuersClaimValueMock;
+
 
     protected function setUp(): void
     {
@@ -78,6 +84,9 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustMarkOwnersClaimValueMock = $this->createMock(TrustMarkOwnersClaimValue::class);
 
         $this->trustMarkDelegationMock = $this->createMock(TrustMarkDelegation::class);
+
+        $this->trustMarkIssuersClaimBagMock = $this->createMock(TrustMarkIssuersClaimBag::class);
+        $this->trustMarkIssuersClaimValueMock = $this->createMock(TrustMarkIssuersClaimValue::class);
     }
 
 
@@ -713,6 +722,103 @@ final class TrustMarkValidatorTest extends TestCase
         $this->expectExceptionMessage('Trust Mark Type');
 
         $this->sut()->validateTrustMarkDelegation(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testDoForTrustMarkValidatesTrustMarkIssuers(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers');
+
+        $this->sut()->doForTrustMark(
+            $this->trustMarkMock,
+            $this->leafEntityConfigurationMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesIfNoTrustMarkIssuersDefined(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn(null);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->trustMarkMock->expects($this->atLeastOnce())->method('getTrustMarkType');
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesForEmptyTrustMarkIssuers(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')->willReturn([]);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->trustMarkMock->expects($this->atLeastOnce())->method('getTrustMarkType');
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersThrowsForIssuerNotAdvertisedByTrustAnchor(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')
+            ->willReturn(['https://example.com/trust-mark-issuer']);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->expectException(TrustMarkException::class);
+        $this->expectExceptionMessage('not issued by any');
+        ;
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesForIssuerAdvertisedByTrustAnchor(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkMock->method('getIssuer')->willReturn('trustMarkIssuerId');
+
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')
+            ->willReturn(['trustMarkIssuerId']);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->sut()->validateTrustMarkIssuers(
             $this->trustMarkMock,
             $this->trustAnchorConfigurationMock,
         );
