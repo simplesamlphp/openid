@@ -314,6 +314,30 @@ class EntityStatement extends ParsedJws
 
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     *
+     * @return ?non-empty-string
+     */
+    public function getFederationTrustMarkStatusEndpoint(): ?string
+    {
+        $federationTrustMarkEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationTrustMarkStatusEndpoint->value,
+        );
+
+        if (is_null($federationTrustMarkEndpoint)) {
+            return null;
+        }
+
+        return $this->helpers->type()->ensureNonEmptyString($federationTrustMarkEndpoint);
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -362,6 +386,7 @@ class EntityStatement extends ParsedJws
             $this->getTrustMarkIssuers(...),
             $this->getFederationFetchEndpoint(...),
             $this->getFederationTrustMarkEndpoint(...),
+            $this->getFederationTrustMarkStatusEndpoint(...),
         );
     }
 }

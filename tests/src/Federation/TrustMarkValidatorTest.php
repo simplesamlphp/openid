@@ -23,6 +23,7 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 
 #[CoversClass(TrustMarkValidator::class)]
@@ -33,6 +34,8 @@ final class TrustMarkValidatorTest extends TestCase
     protected MockObject $trustMarkFactoryMock;
 
     protected MockObject $trustMarkDelegationFactoryMock;
+
+    protected MockObject $trustMarkStatusFetcherMock;
 
     protected MockObject $maxCacheDurationDecoratorMock;
 
@@ -66,6 +69,7 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustChainResolverMock = $this->createMock(TrustChainResolver::class);
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
         $this->trustMarkDelegationFactoryMock = $this->createMock(TrustMarkDelegationFactory::class);
+        $this->trustMarkStatusFetcherMock = $this->createMock(TrustMarkStatusFetcher::class);
         $this->maxCacheDurationDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
@@ -94,6 +98,7 @@ final class TrustMarkValidatorTest extends TestCase
         ?TrustChainResolver $trustChainResolver = null,
         ?TrustMarkFactory $trustMarkFactory = null,
         ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null,
+        ?TrustMarkStatusFetcher $trustMarkStatusFetcher = null,
         ?DateIntervalDecorator $maxCacheDurationDecorator = null,
         ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
@@ -101,6 +106,7 @@ final class TrustMarkValidatorTest extends TestCase
         $trustChainResolver ??= $this->trustChainResolverMock;
         $trustMarkFactory ??= $this->trustMarkFactoryMock;
         $trustMarkDelegationFactory ??= $this->trustMarkDelegationFactoryMock;
+        $trustMarkStatusFetcher ??= $this->trustMarkStatusFetcherMock;
         $maxCacheDurationDecorator ??= $this->maxCacheDurationDecoratorMock;
         $cacheDecorator ??= $this->cacheDecoratorMock;
         $logger ??= $this->loggerMock;
@@ -109,6 +115,7 @@ final class TrustMarkValidatorTest extends TestCase
             $trustChainResolver,
             $trustMarkFactory,
             $trustMarkDelegationFactory,
+            $trustMarkStatusFetcher,
             $maxCacheDurationDecorator,
             $cacheDecorator,
             $logger,
@@ -170,6 +177,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustChainResolverMock,
             $this->trustMarkFactoryMock,
             $this->trustMarkDelegationFactoryMock,
+            $this->trustMarkStatusFetcherMock,
             $this->maxCacheDurationDecoratorMock,
         );
 
@@ -795,7 +803,6 @@ final class TrustMarkValidatorTest extends TestCase
 
         $this->expectException(TrustMarkException::class);
         $this->expectExceptionMessage('not issued by any');
-        ;
 
         $this->sut()->validateTrustMarkIssuers(
             $this->trustMarkMock,

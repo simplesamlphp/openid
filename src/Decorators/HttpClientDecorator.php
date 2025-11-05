@@ -22,12 +22,16 @@ class HttpClientDecorator
 
 
     /**
+     * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @throws \SimpleSAML\OpenID\Exceptions\HttpException
      */
-    public function request(HttpMethodsEnum $httpMethodsEnum, string $uri): ResponseInterface
-    {
+    public function request(
+        HttpMethodsEnum $httpMethodsEnum,
+        string $uri,
+        array $options = [],
+    ): ResponseInterface {
         try {
-            $response = $this->client->request($httpMethodsEnum->value, $uri);
+            $response = $this->client->request($httpMethodsEnum->value, $uri, $options);
         } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',
