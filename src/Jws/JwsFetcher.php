@@ -84,6 +84,7 @@ class JwsFetcher extends AbstractJwsFetcher
      *
      * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @param bool $shouldCache If true, each successful fetch will be cached, with URI being used as a cache key.
+     * @param string ...$additionalCacheKeyElements Additional string elements to be used as cache key.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -92,6 +93,7 @@ class JwsFetcher extends AbstractJwsFetcher
         HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
         array $options = [],
         bool $shouldCache = true,
+        string ...$additionalCacheKeyElements,
     ): ParsedJws {
         $this->logger?->debug(
             'Trying to fetch JWS token from network.',
@@ -143,7 +145,7 @@ class JwsFetcher extends AbstractJwsFetcher
             ) :
             $this->maxCacheDuration->getInSeconds();
 
-            $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri);
+            $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri, ...$additionalCacheKeyElements);
         }
 
         $this->logger?->debug('Returning built JWS instance.', ['uri' => $uri, 'token' => $token]);

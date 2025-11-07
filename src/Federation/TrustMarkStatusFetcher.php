@@ -36,7 +36,7 @@ class TrustMarkStatusFetcher extends JwsFetcher
 
     public function getExpectedContentTypeHttpHeader(): string
     {
-        return ContentTypesEnum::ApplicationTrustMarkJwt->value;
+        return ContentTypesEnum::ApplicationTrustMarkStatusResponseJwt->value;
     }
 
 
@@ -61,31 +61,47 @@ class TrustMarkStatusFetcher extends JwsFetcher
             ['trustMarkStatusEndpoint' => $trustMarkStatusEndpoint, 'trustMarkType' => $trustMark->getType()],
         );
 
-        $trustMarkStatus =  $this->fromNetwork(
+        return $this->fromNetwork(
             $trustMarkStatusEndpoint,
-            HttpMethodsEnum::POST,
-            [
+            options: [
                 'form_params' => [
                     'trust_mark' => $trustMark->getToken(),
                 ],
             ],
-            false,
         );
+    }
+
+
+    /**
+     * Fetch Trust Mark Status from the network.
+     *
+     * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
+     * @param bool $shouldCache If true, each successful fetch will be cached, with URI being used as a cache key.
+     * @param string ...$additionalCacheKeyElements Additional string elements to be used as cache key.
+     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function fromNetwork(
+        string $uri,
+        HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::POST,
+        array $options = [],
+        bool $shouldCache = false,
+        string ...$additionalCacheKeyElements,
+    ): TrustMarkStatus {
+        $trustMarkStatus = parent::fromNetwork($uri, $httpMethodsEnum, $options, $shouldCache);
 
         if ($trustMarkStatus instanceof TrustMarkStatus) {
             return $trustMarkStatus;
         }
 
+        // @codeCoverageIgnoreStart
         $message = 'Unexpected Trust Mark Status instance encountered for network fetch.';
         $this->logger?->error(
             $message,
-            [
-                'trustMarkStatusEndpoint' => $trustMarkStatusEndpoint,
-                'trustMarkType' => $trustMark->getType(),
-                'trustMarkStatus' => $trustMarkStatus,
-            ],
+            ['uri' => $uri, 'trustMarkStatus' => $trustMarkStatus],
         );
 
         throw new FetchException($message);
+        // @codeCoverageIgnoreEnd
     }
 }

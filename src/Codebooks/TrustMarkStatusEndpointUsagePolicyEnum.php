@@ -28,5 +28,5 @@ enum TrustMarkStatusEndpointUsagePolicyEnum
     case RequiredIfEndpointProvidedForNonExpiringTrustMarksOnly;
 
     // Trust Mark will not be checked using the Trust Mark Status Endpoint.
-    case NotUtilized;
+    case NotUsed;
 }

@@ -387,6 +387,26 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testCanGetFederationTrustMarkStatusEndpoint(): void
+    {
+        $payload = $this->validPayload;
+        $payload['metadata']['federation_entity']['federation_trust_mark_status_endpoint'] = 'uri';
+
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+        $this->arrHelperMock->method('getNestedValue')
+            ->willReturnCallback(fn(
+                array $array,
+                string $key,
+                string $key2,
+                string $key3,
+            ): ?string => $array[$key][$key2][$key3] ?? null);
+
+        $this->assertSame('uri', $this->sut()->getFederationTrustMarkStatusEndpoint());
+    }
+
+
     public function testFederationFetchEndpointIsOptional(): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);

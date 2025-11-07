@@ -118,6 +118,7 @@ class TrustMarkFetcher extends JwsFetcher
      *
      * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @param bool $shouldCache If true, each successful fetch will be cached, with URI being used as a cache key.
+     * @param string ...$additionalCacheKeyElements Additional string elements to be used as cache key.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -126,6 +127,7 @@ class TrustMarkFetcher extends JwsFetcher
         HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
         array $options = [],
         bool $shouldCache = true,
+        string ...$additionalCacheKeyElements,
     ): TrustMark {
         $trustMark = parent::fromNetwork($uri, $httpMethodsEnum, $options, $shouldCache);
 

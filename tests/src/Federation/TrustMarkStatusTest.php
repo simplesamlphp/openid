@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Federation\Factories;
+namespace SimpleSAML\Test\OpenID\Federation;
 
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
@@ -11,33 +11,29 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
-use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
 use SimpleSAML\OpenID\Federation\TrustMarkStatus;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
-use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
-#[CoversClass(TrustMarkStatusFactory::class)]
-#[UsesClass(ParsedJwsFactory::class)]
+#[CoversClass(TrustMarkStatus::class)]
 #[UsesClass(ParsedJws::class)]
-#[UsesClass(TrustMarkStatus::class)]
-final class TrustMarkStatusFactoryTest extends TestCase
+final class TrustMarkStatusTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-    protected MockObject $jwsParserMock;
+    protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
 
     protected MockObject $jwksFactoryMock;
 
-    protected MockObject $jwsSerializerManagerMock;
+    protected MockObject $jwsSerializerManagerDecoratorMock;
 
     protected MockObject $dateIntervalDecoratorMock;
 
@@ -47,17 +43,18 @@ final class TrustMarkStatusFactoryTest extends TestCase
 
     protected MockObject $claimFactoryMock;
 
+    protected array $samplePayload = [
+        'iss' => 'https://www.agid.gov.it',
+        'iat' => 1734016912,
+        // phpcs:ignore
+        'trust_mark' => 'trust-mark-string',
+        'status' => 'active',
+    ];
+
     protected array $sampleHeader = [
         'alg' => 'RS256',
         'typ' => 'trust-mark-status-response+jwt',
         'kid' => 'fsQ45F0D916RdKEeTjta8DYWiodjthouHrVWgOXBrkk',
-    ];
-
-    protected array $samplePayload = [
-        'iss' => 'https://www.example.com/trust-mark-issuer',
-        'trust_mark' => 'trust-mark-token',
-        'iat' => 1759897995,
-        'status' => 'active',
     ];
 
 
@@ -70,15 +67,12 @@ final class TrustMarkStatusFactoryTest extends TestCase
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
         $jwsMock->method('getSignature')->willReturn($this->signatureMock);
 
-        $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
-
-        $this->jwsParserMock = $this->createMock(JwsParser::class);
-        $this->jwsParserMock->method('parse')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
+        $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
         $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManagerDecorator::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -95,24 +89,24 @@ final class TrustMarkStatusFactoryTest extends TestCase
 
 
     protected function sut(
-        ?JwsParser $jwsParser = null,
+        ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
         ?JwksFactory $jwksFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
-    ): TrustMarkStatusFactory {
-        $jwsParser ??= $this->jwsParserMock;
+    ): TrustMarkStatus {
+        $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
-        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerMock;
+        $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
-        return new TrustMarkStatusFactory(
-            $jwsParser,
+        return new TrustMarkStatus(
+            $jwsDecorator,
             $jwsVerifierDecorator,
             $jwksFactory,
             $jwsSerializerManagerDecorator,
@@ -125,18 +119,54 @@ final class TrustMarkStatusFactoryTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(TrustMarkStatusFactory::class, $this->sut());
-    }
-
-
-    public function testCanBuildFromToken(): void
-    {
-        $this->jsonHelperMock->method('decode')->willReturn($this->samplePayload);
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->samplePayload);
 
         $this->assertInstanceOf(
             TrustMarkStatus::class,
-            $this->sut()->fromToken('token'),
+            $this->sut(),
         );
+    }
+
+
+    public function testThrowsForMissingTrustMark(): void
+    {
+        $payload = $this->samplePayload;
+        unset($payload['trust_mark']);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Trust Mark');
+
+        $this->sut();
+    }
+
+
+    public function testThrowsForMissingStatus(): void
+    {
+        $payload = $this->samplePayload;
+        unset($payload['status']);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Status');
+
+        $this->sut();
+    }
+
+
+    public function testThrowsForInvalidTypeHeader(): void
+    {
+        $header = $this->sampleHeader;
+        $header['typ'] = 'invalid';
+        $this->signatureMock->method('getProtectedHeader')->willReturn($header);
+        $this->jsonHelperMock->method('decode')->willReturn($this->samplePayload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Type');
+
+        $this->sut();
     }
 }
