@@ -8,6 +8,7 @@ use DateInterval;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
@@ -117,6 +118,8 @@ class Federation
         ?CacheInterface $cache = null,
         protected readonly ?LoggerInterface $logger = null,
         ?Client $client = null,
+        // phpcs:ignore
+        protected readonly TrustMarkStatusEndpointUsagePolicyEnum $defaultTrustMarkStatusEndpointUsagePolicyEnum = TrustMarkStatusEndpointUsagePolicyEnum::NotUsed,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
@@ -290,6 +293,7 @@ class Federation
             $this->maxCacheDurationDecorator,
             $this->cacheDecorator(),
             $this->logger,
+            $this->defaultTrustMarkStatusEndpointUsagePolicyEnum,
         );
     }
 
