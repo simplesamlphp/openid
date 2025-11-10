@@ -13,7 +13,9 @@ use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum;
 use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
+use SimpleSAML\OpenID\Exceptions\TrustMarkStatusException;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
@@ -70,6 +72,8 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkStatusMock;
 
+    protected MockObject $trustMarkIssuerConfigurationMock;
+
 
     protected function setUp(): void
     {
@@ -100,6 +104,9 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustMarkIssuersClaimValueMock = $this->createMock(TrustMarkIssuersClaimValue::class);
 
         $this->trustMarkStatusMock = $this->createMock(TrustMarkStatus::class);
+
+        $this->trustMarkIssuerConfigurationMock = $this->createMock(EntityStatement::class);
+        $this->trustMarkIssuerConfigurationMock->method('getIssuer')->willReturn('trustMarkIssuerId');
     }
 
 
@@ -948,6 +955,89 @@ final class TrustMarkValidatorTest extends TestCase
                 $trustMarkIssuerEntityConfigurationWithoutEndpoint,
                 TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvidedForNonExpiringTrustMarksOnly,
             ),
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusEndpointThrowsOnFetchError(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willThrowException(new FetchException('error'));
+
+        $this->expectException(TrustMarkException::class);
+        $this->expectExceptionMessage('Error fetching Trust Mark Status');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusEndpointThrowsOnInvalidTrustMarkStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('invalid'); // From the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusThrowsOnCustomStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('custom-status'); // Not from the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusPassesOnCustomValidTrustMarkStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->expects($this->atLeastOnce())
+            ->method('getStatus')
+            ->willReturn('custom-status'); // Not from the spec
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+            ['custom-status'],
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusThrowsOnInvalidCustomStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('invalid-custom-status'); // Not from the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+            ['custom-status'],
         );
     }
 }
