@@ -57,6 +57,7 @@ enum ClaimsEnum: string
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
+    case FederationTrustMarkStatusEndpoint = 'federation_trust_mark_status_endpoint';
     case Format = 'format';
     case GrantTypes = 'grant_types';
     case GrantTypesSupported = 'grant_types_supported';
@@ -130,6 +131,7 @@ enum ClaimsEnum: string
     case ServiceDocumentation = 'service_documentation';
     case SignedJwksUri = 'signed_jwks_uri';
     case SignedMetadata = 'signed_metadata';
+    case Status = 'status';
     // Subject
     case Sub = 'sub';
     case SubjectTypesSupported = 'subject_types_supported';

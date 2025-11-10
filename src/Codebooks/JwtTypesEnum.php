@@ -10,4 +10,5 @@ enum JwtTypesEnum: string
     case JwkSetJwt = 'jwk-set+jwt';
     case TrustMarkJwt = 'trust-mark+jwt';
     case TrustMarkDelegationJwt = 'trust-mark-delegation+jwt';
+    case TrustMarkStatusResponseJwt = 'trust-mark-status-response+jwt';
 }

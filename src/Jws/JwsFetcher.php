@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID\Jws;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\HttpHeadersEnum;
+use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Helpers;
@@ -79,19 +80,27 @@ class JwsFetcher extends AbstractJwsFetcher
 
 
     /**
-     * Fetch JWS from network. Each successful fetch will be cached, with URI being used as a cache key.
+     * Fetch JWS from the network.
      *
+     * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
+     * @param bool $shouldCache If true, each successful fetch will be cached, with URI being used as a cache key.
+     * @param string ...$additionalCacheKeyElements Additional string elements to be used as cache key.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function fromNetwork(string $uri): ParsedJws
-    {
+    public function fromNetwork(
+        string $uri,
+        HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
+        array $options = [],
+        bool $shouldCache = true,
+        string ...$additionalCacheKeyElements,
+    ): ParsedJws {
         $this->logger?->debug(
             'Trying to fetch JWS token from network.',
             ['uri' => $uri],
         );
 
-        $response = $this->artifactFetcher->fromNetwork($uri);
+        $response = $this->artifactFetcher->fromNetwork($uri, $httpMethodsEnum, $options);
 
         if ($response->getStatusCode() < 200 || $response->getStatusCode() > 299) {
             $message = sprintf(
@@ -126,15 +135,18 @@ class JwsFetcher extends AbstractJwsFetcher
         $this->logger?->debug('Proceeding to JWS instance building.');
 
         $jwsInstance = $this->buildJwsInstance($token);
-        $this->logger?->debug('JWS instance built, saving its token to cache.', ['uri' => $uri, 'token' => $token]);
+        $this->logger?->debug('JWS instance built.', ['uri' => $uri, 'token' => $token]);
 
-        $cacheTtl = is_int($expirationTime = $jwsInstance->getExpirationTime()) ?
-        $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
-            $expirationTime,
-        ) :
-        $this->maxCacheDuration->getInSeconds();
+        if ($shouldCache) {
+            $this->logger?->debug('Saving JWS token to cache.', ['uri' => $uri, 'token' => $token]);
+            $cacheTtl = is_int($expirationTime = $jwsInstance->getExpirationTime()) ?
+            $this->maxCacheDuration->lowestInSecondsComparedToExpirationTime(
+                $expirationTime,
+            ) :
+            $this->maxCacheDuration->getInSeconds();
 
-        $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri);
+            $this->artifactFetcher->cacheIt($token, $cacheTtl, $uri, ...$additionalCacheKeyElements);
+        }
 
         $this->logger?->debug('Returning built JWS instance.', ['uri' => $uri, 'token' => $token]);
 

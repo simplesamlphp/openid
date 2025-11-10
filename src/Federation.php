@@ -24,10 +24,12 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -100,6 +102,10 @@ class Federation
     protected ?TrustMarkValidator $trustMarkValidator = null;
 
     protected ?TrustMarkFetcher $trustMarkFetcher = null;
+
+    protected ?TrustMarkStatusFactory $trustMarkStatusFactory = null;
+
+    protected ?TrustMarkStatusFetcher $trustMarkStatusFetcher = null;
 
 
     public function __construct(
@@ -248,12 +254,39 @@ class Federation
     }
 
 
+    public function trustMarkStatusFactory(): TrustMarkStatusFactory
+    {
+        return $this->trustMarkStatusFactory ??= new TrustMarkStatusFactory(
+            $this->jwsParser(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
+        );
+    }
+
+
+    public function trustMarkStatusFetcher(): TrustMarkStatusFetcher
+    {
+        return $this->trustMarkStatusFetcher ??= new TrustMarkStatusFetcher(
+            $this->trustMarkStatusFactory(),
+            $this->artifactFetcher(),
+            $this->maxCacheDurationDecorator,
+            $this->helpers(),
+            $this->logger,
+        );
+    }
+
+
     public function trustMarkValidator(): TrustMarkValidator
     {
         return $this->trustMarkValidator ??= new TrustMarkValidator(
             $this->trustChainResolver(),
             $this->trustMarkFactory(),
             $this->trustMarkDelegationFactory(),
+            $this->trustMarkStatusFetcher(),
             $this->maxCacheDurationDecorator,
             $this->cacheDecorator(),
             $this->logger,
