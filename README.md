@@ -249,10 +249,11 @@ try {
 
 ### Validating Trust Marks
 
-Federation tools expose Trust Mark Validator with several methods for validating Trust Marks, with the most common
-one being the one to validate Trust Mark for some entity simply based on the Trust Mark Type.
+Federation tools expose Trust Mark Validator with several methods for validating
+Trust Marks, with the most common one being the one to validate Trust Mark for
+some entity simply based on the Trust Mark Type.
 
-If cache is utilized, Trust Mark validation will be cached with cache TTL being the minimum expiration
+If cache is used, Trust Mark validation will be cached with cache TTL being the minimum expiration
 time of Trust Mark, Leaf Entity Statement or `maxCacheDuration`, whatever is smaller.
 
 ```php
@@ -270,7 +271,7 @@ $leafEntityConfigurationStatement = $trustChain->getResolvedLeaf();
 $trustAnchorConfigurationStatement = $trustChain->getResolvedTrustAnchor();
 
 try {
-    // Example which queries cache for previously validated Trust Mark, and does formal validation if not cached.
+    // Example which queries cache for previously validated Trust Mark and does formal validation if not cached.
     $federationTools->trustMarkValidator()->fromCacheOrDoForTrustMarkType(
         $trustMarkType,
         $leafEntityConfigurationStatement,
@@ -278,12 +279,14 @@ try {
         $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
     );
     
-    // Example which always does formal validation (does not use cache).
+    // Example which always does formal validation (does not use cache), and requires usage of Trust Mark
+    // Status Endpoint for non-expiring Trust Marks.
     $federationTools->trustMarkValidator()->doForTrustMarkType(
         $trustMarkType,
         $leafEntityConfigurationStatement,
         $trustAnchorConfigurationStatement,
         $expectedJwtType = \SimpleSAML\OpenID\Codebooks\JwtTypesEnum::TrustMarkJwt,
+        \SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum::RequiredForNonExpiringTrustMarksOnly,
     );
 } catch (\Throwable $exception) {
     $this->logger->error('Trust Mark validation failed. Error was: ' . $exception->getMessage());

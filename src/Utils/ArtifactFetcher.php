@@ -69,13 +69,17 @@ class ArtifactFetcher
 
 
     /**
+     * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromNetwork(string $uri): ResponseInterface
-    {
+    public function fromNetwork(
+        string $uri,
+        HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
+        array $options = [],
+    ): ResponseInterface {
         $this->logger?->debug('Fetching artifact on network from URI.', ['uri' => $uri]);
         try {
-            $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
+            $response = $this->httpClientDecorator->request($httpMethodsEnum, $uri, $options);
         } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',

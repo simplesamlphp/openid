@@ -80,6 +80,7 @@ enum ClaimsEnum: string
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
+    case FederationTrustMarkStatusEndpoint = 'federation_trust_mark_status_endpoint';
     case Format = 'format';
     case Grants = 'grants';
     case GrantTypes = 'grant_types';
@@ -183,6 +184,7 @@ enum ClaimsEnum: string
     case Type = 'type';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
+    case TrustMarkIssuers = 'trust_mark_issuers';
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarkType = 'trust_mark_type';
     case TrustMarks = 'trust_marks';

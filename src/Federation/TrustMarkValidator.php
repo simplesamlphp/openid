@@ -6,9 +6,12 @@ namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
+use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum;
+use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
+use SimpleSAML\OpenID\Exceptions\TrustMarkStatusException;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
@@ -16,13 +19,22 @@ use Throwable;
 
 class TrustMarkValidator
 {
+    /**
+     * // phpcs:ignore
+     * @param \SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum $defaultTrustMarkStatusEndpointUsagePolicyEnum Default
+     * Trust Mark Status Endpoint Usage Policy to use when none is specified in a particular method. Defaults to
+     * NotUsed, meaning that the Trust Mark Status Endpoint will not be used at all.
+     */
     public function __construct(
         protected readonly TrustChainResolver $trustChainResolver,
         protected readonly TrustMarkFactory $trustMarkFactory,
         protected readonly TrustMarkDelegationFactory $trustMarkDelegationFactory,
+        protected readonly TrustMarkStatusFetcher $trustMarkStatusFetcher,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
+        // phpcs:ignore
+        protected readonly TrustMarkStatusEndpointUsagePolicyEnum $defaultTrustMarkStatusEndpointUsagePolicyEnum = TrustMarkStatusEndpointUsagePolicyEnum::NotUsed,
     ) {
     }
 
@@ -87,6 +99,8 @@ class TrustMarkValidator
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     * considered valid
      * @param non-empty-string $trustMarkType
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -99,6 +113,8 @@ class TrustMarkValidator
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
         if (
             $this->isValidationCachedFor(
@@ -110,16 +126,22 @@ class TrustMarkValidator
             return;
         }
 
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
         $this->doForTrustMarkType(
             $trustMarkType,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
             $expectedJwtType,
+            $trustMarkStatusEndpointUsagePolicyEnum,
+            $additionallyValidTrustMarkStatues,
         );
     }
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     *  considered valid
      * @param non-empty-string $trustMarkType
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -131,6 +153,8 @@ class TrustMarkValidator
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
         $this->logger?->debug(
             sprintf(
@@ -183,6 +207,8 @@ class TrustMarkValidator
             ),
         );
 
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
         foreach ($trustMarksClaimValues as $idx => $trustMarksClaimValue) {
             $this->logger?->debug(
                 sprintf(
@@ -201,6 +227,8 @@ class TrustMarkValidator
                     $leafEntityConfiguration,
                     $trustAnchorEntityConfiguration,
                     $expectedJwtType,
+                    $trustMarkStatusEndpointUsagePolicyEnum,
+                    $additionallyValidTrustMarkStatues,
                 );
 
                 $this->logger?->debug(
@@ -241,6 +269,8 @@ class TrustMarkValidator
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     *  considered valid
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
@@ -254,6 +284,8 @@ class TrustMarkValidator
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
         if (
             $this->isValidationCachedFor(
@@ -265,16 +297,22 @@ class TrustMarkValidator
             return;
         }
 
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
         $this->doForTrustMarksClaimValue(
             $trustMarksClaimValue,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
             $expectedJwtType,
+            $trustMarkStatusEndpointUsagePolicyEnum,
+            $additionallyValidTrustMarkStatues,
         );
     }
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     * considered valid
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
@@ -288,13 +326,19 @@ class TrustMarkValidator
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
         JwtTypesEnum $expectedJwtType = JwtTypesEnum::TrustMarkJwt,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
         $trustMark = $this->validateTrustMarksClaimValue($trustMarksClaimValue, $expectedJwtType);
+
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
 
         $this->doForTrustMark(
             $trustMark,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
+            $trustMarkStatusEndpointUsagePolicyEnum,
+            $additionallyValidTrustMarkStatues,
         );
     }
 
@@ -366,6 +410,8 @@ class TrustMarkValidator
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     * considered valid
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
@@ -378,6 +424,8 @@ class TrustMarkValidator
         TrustMark $trustMark,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
         if (
             $this->isValidationCachedFor(
@@ -389,15 +437,21 @@ class TrustMarkValidator
             return;
         }
 
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
         $this->doForTrustMark(
             $trustMark,
             $leafEntityConfiguration,
             $trustAnchorEntityConfiguration,
+            $trustMarkStatusEndpointUsagePolicyEnum,
+            $additionallyValidTrustMarkStatues,
         );
     }
 
 
     /**
+     * @param non-empty-string[] $additionallyValidTrustMarkStatues Array of additional Trust Mark statuses that are
+     * considered valid
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
@@ -405,24 +459,31 @@ class TrustMarkValidator
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      * @throws \SimpleSAML\OpenID\Exceptions\JwksException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function doForTrustMark(
         TrustMark $trustMark,
         EntityStatement $leafEntityConfiguration,
         EntityStatement $trustAnchorEntityConfiguration,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+        array $additionallyValidTrustMarkStatues = [],
     ): void {
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
         $this->logger?->debug(
             'Validating Trust Mark.',
             [
                 'trustMarkPayload' => $trustMark->getPayload(),
                 'leafEntityConfigurationPayload' => $leafEntityConfiguration->getPayload(),
                 'trustAnchorEntityConfigurationPayload' => $trustAnchorEntityConfiguration->getPayload(),
+                'trustMarkStatusEndpointUsagePolicyEnum' => $trustMarkStatusEndpointUsagePolicyEnum->name,
             ],
         );
 
         $this->validateSubjectClaim($trustMark, $leafEntityConfiguration);
+        $this->validateTrustMarkIssuers($trustMark, $trustAnchorEntityConfiguration);
 
-        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve chain, as Trust Anchor is trusted
+        // If Trust Mark Issuer is the Trust Anchor itself, we don't have to resolve a chain, as Trust Anchor is trusted
         // out-of-band. Otherwise, we have to resolve trust for Trust Mark Issuer.
         $trustMarkIssuerEntityConfiguration =
         $trustMark->getIssuer() === $trustAnchorEntityConfiguration->getIssuer() ?
@@ -431,6 +492,20 @@ class TrustMarkValidator
             $trustMark,
             $trustAnchorEntityConfiguration,
         )->getResolvedLeaf();
+
+        if (
+            $this->shouldUseTrustMarkStatusEndpoint(
+                $trustMark,
+                $trustMarkIssuerEntityConfiguration,
+                $trustMarkStatusEndpointUsagePolicyEnum,
+            )
+        ) {
+            $this->validateUsingTrustMarkStatusEndpoint(
+                $trustMark,
+                $trustMarkIssuerEntityConfiguration,
+                $additionallyValidTrustMarkStatues,
+            );
+        }
 
         $this->validateTrustMarkSignature($trustMark, $trustMarkIssuerEntityConfiguration);
 
@@ -511,6 +586,91 @@ class TrustMarkValidator
                 'Leaf entity %s is the subject of the Trust Mark %s.',
                 $leafEntityConfiguration->getIssuer(),
                 $trustMark->getTrustMarkType(),
+            ),
+        );
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function validateTrustMarkIssuers(
+        TrustMark $trustMark,
+        EntityStatement $trustAnchorEntityConfiguration,
+    ): void {
+        $this->logger?->debug('Validating Trust Mark Issuers.');
+
+        if (is_null($trustMarkIssuersClaimBag = $trustAnchorEntityConfiguration->getTrustMarkIssuers())) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s does not define Trust Mark Issuers. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                ),
+            );
+            return;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Anchor %s defines Trust Mark Issuers.',
+                $trustAnchorEntityConfiguration->getIssuer(),
+            ),
+            ['trustMarkIssuers' => $trustMarkIssuersClaimBag->jsonSerialize()],
+        );
+
+        $trustMarkIssuersClaimValue = $trustMarkIssuersClaimBag->get($trustMark->getTrustMarkType());
+
+        if (is_null($trustMarkIssuersClaimValue)) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s does not define issuers of Trust Mark %s. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                    $trustMark->getTrustMarkType(),
+                ),
+            );
+            return;
+        }
+
+        if ($trustMarkIssuersClaimValue->getTrustMarkIssuers() === []) {
+            $this->logger?->debug(
+                sprintf(
+                    'Trust Anchor %s defines any issuers of Trust Mark %s. Skipping validation.',
+                    $trustAnchorEntityConfiguration->getIssuer(),
+                    $trustMark->getTrustMarkType(),
+                ),
+            );
+            return;
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Anchor %s defines issuers %s of Trust Mark %s.',
+                $trustAnchorEntityConfiguration->getIssuer(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustMark->getTrustMarkType(),
+            ),
+        );
+
+        if (!in_array($trustMark->getIssuer(), $trustMarkIssuersClaimValue->getTrustMarkIssuers(), true)) {
+            $error = sprintf(
+                'Trust Mark %s is not issued by any of the Trust Mark Issuers %s defined by Trust Anchor %s.',
+                $trustMark->getTrustMarkType(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustAnchorEntityConfiguration->getIssuer(),
+            );
+
+            $this->logger?->error($error);
+            throw new TrustMarkException($error);
+        }
+
+        $this->logger?->debug(
+            sprintf(
+                'Trust Mark %s is issued by one of the Trust Mark Issuers %s defined by Trust Anchor %s.',
+                $trustMark->getTrustMarkType(),
+                implode(', ', $trustMarkIssuersClaimValue->getTrustMarkIssuers()),
+                $trustAnchorEntityConfiguration->getIssuer(),
             ),
         );
     }
@@ -729,5 +889,133 @@ class TrustMarkValidator
         $this->logger?->debug('Trust Mark Type claim validated.');
 
         $this->logger?->debug('Trust Mark delegation validated.');
+    }
+
+
+    public function getDefaultTrustMarkStatusEndpointUsagePolicyEnum(): TrustMarkStatusEndpointUsagePolicyEnum
+    {
+        return $this->defaultTrustMarkStatusEndpointUsagePolicyEnum;
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function shouldUseTrustMarkStatusEndpoint(
+        TrustMark $trustMark,
+        EntityStatement $trustMarkIssuerEntityConfiguration,
+        ?TrustMarkStatusEndpointUsagePolicyEnum $trustMarkStatusEndpointUsagePolicyEnum = null,
+    ): bool {
+        $trustMarkStatusEndpointUsagePolicyEnum ??= $this->getDefaultTrustMarkStatusEndpointUsagePolicyEnum();
+
+        if ($trustMarkStatusEndpointUsagePolicyEnum === TrustMarkStatusEndpointUsagePolicyEnum::Required) {
+            return true;
+        }
+
+        if (
+            $trustMarkStatusEndpointUsagePolicyEnum ===
+            TrustMarkStatusEndpointUsagePolicyEnum::RequiredForNonExpiringTrustMarksOnly
+        ) {
+            return $trustMark->getExpirationTime() === null;
+        }
+
+        if (
+            $trustMarkStatusEndpointUsagePolicyEnum ===
+            TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvided
+        ) {
+            return $trustMarkIssuerEntityConfiguration->getFederationTrustMarkStatusEndpoint() !== null;
+        }
+
+        if (
+            $trustMarkStatusEndpointUsagePolicyEnum ===
+            TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvidedForNonExpiringTrustMarksOnly
+        ) {
+            return $trustMark->getExpirationTime() === null &&
+            $trustMarkIssuerEntityConfiguration->getFederationTrustMarkStatusEndpoint() !== null;
+        }
+
+        return false;
+    }
+
+
+    /**
+     * @param non-empty-string[] $additionallyValidStatues Array of additional statuses that are considered valid
+     * in addition to those defined by the OpenID Federation specification.
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkStatusException
+     */
+    public function validateUsingTrustMarkStatusEndpoint(
+        TrustMark $trustMark,
+        EntityStatement $trustMarkIssuerEntityConfiguration,
+        array $additionallyValidStatues = [],
+    ): void {
+        $this->logger?->debug('Validating Trust Mark using Trust Mark Status Endpoint.');
+
+        try {
+            $trustMarkStatus = $this->trustMarkStatusFetcher->fromFederationTrustMarkStatusEndpoint(
+                $trustMark,
+                $trustMarkIssuerEntityConfiguration,
+            );
+        } catch (Throwable $throwable) {
+            $message = 'Error fetching Trust Mark Status from Trust Mark Status Endpoint';
+            $this->logger?->error($message, [
+                'error' => $throwable->getMessage(),
+            ]);
+
+            throw new TrustMarkException($message);
+        }
+
+        $this->logger?->debug(
+            'Successfully fetched Trust Mark Status from Trust Mark Status Endpoint.',
+            ['trustMarkStatus' => $trustMarkStatus->getStatus()],
+        );
+
+        $trustMarkStatusEnum = TrustMarkStatusEnum::tryFrom($trustMarkStatus->getStatus());
+
+        if ($trustMarkStatusEnum instanceof TrustMarkStatusEnum) {
+            $this->logger?->debug(
+                'Trust Mark Status is one of the specified statuses, checking validity.',
+                ['trustMarkStatusEnum' => $trustMarkStatusEnum],
+            );
+
+            if ($trustMarkStatusEnum->isValid()) {
+                $this->logger?->debug('Trust Mark Status is valid.');
+                return;
+            }
+
+            throw new TrustMarkStatusException(
+                sprintf('Trust Mark Status is not valid. Reason: %s', $trustMarkStatusEnum->value),
+            );
+        }
+
+        if ($additionallyValidStatues === []) {
+            throw new TrustMarkStatusException(
+                sprintf('Trust Mark Status %s is not valid.', $trustMarkStatus->getStatus()),
+            );
+        }
+
+        $this->logger?->debug(
+            'Trust Mark Status is not one of the specified statuses, checking validity based on user-defined statuses.',
+            ['additionallyValidStatues' => $additionallyValidStatues],
+        );
+
+        if (in_array($trustMarkStatus->getStatus(), $additionallyValidStatues, true)) {
+            $this->logger?->debug(
+                'Trust Mark Status is valid based on user-defined statuses.',
+                [
+                    'trustMarkStatus' => $trustMarkStatus->getStatus(),
+                    'additionallyValidStatues' => $additionallyValidStatues,
+                ],
+            );
+            return;
+        }
+
+        throw new TrustMarkStatusException(
+            sprintf('Trust Mark Status %s is not valid.', $trustMarkStatus->getStatus()),
+        );
     }
 }

@@ -7,6 +7,7 @@ namespace SimpleSAML\OpenID\Federation;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\ContentTypesEnum;
+use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
@@ -113,14 +114,22 @@ class TrustMarkFetcher extends JwsFetcher
 
 
     /**
-     * Fetch Trust Mark from network. Each successful fetch will be cached, with URI being used as a cache key.
+     * Fetch Trust Mark from network.
      *
+     * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
+     * @param bool $shouldCache If true, each successful fetch will be cached, with URI being used as a cache key.
+     * @param string ...$additionalCacheKeyElements Additional string elements to be used as cache key.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function fromNetwork(string $uri): TrustMark
-    {
-        $trustMark = parent::fromNetwork($uri);
+    public function fromNetwork(
+        string $uri,
+        HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
+        array $options = [],
+        bool $shouldCache = true,
+        string ...$additionalCacheKeyElements,
+    ): TrustMark {
+        $trustMark = parent::fromNetwork($uri, $httpMethodsEnum, $options, $shouldCache);
 
         if ($trustMark instanceof TrustMark) {
             return $trustMark;

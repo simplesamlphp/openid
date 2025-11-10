@@ -323,6 +323,22 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testTrustMarkIssuersIsBuildUsingFactoryOptional(): void
+    {
+        $this->validPayload['trust_mark_issuers'] = [
+            'trustMarkType' => ['https://issuer1.org', 'https://issuer2.org'],
+        ];
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->federationClaimFactoryMock->expects($this->atLeastOnce())
+            ->method('buildTrustMarkIssuersClaimBagFrom')
+            ->with($this->validPayload['trust_mark_issuers']);
+
+        $this->sut()->getTrustMarkIssuers();
+    }
+
+
     public function testThrowsOnInvalidTrustMarks(): void
     {
         $this->validPayload['trust_marks'] = 'invalid';
@@ -368,6 +384,26 @@ final class EntityStatementTest extends TestCase
             ): ?string => $array[$key][$key2][$key3] ?? null);
 
         $this->assertSame('uri', $this->sut()->getFederationFetchEndpoint());
+    }
+
+
+    public function testCanGetFederationTrustMarkStatusEndpoint(): void
+    {
+        $payload = $this->validPayload;
+        $payload['metadata']['federation_entity']['federation_trust_mark_status_endpoint'] = 'uri';
+
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($payload);
+        $this->arrHelperMock->method('getNestedValue')
+            ->willReturnCallback(fn(
+                array $array,
+                string $key,
+                string $key2,
+                string $key3,
+            ): ?string => $array[$key][$key2][$key3] ?? null);
+
+        $this->assertSame('uri', $this->sut()->getFederationTrustMarkStatusEndpoint());
     }
 
 

@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -234,6 +235,25 @@ class EntityStatement extends ParsedJws
     }
 
 
+    public function getTrustMarkIssuers(): ?TrustMarkIssuersClaimBag
+    {
+        // trust_mark_issuers
+        // OPTIONAL. A Trust Anchor MAY use this claim to tell which combination of Trust Mark type identifiers and
+        // issuers are trusted by the federation. It is a JSON object with member names that are Trust Mark type
+        // identifiers, and each corresponding value being an array of Entity Identifiers that are trusted to
+        // represent the accreditation authority for Trust Marks with that identifier.
+
+        $claimKey = ClaimsEnum::TrustMarkIssuers->value;
+        $trustMarkIssuersClaimData = $this->getPayloadClaim($claimKey);
+
+        if (is_null($trustMarkIssuersClaimData)) {
+            return null;
+        }
+
+        return $this->claimFactory->forFederation()->buildTrustMarkIssuersClaimBagFrom($trustMarkIssuersClaimData);
+    }
+
+
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -294,6 +314,30 @@ class EntityStatement extends ParsedJws
 
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     *
+     * @return ?non-empty-string
+     */
+    public function getFederationTrustMarkStatusEndpoint(): ?string
+    {
+        $federationTrustMarkEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationTrustMarkStatusEndpoint->value,
+        );
+
+        if (is_null($federationTrustMarkEndpoint)) {
+            return null;
+        }
+
+        return $this->helpers->type()->ensureNonEmptyString($federationTrustMarkEndpoint);
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -339,8 +383,10 @@ class EntityStatement extends ParsedJws
             $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),
             $this->getTrustMarkOwners(...),
+            $this->getTrustMarkIssuers(...),
             $this->getFederationFetchEndpoint(...),
             $this->getFederationTrustMarkEndpoint(...),
+            $this->getFederationTrustMarkStatusEndpoint(...),
         );
     }
 }

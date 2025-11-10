@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEndpointUsagePolicyEnum;
+use SimpleSAML\OpenID\Codebooks\TrustMarkStatusEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\TrustMarkException;
+use SimpleSAML\OpenID\Exceptions\TrustMarkStatusException;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
+use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
@@ -21,9 +28,12 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
+use SimpleSAML\OpenID\Federation\TrustMarkStatus;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 
 #[CoversClass(TrustMarkValidator::class)]
+#[UsesClass(TrustMarkStatusEnum::class)]
 final class TrustMarkValidatorTest extends TestCase
 {
     protected MockObject $trustChainResolverMock;
@@ -31,6 +41,8 @@ final class TrustMarkValidatorTest extends TestCase
     protected MockObject $trustMarkFactoryMock;
 
     protected MockObject $trustMarkDelegationFactoryMock;
+
+    protected MockObject $trustMarkStatusFetcherMock;
 
     protected MockObject $maxCacheDurationDecoratorMock;
 
@@ -54,12 +66,21 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkDelegationMock;
 
+    protected MockObject $trustMarkIssuersClaimBagMock;
+
+    protected MockObject $trustMarkIssuersClaimValueMock;
+
+    protected MockObject $trustMarkStatusMock;
+
+    protected MockObject $trustMarkIssuerConfigurationMock;
+
 
     protected function setUp(): void
     {
         $this->trustChainResolverMock = $this->createMock(TrustChainResolver::class);
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
         $this->trustMarkDelegationFactoryMock = $this->createMock(TrustMarkDelegationFactory::class);
+        $this->trustMarkStatusFetcherMock = $this->createMock(TrustMarkStatusFetcher::class);
         $this->maxCacheDurationDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
@@ -78,6 +99,14 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustMarkOwnersClaimValueMock = $this->createMock(TrustMarkOwnersClaimValue::class);
 
         $this->trustMarkDelegationMock = $this->createMock(TrustMarkDelegation::class);
+
+        $this->trustMarkIssuersClaimBagMock = $this->createMock(TrustMarkIssuersClaimBag::class);
+        $this->trustMarkIssuersClaimValueMock = $this->createMock(TrustMarkIssuersClaimValue::class);
+
+        $this->trustMarkStatusMock = $this->createMock(TrustMarkStatus::class);
+
+        $this->trustMarkIssuerConfigurationMock = $this->createMock(EntityStatement::class);
+        $this->trustMarkIssuerConfigurationMock->method('getIssuer')->willReturn('trustMarkIssuerId');
     }
 
 
@@ -85,6 +114,7 @@ final class TrustMarkValidatorTest extends TestCase
         ?TrustChainResolver $trustChainResolver = null,
         ?TrustMarkFactory $trustMarkFactory = null,
         ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null,
+        ?TrustMarkStatusFetcher $trustMarkStatusFetcher = null,
         ?DateIntervalDecorator $maxCacheDurationDecorator = null,
         ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
@@ -92,6 +122,7 @@ final class TrustMarkValidatorTest extends TestCase
         $trustChainResolver ??= $this->trustChainResolverMock;
         $trustMarkFactory ??= $this->trustMarkFactoryMock;
         $trustMarkDelegationFactory ??= $this->trustMarkDelegationFactoryMock;
+        $trustMarkStatusFetcher ??= $this->trustMarkStatusFetcherMock;
         $maxCacheDurationDecorator ??= $this->maxCacheDurationDecoratorMock;
         $cacheDecorator ??= $this->cacheDecoratorMock;
         $logger ??= $this->loggerMock;
@@ -100,6 +131,7 @@ final class TrustMarkValidatorTest extends TestCase
             $trustChainResolver,
             $trustMarkFactory,
             $trustMarkDelegationFactory,
+            $trustMarkStatusFetcher,
             $maxCacheDurationDecorator,
             $cacheDecorator,
             $logger,
@@ -161,6 +193,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustChainResolverMock,
             $this->trustMarkFactoryMock,
             $this->trustMarkDelegationFactoryMock,
+            $this->trustMarkStatusFetcherMock,
             $this->maxCacheDurationDecoratorMock,
         );
 
@@ -445,6 +478,31 @@ final class TrustMarkValidatorTest extends TestCase
     }
 
 
+    public function testDoForTrustMarkCanUseTrustMarkStatusEndpoint(): void
+    {
+        $this->cacheDecoratorMock->expects($this->never())->method('get');
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+
+        $this->trustMarkStatusMock->expects($this->atLeastOnce())
+            ->method('getStatus')
+            ->willReturn('active');
+
+        $this->trustMarkStatusFetcherMock->expects($this->once())
+            ->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+
+        $this->cacheDecoratorMock->expects($this->once())->method('set');
+
+        $this->sut()->doForTrustMark(
+            $this->trustMarkMock,
+            $this->leafEntityConfigurationMock,
+            $this->trustAnchorConfigurationMock,
+            TrustMarkStatusEndpointUsagePolicyEnum::Required,
+        );
+    }
+
+
     public function testValidateSubjectClaimThrowsForInvalidSubject(): void
     {
         $this->trustMarkMock->method('getSubject')->willReturn('invalidSubject');
@@ -715,6 +773,271 @@ final class TrustMarkValidatorTest extends TestCase
         $this->sut()->validateTrustMarkDelegation(
             $this->trustMarkMock,
             $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testDoForTrustMarkValidatesTrustMarkIssuers(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers');
+
+        $this->sut()->doForTrustMark(
+            $this->trustMarkMock,
+            $this->leafEntityConfigurationMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesIfNoTrustMarkIssuersDefined(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn(null);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->trustMarkMock->expects($this->atLeastOnce())->method('getTrustMarkType');
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesForEmptyTrustMarkIssuers(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')->willReturn([]);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->trustMarkMock->expects($this->atLeastOnce())->method('getTrustMarkType');
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersThrowsForIssuerNotAdvertisedByTrustAnchor(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')
+            ->willReturn(['https://example.com/trust-mark-issuer']);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->expectException(TrustMarkException::class);
+        $this->expectExceptionMessage('not issued by any');
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testValidateTrustMarkIssuersPassesForIssuerAdvertisedByTrustAnchor(): void
+    {
+        $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
+        $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
+        $this->trustMarkMock->method('getIssuer')->willReturn('trustMarkIssuerId');
+
+        $this->trustMarkIssuersClaimValueMock->method('getTrustMarkIssuers')
+            ->willReturn(['trustMarkIssuerId']);
+        $this->trustMarkIssuersClaimBagMock->expects($this->once())->method('get')
+            ->with('trustMarkType')
+            ->willReturn($this->trustMarkIssuersClaimValueMock);
+        $this->trustAnchorConfigurationMock->expects($this->once())->method('getTrustMarkIssuers')
+            ->willReturn($this->trustMarkIssuersClaimBagMock);
+
+        $this->sut()->validateTrustMarkIssuers(
+            $this->trustMarkMock,
+            $this->trustAnchorConfigurationMock,
+        );
+    }
+
+
+    public function testShouldUseTrustMarkStatusForNonExpiringTrustMarks(): void
+    {
+        $trustMarkIssuerEntityConfiguration = $this->createMock(EntityStatement::class);
+
+        $nonExpiringTrustMark = $this->createMock(TrustMark::class);
+        $nonExpiringTrustMark->method('getExpirationTime')->willReturn(null);
+        $this->assertTrue(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $nonExpiringTrustMark,
+                $trustMarkIssuerEntityConfiguration,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredForNonExpiringTrustMarksOnly,
+            ),
+        );
+
+
+        $expiringTrustMark = $this->createMock(TrustMark::class);
+        $expiringTrustMark->method('getExpirationTime')->willReturn(time() + 100);
+        $this->assertFalse(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $expiringTrustMark,
+                $trustMarkIssuerEntityConfiguration,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredForNonExpiringTrustMarksOnly,
+            ),
+        );
+    }
+
+
+    public function testShouldUseTrustMarkStatusWhenEndpointIsAvailable(): void
+    {
+        $trustMarkIssuerEntityConfigurationWithEndpoint = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfigurationWithEndpoint->method('getFederationTrustMarkStatusEndpoint')
+            ->willReturn('https://example.com/trust-mark-status');
+
+        $this->assertTrue(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $this->trustMarkMock,
+                $trustMarkIssuerEntityConfigurationWithEndpoint,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvided,
+            ),
+        );
+
+        $trustMarkIssuerEntityConfigurationWithoutEndpoint = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfigurationWithoutEndpoint->method('getFederationTrustMarkStatusEndpoint')
+            ->willReturn(null);
+
+        $this->assertFalse(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $this->trustMarkMock,
+                $trustMarkIssuerEntityConfigurationWithoutEndpoint,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvided,
+            ),
+        );
+    }
+
+
+    public function testShouldUseTrustMarkStatusForNonExpiringWhenEndpointIsAvailable(): void
+    {
+        $trustMarkIssuerEntityConfigurationWithEndpoint = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfigurationWithEndpoint->method('getFederationTrustMarkStatusEndpoint')
+            ->willReturn('https://example.com/trust-mark-status');
+
+        $nonExpiringTrustMark = $this->createMock(TrustMark::class);
+        $nonExpiringTrustMark->method('getExpirationTime')->willReturn(null);
+
+        $this->assertTrue(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $nonExpiringTrustMark,
+                $trustMarkIssuerEntityConfigurationWithEndpoint,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvidedForNonExpiringTrustMarksOnly,
+            ),
+        );
+
+        $trustMarkIssuerEntityConfigurationWithoutEndpoint = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfigurationWithoutEndpoint->method('getFederationTrustMarkStatusEndpoint')
+            ->willReturn(null);
+
+        $this->assertFalse(
+            $this->sut()->shouldUseTrustMarkStatusEndpoint(
+                $this->trustMarkMock,
+                $trustMarkIssuerEntityConfigurationWithoutEndpoint,
+                TrustMarkStatusEndpointUsagePolicyEnum::RequiredIfEndpointProvidedForNonExpiringTrustMarksOnly,
+            ),
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusEndpointThrowsOnFetchError(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willThrowException(new FetchException('error'));
+
+        $this->expectException(TrustMarkException::class);
+        $this->expectExceptionMessage('Error fetching Trust Mark Status');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusEndpointThrowsOnInvalidTrustMarkStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('invalid'); // From the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusThrowsOnCustomStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('custom-status'); // Not from the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusPassesOnCustomValidTrustMarkStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->expects($this->atLeastOnce())
+            ->method('getStatus')
+            ->willReturn('custom-status'); // Not from the spec
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+            ['custom-status'],
+        );
+    }
+
+
+    public function testValidateUsingTrustMarkStatusThrowsOnInvalidCustomStatus(): void
+    {
+        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusMock);
+        $this->trustMarkStatusMock->method('getStatus')
+            ->willReturn('invalid-custom-status'); // Not from the spec
+
+        $this->expectException(TrustMarkStatusException::class);
+        $this->expectExceptionMessage('not valid');
+
+        $this->sut()->validateUsingTrustMarkStatusEndpoint(
+            $this->trustMarkMock,
+            $this->trustMarkIssuerConfigurationMock,
+            ['custom-status'],
         );
     }
 }
