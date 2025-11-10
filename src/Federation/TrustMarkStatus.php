@@ -86,6 +86,17 @@ class TrustMarkStatus extends ParsedJws
 
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkStatusException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return non-empty-string
+     */
+    public function getKeyId(): string
+    {
+        return parent::getKeyId() ?? throw new TrustMarkStatusException('No KeyId header claim found.');
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkException
      */
@@ -97,6 +108,7 @@ class TrustMarkStatus extends ParsedJws
             $this->getTrustMark(...),
             $this->getStatus(...),
             $this->getType(...),
+            $this->getKeyId(...),
         );
     }
 }
