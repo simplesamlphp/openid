@@ -8,9 +8,11 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
@@ -36,6 +38,8 @@ final class ParsedJwsFactoryTest extends TestCase
 
     protected MockObject $claimFactoryMock;
 
+    protected MockObject $jwkDecoratorMock;
+
 
     protected function setUp(): void
     {
@@ -46,6 +50,8 @@ final class ParsedJwsFactoryTest extends TestCase
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
+        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
@@ -89,6 +95,20 @@ final class ParsedJwsFactoryTest extends TestCase
         $this->assertInstanceOf(
             ParsedJws::class,
             $this->sut()->fromToken('token'),
+        );
+    }
+
+
+    public function testCanBuildFromData(): void
+    {
+        $this->assertInstanceOf(
+            ParsedJws::class,
+            $this->sut()->fromData(
+                $this->jwkDecoratorMock,
+                SignatureAlgorithmEnum::RS256,
+                [],
+                [],
+            ),
         );
     }
 }

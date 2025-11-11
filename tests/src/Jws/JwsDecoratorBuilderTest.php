@@ -9,8 +9,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -27,6 +29,8 @@ final class JwsDecoratorBuilderTest extends TestCase
 
     protected MockObject $jwsDecoratorMock;
 
+    protected MockObject $jwkDecoratorMock;
+
 
     protected function setUp(): void
     {
@@ -34,6 +38,8 @@ final class JwsDecoratorBuilderTest extends TestCase
         $this->jwsBuilderMock = $this->createMock(JWSBuilder::class);
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
+
+        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
@@ -78,5 +84,36 @@ final class JwsDecoratorBuilderTest extends TestCase
         $this->expectExceptionMessage('parse');
 
         $this->sut()->fromToken('token');
+    }
+
+
+    public function testCanBuildFromData(): void
+    {
+        $this->assertInstanceOf(
+            JwsDecorator::class,
+            $this->sut()->fromData(
+                $this->jwkDecoratorMock,
+                SignatureAlgorithmEnum::RS256,
+                [],
+                [],
+            ),
+        );
+    }
+
+
+    public function testBuildFromDataThrowsJwsException(): void
+    {
+        $this->jwsBuilderMock->expects($this->once())->method('create')
+            ->willThrowException(new \Exception('Error'));
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('build');
+
+        $this->sut()->fromData(
+            $this->jwkDecoratorMock,
+            SignatureAlgorithmEnum::RS256,
+            [],
+            [],
+        );
     }
 }

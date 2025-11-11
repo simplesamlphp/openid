@@ -144,7 +144,7 @@ final class TrustMarkFactoryTest extends TestCase
     }
 
 
-    public function testCanBuild(): void
+    public function testCanBuildFromToken(): void
     {
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
