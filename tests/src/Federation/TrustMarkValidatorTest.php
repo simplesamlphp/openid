@@ -28,8 +28,8 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
-use SimpleSAML\OpenID\Federation\TrustMarkStatus;
-use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 
 #[CoversClass(TrustMarkValidator::class)]
@@ -42,7 +42,7 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkDelegationFactoryMock;
 
-    protected MockObject $trustMarkStatusFetcherMock;
+    protected MockObject $trustMarkStatusResponseFetcherMock;
 
     protected MockObject $maxCacheDurationDecoratorMock;
 
@@ -70,7 +70,7 @@ final class TrustMarkValidatorTest extends TestCase
 
     protected MockObject $trustMarkIssuersClaimValueMock;
 
-    protected MockObject $trustMarkStatusMock;
+    protected MockObject $trustMarkStatusResponseMock;
 
     protected MockObject $trustMarkIssuerConfigurationMock;
 
@@ -80,7 +80,7 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustChainResolverMock = $this->createMock(TrustChainResolver::class);
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
         $this->trustMarkDelegationFactoryMock = $this->createMock(TrustMarkDelegationFactory::class);
-        $this->trustMarkStatusFetcherMock = $this->createMock(TrustMarkStatusFetcher::class);
+        $this->trustMarkStatusResponseFetcherMock = $this->createMock(TrustMarkStatusResponseFetcher::class);
         $this->maxCacheDurationDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
@@ -103,7 +103,7 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustMarkIssuersClaimBagMock = $this->createMock(TrustMarkIssuersClaimBag::class);
         $this->trustMarkIssuersClaimValueMock = $this->createMock(TrustMarkIssuersClaimValue::class);
 
-        $this->trustMarkStatusMock = $this->createMock(TrustMarkStatus::class);
+        $this->trustMarkStatusResponseMock = $this->createMock(TrustMarkStatusResponse::class);
 
         $this->trustMarkIssuerConfigurationMock = $this->createMock(EntityStatement::class);
         $this->trustMarkIssuerConfigurationMock->method('getIssuer')->willReturn('trustMarkIssuerId');
@@ -114,7 +114,7 @@ final class TrustMarkValidatorTest extends TestCase
         ?TrustChainResolver $trustChainResolver = null,
         ?TrustMarkFactory $trustMarkFactory = null,
         ?TrustMarkDelegationFactory $trustMarkDelegationFactory = null,
-        ?TrustMarkStatusFetcher $trustMarkStatusFetcher = null,
+        ?TrustMarkStatusResponseFetcher $trustMarkStatusResponseFetcher = null,
         ?DateIntervalDecorator $maxCacheDurationDecorator = null,
         ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
@@ -122,7 +122,7 @@ final class TrustMarkValidatorTest extends TestCase
         $trustChainResolver ??= $this->trustChainResolverMock;
         $trustMarkFactory ??= $this->trustMarkFactoryMock;
         $trustMarkDelegationFactory ??= $this->trustMarkDelegationFactoryMock;
-        $trustMarkStatusFetcher ??= $this->trustMarkStatusFetcherMock;
+        $trustMarkStatusResponseFetcher ??= $this->trustMarkStatusResponseFetcherMock;
         $maxCacheDurationDecorator ??= $this->maxCacheDurationDecoratorMock;
         $cacheDecorator ??= $this->cacheDecoratorMock;
         $logger ??= $this->loggerMock;
@@ -131,7 +131,7 @@ final class TrustMarkValidatorTest extends TestCase
             $trustChainResolver,
             $trustMarkFactory,
             $trustMarkDelegationFactory,
-            $trustMarkStatusFetcher,
+            $trustMarkStatusResponseFetcher,
             $maxCacheDurationDecorator,
             $cacheDecorator,
             $logger,
@@ -193,7 +193,7 @@ final class TrustMarkValidatorTest extends TestCase
             $this->trustChainResolverMock,
             $this->trustMarkFactoryMock,
             $this->trustMarkDelegationFactoryMock,
-            $this->trustMarkStatusFetcherMock,
+            $this->trustMarkStatusResponseFetcherMock,
             $this->maxCacheDurationDecoratorMock,
         );
 
@@ -484,13 +484,13 @@ final class TrustMarkValidatorTest extends TestCase
         $this->trustMarkMock->method('getTrustMarkType')->willReturn('trustMarkType');
         $this->trustMarkMock->method('getSubject')->willReturn('leafEntityId');
 
-        $this->trustMarkStatusMock->expects($this->atLeastOnce())
+        $this->trustMarkStatusResponseMock->expects($this->atLeastOnce())
             ->method('getStatus')
             ->willReturn('active');
 
-        $this->trustMarkStatusFetcherMock->expects($this->once())
+        $this->trustMarkStatusResponseFetcherMock->expects($this->once())
             ->method('fromFederationTrustMarkStatusEndpoint')
-            ->willReturn($this->trustMarkStatusMock);
+            ->willReturn($this->trustMarkStatusResponseMock);
 
         $this->cacheDecoratorMock->expects($this->once())->method('set');
 
@@ -961,7 +961,7 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testValidateUsingTrustMarkStatusEndpointThrowsOnFetchError(): void
     {
-        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+        $this->trustMarkStatusResponseFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
             ->willThrowException(new FetchException('error'));
 
         $this->expectException(TrustMarkException::class);
@@ -976,9 +976,9 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testValidateUsingTrustMarkStatusEndpointThrowsOnInvalidTrustMarkStatus(): void
     {
-        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
-            ->willReturn($this->trustMarkStatusMock);
-        $this->trustMarkStatusMock->method('getStatus')
+        $this->trustMarkStatusResponseFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusResponseMock);
+        $this->trustMarkStatusResponseMock->method('getStatus')
             ->willReturn('invalid'); // From the spec
 
         $this->expectException(TrustMarkStatusException::class);
@@ -993,9 +993,9 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testValidateUsingTrustMarkStatusThrowsOnCustomStatus(): void
     {
-        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
-            ->willReturn($this->trustMarkStatusMock);
-        $this->trustMarkStatusMock->method('getStatus')
+        $this->trustMarkStatusResponseFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusResponseMock);
+        $this->trustMarkStatusResponseMock->method('getStatus')
             ->willReturn('custom-status'); // Not from the spec
 
         $this->expectException(TrustMarkStatusException::class);
@@ -1010,9 +1010,9 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testValidateUsingTrustMarkStatusPassesOnCustomValidTrustMarkStatus(): void
     {
-        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
-            ->willReturn($this->trustMarkStatusMock);
-        $this->trustMarkStatusMock->expects($this->atLeastOnce())
+        $this->trustMarkStatusResponseFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusResponseMock);
+        $this->trustMarkStatusResponseMock->expects($this->atLeastOnce())
             ->method('getStatus')
             ->willReturn('custom-status'); // Not from the spec
 
@@ -1026,9 +1026,9 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testValidateUsingTrustMarkStatusThrowsOnInvalidCustomStatus(): void
     {
-        $this->trustMarkStatusFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
-            ->willReturn($this->trustMarkStatusMock);
-        $this->trustMarkStatusMock->method('getStatus')
+        $this->trustMarkStatusResponseFetcherMock->method('fromFederationTrustMarkStatusEndpoint')
+            ->willReturn($this->trustMarkStatusResponseMock);
+        $this->trustMarkStatusResponseMock->method('getStatus')
             ->willReturn('invalid-custom-status'); // Not from the spec
 
         $this->expectException(TrustMarkStatusException::class);

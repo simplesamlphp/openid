@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
-use SimpleSAML\OpenID\Federation\TrustMarkStatus;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -21,9 +21,9 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
-#[CoversClass(TrustMarkStatus::class)]
+#[CoversClass(TrustMarkStatusResponse::class)]
 #[UsesClass(ParsedJws::class)]
-final class TrustMarkStatusTest extends TestCase
+final class TrustMarkStatusResponseTest extends TestCase
 {
     protected MockObject $signatureMock;
 
@@ -96,7 +96,7 @@ final class TrustMarkStatusTest extends TestCase
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
-    ): TrustMarkStatus {
+    ): TrustMarkStatusResponse {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
@@ -105,7 +105,7 @@ final class TrustMarkStatusTest extends TestCase
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
-        return new TrustMarkStatus(
+        return new TrustMarkStatusResponse(
             $jwsDecorator,
             $jwsVerifierDecorator,
             $jwksFactory,
@@ -123,7 +123,7 @@ final class TrustMarkStatusTest extends TestCase
         $this->jsonHelperMock->method('decode')->willReturn($this->samplePayload);
 
         $this->assertInstanceOf(
-            TrustMarkStatus::class,
+            TrustMarkStatusResponse::class,
             $this->sut(),
         );
     }

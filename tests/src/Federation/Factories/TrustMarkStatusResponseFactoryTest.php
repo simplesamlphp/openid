@@ -12,8 +12,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
-use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
-use SimpleSAML\OpenID\Federation\TrustMarkStatus;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
@@ -23,11 +23,11 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
-#[CoversClass(TrustMarkStatusFactory::class)]
+#[CoversClass(TrustMarkStatusResponseFactory::class)]
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
-#[UsesClass(TrustMarkStatus::class)]
-final class TrustMarkStatusFactoryTest extends TestCase
+#[UsesClass(TrustMarkStatusResponse::class)]
+final class TrustMarkStatusResponseFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
@@ -102,7 +102,7 @@ final class TrustMarkStatusFactoryTest extends TestCase
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
-    ): TrustMarkStatusFactory {
+    ): TrustMarkStatusResponseFactory {
         $jwsParser ??= $this->jwsParserMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksFactory ??= $this->jwksFactoryMock;
@@ -111,7 +111,7 @@ final class TrustMarkStatusFactoryTest extends TestCase
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
-        return new TrustMarkStatusFactory(
+        return new TrustMarkStatusResponseFactory(
             $jwsParser,
             $jwsVerifierDecorator,
             $jwksFactory,
@@ -125,7 +125,7 @@ final class TrustMarkStatusFactoryTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(TrustMarkStatusFactory::class, $this->sut());
+        $this->assertInstanceOf(TrustMarkStatusResponseFactory::class, $this->sut());
     }
 
 
@@ -135,7 +135,7 @@ final class TrustMarkStatusFactoryTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
         $this->assertInstanceOf(
-            TrustMarkStatus::class,
+            TrustMarkStatusResponse::class,
             $this->sut()->fromToken('token'),
         );
     }

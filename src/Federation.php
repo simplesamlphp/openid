@@ -25,12 +25,12 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
-use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
-use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
@@ -104,9 +104,9 @@ class Federation
 
     protected ?TrustMarkFetcher $trustMarkFetcher = null;
 
-    protected ?TrustMarkStatusFactory $trustMarkStatusFactory = null;
+    protected ?TrustMarkStatusResponseFactory $trustMarkStatusResponseFactory = null;
 
-    protected ?TrustMarkStatusFetcher $trustMarkStatusFetcher = null;
+    protected ?TrustMarkStatusResponseFetcher $trustMarkStatusResponseFetcher = null;
 
 
     public function __construct(
@@ -257,9 +257,9 @@ class Federation
     }
 
 
-    public function trustMarkStatusFactory(): TrustMarkStatusFactory
+    public function trustMarkStatusResponseFactory(): TrustMarkStatusResponseFactory
     {
-        return $this->trustMarkStatusFactory ??= new TrustMarkStatusFactory(
+        return $this->trustMarkStatusResponseFactory ??= new TrustMarkStatusResponseFactory(
             $this->jwsParser(),
             $this->jwsVerifierDecorator(),
             $this->jwksFactory(),
@@ -271,10 +271,10 @@ class Federation
     }
 
 
-    public function trustMarkStatusFetcher(): TrustMarkStatusFetcher
+    public function trustMarkStatusResponseFetcher(): TrustMarkStatusResponseFetcher
     {
-        return $this->trustMarkStatusFetcher ??= new TrustMarkStatusFetcher(
-            $this->trustMarkStatusFactory(),
+        return $this->trustMarkStatusResponseFetcher ??= new TrustMarkStatusResponseFetcher(
+            $this->trustMarkStatusResponseFactory(),
             $this->artifactFetcher(),
             $this->maxCacheDurationDecorator,
             $this->helpers(),
@@ -289,7 +289,7 @@ class Federation
             $this->trustChainResolver(),
             $this->trustMarkFactory(),
             $this->trustMarkDelegationFactory(),
-            $this->trustMarkStatusFetcher(),
+            $this->trustMarkStatusResponseFetcher(),
             $this->maxCacheDurationDecorator,
             $this->cacheDecorator(),
             $this->logger,
