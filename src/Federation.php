@@ -267,9 +267,9 @@ class Federation
     public function trustMarkStatusResponseFactory(): TrustMarkStatusResponseFactory
     {
         return $this->trustMarkStatusResponseFactory ??= new TrustMarkStatusResponseFactory(
-            $this->jwsParser(),
+            $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
