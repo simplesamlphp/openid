@@ -33,7 +33,7 @@ use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
-use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
@@ -78,7 +78,7 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(TrustMarkDelegationFactory::class)]
 #[UsesClass(TrustMarkValidator::class)]
 #[UsesClass(TrustMarkFetcher::class)]
-#[UsesClass(TrustMarkStatusFetcher::class)]
+#[UsesClass(TrustMarkStatusResponseFetcher::class)]
 final class FederationTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;

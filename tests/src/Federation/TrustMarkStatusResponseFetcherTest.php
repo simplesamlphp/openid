@@ -15,21 +15,21 @@ use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
-use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
 use SimpleSAML\OpenID\Federation\TrustMark;
-use SimpleSAML\OpenID\Federation\TrustMarkStatusFetcher;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
-#[CoversClass(TrustMarkStatusFetcher::class)]
+#[CoversClass(TrustMarkStatusResponseFetcher::class)]
 #[UsesClass(AbstractJwsFetcher::class)]
 #[UsesClass(JwsFetcher::class)]
 #[UsesClass(WellKnownEnum::class)]
-final class TrustMarkStatusFetcherTest extends TestCase
+final class TrustMarkStatusResponseFetcherTest extends TestCase
 {
-    protected MockObject $trustMarkStatusFactoryMock;
+    protected MockObject $trustMarkStatusResponseFactoryMock;
 
     protected MockObject $artifactFetcherMock;
 
@@ -48,7 +48,7 @@ final class TrustMarkStatusFetcherTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->trustMarkStatusFactoryMock = $this->createMock(TrustMarkStatusFactory::class);
+        $this->trustMarkStatusResponseFactoryMock = $this->createMock(TrustMarkStatusResponseFactory::class);
         $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -63,20 +63,20 @@ final class TrustMarkStatusFetcherTest extends TestCase
 
 
     protected function sut(
-        ?TrustMarkStatusFactory $trustMarkStatusFactory = null,
+        ?TrustMarkStatusResponseFactory $trustMarkStatusResponseFactory = null,
         ?ArtifactFetcher $artifactFetcher = null,
         ?DateIntervalDecorator $maxCacheDuration = null,
         ?Helpers $helpers = null,
         ?LoggerInterface $logger = null,
-    ): TrustMarkStatusFetcher {
-        $trustMarkStatusFactory ??= $this->trustMarkStatusFactoryMock;
+    ): TrustMarkStatusResponseFetcher {
+        $trustMarkStatusResponseFactory ??= $this->trustMarkStatusResponseFactoryMock;
         $artifactFetcher ??= $this->artifactFetcherMock;
         $maxCacheDuration ??= $this->maxCacheDurationMock;
         $helpers ??= $this->helpersMock;
         $logger ??= $this->loggerMock;
 
-        return new TrustMarkStatusFetcher(
-            $trustMarkStatusFactory,
+        return new TrustMarkStatusResponseFetcher(
+            $trustMarkStatusResponseFactory,
             $artifactFetcher,
             $maxCacheDuration,
             $helpers,
@@ -87,7 +87,7 @@ final class TrustMarkStatusFetcherTest extends TestCase
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(TrustMarkStatusFetcher::class, $this->sut());
+        $this->assertInstanceOf(TrustMarkStatusResponseFetcher::class, $this->sut());
     }
 
 
@@ -113,7 +113,7 @@ final class TrustMarkStatusFetcherTest extends TestCase
         $this->responseMock->method('getHeaderLine')
             ->willReturn('application/trust-mark-status-response+jwt');
 
-        $this->trustMarkStatusFactoryMock->expects($this->once())->method('fromToken');
+        $this->trustMarkStatusResponseFactoryMock->expects($this->once())->method('fromToken');
 
         $this->sut()->fromFederationTrustMarkStatusEndpoint(
             $this->trustMarkMock,

@@ -9,7 +9,7 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\TrustMarkStatusException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
-class TrustMarkStatus extends ParsedJws
+class TrustMarkStatusResponse extends ParsedJws
 {
     /**
      * @return non-empty-string

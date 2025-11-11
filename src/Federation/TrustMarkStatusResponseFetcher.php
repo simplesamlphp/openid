@@ -10,15 +10,15 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
-use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusFactory;
+use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
-class TrustMarkStatusFetcher extends JwsFetcher
+class TrustMarkStatusResponseFetcher extends JwsFetcher
 {
     public function __construct(
-        private readonly TrustMarkStatusFactory $parsedJwsFactory,
+        private readonly TrustMarkStatusResponseFactory $parsedJwsFactory,
         ArtifactFetcher $artifactFetcher,
         DateIntervalDecorator $maxCacheDuration,
         Helpers $helpers,
@@ -28,7 +28,7 @@ class TrustMarkStatusFetcher extends JwsFetcher
     }
 
 
-    protected function buildJwsInstance(string $token): TrustMarkStatus
+    protected function buildJwsInstance(string $token): TrustMarkStatusResponse
     {
         return $this->parsedJwsFactory->fromToken($token);
     }
@@ -52,7 +52,7 @@ class TrustMarkStatusFetcher extends JwsFetcher
     public function fromFederationTrustMarkStatusEndpoint(
         TrustMark $trustMark,
         EntityStatement $entityConfiguration,
-    ): TrustMarkStatus {
+    ): TrustMarkStatusResponse {
         $trustMarkStatusEndpoint = $entityConfiguration->getFederationTrustMarkStatusEndpoint() ??
         throw new EntityStatementException('No federation trust mark status endpoint found in entity configuration.');
 
@@ -87,18 +87,18 @@ class TrustMarkStatusFetcher extends JwsFetcher
         array $options = [],
         bool $shouldCache = false,
         string ...$additionalCacheKeyElements,
-    ): TrustMarkStatus {
-        $trustMarkStatus = parent::fromNetwork($uri, $httpMethodsEnum, $options, $shouldCache);
+    ): TrustMarkStatusResponse {
+        $trustMarkStatusResponse = parent::fromNetwork($uri, $httpMethodsEnum, $options, $shouldCache);
 
-        if ($trustMarkStatus instanceof TrustMarkStatus) {
-            return $trustMarkStatus;
+        if ($trustMarkStatusResponse instanceof TrustMarkStatusResponse) {
+            return $trustMarkStatusResponse;
         }
 
         // @codeCoverageIgnoreStart
         $message = 'Unexpected Trust Mark Status instance encountered for network fetch.';
         $this->logger?->error(
             $message,
-            ['uri' => $uri, 'trustMarkStatus' => $trustMarkStatus],
+            ['uri' => $uri, 'trustMarkStatusResponse' => $trustMarkStatusResponse],
         );
 
         throw new FetchException($message);

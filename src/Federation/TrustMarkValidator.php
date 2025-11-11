@@ -29,7 +29,7 @@ class TrustMarkValidator
         protected readonly TrustChainResolver $trustChainResolver,
         protected readonly TrustMarkFactory $trustMarkFactory,
         protected readonly TrustMarkDelegationFactory $trustMarkDelegationFactory,
-        protected readonly TrustMarkStatusFetcher $trustMarkStatusFetcher,
+        protected readonly TrustMarkStatusResponseFetcher $trustMarkStatusResponseFetcher,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly ?CacheDecorator $cacheDecorator = null,
         protected readonly ?LoggerInterface $logger = null,
@@ -956,7 +956,7 @@ class TrustMarkValidator
         $this->logger?->debug('Validating Trust Mark using Trust Mark Status Endpoint.');
 
         try {
-            $trustMarkStatus = $this->trustMarkStatusFetcher->fromFederationTrustMarkStatusEndpoint(
+            $trustMarkStatusResponse = $this->trustMarkStatusResponseFetcher->fromFederationTrustMarkStatusEndpoint(
                 $trustMark,
                 $trustMarkIssuerEntityConfiguration,
             );
@@ -971,10 +971,10 @@ class TrustMarkValidator
 
         $this->logger?->debug(
             'Successfully fetched Trust Mark Status from Trust Mark Status Endpoint.',
-            ['trustMarkStatus' => $trustMarkStatus->getStatus()],
+            ['trustMarkStatus' => $trustMarkStatusResponse->getStatus()],
         );
 
-        $trustMarkStatusEnum = TrustMarkStatusEnum::tryFrom($trustMarkStatus->getStatus());
+        $trustMarkStatusEnum = TrustMarkStatusEnum::tryFrom($trustMarkStatusResponse->getStatus());
 
         if ($trustMarkStatusEnum instanceof TrustMarkStatusEnum) {
             $this->logger?->debug(
@@ -994,7 +994,7 @@ class TrustMarkValidator
 
         if ($additionallyValidStatues === []) {
             throw new TrustMarkStatusException(
-                sprintf('Trust Mark Status %s is not valid.', $trustMarkStatus->getStatus()),
+                sprintf('Trust Mark Status %s is not valid.', $trustMarkStatusResponse->getStatus()),
             );
         }
 
@@ -1003,11 +1003,11 @@ class TrustMarkValidator
             ['additionallyValidStatues' => $additionallyValidStatues],
         );
 
-        if (in_array($trustMarkStatus->getStatus(), $additionallyValidStatues, true)) {
+        if (in_array($trustMarkStatusResponse->getStatus(), $additionallyValidStatues, true)) {
             $this->logger?->debug(
                 'Trust Mark Status is valid based on user-defined statuses.',
                 [
-                    'trustMarkStatus' => $trustMarkStatus->getStatus(),
+                    'trustMarkStatus' => $trustMarkStatusResponse->getStatus(),
                     'additionallyValidStatues' => $additionallyValidStatues,
                 ],
             );
@@ -1015,7 +1015,7 @@ class TrustMarkValidator
         }
 
         throw new TrustMarkStatusException(
-            sprintf('Trust Mark Status %s is not valid.', $trustMarkStatus->getStatus()),
+            sprintf('Trust Mark Status %s is not valid.', $trustMarkStatusResponse->getStatus()),
         );
     }
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\Factories;
 
-use SimpleSAML\OpenID\Federation\TrustMarkStatus;
+use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
-class TrustMarkStatusFactory extends ParsedJwsFactory
+class TrustMarkStatusResponseFactory extends ParsedJwsFactory
 {
-    public function fromToken(string $token): TrustMarkStatus
+    public function fromToken(string $token): TrustMarkStatusResponse
     {
-        return new TrustMarkStatus(
+        return new TrustMarkStatusResponse(
             $this->jwsParser->parse($token),
             $this->jwsVerifierDecorator,
             $this->jwksFactory,
