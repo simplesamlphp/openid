@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\VerifiableCredentials\Factories;
+namespace SimpleSAML\Test\OpenID\VerifiableCredentials\SdJwtVc\Factories;
 
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
@@ -17,16 +17,16 @@ use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
-use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\SdJwt\DisclosureBag;
+use SimpleSAML\OpenID\SdJwt\Factories\DisclosureFactory;
+use SimpleSAML\OpenID\SdJwt\Factories\SdJwtFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
-use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
-use SimpleSAML\OpenID\VerifiableCredentials\OpenId4VciProof;
+use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\SdJwtVc;
 
-#[\PHPUnit\Framework\Attributes\CoversClass(OpenId4VciProofFactory::class)]
-#[\PHPUnit\Framework\Attributes\UsesClass(SignatureAlgorithmEnum::class)]
-#[\PHPUnit\Framework\Attributes\UsesClass(ParsedJws::class)]
-#[\PHPUnit\Framework\Attributes\UsesClass(OpenId4VciProof::class)]
-final class OpenId4VciProofFactoryTest extends TestCase
+#[\PHPUnit\Framework\Attributes\CoversClass(SdJwtVcFactory::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(SdJwtVc::class)]
+final class SdJwtVcFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
@@ -46,29 +46,27 @@ final class OpenId4VciProofFactoryTest extends TestCase
 
     protected MockObject $claimFactoryMock;
 
+    protected MockObject $jwkDecoratorMock;
+
+    protected MockObject $disclosureBagMock;
+
+    protected MockObject $disclosureFactoryMock;
+
     protected array $sampleHeader = [
-        "typ" => "openid4vci-proof+jwt",
-        "alg" => "ES256",
-        "jwk" => [
-            "kty" => "EC",
-            "crv" => "P-256",
-            "x" => "nUWAoAv3XZith8E7i19OdaxOLYFOwM-Z2EuM02TirT4",
-            "y" => "HskHU8BjUi1U9Xqi7Swmj8gwAK_0xkcDjEW_71SosEY",
-        ],
+        'alg' => 'ES256',
+        'typ' => 'dc+sd-jwt',
+        'kid' => 'F4VFObNusj3PHmrHxpqh4GNiuFHlfh-2s6xMJ95fLYA',
     ];
 
     protected array $expiredPayload = [
         'iat' => 1734009487,
         'nbf' => 1734009487,
         'exp' => 1734009487,
-        "iss" => "s6BhdRkqt3",
-        "aud" => "https://server.example.com",
-        "nonce" => "tZignsnFbp",
+        'vct' => 'https://betelgeuse.example.com/education_credential',
+        'iss' => 'https://08-dap.localhost.markoivancic.from.hr/openid/entities/ALeaf/',
     ];
 
     protected array $validPayload;
-
-    protected MockObject $jwkDecoratorMock;
 
 
     protected function setUp(): void
@@ -107,6 +105,9 @@ final class OpenId4VciProofFactoryTest extends TestCase
         $this->validPayload['exp'] = time() + 3600;
 
         $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
+        $this->disclosureBagMock = $this->createMock(DisclosureBag::class);
+
+        $this->disclosureFactoryMock = $this->createMock(DisclosureFactory::class);
     }
 
 
@@ -118,7 +119,8 @@ final class OpenId4VciProofFactoryTest extends TestCase
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
-    ): OpenId4VciProofFactory {
+        ?DisclosureFactory $disclosureFactory = null,
+    ): SdJwtVcFactory {
         $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
         $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
@@ -126,8 +128,9 @@ final class OpenId4VciProofFactoryTest extends TestCase
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
+        $disclosureFactory ??= $this->disclosureFactoryMock;
 
-        return new OpenId4VciProofFactory(
+        return new SdJwtVcFactory(
             $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
             $jwksDecoratorFactory,
@@ -135,25 +138,14 @@ final class OpenId4VciProofFactoryTest extends TestCase
             $dateIntervalDecorator,
             $helpers,
             $claimFactory,
+            $disclosureFactory,
         );
     }
 
 
     public function testCanCreateInstance(): void
     {
-        $this->assertInstanceOf(OpenId4VciProofFactory::class, $this->sut());
-    }
-
-
-    public function testCanBuildFromToken(): void
-    {
-        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
-        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
-
-        $this->assertInstanceOf(
-            OpenId4VciProof::class,
-            $this->sut()->fromToken('token'),
-        );
+        $this->assertInstanceOf(SdJwtFactory::class, $this->sut());
     }
 
 
@@ -163,12 +155,13 @@ final class OpenId4VciProofFactoryTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
 
         $this->assertInstanceOf(
-            OpenId4VciProof::class,
+            SdJwtVc::class,
             $this->sut()->fromData(
                 $this->jwkDecoratorMock,
                 SignatureAlgorithmEnum::ES256,
                 $this->validPayload,
                 $this->sampleHeader,
+                $this->disclosureBagMock,
             ),
         );
     }

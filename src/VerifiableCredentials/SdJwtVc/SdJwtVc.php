@@ -6,7 +6,6 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
-use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\SdJwtVcException;
 use SimpleSAML\OpenID\SdJwt\Disclosure;
 use SimpleSAML\OpenID\SdJwt\DisclosureBag;
@@ -33,7 +32,7 @@ class SdJwtVc extends SdJwt
         $typ = parent::getType() ?? throw new SdJwtVcException('No Type header claim found.');
 
         if (!in_array($typ, [JwtTypesEnum::DcSdJwt->value, JwtTypesEnum::VcSdJwt->value], true)) {
-            throw new EntityStatementException('Invalid Type header claim.');
+            throw new SdJwtVcException('Invalid Type header claim.');
         }
 
         return $typ;
