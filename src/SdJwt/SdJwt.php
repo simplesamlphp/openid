@@ -92,6 +92,11 @@ class SdJwt extends ParsedJws
     }
 
 
+    /**
+     * @param \SimpleSAML\OpenID\SdJwt\DisclosureBag|null $disclosureBag If provided, only disclosures with matching
+     * salts will be included.
+     * @throws \JsonException
+     */
     public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
@@ -138,6 +143,9 @@ class SdJwt extends ParsedJws
     {
         $this->validateByCallbacks(
             $this->getSelectiveDisclosureAlgorithm(...),
+            $this->getExpirationTime(...),
+            $this->getIssuedAt(...),
+            $this->getNotBefore(...),
         );
     }
 }

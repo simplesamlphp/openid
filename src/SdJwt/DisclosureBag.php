@@ -11,12 +11,12 @@ class DisclosureBag
     /**
      * @var \SimpleSAML\OpenID\SdJwt\Disclosure[]
      */
-    protected array $disclosures;
+    protected array $disclosures = [];
 
 
     public function __construct(Disclosure ...$disclosures)
     {
-        $this->disclosures = $disclosures;
+        $this->add(...$disclosures);
     }
 
 

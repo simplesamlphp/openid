@@ -14,6 +14,12 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\SdJwt\Disclosure;
 
 #[CoversClass(Disclosure::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Helpers::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Helpers\Base64Url::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Helpers\Json::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Helpers\Type::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Helpers\Hash::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(HashAlgorithmsEnum::class)]
 final class DisclosureTest extends TestCase
 {
     protected Helpers $helpers;
@@ -131,5 +137,27 @@ final class DisclosureTest extends TestCase
             SdJwtDisclosureType::ArrayElement,
             $this->sut(name: false)->getType(),
         );
+    }
+
+
+    public function testCanGetEncoded(): void
+    {
+        $this->assertNotEmpty($this->sut()->getEncoded());
+    }
+
+
+    public function testCanGetDigest(): void
+    {
+        $this->assertNotEmpty($this->sut()->getDigest());
+    }
+
+
+    public function testCanGetDigestRepresentation(): void
+    {
+        $this->assertNotEmpty($this->sut(
+            name: false,
+        )->getDigestRepresentation());
+
+        $this->assertNotEmpty($this->sut()->getDigestRepresentation());
     }
 }

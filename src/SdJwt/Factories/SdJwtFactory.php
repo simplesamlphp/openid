@@ -112,6 +112,8 @@ class SdJwtFactory extends ParsedJwsFactory
 
         $disclosurePaths = [];
 
+        $usedDecoys = 0;
+
         foreach ($disclosures as $disclosure) {
             $disclosurePath = $disclosure->getPath();
 
@@ -131,8 +133,12 @@ class SdJwtFactory extends ParsedJwsFactory
                 ...$disclosurePath,
             );
 
-            // Randomly add decoys.
-            if (random_int(0, 1) !== 0) {
+            // Ensure minimum and maximum number of decoys, otherwise add them
+            // randomly.
+            if (
+                ($usedDecoys < $minDecoys && $usedDecoys <= $maxDecoys) ||
+                random_int(0, 1) !== 0
+            ) {
                 $disclosurePathReference =& $this->helpers->arr()->getNestedValueReference(
                     $payload,
                     ...$disclosurePath,

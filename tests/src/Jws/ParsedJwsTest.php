@@ -203,7 +203,6 @@ final class ParsedJwsTest extends TestCase
         $this->expectException(JwsException::class);
         $this->expectExceptionMessage('not valid');
 
-        /** @phpstan-ignore expr.resultUnused (Validation is invoked from constructor.) */
         new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
