@@ -29,14 +29,7 @@ class CredentialOfferFactory
         ?array $parameters = null,
         ?string $uri = null,
     ): CredentialOffer {
-        if (
-            ($parameters !== null && $uri !== null) ||
-            ($parameters === null && $uri === null)
-        ) {
-            throw new CredentialOfferException('Only one of parameters or uri must be provided.');
-        }
-
-        if ($parameters !== null) {
+        if ($parameters !== null && $uri === null) {
             $credentialIssuer = $parameters[ClaimsEnum::CredentialIssuer->value] ?? null;
             $credentialIssuer = $this->helpers->type()->ensureNonEmptyString(
                 $credentialIssuer,
@@ -75,12 +68,12 @@ class CredentialOfferFactory
             );
         }
 
-        if ($uri !== null) {
+        if ($uri !== null && $parameters === null) {
             return new CredentialOffer(
                 uri: $uri,
             );
         }
 
-        throw new CredentialOfferException('Invalid parameters or uri.');
+        throw new CredentialOfferException('Only one of parameters or uri must be provided.');
     }
 }
