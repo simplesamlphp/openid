@@ -104,6 +104,24 @@ class VcClaimValue implements ClaimInterface
     }
 
 
+    public function getRefreshService(): ?VcRefreshServiceClaimBag
+    {
+        return $this->refreshServiceClaimBag;
+    }
+
+
+    public function getTermsOfUse(): ?VcTermsOfUseClaimBag
+    {
+        return $this->termsOfUseClaimBag;
+    }
+
+
+    public function getEvidence(): ?VcEvidenceClaimBag
+    {
+        return $this->evidenceClaimBag;
+    }
+
+
     public function getName(): string
     {
         return ClaimsEnum::Vc->value;
@@ -115,7 +133,20 @@ class VcClaimValue implements ClaimInterface
      */
     public function getValue(): array
     {
-        // TODO: Implement getValue() method.
-        return [];
+        return array_filter([
+            ClaimsEnum::AtContext->value => $this->getAtContext()->jsonSerialize(),
+            ClaimsEnum::Id->value => $this->getId(),
+            ClaimsEnum::Type->value => $this->getType()->jsonSerialize(),
+            ClaimsEnum::Issuer->value => $this->getIssuer()->jsonSerialize(),
+            ClaimsEnum::Issuance_Date->value => $this->getIssuanceDate()->format(\DateTimeInterface::RFC3339),
+            ClaimsEnum::Credential_Subject->value => $this->getCredentialSubject()->jsonSerialize(),
+            ClaimsEnum::Proof->value => $this->getProof()?->jsonSerialize(),
+            ClaimsEnum::Expiration_Date->value => $this->getExpirationDate()?->format(\DateTimeInterface::RFC3339),
+            ClaimsEnum::Credential_Status->value => $this->getCredentialStatus()?->jsonSerialize(),
+            ClaimsEnum::Credential_Schema->value => $this->getCredentialSchema()?->jsonSerialize(),
+            ClaimsEnum::Refresh_Service->value => $this->getRefreshService()?->jsonSerialize(),
+            ClaimsEnum::Terms_Of_Use->value => $this->getTermsOfUse()?->jsonSerialize(),
+            ClaimsEnum::Evidence->value => $this->getEvidence()?->jsonSerialize(),
+        ]);
     }
 }
