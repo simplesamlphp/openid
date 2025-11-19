@@ -135,6 +135,7 @@ class OpenId4VciProof extends ParsedJws
             $this->getAudience(...),
             $this->getIssuedAt(...),
             $this->getExpirationTime(...),
+            $this->getNonce(...),
         );
     }
 }

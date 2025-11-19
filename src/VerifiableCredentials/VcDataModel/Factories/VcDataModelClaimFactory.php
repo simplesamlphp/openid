@@ -137,14 +137,8 @@ class VcDataModelClaimFactory
 
         // If we have the 'sub' claim in JWT, we must use it as the credentialSubject ID value. However, we can't do
         // that if we have more than one credentialSubject.
-        if (is_string($subClaimValue)) {
-            if ($data === []) {
-                $vcCredentialSubjectClaimValueData[ClaimsEnum::Id->value] = $subClaimValue;
-            } else {
-                throw new VcDataModelException(
-                    'Refusing to set credentialSubject ID claim value for multiple subjects.',
-                );
-            }
+        if (is_string($subClaimValue) && $data === []) {
+            $vcCredentialSubjectClaimValueData[ClaimsEnum::Id->value] = $subClaimValue;
         }
 
         $vcCredentialSubjectClaimValue = $this->buildVcCredentialSubjectClaimValue($vcCredentialSubjectClaimValueData);
