@@ -256,7 +256,7 @@ minimum expiration time of Trust Mark, Leaf Entity Statement or
 $trustMarkType = 'https://example.com/trust-mark/member';
 // Leaf for which you want to validate the Trust Mark with ID above.
 $leafEntityConfigurationStatement = $trustChain->getResolvedLeaf();
-// Trust Anchor under which you want to validate Trust Mark.
+// Trust Anchor, under which you want to validate Trust Mark.
 $trustAnchorConfigurationStatement = $trustChain->getResolvedTrustAnchor();
 
 try {

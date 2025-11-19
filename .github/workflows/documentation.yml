@@ -33,3 +33,24 @@ jobs:
           path: '**/*.md'
           check_filenames: true
           ignore_words_list: tekst
+
+  build:
+    name: Build documentation
+    needs: quality
+    runs-on: [ubuntu-latest]
+
+    steps:
+      - name: Run docs build
+        if: github.event_name != 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          # Token has to be generated on a user account that controls the docs-repository.
+          # The _only_ scope to select is "Access public repositories", nothing more.
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'simplesamlphp',
+              repo: 'docs',
+              workflow_id: 'mk_docs.yml',
+              ref: 'main'
+            })
