@@ -55,7 +55,7 @@ class VcAtContextClaimValue implements ClaimInterface
 
     public function getName(): string
     {
-        return ClaimsEnum::AtContext->name;
+        return ClaimsEnum::AtContext->value;
     }
 
 

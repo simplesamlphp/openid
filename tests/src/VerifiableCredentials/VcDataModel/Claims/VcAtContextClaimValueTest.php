@@ -49,7 +49,7 @@ final class VcAtContextClaimValueTest extends TestCase
         $this->assertContains($this->baseContext, $sut->jsonSerialize());
         $this->assertSame($this->baseContext, $sut->getBaseContext());
         $this->assertSame($this->otherContexts, $sut->getOtherContexts());
-        $this->assertSame('AtContext', $sut->getName());
+        $this->assertSame('@context', $sut->getName());
         $this->assertContains($this->baseContext, $sut->getValue());
     }
 }
