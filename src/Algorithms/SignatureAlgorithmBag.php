@@ -14,13 +14,15 @@ class SignatureAlgorithmBag
 
     public function __construct(SignatureAlgorithmEnum $algorithm, SignatureAlgorithmEnum ...$algorithms)
     {
-        $this->algorithms = [$algorithm, ...$algorithms];
+        $this->algorithms = array_unique([$algorithm, ...$algorithms]);
     }
 
 
     public function add(SignatureAlgorithmEnum $algorithm): void
     {
-        $this->algorithms[] = $algorithm;
+        if (!in_array($algorithm, $this->algorithms, true)) {
+            $this->algorithms[] = $algorithm;
+        }
     }
 
 
