@@ -128,6 +128,42 @@ class EntityStatement extends ParsedJws
 
 
     /**
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return null|non-empty-string[]
+     */
+    public function getTrustAnchorHints(): ?array
+    {
+        // trust_anchor_hints
+        // OPTIONAL. An array of strings representing the Entity Identifiers of Trust Anchors trusted by the Entity.
+        // Its value MUST NOT be the empty array []. This Claim MUST NOT be present in Entity Configurations
+        // of Trust Anchors with no Superiors.
+
+        $claimKey = ClaimsEnum::TrustAnchorHints->value;
+        $trustAnchorHints = $this->getPayloadClaim($claimKey);
+
+        if (is_null($trustAnchorHints)) {
+            return null;
+        }
+
+        if (!is_array($trustAnchorHints)) {
+            throw new EntityStatementException('Invalid Trust Anchor Hints claim.');
+        }
+
+        if ($trustAnchorHints === []) {
+            throw new EntityStatementException('Empty Trust Anchor Hints claim encountered.');
+        }
+
+        // It MUST NOT be present in Subordinate Statements.
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Anchor Hints claim encountered in non-configuration statement.');
+        }
+
+        return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($trustAnchorHints, $claimKey);
+    }
+
+
+    /**
      * @return ?array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
@@ -379,6 +415,7 @@ class EntityStatement extends ParsedJws
             $this->getType(...),
             $this->getKeyId(...),
             $this->getAuthorityHints(...),
+            $this->getTrustAnchorHints(...),
             $this->getMetadata(...),
             $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),

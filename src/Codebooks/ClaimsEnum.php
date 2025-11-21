@@ -182,6 +182,7 @@ enum ClaimsEnum: string
     // Type
     case Typ = 'typ';
     case Type = 'type';
+    case TrustAnchorHints = 'trust_anchor_hints';
     case TrustChain = 'trust_chain';
     case TrustMark = 'trust_mark';
     case TrustMarkIssuers = 'trust_mark_issuers';

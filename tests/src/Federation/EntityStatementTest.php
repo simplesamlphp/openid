@@ -136,6 +136,7 @@ final class EntityStatementTest extends TestCase
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
         $this->federationClaimFactoryMock = $this->createMock(FederationClaimFactory::class);
@@ -265,6 +266,61 @@ final class EntityStatementTest extends TestCase
 
     public function testThrowsIfAuthorityHintsNotInConfigurationStatement(): void
     {
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
+    public function testCanDefineTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = ['trust-anchor-id'];
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+
+        $this->assertSame(['trust-anchor-id'], $this->sut()->getTrustAnchorHints());
+    }
+
+
+    public function testThrowsOnInvalidTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = 'invalid';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Invalid');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
+    public function testThrowsOnEmptyTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = [];
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Empty');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
+    public function testThrowsIfTrustAnchorHintsNotInConfigurationStatement(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = ['trust-anchor-id'];
         $this->validPayload['iss'] = 'something-else';
 
         $this->expectException(JwsException::class);
