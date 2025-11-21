@@ -380,6 +380,26 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testTrustMarkOwnersClaimIsAllowedInConfigurationStatementOnly(): void
+    {
+        $this->validPayload['trust_mark_owners'] = [
+            'trustMarkType' => [
+                'sub' => 'subject',
+                'jwks' => ['keys' => [['key' => 'value']]],
+            ],
+        ];
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut()->getTrustMarkOwners();
+    }
+
+
     public function testTrustMarkIssuersIsBuildUsingFactoryOptional(): void
     {
         $this->validPayload['trust_mark_issuers'] = [
