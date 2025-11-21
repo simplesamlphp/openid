@@ -396,6 +396,23 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testTrustMarkIssuersClaimIsAllowedInConfigurationStatementOnly(): void
+    {
+        $this->validPayload['trust_mark_issuers'] = [
+            'trustMarkType' => ['https://issuer1.org', 'https://issuer2.org'],
+        ];
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut()->getTrustMarkIssuers();
+    }
+
+
     public function testThrowsOnInvalidTrustMarks(): void
     {
         $this->validPayload['trust_marks'] = 'invalid';

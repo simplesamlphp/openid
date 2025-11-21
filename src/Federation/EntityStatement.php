@@ -276,6 +276,10 @@ class EntityStatement extends ParsedJws
     }
 
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
     public function getTrustMarkIssuers(): ?TrustMarkIssuersClaimBag
     {
         // trust_mark_issuers
@@ -289,6 +293,10 @@ class EntityStatement extends ParsedJws
 
         if (is_null($trustMarkIssuersClaimData)) {
             return null;
+        }
+
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Mark Issuers claim encountered in non-configuration statement.');
         }
 
         return $this->claimFactory->forFederation()->buildTrustMarkIssuersClaimBagFrom($trustMarkIssuersClaimData);
