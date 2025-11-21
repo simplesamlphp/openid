@@ -36,11 +36,11 @@ use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
-use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
-use SimpleSAML\OpenID\Jws\JwsParser;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
@@ -59,8 +59,8 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(TrustMarkFactory::class)]
 #[UsesClass(AlgorithmManagerDecoratorFactory::class)]
 #[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
-#[UsesClass(JwsParserFactory::class)]
-#[UsesClass(JwsParser::class)]
+#[UsesClass(JwsDecoratorBuilderFactory::class)]
+#[UsesClass(JwsDecoratorBuilder::class)]
 #[UsesClass(JwsVerifierDecoratorFactory::class)]
 #[UsesClass(DateIntervalDecorator::class)]
 #[UsesClass(DateIntervalDecoratorFactory::class)]

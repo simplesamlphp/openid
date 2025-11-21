@@ -15,10 +15,10 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -31,11 +31,11 @@ final class TrustMarkStatusResponseFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-    protected MockObject $jwsParserMock;
+    protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerMock;
 
@@ -73,11 +73,11 @@ final class TrustMarkStatusResponseFactoryTest extends TestCase
         $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsParserMock = $this->createMock(JwsParser::class);
-        $this->jwsParserMock->method('parse')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
+        $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
@@ -95,26 +95,26 @@ final class TrustMarkStatusResponseFactoryTest extends TestCase
 
 
     protected function sut(
-        ?JwsParser $jwsParser = null,
+        ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
     ): TrustMarkStatusResponseFactory {
-        $jwsParser ??= $this->jwsParserMock;
+        $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
         return new TrustMarkStatusResponseFactory(
-            $jwsParser,
+            $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,

@@ -26,6 +26,7 @@ class TrustMarkDelegation extends ParsedJws
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getSubject(): string
     {
@@ -36,6 +37,7 @@ class TrustMarkDelegation extends ParsedJws
     /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getTrustMarkType(): string
     {

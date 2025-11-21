@@ -7,7 +7,9 @@ namespace SimpleSAML\OpenID\Codebooks;
 enum WellKnownEnum: string
 {
     case Prefix = '.well-known';
+    case OAuthAuthorizationServer = 'oauth-authorization-server';
     case OpenIdFederation = 'openid-federation';
+    case OpenIdCredentialIssuer = 'openid-credential-issuer';
 
 
     public function path(): string

@@ -9,7 +9,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Helpers\Arr;
+use SimpleSAML\OpenID\Helpers\Base64Url;
+use SimpleSAML\OpenID\Helpers\DateTime;
+use SimpleSAML\OpenID\Helpers\Hash;
 use SimpleSAML\OpenID\Helpers\Json;
+use SimpleSAML\OpenID\Helpers\Random;
 use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Helpers\Url;
 
@@ -40,5 +44,9 @@ final class HelpersTest extends TestCase
         $this->assertInstanceOf(Json::class, $sut->json());
         $this->assertInstanceOf(Arr::class, $sut->arr());
         $this->assertInstanceOf(Type::class, $sut->type());
+        $this->assertInstanceOf(DateTime::class, $sut->dateTime());
+        $this->assertInstanceOf(Base64Url::class, $sut->base64Url());
+        $this->assertInstanceOf(Hash::class, $sut->hash());
+        $this->assertInstanceOf(Random::class, $sut->random());
     }
 }

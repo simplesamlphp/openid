@@ -23,20 +23,20 @@ use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Jwks;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
-use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 
 #[CoversClass(Jwks::class)]
-#[UsesClass(JwksFactory::class)]
+#[UsesClass(JwksDecoratorFactory::class)]
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(SignedJwksFactory::class)]
 #[UsesClass(JwksFetcher::class)]
@@ -48,9 +48,9 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(HttpClientDecoratorFactory::class)]
 #[UsesClass(AlgorithmManagerDecoratorFactory::class)]
 #[UsesClass(JwsSerializerManagerDecoratorFactory::class)]
-#[UsesClass(JwsParserFactory::class)]
+#[UsesClass(JwsDecoratorBuilderFactory::class)]
 #[UsesClass(JwsVerifierDecoratorFactory::class)]
-#[UsesClass(JwsParser::class)]
+#[UsesClass(JwsDecoratorBuilder::class)]
 #[UsesClass(AlgorithmManagerDecorator::class)]
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
@@ -123,7 +123,7 @@ final class JwksTest extends TestCase
     {
         $sut = $this->sut();
 
-        $this->assertInstanceOf(JwksFactory::class, $sut->jwksFactory());
+        $this->assertInstanceOf(JwksDecoratorFactory::class, $sut->jwksDecoratorFactory());
         $this->assertInstanceOf(SignedJwksFactory::class, $sut->signedJwksFactory());
         $this->assertInstanceOf(JwksFetcher::class, $sut->jwksFetcher());
     }

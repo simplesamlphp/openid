@@ -8,12 +8,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -22,11 +24,11 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 #[UsesClass(ParsedJws::class)]
 final class ParsedJwsFactoryTest extends TestCase
 {
-    protected MockObject $jwsParserMock;
+    protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
@@ -36,40 +38,44 @@ final class ParsedJwsFactoryTest extends TestCase
 
     protected MockObject $claimFactoryMock;
 
+    protected MockObject $jwkDecoratorMock;
+
 
     protected function setUp(): void
     {
-        $this->jwsParserMock = $this->createMock(JwsParser::class);
+        $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+
+        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
     protected function sut(
-        ?JwsParser $jwsParser = null,
+        ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
     ): ParsedJwsFactory {
-        $jwsParser ??= $this->jwsParserMock;
+        $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
         return new ParsedJwsFactory(
-            $jwsParser,
+            $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
@@ -89,6 +95,20 @@ final class ParsedJwsFactoryTest extends TestCase
         $this->assertInstanceOf(
             ParsedJws::class,
             $this->sut()->fromToken('token'),
+        );
+    }
+
+
+    public function testCanBuildFromData(): void
+    {
+        $this->assertInstanceOf(
+            ParsedJws::class,
+            $this->sut()->fromData(
+                $this->jwkDecoratorMock,
+                SignatureAlgorithmEnum::RS256,
+                [],
+                [],
+            ),
         );
     }
 }

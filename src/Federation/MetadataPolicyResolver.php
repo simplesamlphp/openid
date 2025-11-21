@@ -122,14 +122,12 @@ class MetadataPolicyResolver
                         (!is_array($currentPolicy[$nextPolicyParameter])) ||
                         (!array_key_exists($metadataPolicyOperatorEnum->value, $currentPolicy[$nextPolicyParameter]))
                     ) {
-                        $this->helpers->arr()->ensureArrayDepth(
+                        $this->helpers->arr()->setNestedValue(
                             $currentPolicy,
+                            $operatorValue,
                             $nextPolicyParameter,
                             $metadataPolicyOperatorEnum->value,
                         );
-                        // @phpstan-ignore offsetAccess.nonOffsetAccessible (We ensured this is array.)
-                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                        $operatorValue;
 
                         // It exists, so we have to check special cases for merging.
                     } elseif (

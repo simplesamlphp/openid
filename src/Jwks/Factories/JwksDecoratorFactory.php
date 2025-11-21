@@ -7,12 +7,12 @@ namespace SimpleSAML\OpenID\Jwks\Factories;
 use Jose\Component\Core\JWKSet;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
-class JwksFactory
+class JwksDecoratorFactory
 {
     /**
      * @phpstan-ignore missingType.iterableValue (JWKS array is validated later)
      */
-    public function fromKeyData(array $jwks): JwksDecorator
+    public function fromKeySetData(array $jwks): JwksDecorator
     {
         return new JwksDecorator(JWKSet::createFromKeyData($jwks));
     }

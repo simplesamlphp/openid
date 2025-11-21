@@ -10,15 +10,17 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -31,11 +33,11 @@ final class EntityStatementFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;
 
-    protected MockObject $jwsParserMock;
+    protected MockObject $jwsDecoratorBuilderMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
@@ -99,6 +101,8 @@ final class EntityStatementFactoryTest extends TestCase
 
     protected array $validPayload;
 
+    protected MockObject $jwkDecoratorMock;
+
 
     protected function setUp(): void
     {
@@ -112,11 +116,12 @@ final class EntityStatementFactoryTest extends TestCase
         $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsParserMock = $this->createMock(JwsParser::class);
-        $this->jwsParserMock->method('parse')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
+        $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
+        $this->jwsDecoratorBuilderMock->method('fromData')->willReturn($jwsDecoratorMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
 
@@ -133,30 +138,32 @@ final class EntityStatementFactoryTest extends TestCase
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
+
+        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
     protected function sut(
-        ?JwsParser $jwsParser = null,
+        ?JwsDecoratorBuilder $jwsDecoratorBuilder = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $dateIntervalDecorator = null,
         ?Helpers $helpers = null,
         ?ClaimFactory $claimFactory = null,
     ): EntityStatementFactory {
-        $jwsParser ??= $this->jwsParserMock;
+        $jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $dateIntervalDecorator ??= $this->dateIntervalDecoratorMock;
         $helpers ??= $this->helpersMock;
         $claimFactory ??= $this->claimFactoryMock;
 
         return new EntityStatementFactory(
-            $jwsParser,
+            $jwsDecoratorBuilder,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $dateIntervalDecorator,
             $helpers,
@@ -179,6 +186,23 @@ final class EntityStatementFactoryTest extends TestCase
         $this->assertInstanceOf(
             EntityStatement::class,
             $this->sut()->fromToken('token'),
+        );
+    }
+
+
+    public function testCanBuildFromData(): void
+    {
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        $this->assertInstanceOf(
+            EntityStatement::class,
+            $this->sut()->fromData(
+                $this->jwkDecoratorMock,
+                SignatureAlgorithmEnum::ES256,
+                $this->validPayload,
+                $this->sampleHeader,
+            ),
         );
     }
 }

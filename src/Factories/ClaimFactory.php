@@ -10,10 +10,13 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
 
 class ClaimFactory
 {
     protected FederationClaimFactory $federationClaimFactory;
+
+    protected VcDataModelClaimFactory $vcDataModelClaimFactory;
 
 
     public function __construct(
@@ -25,6 +28,15 @@ class ClaimFactory
     public function forFederation(): FederationClaimFactory
     {
         return $this->federationClaimFactory ??= new FederationClaimFactory(
+            $this->helpers,
+            $this,
+        );
+    }
+
+
+    public function forVcDataModel(): VcDataModelClaimFactory
+    {
+        return $this->vcDataModelClaimFactory ??= new VcDataModelClaimFactory(
             $this->helpers,
             $this,
         );

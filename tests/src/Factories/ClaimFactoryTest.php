@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
 
 #[CoversClass(ClaimFactory::class)]
 #[UsesClass(Helpers::class)]
@@ -20,6 +21,7 @@ use SimpleSAML\OpenID\Helpers;
 #[UsesClass(FederationClaimFactory::class)]
 #[UsesClass(GenericClaim::class)]
 #[UsesClass(JwksClaim::class)]
+#[UsesClass(VcDataModelClaimFactory::class)]
 final class ClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
@@ -65,6 +67,12 @@ final class ClaimFactoryTest extends TestCase
     public function testCanGetForFederation(): void
     {
         $this->assertInstanceOf(FederationClaimFactory::class, $this->sut()->forFederation());
+    }
+
+
+    public function testCanGetForVcDataModel(): void
+    {
+        $this->assertInstanceOf(VcDataModelClaimFactory::class, $this->sut()->forVcDataModel());
     }
 
 

@@ -6,7 +6,6 @@ namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
@@ -15,9 +14,11 @@ use SimpleSAML\OpenID\Helpers;
 
 #[CoversClass(MetadataPolicyApplicator::class)]
 #[UsesClass(MetadataPolicyOperatorsEnum::class)]
+#[UsesClass(Helpers::class)]
+#[UsesClass(Helpers\Arr::class)]
 final class MetadataPolicyApplicatorTest extends TestCase
 {
-    protected MockObject $helpersMock;
+    protected Helpers $helpers;
 
     protected array $metadataPolicySample = [
         'grant_types' => [
@@ -70,18 +71,18 @@ final class MetadataPolicyApplicatorTest extends TestCase
     ];
 
 
-    protected function sut(
-        ?Helpers $helpers = null,
-    ): MetadataPolicyApplicator {
-        $helpers ??= $this->helpersMock;
-
-        return new MetadataPolicyApplicator($helpers);
+    protected function setUp(): void
+    {
+        $this->helpers = new Helpers();
     }
 
 
-    protected function setUp(): void
-    {
-        $this->helpersMock = $this->createMock(Helpers::class);
+    protected function sut(
+        ?Helpers $helpers = null,
+    ): MetadataPolicyApplicator {
+        $helpers ??= $this->helpers;
+
+        return new MetadataPolicyApplicator($helpers);
     }
 
 

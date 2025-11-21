@@ -13,7 +13,7 @@ use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use Throwable;
 
@@ -21,7 +21,7 @@ class JwksFetcher
 {
     public function __construct(
         protected readonly HttpClientDecorator $httpClientDecorator,
-        protected readonly JwksFactory $jwksFactory,
+        protected readonly JwksDecoratorFactory $jwksDecoratorFactory,
         protected readonly SignedJwksFactory $signedJwksFactory,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly Helpers $helpers,
@@ -94,7 +94,7 @@ class JwksFetcher
 
         $this->logger?->debug('JWKS JSON decoded, proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
-        return $this->jwksFactory->fromKeyData($jwks);
+        return $this->jwksDecoratorFactory->fromKeySetData($jwks);
     }
 
 
@@ -156,7 +156,7 @@ class JwksFetcher
 
         $this->logger?->debug('Proceeding to instance building.', ['uri' => $uri, 'jwks' => $jwks]);
 
-        return $this->jwksFactory->fromKeyData($jwks);
+        return $this->jwksDecoratorFactory->fromKeySetData($jwks);
     }
 
 
@@ -222,6 +222,6 @@ class JwksFetcher
             );
         }
 
-        return $this->jwksFactory->fromKeyData($signedJwks->jsonSerialize());
+        return $this->jwksDecoratorFactory->fromKeySetData($signedJwks->jsonSerialize());
     }
 }

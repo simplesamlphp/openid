@@ -6,6 +6,14 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ClaimsEnum: string
 {
+    // _SelectiveDisclosure
+    case _Sd = '_sd';
+    // _SelectiveDisclosureAlgorithm
+    case _SdAlg = '_sd_alg';
+    // @context
+    case AtContext = '@context';
+    // @type
+    case AtType = '@type';
     case AcrValuesSupported = 'acr_values_supported';
     // Algorithm
     case Alg = 'alg';
@@ -18,6 +26,7 @@ enum ClaimsEnum: string
     case Aud = 'aud';
     case AuthorityHints = 'authority_hints';
     case AuthorizationEndpoint = 'authorization_endpoint';
+    case AuthorizationServer = 'authorization_server';
     case AuthorizationServers = 'authorization_servers';
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
     case BackChannelLogoutSupported = 'backchannel_logout_supported';
@@ -33,32 +42,47 @@ enum ClaimsEnum: string
     case ClientName = 'client_name';
     case ClientRegistrationTypes = 'client_registration_types';
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
+    // Confirmation
+    case Cnf = 'cnf';
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
     case Contacts = 'contacts';
+    case CredentialConfigurationId = 'credential_configuration_id';
+    case CredentialConfigurationIds = 'credential_configuration_ids';
     case CredentialConfigurationsSupported = 'credential_configurations_supported';
     case CredentialDefinition = 'credential_definition';
     case CredentialEndpoint = 'credential_endpoint';
+    case CredentialIdentifier = 'credential_identifier';
+    case CredentialIdentifiers = 'credential_identifiers';
     case CredentialIssuer = 'credential_issuer';
+    case CredentialMetadata = 'credential_metadata';
     case CredentialResponseEncryption = 'credential_response_encryption';
+    case Credential_Schema = 'credentialSchema';
     // CredentialSigningAlgorithmValuesSupported
     case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
+    case Credential_Status = 'credentialStatus';
+    case Credential_Subject = 'credentialSubject';
     case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
+    case CryptographicSuitesSupported = 'cryptographic_suites_supported';
     case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
     case Delegation = 'delegation';
     case Description = 'description';
     case Display = 'display';
     case DisplayName = 'display_name';
+    case DotDotDot = '...';
     case EndSessionEndpoint = 'end_session_endpoint';
-    // ExpirationTime
-    case Exp = 'exp';
     case EncryptionRequired = 'encryption_required';
     // EncryptionValuesSupported
     case EncValuesSupported = 'enc_values_supported';
+    case Evidence = 'evidence';
+    // ExpirationTime
+    case Exp = 'exp';
+    case Expiration_Date = 'expirationDate';
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
     case FederationListEndpoint = 'federation_list_endpoint';
     case FederationTrustMarkEndpoint = 'federation_trust_mark_endpoint';
     case FederationTrustMarkStatusEndpoint = 'federation_trust_mark_status_endpoint';
     case Format = 'format';
+    case Grants = 'grants';
     case GrantTypes = 'grant_types';
     case GrantTypesSupported = 'grant_types_supported';
     case HomepageUri = 'homepage_uri';
@@ -66,6 +90,7 @@ enum ClaimsEnum: string
     case Iat = 'iat';
     // Identifier
     case Id = 'id';
+    case InputMode = 'input_mode';
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
     case InformationUri = 'information_uri';
     case IntrospectionEndpoint = 'introspection_endpoint';
@@ -74,9 +99,13 @@ enum ClaimsEnum: string
     'introspection_endpoint_auth_signing_alg_values_supported';
     // Issuer
     case Iss = 'iss';
+    case Issuance_Date = 'issuanceDate';
     case Issuer = 'issuer';
+    case IssuerState = 'issuer_state';
     // JWT ID
     case Jti = 'jti';
+    // JsonWebKey
+    case Jwk = 'jwk';
     // JsonWebKeySet
     case Jwks = 'jwks';
     case JwksUri = 'jwks_uri';
@@ -86,6 +115,7 @@ enum ClaimsEnum: string
     case KeyAttestationsRequired = 'key_attestations_required';
     case KeyStorage = 'key_storage';
     case Keys = 'keys';
+    case Length = 'length';
     case Locale = 'locale';
     case Logo = 'logo';
     case LogoUri = 'logo_uri';
@@ -95,7 +125,11 @@ enum ClaimsEnum: string
     // MetadataPolicyCritical
     case MetadataPolicyCrit = 'metadata_policy_crit';
     case Name = 'name';
+    case Nonce = 'nonce';
     case NonceEndpoint = 'nonce_endpoint';
+    // NotBefore
+    case Nbf = 'nbf';
+    case Notification = 'notification';
     case NotificationEndpoint = 'notification_endpoint';
     // OpenIDProviderPolicyUri
     case OpPolicyUri = 'op_policy_uri';
@@ -106,12 +140,16 @@ enum ClaimsEnum: string
     case Path = 'path';
     case PolicyUri = 'policy_uri';
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
+    case PreAuthorizedCode = 'pre-authorized_code';
     case PreAuthorizedGrantAnonymousAccessSupported = 'pre-authorized_grant_anonymous_access_supported';
+    case Proof = 'proof';
+    case Proofs = 'proofs';
     // ProofSigningAlgorithmValuesSupported
     case ProofSigningAlgValuesSupported = 'proof_signing_alg_values_supported';
     case ProofTypesSupported = 'proof_types_supported';
     // Reference
     case Ref = 'ref';
+    case Refresh_Service = 'refreshService';
     // PublicKeyUse
     case RedirectUris = 'redirect_uris';
     case RegistrationEndpoint = 'registration_endpoint';
@@ -135,6 +173,7 @@ enum ClaimsEnum: string
     // Subject
     case Sub = 'sub';
     case SubjectTypesSupported = 'subject_types_supported';
+    case Terms_Of_Use = 'termsOfUse';
     case TextColor = 'text_color';
     case TokenEndpoint = 'token_endpoint';
     case TokenEndpointAuthMethod = 'token_endpoint_auth_method';
@@ -149,10 +188,18 @@ enum ClaimsEnum: string
     case TrustMarkOwners = 'trust_mark_owners';
     case TrustMarkType = 'trust_mark_type';
     case TrustMarks = 'trust_marks';
+    // TransactionCode
+    case TxCode = 'tx_code';
     // UserInterfaceLocalesSupported
     case UiLocalesSupported = 'ui_locales_supported';
     case Uri = 'uri';
     case Use = 'use';
     case UserAuthentication = 'user_authentication';
     case UserinfoEndpoint = 'userinfo_endpoint';
+    // VerifiableCredential
+    case Vc = 'vc';
+    // VerifiableCredentialType
+    case Vct = 'vct';
+    // X509certificateChain
+    case X5c = 'x5c';
 }

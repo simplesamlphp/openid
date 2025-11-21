@@ -12,9 +12,9 @@ class TrustMarkStatusResponseFactory extends ParsedJwsFactory
     public function fromToken(string $token): TrustMarkStatusResponse
     {
         return new TrustMarkStatusResponse(
-            $this->jwsParser->parse($token),
+            $this->jwsDecoratorBuilder->fromToken($token),
             $this->jwsVerifierDecorator,
-            $this->jwksFactory,
+            $this->jwksDecoratorFactory,
             $this->jwsSerializerManagerDecorator,
             $this->timestampValidationLeeway,
             $this->helpers,

@@ -20,4 +20,6 @@ enum CredentialFormatIdentifiersEnum: string
 
     // IETF SD-JWT VC
     case DcSdJwt = 'dc+sd-jwt';
+    // Deprecated identifier for IETF SD-JWT VC. Use 'dc+sd-jwt' instead.
+    case VcSdJwt = 'vc+sd-jwt';
 }

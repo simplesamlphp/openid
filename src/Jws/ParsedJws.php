@@ -10,7 +10,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
@@ -33,7 +33,7 @@ class ParsedJws
     public function __construct(
         protected readonly JwsDecorator $jwsDecorator,
         protected readonly JwsVerifierDecorator $jwsVerifierDecorator,
-        protected readonly JwksFactory $jwksFactory,
+        protected readonly JwksDecoratorFactory $jwksDecoratorFactory,
         protected readonly JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
         protected readonly DateIntervalDecorator $timestampValidationLeeway,
         protected readonly Helpers $helpers,
@@ -102,6 +102,15 @@ class ParsedJws
     }
 
 
+    public function getNestedPayloadClaim(int|string ...$keys): mixed
+    {
+        return $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ...$keys,
+        );
+    }
+
+
     public function getToken(
         JwsSerializerEnum $jwsSerializerEnum = JwsSerializerEnum::Compact,
         ?int $signatureIndex = null,
@@ -148,7 +157,7 @@ class ParsedJws
         if (
             !$this->jwsVerifierDecorator->verifyWithKeySet(
                 $this->jwsDecorator,
-                $this->jwksFactory->fromKeyData($jwks),
+                $this->jwksDecoratorFactory->fromKeySetData($jwks),
                 $signatureIndex,
             )
         ) {
@@ -158,8 +167,24 @@ class ParsedJws
 
 
     /**
+     * @param mixed[] $key
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     *
+     */
+    public function verifyWithKey(array $key): void
+    {
+        $this->verifyWithKeySet([
+            'keys' => [
+                $key,
+            ],
+        ]);
+    }
+
+
+    /**
      * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getIssuer(): ?string
     {
@@ -174,8 +199,9 @@ class ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getSubject(): ?string
     {
@@ -188,8 +214,9 @@ class ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return ?string[]
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getAudience(): ?array
     {
@@ -215,6 +242,7 @@ class ParsedJws
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @return ?non-empty-string
      */
     public function getJwtId(): ?string
@@ -251,6 +279,29 @@ class ParsedJws
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getNotBefore(): ?int
+    {
+        $nbf = $this->getPayloadClaim(ClaimsEnum::Nbf->value);
+
+        if (is_null($nbf)) {
+            return null;
+        }
+
+        $nbf = $this->helpers->type()->ensureInt($nbf);
+
+        if ($nbf - $this->timestampValidationLeeway->getInSeconds() > time()) {
+            throw new JwsException(sprintf('Not Before claim (%d) is higher than current time.', $nbf));
+        }
+
+        return $nbf;
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getIssuedAt(): ?int
     {
@@ -273,6 +324,7 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getIdentifier(): ?string
     {
@@ -289,6 +341,7 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getKeyId(): ?string
     {
@@ -303,10 +356,26 @@ class ParsedJws
     /**
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function getType(): ?string
     {
         $claimKey = ClaimsEnum::Typ->value;
+
+        $typ = $this->getHeaderClaim($claimKey);
+
+        return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);
+    }
+
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getAlgorithm(): ?string
+    {
+        $claimKey = ClaimsEnum::Alg->value;
 
         $typ = $this->getHeaderClaim($claimKey);
 

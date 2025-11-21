@@ -13,7 +13,7 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
@@ -26,7 +26,7 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksFactoryMock;
+    protected MockObject $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
@@ -39,6 +39,8 @@ final class ParsedJwsTest extends TestCase
     protected MockObject $signatureMock;
 
     protected MockObject $jsonHelperMock;
+
+    protected MockObject $arrHelperMock;
 
     protected MockObject $claimFactoryMock;
 
@@ -106,7 +108,7 @@ final class ParsedJwsTest extends TestCase
     {
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksFactoryMock = $this->createMock(JwksFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
@@ -121,6 +123,8 @@ final class ParsedJwsTest extends TestCase
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
         $typeHelperMock = $this->createMock(Helpers\Type::class);
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
+        $this->arrHelperMock = $this->createMock(Helpers\Arr::class);
+        $this->helpersMock->method('arr')->willReturn($this->arrHelperMock);
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
@@ -136,7 +140,7 @@ final class ParsedJwsTest extends TestCase
     protected function sut(
         ?JwsDecorator $jwsDecorator = null,
         ?JwsVerifierDecorator $jwsVerifierDecorator = null,
-        ?JwksFactory $jwksFactory = null,
+        ?JwksDecoratorFactory $jwksDecoratorFactory = null,
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
         ?DateIntervalDecorator $timestampValidationLeewayMock = null,
         ?Helpers $helpers = null,
@@ -144,7 +148,7 @@ final class ParsedJwsTest extends TestCase
     ): ParsedJws {
         $jwsDecorator ??= $this->jwsDecoratorMock;
         $jwsVerifierDecorator ??= $this->jwsVerifierDecoratorMock;
-        $jwksFactory ??= $this->jwksFactoryMock;
+        $jwksDecoratorFactory ??= $this->jwksDecoratorFactoryMock;
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
         $timestampValidationLeewayMock ??= $this->timestampValidationLeewayMock;
         $helpers ??= $this->helpersMock;
@@ -153,7 +157,7 @@ final class ParsedJwsTest extends TestCase
         return new ParsedJws(
             $jwsDecorator,
             $jwsVerifierDecorator,
-            $jwksFactory,
+            $jwksDecoratorFactory,
             $jwsSerializerManagerDecorator,
             $timestampValidationLeewayMock,
             $helpers,
@@ -173,7 +177,7 @@ final class ParsedJwsTest extends TestCase
         $sut = new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
-            $this->jwksFactoryMock,
+            $this->jwksDecoratorFactoryMock,
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
@@ -199,11 +203,10 @@ final class ParsedJwsTest extends TestCase
         $this->expectException(JwsException::class);
         $this->expectExceptionMessage('not valid');
 
-        /** @phpstan-ignore expr.resultUnused (Validation is invoked from constructor.) */
         new class (
             $this->jwsDecoratorMock,
             $this->jwsVerifierDecoratorMock,
-            $this->jwksFactoryMock,
+            $this->jwksDecoratorFactoryMock,
             $this->jwsSerializerManagerDecoratorMock,
             $this->timestampValidationLeewayMock,
             $this->helpersMock,
@@ -238,6 +241,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame($this->sampleHeader['kid'], $this->sut()->getHeaderClaim('kid'));
         $this->assertSame($this->sampleHeader['kid'], $this->sut()->getKeyId());
         $this->assertSame($this->sampleHeader['typ'], $this->sut()->getType());
+        $this->assertSame($this->sampleHeader['alg'], $this->sut()->getAlgorithm());
     }
 
 
@@ -299,6 +303,7 @@ final class ParsedJwsTest extends TestCase
         $this->assertSame($this->validPayload['sub'], $sut->getSubject());
         $this->assertSame($this->validPayload['exp'], $sut->getExpirationTime());
         $this->assertSame($this->validPayload['iat'], $sut->getIssuedAt());
+        $this->assertSame($this->validPayload['nbf'], $sut->getNotBefore());
     }
 
 
@@ -315,6 +320,18 @@ final class ParsedJwsTest extends TestCase
         $this->assertNull($sut->getIssuedAt());
         $this->assertNull($sut->getIdentifier());
         $this->assertNull($sut->getIssuer());
+        $this->assertNull($sut->getNotBefore());
+    }
+
+
+    public function testCanGetNestedPayloadClaims(): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn($this->validPayload);
+
+        $this->arrHelperMock->expects($this->once())->method('getNestedValue');
+
+        $this->sut()->getNestedPayloadClaim('metadata');
     }
 
 
@@ -373,6 +390,15 @@ final class ParsedJwsTest extends TestCase
     }
 
 
+    public function testCanVerifyWithKey(): void
+    {
+        $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
+            ->willReturn(true);
+
+        $this->sut()->verifyWithKey(['key']);
+    }
+
+
     public function testThrowsOnVerifyWithKeySetError(): void
     {
         $this->jwsVerifierDecoratorMock->expects($this->once())->method('verifyWithKeySet')
@@ -408,5 +434,19 @@ final class ParsedJwsTest extends TestCase
         $this->expectExceptionMessage('Issued At');
 
         $this->sut()->getIssuedAt();
+    }
+
+
+    public function testThrowsIfNotBeforeInTheFuture(): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $payload = $this->validPayload;
+        $payload['nbf'] = time() + 60;
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn($payload);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Not Before');
+
+        $this->sut()->getNotBefore();
     }
 }

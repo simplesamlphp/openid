@@ -8,14 +8,36 @@ use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
 class Arr
 {
+    public const MAX_DEPTH = 99;
+
+
     /**
-     * @phpstan-ignore missingType.iterableValue (We can handle mixed type)
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function validateMaxDepth(int $depth): void
+    {
+        if ($depth > self::MAX_DEPTH) {
+            throw new OpenIdException(
+                sprintf(
+                    'Refusing to recurse to given depth %s. Max depth is %s.',
+                    $depth,
+                    self::MAX_DEPTH,
+                ),
+            );
+        }
+    }
+
+
+    /**
+     * Ensure the existence of nested arrays for given keys. Note that this will create / overwrite any non-array
+     * nested values and make them an array.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function ensureArrayDepth(array &$array, int|string ...$keys): void
     {
-        if (count($keys) > 99) {
-            throw new OpenIdException('Refusing to recurse to given depth.');
-        }
+        $this->validateMaxDepth(count($keys));
 
         $key = array_shift($keys);
 
@@ -28,6 +50,82 @@ class Arr
         }
 
         $this->ensureArrayDepth($array[$key], ...$keys);
+    }
+
+
+    /**
+     * Get nested value reference at a given path. Creates nested arrays dynamically if the key is not present.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException If a non-array value exists on the path.
+     */
+    public function &getNestedValueReference(array &$array, int|string ...$keys): mixed
+    {
+        $this->validateMaxDepth(count($keys));
+
+        $nested = &$array;
+
+        foreach ($keys as $key) {
+            if (!is_array($nested)) {
+                throw new OpenIdException(
+                    sprintf(
+                        'Refusing to operate on non-array value for key: %s, path: %s, array: %s.',
+                        $key,
+                        implode('.', $keys),
+                        var_export($array, true),
+                    ),
+                );
+            }
+
+            if (!isset($nested[$key])) {
+                $nested[$key] = [];
+            }
+
+            $nested = &$nested[$key];
+        }
+
+        return $nested;
+    }
+
+
+    /**
+     * Set a value at a path.
+     *
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function setNestedValue(array &$array, mixed $value, int|string ...$keys): void
+    {
+        if (count($keys) < 1) {
+            return;
+        }
+
+        $reference =& $this->getNestedValueReference($array, ...$keys);
+
+        $reference = $value;
+    }
+
+
+    /**
+     * @param mixed[] $array
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function addNestedValue(array &$array, mixed $value, int|string ...$keys): void
+    {
+        $reference =& $this->getNestedValueReference($array, ...$keys);
+
+        if (!is_array($reference)) {
+            throw new OpenIdException(
+                sprintf(
+                    'Refusing to add value to non-array value. Array: %s, path: %s, value: %s.',
+                    var_export($array, true),
+                    implode('.', $keys),
+                    var_export($value, true),
+                ),
+            );
+        }
+
+        $reference[] = $value;
     }
 
 
@@ -56,5 +154,78 @@ class Arr
         }
 
         return $this->getNestedValue($nestedArray, ...$keys);
+    }
+
+
+    /**
+     * @param mixed[] $array
+     */
+    public function isAssociative(array $array): bool
+    {
+        // Has at least one string key or non-sequential numeric keys
+        return array_keys($array) !== range(0, count($array) - 1);
+    }
+
+
+    /**
+     * Is an array of arrays.
+     * @param mixed[] $array
+     */
+    public function isOfArrays(array $array): bool
+    {
+        foreach ($array as $value) {
+            if (!is_array($value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    /**
+     * Recursively check if an array contains the key, at any level.
+     *
+     * @param mixed[] $array
+     */
+    public function containsKey(array $array, string|int $key): bool
+    {
+        foreach ($array as $currentKey => $value) {
+            if ($currentKey === $key) {
+                return true;
+            }
+
+            if (is_array($value) && $this->containsKey($value, $key)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Recursively sort an array by keys if keys are strings and values if keys are numeric.
+     *
+     * @param mixed[] $array
+     */
+    public function hybridSort(array &$array): void
+    {
+        // Determine if keys are numeric or string
+        $allNumeric = array_keys($array) === array_keys(array_values($array));
+
+        // Sort appropriately
+        if ($allNumeric) {
+            sort($array); // numeric indexes: sort by value
+        } else {
+            ksort($array); // string keys: sort by key
+        }
+
+        // Recurse into nested arrays
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $this->hybridSort($value);
+            }
+        }
     }
 }

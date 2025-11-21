@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID;
 
 use DateInterval;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
@@ -15,10 +16,10 @@ use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
-use SimpleSAML\OpenID\Jwks\Factories\JwksFactory;
-use SimpleSAML\OpenID\Jws\Factories\JwsParserFactory;
+use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
+use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
-use SimpleSAML\OpenID\Jws\JwsParser;
+use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
@@ -28,7 +29,7 @@ class Core
 
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
 
-    protected ?JwsParser $jwsParser = null;
+    protected ?JwsDecoratorBuilder $jwsDecoratorBuilder = null;
 
     protected ?JwsVerifierDecorator $jwsVerifierDecorator = null;
 
@@ -42,15 +43,17 @@ class Core
 
     protected ?JwsSerializerManagerDecoratorFactory $jwsSerializerManagerDecoratorFactory = null;
 
-    protected ?JwsParserFactory $jwsParserFactory = null;
+    protected ?JwsDecoratorBuilderFactory $jwsDecoratorBuilderFactory = null;
 
     protected ?JwsVerifierDecoratorFactory $jwsVerifierDecoratorFactory = null;
 
-    protected ?JwksFactory $jwksFactory = null;
+    protected ?JwksDecoratorFactory $jwksDecoratorFactory = null;
 
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
 
     protected ?ClaimFactory $claimFactory = null;
+
+    protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
 
     public function __construct(
@@ -72,9 +75,9 @@ class Core
     public function requestObjectFactory(): RequestObjectFactory
     {
         return $this->requestObjectFactory ??= new RequestObjectFactory(
-            $this->jwsParser(),
+            $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
@@ -86,9 +89,9 @@ class Core
     public function clientAssertionFactory(): ClientAssertionFactory
     {
         return $this->clientAssertionFactory ??= new ClientAssertionFactory(
-            $this->jwsParser(),
+            $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
-            $this->jwksFactory(),
+            $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
@@ -113,6 +116,13 @@ class Core
     }
 
 
+    public function algorithmManagerDecorator(): AlgorithmManagerDecorator
+    {
+        return $this->algorithmManagerDecorator ??= $this->algorithmManagerDecoratorFactory()
+            ->build($this->supportedAlgorithms);
+    }
+
+
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
         if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
@@ -123,13 +133,13 @@ class Core
     }
 
 
-    public function jwsParserFactory(): JwsParserFactory
+    public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
-        if (is_null($this->jwsParserFactory)) {
-            $this->jwsParserFactory = new JwsParserFactory();
+        if (is_null($this->jwsDecoratorBuilderFactory)) {
+            $this->jwsDecoratorBuilderFactory = new JwsDecoratorBuilderFactory();
         }
 
-        return $this->jwsParserFactory;
+        return $this->jwsDecoratorBuilderFactory;
     }
 
 
@@ -143,9 +153,9 @@ class Core
     }
 
 
-    public function jwksFactory(): JwksFactory
+    public function jwksDecoratorFactory(): JwksDecoratorFactory
     {
-        return $this->jwksFactory ??= new JwksFactory();
+        return $this->jwksDecoratorFactory ??= new JwksDecoratorFactory();
     }
 
 
@@ -170,13 +180,17 @@ class Core
     }
 
 
-    public function jwsParser(): JwsParser
+    public function jwsDecoratorBuilder(): JwsDecoratorBuilder
     {
-        if (is_null($this->jwsParser)) {
-            $this->jwsParser = $this->jwsParserFactory()->build($this->jwsSerializerManagerDecorator());
+        if (is_null($this->jwsDecoratorBuilder)) {
+            $this->jwsDecoratorBuilder = $this->jwsDecoratorBuilderFactory()->build(
+                $this->jwsSerializerManagerDecorator(),
+                $this->algorithmManagerDecorator(),
+                $this->helpers(),
+            );
         }
 
-        return $this->jwsParser;
+        return $this->jwsDecoratorBuilder;
     }
 
 
@@ -184,7 +198,7 @@ class Core
     {
         if (is_null($this->jwsVerifierDecorator)) {
             $this->jwsVerifierDecorator = $this->jwsVerifierDecoratorFactory()->build(
-                $this->algorithmManagerDecoratorFactory()->build($this->supportedAlgorithms),
+                $this->algorithmManagerDecorator(),
             );
         }
 
