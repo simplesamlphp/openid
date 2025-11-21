@@ -14,7 +14,7 @@ class SignatureAlgorithmBag
 
     public function __construct(SignatureAlgorithmEnum $algorithm, SignatureAlgorithmEnum ...$algorithms)
     {
-        $this->algorithms = array_unique([$algorithm, ...$algorithms]);
+        $this->algorithms = array_unique([$algorithm, ...$algorithms], SORT_REGULAR);
     }
 
 
