@@ -216,8 +216,9 @@ final class EntityStatementTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $payload = $this->validPayload;
         $payload['iss'] = 'something-else';
-        // Authority hints should not be present if not configuration.
+        // Authority hints, trust marks should not be present if not configuration.
         unset($payload['authority_hints']);
+        unset($payload['trust_marks']);
         $this->jsonHelperMock->method('decode')->willReturn($payload);
 
         $this->assertFalse($this->sut()->isConfiguration());
@@ -525,6 +526,7 @@ final class EntityStatementTest extends TestCase
         $payload = $this->validPayload;
         $payload['sub'] = 'something-else';
         unset($payload['authority_hints']);
+        unset($payload['trust_marks']);
         $payload['metadata_policy'] = [
             'openid_relying_party' => [
                 'contacts' => [

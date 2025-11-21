@@ -237,6 +237,11 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Invalid Trust Marks claim.');
         }
 
+        // It MUST NOT be present in Subordinate Statements.
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Marks claim encountered in configuration statement.');
+        }
+
         $trustMarkClaimBag = $this->claimFactory->forFederation()->buildTrustMarksClaimBag();
 
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
