@@ -1,4 +1,4 @@
-## OpenID Tools Library Installation
+# OpenID Tools Library Installation
 
 Library can be installed by using Composer:
 

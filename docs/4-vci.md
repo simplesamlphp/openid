@@ -1,4 +1,4 @@
-## OpenID for Verifiable Credential Issuance (OpenID4VCI) Tools
+# OpenID for Verifiable Credential Issuance (OpenID4VCI) Tools
 
 To use it, create an instance of the `\SimpleSAML\OpenID\VerifiableCredentials`
 class.

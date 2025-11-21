@@ -7,7 +7,7 @@ The library provides some common tools that you might find useful when working w
 
 > The library is under development, and you can expect braking changes along the way.
 
-```
+```text
 /*
  *
  *       |   
@@ -21,5 +21,3 @@ The library provides some common tools that you might find useful when working w
 ```
 
 To get started, refer to [library documentation](docs/1-openid.md).
-
-

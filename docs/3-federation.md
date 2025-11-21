@@ -1,4 +1,4 @@
-## OpenID Federation Tools (draft 44)
+# OpenID Federation Tools (draft 44)
 
 To use it, create an instance of the class `\SimpleSAML\OpenID\Federation`.
 
@@ -62,7 +62,7 @@ class Test
 }
 ```
 
-### Trust chain resolver
+## Trust Chain Resolver
 
 Once you have a `\SimpleSAML\OpenID\Federation` instantiated, you can continue
 with using available tools. The first tool we will take a look at is the Trust
@@ -159,7 +159,7 @@ if (is_null($metadata)) {
 If getting metadata results in an exception, the metadata is considered invalid
 and is to be discarded.
 
-### Additional verification of signatures
+## Additional Verification of Signatures
 
 The whole trust chain (each entity statement) has been verified using public
 keys from JWKS claims in configuration / subordinate statements. As per
@@ -196,7 +196,7 @@ try {
 
 ```
 
-### Fetching Trust Marks
+## Fetching Trust Marks
 
 Federation tools expose Trust Mark Fetcher, which you can use to dynamically
 fetch or refresh (short-living) Trust Marks.
@@ -235,7 +235,7 @@ try {
 
 ```
 
-### Validating Trust Marks
+## Validating Trust Marks
 
 Federation tools expose Trust Mark Validator with several methods for validating
 Trust Marks, with the most common one being the one to validate Trust Mark for
