@@ -49,7 +49,7 @@ $jwkTools = new Jwk();
 You can now use the `$verifiableCredentialTools` instance to create and verify
 verifiable credentials.
 
-### Creating SD-JWT VCs
+## Creating SD-JWT VCs
 
 The following example shows how to create a SD-JWT VC.
 
