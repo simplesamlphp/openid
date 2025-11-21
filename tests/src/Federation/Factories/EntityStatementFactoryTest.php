@@ -29,6 +29,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 #[UsesClass(ParsedJwsFactory::class)]
 #[UsesClass(ParsedJws::class)]
 #[UsesClass(EntityStatement::class)]
+#[UsesClass(SignatureAlgorithmEnum::class)]
 final class EntityStatementFactoryTest extends TestCase
 {
     protected MockObject $signatureMock;

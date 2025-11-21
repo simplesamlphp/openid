@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials;
 
-use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\OpenId4VciProofException;
@@ -21,17 +20,7 @@ class OpenId4VciProof extends ParsedJws
      */
     public function getAlgorithm(): string
     {
-        $alg = parent::getAlgorithm() ?? throw new OpenId4VciProofException('No Algorithm header claim found.');
-
-        $algEnum = SignatureAlgorithmEnum::tryFrom($alg) ?? throw new OpenId4VciProofException(
-            'Invalid Algorithm header claim.',
-        );
-
-        if ($algEnum->isNone()) {
-            throw new OpenId4VciProofException('Invalid Algorithm header claim (none).');
-        }
-
-        return $alg;
+        return parent::getAlgorithm() ?? throw new OpenId4VciProofException('No Algorithm header claim found.');
     }
 
 
