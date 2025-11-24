@@ -65,4 +65,13 @@ final class JwksClaimTest extends TestCase
             $this->sut()->jsonSerialize(),
         );
     }
+
+
+    public function testCanCheckIfKeyIdExists(): void
+    {
+        $sut = $this->sut();
+
+        $this->assertTrue($sut->hasKeyId('F4VFObNusj3PHmrHxpqh4GNiuFHlfh-2s6xMJ95fLYA'));
+        $this->assertFalse($sut->hasKeyId('invalid-key-id'));
+    }
 }
