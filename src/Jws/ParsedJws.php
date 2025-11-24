@@ -42,11 +42,22 @@ class ParsedJws
         protected readonly ClaimFactory $claimFactory,
     ) {
         $this->validate();
+        $this->validateCommonTimestamps();
     }
 
 
     protected function validate(): void
     {
+    }
+
+
+    protected function validateCommonTimestamps(): void
+    {
+        $this->validateByCallbacks(
+            $this->getExpirationTime(...),
+            $this->getNotBefore(...),
+            $this->getIssuedAt(...),
+        );
     }
 
 

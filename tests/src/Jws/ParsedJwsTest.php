@@ -283,8 +283,8 @@ final class ParsedJwsTest extends TestCase
 
     public function testThrowsOnPayloadDecodingError(): void
     {
-        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
-        $this->jsonHelperMock->expects($this->once())->method('decode')
+        $this->jwsMock->expects($this->atLeastOnce())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->atLeastOnce())->method('decode')
             ->willThrowException(new \JsonException('Error'));
 
         $this->expectException(JwsException::class);
