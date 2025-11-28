@@ -24,8 +24,6 @@ jobs:
     steps:
       - run: echo "Temporary disabled"
 
-# Temporarily disabled bc. of error: "The package "symfony/cache" conflicts with the extension "redis".
-# You need to disable it in order to run this application.
 #    uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1.10.5
 #    with:
 #      php-version: ${{ matrix.php-version }}
@@ -62,7 +60,7 @@ jobs:
           extensions: ctype, date, dom, filter, hash, mbstring, openssl, pcre, soap, spl, xml
           tools: composer
           ini-values: error_reporting=E_ALL
-           coverage: pcov
+          coverage: pcov
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
