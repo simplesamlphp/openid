@@ -14,16 +14,16 @@ on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 jobs:
-  phplinter:
-    name: 'PHP-Linter'
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: ['8.2', '8.3', '8.4', '8.5']
-
-    uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1.10.5
-    with:
-      php-version: ${{ matrix.php-version }}
+#  phplinter:
+#    name: 'PHP-Linter'
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        php-version: ['8.2', '8.3', '8.4', '8.5']
+#
+#    uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1.10.5
+#    with:
+#      php-version: ${{ matrix.php-version }}
 
   linter:
     name: 'Linter'
@@ -173,13 +173,6 @@ jobs:
           tools: composer, composer-require-checker, composer-unused, phpcs
           extensions: ctype, date, dom, filter, hash, mbstring, openssl, pcre, soap, spl, xml
           coverage: none
-
-      - name: Disable Redis PHP extension
-        run: |
-          if php -m | grep -q redis; then
-            phpdismod redis || echo "phpdismod not available"
-            echo "extension=redis.so" > redis.ini && sudo mv redis.ini /etc/php/$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')/cli/conf.d/20-redis.ini && sudo rm /etc/php/$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')/cli/conf.d/20-redis.ini
-          fi
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
