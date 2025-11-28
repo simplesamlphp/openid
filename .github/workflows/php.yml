@@ -171,8 +171,15 @@ jobs:
           # Should be the highest supported version, so we can use the newest tools
           php-version: '8.5'
           tools: composer, composer-require-checker, composer-unused, phpcs
-          extensions: ctype, date, dom, filter, hash, mbstring, openssl, pcre, soap, spl, xml, :redis
+          extensions: ctype, date, dom, filter, hash, mbstring, openssl, pcre, soap, spl, xml
           coverage: none
+
+      - name: Disable Redis PHP extension
+        run: |
+          if php -m | grep -q redis; then
+            phpdismod redis || echo "phpdismod not available"
+            echo "extension=redis.so" > redis.ini && sudo mv redis.ini /etc/php/$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')/cli/conf.d/20-redis.ini && sudo rm /etc/php/$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')/cli/conf.d/20-redis.ini
+          fi
 
       - name: Setup problem matchers for PHP
         run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
