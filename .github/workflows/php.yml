@@ -14,13 +14,14 @@ on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 jobs:
-#  phplinter:
-#    name: 'PHP-Linter'
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        php-version: ['8.2', '8.3', '8.4', '8.5']
-#
+  phplinter:
+    name: 'PHP-Linter'
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3', '8.4', '8.5']
+    runs-on: [ ubuntu-latest ]
+
 #    uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1.10.5
 #    with:
 #      php-version: ${{ matrix.php-version }}
