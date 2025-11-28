@@ -13,11 +13,17 @@ enum MetadataPolicyOperatorsEnum: string
      * federation specification.
      */
     case Value = 'value';
+
     case Add = 'add';
+
     case Default = 'default';
+
     case OneOf = 'one_of';
+
     case SubsetOf = 'subset_of';
+
     case SupersetOf = 'superset_of';
+
     case Essential = 'essential';
 
 

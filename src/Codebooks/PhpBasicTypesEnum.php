@@ -10,13 +10,22 @@ namespace SimpleSAML\OpenID\Codebooks;
 enum PhpBasicTypesEnum: string
 {
     case Boolean = 'boolean';
+
     case Integer = 'integer';
+
     case Double = 'double';
+
     case String = 'string';
+
     case Array = 'array';
+
     case Object = 'object';
+
     case Resource = 'resource';
+
     case Null = 'NULL';
+
     case UnknownType = 'unknown type';
+
     case ResourceClosed = 'resource (closed)';
 }
