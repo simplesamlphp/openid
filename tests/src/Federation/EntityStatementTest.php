@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
@@ -24,6 +25,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(EntityStatement::class)]
 #[UsesClass(ParsedJws::class)]
+#[UsesClass(SignatureAlgorithmEnum::class)]
 final class EntityStatementTest extends TestCase
 {
     protected MockObject $signatureMock;
@@ -136,6 +138,7 @@ final class EntityStatementTest extends TestCase
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
         $this->federationClaimFactoryMock = $this->createMock(FederationClaimFactory::class);
@@ -215,8 +218,9 @@ final class EntityStatementTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $payload = $this->validPayload;
         $payload['iss'] = 'something-else';
-        // Authority hints should not be present if not configuration.
+        // Authority hints, trust marks should not be present if not configuration.
         unset($payload['authority_hints']);
+        unset($payload['trust_marks']);
         $this->jsonHelperMock->method('decode')->willReturn($payload);
 
         $this->assertFalse($this->sut()->isConfiguration());
@@ -277,6 +281,61 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testCanDefineTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = ['trust-anchor-id'];
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+
+        $this->assertSame(['trust-anchor-id'], $this->sut()->getTrustAnchorHints());
+    }
+
+
+    public function testThrowsOnInvalidTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = 'invalid';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Invalid');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
+    public function testThrowsOnEmptyTrustAnchorHints(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = [];
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Empty');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
+    public function testThrowsIfTrustAnchorHintsNotInConfigurationStatement(): void
+    {
+        $this->validPayload['trust_anchor_hints'] = ['trust-anchor-id'];
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut();
+    }
+
+
     public function testTrustMarksAreOptional(): void
     {
         $payload = $this->validPayload;
@@ -323,6 +382,26 @@ final class EntityStatementTest extends TestCase
     }
 
 
+    public function testTrustMarkOwnersClaimIsAllowedInConfigurationStatementOnly(): void
+    {
+        $this->validPayload['trust_mark_owners'] = [
+            'trustMarkType' => [
+                'sub' => 'subject',
+                'jwks' => ['keys' => [['key' => 'value']]],
+            ],
+        ];
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
+
+        $this->sut()->getTrustMarkOwners();
+    }
+
+
     public function testTrustMarkIssuersIsBuildUsingFactoryOptional(): void
     {
         $this->validPayload['trust_mark_issuers'] = [
@@ -334,6 +413,23 @@ final class EntityStatementTest extends TestCase
         $this->federationClaimFactoryMock->expects($this->atLeastOnce())
             ->method('buildTrustMarkIssuersClaimBagFrom')
             ->with($this->validPayload['trust_mark_issuers']);
+
+        $this->sut()->getTrustMarkIssuers();
+    }
+
+
+    public function testTrustMarkIssuersClaimIsAllowedInConfigurationStatementOnly(): void
+    {
+        $this->validPayload['trust_mark_issuers'] = [
+            'trustMarkType' => ['https://issuer1.org', 'https://issuer2.org'],
+        ];
+        $this->validPayload['iss'] = 'something-else';
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('non-configuration');
+
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
         $this->sut()->getTrustMarkIssuers();
     }
@@ -469,6 +565,7 @@ final class EntityStatementTest extends TestCase
         $payload = $this->validPayload;
         $payload['sub'] = 'something-else';
         unset($payload['authority_hints']);
+        unset($payload['trust_marks']);
         $payload['metadata_policy'] = [
             'openid_relying_party' => [
                 'contacts' => [

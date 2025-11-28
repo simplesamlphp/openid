@@ -17,9 +17,9 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 class EntityStatement extends ParsedJws
 {
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     public function getIssuer(): string
     {
@@ -28,9 +28,9 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     public function getSubject(): string
     {
@@ -76,9 +76,9 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     public function getType(): string
     {
@@ -93,9 +93,9 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return null|non-empty-string[]
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     public function getAuthorityHints(): ?array
     {
@@ -124,6 +124,42 @@ class EntityStatement extends ParsedJws
         }
 
         return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($authorityHints, $claimKey);
+    }
+
+
+    /**
+     * @return null|non-empty-string[]
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
+    public function getTrustAnchorHints(): ?array
+    {
+        // trust_anchor_hints
+        // OPTIONAL. An array of strings representing the Entity Identifiers of Trust Anchors trusted by the Entity.
+        // Its value MUST NOT be the empty array []. This Claim MUST NOT be present in Entity Configurations
+        // of Trust Anchors with no Superiors.
+
+        $claimKey = ClaimsEnum::TrustAnchorHints->value;
+        $trustAnchorHints = $this->getPayloadClaim($claimKey);
+
+        if (is_null($trustAnchorHints)) {
+            return null;
+        }
+
+        if (!is_array($trustAnchorHints)) {
+            throw new EntityStatementException('Invalid Trust Anchor Hints claim.');
+        }
+
+        if ($trustAnchorHints === []) {
+            throw new EntityStatementException('Empty Trust Anchor Hints claim encountered.');
+        }
+
+        // It MUST NOT be present in Subordinate Statements.
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Anchor Hints claim encountered in non-configuration statement.');
+        }
+
+        return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($trustAnchorHints, $claimKey);
     }
 
 
@@ -201,6 +237,11 @@ class EntityStatement extends ParsedJws
             throw new EntityStatementException('Invalid Trust Marks claim.');
         }
 
+        // It MUST NOT be present in Subordinate Statements.
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Marks claim encountered in configuration statement.');
+        }
+
         $trustMarkClaimBag = $this->claimFactory->forFederation()->buildTrustMarksClaimBag();
 
         while (is_array($trustMarkClaimData = array_pop($trustMarksClaims))) {
@@ -235,6 +276,10 @@ class EntityStatement extends ParsedJws
     }
 
 
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
+     */
     public function getTrustMarkIssuers(): ?TrustMarkIssuersClaimBag
     {
         // trust_mark_issuers
@@ -250,14 +295,18 @@ class EntityStatement extends ParsedJws
             return null;
         }
 
+        if (!$this->isConfiguration()) {
+            throw new EntityStatementException('Trust Mark Issuers claim encountered in non-configuration statement.');
+        }
+
         return $this->claimFactory->forFederation()->buildTrustMarkIssuersClaimBagFrom($trustMarkIssuersClaimData);
     }
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\EntityStatementException
      */
     public function getKeyId(): string
     {
@@ -266,11 +315,11 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      *
-     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getFederationFetchEndpoint(): ?string
     {
@@ -290,11 +339,11 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      *
-     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getFederationTrustMarkEndpoint(): ?string
     {
@@ -314,11 +363,11 @@ class EntityStatement extends ParsedJws
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      *
-     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getFederationTrustMarkStatusEndpoint(): ?string
     {
@@ -334,6 +383,19 @@ class EntityStatement extends ParsedJws
         }
 
         return $this->helpers->type()->ensureNonEmptyString($federationTrustMarkEndpoint);
+    }
+
+
+    /**
+     * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenId4VciProofException
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getAlgorithm(): string
+    {
+        return parent::getAlgorithm() ?? throw new EntityStatementException('No Algorithm header claim found.');
     }
 
 
@@ -377,8 +439,10 @@ class EntityStatement extends ParsedJws
             $this->getExpirationTime(...),
             $this->getJwks(...),
             $this->getType(...),
+            $this->getAlgorithm(...),
             $this->getKeyId(...),
             $this->getAuthorityHints(...),
+            $this->getTrustAnchorHints(...),
             $this->getMetadata(...),
             $this->getMetadataPolicy(...),
             $this->getTrustMarks(...),

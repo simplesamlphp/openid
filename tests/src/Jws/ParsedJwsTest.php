@@ -7,8 +7,10 @@ namespace SimpleSAML\Test\OpenID\Jws;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
@@ -20,6 +22,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJws::class)]
+#[UsesClass(SignatureAlgorithmEnum::class)]
 final class ParsedJwsTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
@@ -280,8 +283,8 @@ final class ParsedJwsTest extends TestCase
 
     public function testThrowsOnPayloadDecodingError(): void
     {
-        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
-        $this->jsonHelperMock->expects($this->once())->method('decode')
+        $this->jwsMock->expects($this->atLeastOnce())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->atLeastOnce())->method('decode')
             ->willThrowException(new \JsonException('Error'));
 
         $this->expectException(JwsException::class);
@@ -448,5 +451,26 @@ final class ParsedJwsTest extends TestCase
         $this->expectExceptionMessage('Not Before');
 
         $this->sut()->getNotBefore();
+    }
+
+
+    public function testAlgHeaderCanBeNull(): void
+    {
+        unset($this->sampleHeader['alg']);
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        $this->assertNull($this->sut()->getAlgorithm());
+    }
+
+
+    public function testAlgHeaderCanNotBeNone(): void
+    {
+        $this->sampleHeader['alg'] = 'none';
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('none');
+
+        $this->sut()->getAlgorithm();
     }
 }

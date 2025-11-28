@@ -12,7 +12,9 @@ use Jose\Component\Signature\Serializer\JWSSerializer;
 enum JwsSerializerEnum: string
 {
     case Compact = 'jws_compact';
+
     case JsonGeneral = 'jws_json_general';
+
     case JsonFlattened = 'jws_json_flattened';
 
 

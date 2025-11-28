@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Jws;
 
 use JsonException;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
@@ -40,11 +42,22 @@ class ParsedJws
         protected readonly ClaimFactory $claimFactory,
     ) {
         $this->validate();
+        $this->validateCommonTimestamps();
     }
 
 
     protected function validate(): void
     {
+    }
+
+
+    protected function validateCommonTimestamps(): void
+    {
+        $this->validateByCallbacks(
+            $this->getExpirationTime(...),
+            $this->getNotBefore(...),
+            $this->getIssuedAt(...),
+        );
     }
 
 
@@ -377,8 +390,22 @@ class ParsedJws
     {
         $claimKey = ClaimsEnum::Alg->value;
 
-        $typ = $this->getHeaderClaim($claimKey);
+        $alg = $this->getHeaderClaim($claimKey);
 
-        return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);
+        if (is_null($alg)) {
+            return null;
+        }
+
+        $alg = $this->helpers->type()->ensureNonEmptyString($alg, $claimKey);
+
+        $algEnum = SignatureAlgorithmEnum::tryFrom($alg) ?? throw new EntityStatementException(
+            'Invalid Algorithm header claim.',
+        );
+
+        if ($algEnum->isNone()) {
+            throw new JwsException('Invalid Algorithm header claim (none).');
+        }
+
+        return $alg;
     }
 }

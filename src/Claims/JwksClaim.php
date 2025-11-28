@@ -46,4 +46,19 @@ class JwksClaim implements ClaimInterface
             $this->name => $this->value,
         ];
     }
+
+
+    /**
+     * Check whether the JWKS contains a key with the given key ID.
+     */
+    public function hasKeyId(string $keyId): bool
+    {
+        foreach ($this->value[ClaimsEnum::Keys->value] as $key) {
+            if ($key[ClaimsEnum::Kid->value] === $keyId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
