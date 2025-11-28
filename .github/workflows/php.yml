@@ -24,6 +24,8 @@ jobs:
     steps:
       - run: echo "Temporary disabled"
 
+# Temporarily disabled bc. of error: "The package "symfony/cache" conflicts with the extension "redis".
+# You need to disable it in order to run this application.
 #    uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1.10.5
 #    with:
 #      php-version: ${{ matrix.php-version }}
