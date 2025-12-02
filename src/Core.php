@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
+use SimpleSAML\OpenID\Core\Factories\IdTokenFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
@@ -36,6 +37,8 @@ class Core
     protected ?RequestObjectFactory $requestObjectFactory = null;
 
     protected ?ClientAssertionFactory $clientAssertionFactory = null;
+
+    protected ?IdTokenFactory $idTokenFactory = null;
 
     protected ?Helpers $helpers = null;
 
@@ -89,6 +92,20 @@ class Core
     public function clientAssertionFactory(): ClientAssertionFactory
     {
         return $this->clientAssertionFactory ??= new ClientAssertionFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
+        );
+    }
+
+
+    public function idTokenFactory(): IdTokenFactory
+    {
+        return $this->idTokenFactory ??= new IdTokenFactory(
             $this->jwsDecoratorBuilder(),
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
