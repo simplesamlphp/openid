@@ -12,18 +12,39 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 class RequestObject extends ParsedJws
 {
     /**
+     * Get Algorithm. Overridden to allow the 'none' algorithm.
+     *
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getAlgorithm(): ?string
+    {
+        $claimKey = ClaimsEnum::Alg->value;
+
+        $alg = $this->getHeaderClaim($claimKey);
+
+        if (is_null($alg)) {
+            throw new RequestObjectException('Missing Algorithm header claim.');
+        }
+
+        $alg = $this->helpers->type()->ensureNonEmptyString($alg, $claimKey);
+
+        SignatureAlgorithmEnum::tryFrom($alg) ?? throw new RequestObjectException(
+            'Invalid Algorithm header claim.',
+        );
+
+        return $alg;
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\RequestObjectException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function isProtected(): bool
     {
-        $algHeader = $this->helpers->type()->ensureString(
-            $this->getHeaderClaim(ClaimsEnum::Alg->value) ?? throw new RequestObjectException(
-                'Alg header is missing.',
-            ),
-        );
-
-        return $algHeader !== SignatureAlgorithmEnum::none->value;
+        return $this->getAlgorithm() !== SignatureAlgorithmEnum::none->value;
     }
 }

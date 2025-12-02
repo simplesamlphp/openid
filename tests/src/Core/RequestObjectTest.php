@@ -70,6 +70,7 @@ final class RequestObjectTest extends TestCase
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
+        $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
     }
