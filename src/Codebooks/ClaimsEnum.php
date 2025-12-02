@@ -18,6 +18,9 @@ enum ClaimsEnum: string
     // @type
     case AtType = '@type';
 
+    // Authentication Context Class Reference
+    case Acr = 'acr';
+
     case AcrValuesSupported = 'acr_values_supported';
 
     // Algorithm
@@ -29,10 +32,18 @@ enum ClaimsEnum: string
     // AlternativeText
     case AltText = 'alt_text';
 
+    // Authentication Methods References
+    case Amr = 'amr';
+
     case ApplicationType = 'application_type';
+
+    // Access Token hash
+    case ATHash = 'at_hash';
 
     // Audience
     case Aud = 'aud';
+
+    case AuthTime = 'auth_time';
 
     case AuthorityHints = 'authority_hints';
 
@@ -41,6 +52,9 @@ enum ClaimsEnum: string
     case AuthorizationServer = 'authorization_server';
 
     case AuthorizationServers = 'authorization_servers';
+
+    // Authorized party
+    case Azp = 'azp';
 
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
 
@@ -55,6 +69,9 @@ enum ClaimsEnum: string
     case BackgroundImage = 'background_image';
 
     case BatchSize = 'batch_size';
+
+    // Code hash
+    case CHash = 'c_hash';
 
     case Claims = 'claims';
 
@@ -309,6 +326,9 @@ enum ClaimsEnum: string
 
     // Subject
     case Sub = 'sub';
+
+    // Subject JWK
+    case SubJwk = 'sub_jwk';
 
     case SubjectTypesSupported = 'subject_types_supported';
 

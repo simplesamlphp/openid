@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Helpers;
 
 use JsonSerializable;
+use SimpleSAML\OpenID\Codebooks\UriPattern;
 use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use Stringable;
 use Traversable;
@@ -57,8 +58,8 @@ class Type
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @return mixed[]
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function ensureArray(mixed $value, ?string $context = null): array
     {
@@ -258,7 +259,7 @@ class Type
     public function enforceUri(
         mixed $value,
         ?string $context = null,
-        string $pattern = '/^[a-zA-Z][a-zA-Z0-9+.-]*:[^\s]*$/',
+        string $pattern = UriPattern::Uri->value,
     ): string {
         try {
             $value = $this->enforceRegex($value, $pattern, $context);
