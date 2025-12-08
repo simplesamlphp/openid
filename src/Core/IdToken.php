@@ -282,4 +282,24 @@ class IdToken extends ParsedJws
         return $this->helpers->type()
             ->ensureArrayWithKeysAndValuesAsNonEmptyStrings($subJwk, ClaimsEnum::SubJwk->value);
     }
+
+
+    protected function validate(): void
+    {
+        $this->validateByCallbacks(
+            $this->getIssuer(...),
+            $this->getSubject(...),
+            $this->getAudience(...),
+            $this->getExpirationTime(...),
+            $this->getIssuedAt(...),
+            $this->getAuthTime(...),
+            $this->getNonce(...),
+            $this->getAuthenticationContextClassReference(...),
+            $this->getAuthenticationMethodsReferences(...),
+            $this->getAuthorizedParty(...),
+            $this->getAccessTokenHash(...),
+            $this->getCodeHash(...),
+            $this->getSubJwk(...),
+        );
+    }
 }
