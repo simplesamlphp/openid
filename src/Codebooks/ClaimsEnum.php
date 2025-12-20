@@ -322,6 +322,10 @@ enum ClaimsEnum: string
 
     case SignedMetadata = 'signed_metadata';
 
+    case SoftwareId = 'software_id';
+
+    case SoftwareVersion = 'software_version';
+
     case Status = 'status';
 
     // Subject
