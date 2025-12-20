@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Core;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
+use SimpleSAML\OpenID\Core\Factories\IdTokenFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
@@ -43,6 +44,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(JwsVerifierDecorator::class)]
 #[UsesClass(JwsSerializerManagerDecorator::class)]
 #[UsesClass(ClaimFactory::class)]
+#[UsesClass(IdTokenFactory::class)]
 final class CoreTest extends TestCase
 {
     protected MockObject $supportedAlgorithmsMock;
@@ -104,6 +106,11 @@ final class CoreTest extends TestCase
         $this->assertInstanceOf(
             ClientAssertionFactory::class,
             $sut->clientAssertionFactory(),
+        );
+
+        $this->assertInstanceOf(
+            IdTokenFactory::class,
+            $sut->idTokenFactory(),
         );
     }
 }

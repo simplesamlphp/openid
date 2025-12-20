@@ -15,6 +15,8 @@ final class JwkDecoratorTest extends TestCase
 {
     protected MockObject $jwkMock;
 
+    protected array $additionalData = [];
+
 
     protected function setUp(): void
     {
@@ -24,10 +26,12 @@ final class JwkDecoratorTest extends TestCase
 
     protected function sut(
         ?JWK $jwk = null,
+        ?array $additionalData = null,
     ): JwkDecorator {
         $jwk ??= $this->jwkMock;
+        $additionalData ??= $this->additionalData;
 
-        return new JwkDecorator($jwk);
+        return new JwkDecorator($jwk, $additionalData);
     }
 
 
@@ -46,5 +50,23 @@ final class JwkDecoratorTest extends TestCase
             $this->jwkMock,
             $this->sut()->jwk(),
         );
+    }
+
+
+    public function testCanGetAdditionalData(): void
+    {
+        $this->additionalData = ['foo' => 'bar'];
+
+        $this->assertSame($this->additionalData, $this->sut()->getAdditionalData());
+    }
+
+
+    public function testCanJsonSerialize(): void
+    {
+        $this->jwkMock->expects($this->once())->method('jsonSerialize')
+            ->willReturn(['a' => 'b']);
+        $this->additionalData = ['foo' => 'bar'];
+
+        $this->assertSame(['a' => 'b', 'foo' => 'bar'], $this->sut()->jsonSerialize());
     }
 }

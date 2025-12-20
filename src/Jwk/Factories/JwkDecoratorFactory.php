@@ -32,6 +32,7 @@ class JwkDecoratorFactory
     ): JwkDecorator {
         return new JwkDecorator(
             JWKFactory::createFromKeyFile($path, $password, $additionalData),
+            $additionalData,
         );
     }
 
@@ -47,6 +48,7 @@ class JwkDecoratorFactory
     ): JwkDecorator {
         return new JwkDecorator(
             JWKFactory::createFromKey($key, $password, $additionalData),
+            $additionalData,
         );
     }
 
@@ -62,6 +64,7 @@ class JwkDecoratorFactory
     ): JwkDecorator {
         return new JwkDecorator(
             JWKFactory::createFromPKCS12CertificateFile($path, $password, $additionalData),
+            $additionalData,
         );
     }
 
@@ -76,6 +79,7 @@ class JwkDecoratorFactory
     ): JwkDecorator {
         return new JwkDecorator(
             JWKFactory::createFromCertificateFile($path, $additionalData),
+            $additionalData,
         );
     }
 
@@ -90,6 +94,7 @@ class JwkDecoratorFactory
     ): JwkDecorator {
         return new JwkDecorator(
             JWKFactory::createFromCertificate($certificate, $additionalData),
+            $additionalData,
         );
     }
 }

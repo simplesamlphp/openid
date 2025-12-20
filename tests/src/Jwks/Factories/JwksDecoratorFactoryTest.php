@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID\Jwks\Factories;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
@@ -51,5 +52,21 @@ final class JwksDecoratorFactoryTest extends TestCase
     public function testCanBuildFromKeyData(): void
     {
         $this->assertInstanceOf(Jwks\JwksDecorator::class, $this->sut()->fromKeySetData($this->jwksArraySample));
+    }
+
+
+    public function testCanBuildFromJwkDecorators(): void
+    {
+        $key1 = $this->createMock(JwkDecorator::class);
+        $key2 = $this->createMock(JwkDecorator::class);
+        $key1->expects($this->once())->method('jsonSerialize')->willReturn(['kty' => 'RSA']);
+        $key2->expects($this->once())->method('jsonSerialize')->willReturn(['kty' => 'EC']);
+
+        $jwksDecorator = $this->sut()->fromJwkDecorators($key1, $key2);
+
+        $this->assertSame(
+            ['keys' => [['kty' => 'RSA'], ['kty' => 'EC']]],
+            $jwksDecorator->jsonSerialize(),
+        );
     }
 }

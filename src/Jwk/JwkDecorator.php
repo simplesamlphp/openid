@@ -6,10 +6,14 @@ namespace SimpleSAML\OpenID\Jwk;
 
 use Jose\Component\Core\JWK;
 
-class JwkDecorator
+class JwkDecorator implements \JsonSerializable
 {
+    /**
+     * @param mixed[] $additionalData
+     */
     public function __construct(
         protected readonly JWK $jwk,
+        protected readonly array $additionalData = [],
     ) {
     }
 
@@ -17,5 +21,23 @@ class JwkDecorator
     public function jwk(): JWK
     {
         return $this->jwk;
+    }
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getAdditionalData(): array
+    {
+        return $this->additionalData;
+    }
+
+
+    /**
+     * @return mixed[]
+     */
+    public function jsonSerialize(): array
+    {
+        return array_merge($this->jwk->jsonSerialize(), $this->additionalData);
     }
 }
