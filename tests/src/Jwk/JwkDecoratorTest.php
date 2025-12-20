@@ -53,11 +53,14 @@ final class JwkDecoratorTest extends TestCase
     }
 
 
-    public function testCanGetAdditionalData(): void
+    public function testCanGetAndSetAdditionalData(): void
     {
         $this->additionalData = ['foo' => 'bar'];
+        $sut = $this->sut();
+        $this->assertSame($this->additionalData, $sut->getAdditionalData());
 
-        $this->assertSame($this->additionalData, $this->sut()->getAdditionalData());
+        $sut->addAdditionalData('baz', 'qux');
+        $this->assertSame(['foo' => 'bar', 'baz' => 'qux'], $sut->getAdditionalData());
     }
 
 

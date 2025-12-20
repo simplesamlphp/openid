@@ -9,11 +9,11 @@ use Jose\Component\Core\JWK;
 class JwkDecorator implements \JsonSerializable
 {
     /**
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function __construct(
         protected readonly JWK $jwk,
-        protected readonly array $additionalData = [],
+        protected array $additionalData = [],
     ) {
     }
 
@@ -25,11 +25,20 @@ class JwkDecorator implements \JsonSerializable
 
 
     /**
-     * @return mixed[]
+     * @return array<non-empty-string,mixed>
      */
     public function getAdditionalData(): array
     {
         return $this->additionalData;
+    }
+
+
+    /**
+     * @param non-empty-string $key
+     */
+    public function addAdditionalData(string $key, mixed $value): void
+    {
+        $this->additionalData[$key] = $value;
     }
 
 

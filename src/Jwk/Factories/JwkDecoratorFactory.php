@@ -23,7 +23,7 @@ class JwkDecoratorFactory
 
     /**
      * @param non-empty-string $path
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function fromPkcs1Or8KeyFile(
         string $path,
@@ -39,7 +39,7 @@ class JwkDecoratorFactory
 
     /**
      * @param non-empty-string $key
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function fromPkcs1Or8Key(
         string $key,
@@ -55,7 +55,7 @@ class JwkDecoratorFactory
 
     /**
      * @param non-empty-string $path
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function fromPkcs12CertificateFile(
         string $path,
@@ -71,7 +71,7 @@ class JwkDecoratorFactory
 
     /**
      * @param non-empty-string $path
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function fromX509CertificateFile(
         string $path,
@@ -86,7 +86,7 @@ class JwkDecoratorFactory
 
     /**
      * @param non-empty-string $certificate
-     * @param mixed[] $additionalData
+     * @param array<non-empty-string,mixed> $additionalData
      */
     public function fromX509Certificate(
         string $certificate,
