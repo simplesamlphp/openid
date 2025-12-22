@@ -73,7 +73,11 @@ enum ClaimsEnum: string
     // Code hash
     case CHash = 'c_hash';
 
+    case ClaimTypesSupported = 'claim_types_supported';
+
     case Claims = 'claims';
+
+    case ClaimsLocalesSupported = 'claims_locales_supported';
 
     case ClaimsSupported = 'claims_supported';
 
@@ -86,6 +90,8 @@ enum ClaimsEnum: string
     case ClientRegistrationTypes = 'client_registration_types';
 
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
+
+    case ClientUri = 'client_uri';
 
     // Confirmation
     case Cnf = 'cnf';
@@ -127,6 +133,10 @@ enum ClaimsEnum: string
 
     case CryptographicSuitesSupported = 'cryptographic_suites_supported';
 
+    case DefaultAcrValues = 'default_acr_values';
+
+    case DefaultMaxAge = 'default_max_age';
+
     case DeferredCredentialEndpoint = 'deferred_credential_endpoint';
 
     case Delegation = 'delegation';
@@ -136,6 +146,8 @@ enum ClaimsEnum: string
     case Display = 'display';
 
     case DisplayName = 'display_name';
+
+    case DisplayValuesSupported = 'display_values_supported';
 
     case DotDotDot = '...';
 
@@ -179,9 +191,21 @@ enum ClaimsEnum: string
 
     case InputMode = 'input_mode';
 
+    case IdTokenEncryptionAlgValuesSupported = 'id_token_encryption_alg_values_supported';
+
+    case IdTokenEncryptionEncValuesSupported = 'id_token_encryption_enc_values_supported';
+
+    case IdTokenEncryptedResponseAlg = 'id_token_encrypted_response_alg';
+
+    case IdTokenEncryptedResponseEnc = 'id_token_encrypted_response_enc';
+
+    case IdTokenSignedResponseAlg = 'id_token_signed_response_alg';
+
     case IdTokenSigningAlgValuesSupported = 'id_token_signing_alg_values_supported';
 
     case InformationUri = 'information_uri';
+
+    case InitiateLoginUri = 'initiate_login_uri';
 
     case IntrospectionEndpoint = 'introspection_endpoint';
 
@@ -280,13 +304,12 @@ enum ClaimsEnum: string
 
     case ProofTypesSupported = 'proof_types_supported';
 
+    case RedirectUris = 'redirect_uris';
+
     // Reference
     case Ref = 'ref';
 
     case Refresh_Service = 'refreshService';
-
-    // PublicKeyUse
-    case RedirectUris = 'redirect_uris';
 
     case RegistrationEndpoint = 'registration_endpoint';
 
@@ -294,11 +317,27 @@ enum ClaimsEnum: string
 
     case RequestAuthenticationSigningAlgValuesSupported = 'request_authentication_signing_alg_values_supported';
 
+    case RequestObjectEncryptionAlg = 'request_object_encryption_alg';
+
+    case RequestObjectEncryptionAlgValuesSupported = 'request_object_encryption_alg_values_supported';
+
+    case RequestObjectEncryptionEnc = 'request_object_encryption_enc';
+
+    case RequestObjectEncryptionEncValuesSupported = 'request_object_encryption_enc_values_supported';
+
+    case RequestObjectSigningAlg = 'request_object_signing_alg';
+
     case RequestObjectSigningAlgValuesSupported = 'request_object_signing_alg_values_supported';
 
     case RequestParameterSupported = 'request_parameter_supported';
 
     case RequestUriParameterSupported = 'request_uri_parameter_supported';
+
+    case RequestUris = 'request_uris';
+
+    case RequireAuthTime = 'require_auth_time';
+
+    case RequireRequestUriRegistration = 'require_request_uri_registration';
 
     case ResponseModesSupported = 'response_modes_supported';
 
@@ -315,6 +354,8 @@ enum ClaimsEnum: string
     case Scope = 'scope';
 
     case ScopesSupported = 'scopes_supported';
+
+    case SectorIdentifierUri = 'sector_identifier_uri';
 
     case ServiceDocumentation = 'service_documentation';
 
@@ -334,6 +375,8 @@ enum ClaimsEnum: string
     // Subject JWK
     case SubJwk = 'sub_jwk';
 
+    case SubjectType = 'subject_type';
+
     case SubjectTypesSupported = 'subject_types_supported';
 
     case Terms_Of_Use = 'termsOfUse';
@@ -346,7 +389,11 @@ enum ClaimsEnum: string
 
     case TokenEndpointAuthMethodsSupported = 'token_endpoint_auth_methods_supported';
 
+    case TokenEndpointAuthSigningAlg = 'token_endpoint_auth_signing_alg';
+
     case TokenEndpointAuthSigningAlgValuesSupported = 'token_endpoint_auth_signing_alg_values_supported';
+
+    case TosUri = 'tos_uri';
 
     // Type
     case Typ = 'typ';
@@ -380,6 +427,18 @@ enum ClaimsEnum: string
     case UserAuthentication = 'user_authentication';
 
     case UserinfoEndpoint = 'userinfo_endpoint';
+
+    case UserinfoEncryptedResponseAlg = 'userinfo_encrypted_response_alg';
+
+    case UserinfoEncryptedResponseEnc = 'userinfo_encrypted_response_enc';
+
+    case UserinfoEncryptionAlgValuesSupported = 'userinfo_encryption_alg_values_supported';
+
+    case UserinfoEncryptionEncValuesSupported = 'userinfo_encryption_enc_values_supported';
+
+    case UserinfoSignedResponseAlg = 'userinfo_signed_response_alg';
+
+    case UserinfoSigningAlgValuesSupported = 'userinfo_signing_alg_values_supported';
 
     // VerifiableCredential
     case Vc = 'vc';
