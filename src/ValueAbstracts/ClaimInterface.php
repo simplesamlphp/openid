@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Claims;
+namespace SimpleSAML\OpenID\ValueAbstracts;
 
 interface ClaimInterface extends \JsonSerializable
 {

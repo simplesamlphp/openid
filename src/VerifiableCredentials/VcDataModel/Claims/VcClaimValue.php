@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
 use DateTimeImmutable;
-use SimpleSAML\OpenID\Claims\ClaimInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
 
 class VcClaimValue implements ClaimInterface
 {

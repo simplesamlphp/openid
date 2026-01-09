@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Factories;
 
-use SimpleSAML\OpenID\Claims\GenericClaim;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\ValueAbstracts\GenericClaim;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
 
 class ClaimFactory

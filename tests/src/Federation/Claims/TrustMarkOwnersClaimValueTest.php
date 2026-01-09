@@ -7,8 +7,8 @@ namespace SimpleSAML\Test\OpenID\Federation\Claims;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 #[CoversClass(TrustMarkOwnersClaimValue::class)]
 final class TrustMarkOwnersClaimValueTest extends TestCase

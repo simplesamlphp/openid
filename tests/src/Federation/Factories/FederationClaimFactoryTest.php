@@ -7,7 +7,6 @@ namespace SimpleSAML\Test\OpenID\Federation\Factories;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
@@ -18,6 +17,7 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 #[CoversClass(FederationClaimFactory::class)]
 #[UsesClass(Helpers::class)]

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Claims;
+namespace SimpleSAML\OpenID\ValueAbstracts;
 
 class GenericClaim implements ClaimInterface
 {

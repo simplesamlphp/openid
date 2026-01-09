@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
@@ -24,6 +23,7 @@ use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 use SimpleSAML\OpenID\Jwks\JwksFetcher;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 #[CoversClass(JwksFetcher::class)]
 final class JwksFetcherTest extends TestCase

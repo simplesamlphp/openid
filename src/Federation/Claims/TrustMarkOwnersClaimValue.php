@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\Claims;
 
 use JsonSerializable;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 class TrustMarkOwnersClaimValue implements JsonSerializable
 {

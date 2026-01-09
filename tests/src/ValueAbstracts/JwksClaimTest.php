@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Claims;
+namespace SimpleSAML\Test\OpenID\ValueAbstracts;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 #[CoversClass(JwksClaim::class)]
 final class JwksClaimTest extends TestCase

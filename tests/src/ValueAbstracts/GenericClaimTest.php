@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\Claims;
+namespace SimpleSAML\Test\OpenID\ValueAbstracts;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Claims\GenericClaim;
+use SimpleSAML\OpenID\ValueAbstracts\GenericClaim;
 
 #[CoversClass(GenericClaim::class)]
 final class GenericClaimTest extends TestCase

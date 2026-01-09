@@ -7,12 +7,12 @@ namespace SimpleSAML\Test\OpenID\Factories;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Claims\GenericClaim;
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Exceptions\JwksException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\FederationClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\ValueAbstracts\GenericClaim;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
 
 #[CoversClass(ClaimFactory::class)]

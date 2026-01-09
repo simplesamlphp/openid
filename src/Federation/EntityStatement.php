@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
-use SimpleSAML\OpenID\Claims\JwksClaim;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\EntityTypesEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
@@ -13,6 +12,7 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
 class EntityStatement extends ParsedJws
 {
