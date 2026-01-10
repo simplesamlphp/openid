@@ -12,7 +12,7 @@ use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPairConfigBag;
 class SignatureKeyPairBagFactory
 {
     public function __construct(
-        protected readonly SignatureKeyPairFactory $signatureKeyPairFactory,
+        protected readonly SignatureKeyPairFactory $signatureKeyPairFactory = new SignatureKeyPairFactory(),
     ) {
     }
 
