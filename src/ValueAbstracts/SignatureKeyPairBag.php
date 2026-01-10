@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+use SimpleSAML\OpenID\Exceptions\OpenIdException;
+
 class SignatureKeyPairBag
 {
     /**
@@ -45,5 +48,48 @@ class SignatureKeyPairBag
     public function hasKeyId(string $keyId): bool
     {
         return isset($this->signatureKeyPairs[$keyId]);
+    }
+
+
+    public function getFirst(): ?SignatureKeyPair
+    {
+        return $this->signatureKeyPairs[array_key_first($this->signatureKeyPairs)] ?? null;
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function getFirstOrFail(): SignatureKeyPair
+    {
+        return $this->getFirst() ?? throw new OpenIdException(
+            'Signature key pair is not set.',
+        );
+    }
+
+
+    public function getFirstByAlgorithm(SignatureAlgorithmEnum $signatureAlgorithm): ?SignatureKeyPair
+    {
+        foreach ($this->signatureKeyPairs as $signatureKeyPair) {
+            if ($signatureKeyPair->getSignatureAlgorithm() === $signatureAlgorithm) {
+                return $signatureKeyPair;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function getFirstByAlgorithmOrFail(SignatureAlgorithmEnum $signatureAlgorithm): SignatureKeyPair
+    {
+        return $this->getFirstByAlgorithm($signatureAlgorithm) ?? throw new OpenIdException(
+            sprintf(
+                'Signature key pair for algorithm %s is not set.',
+                $signatureAlgorithm->value,
+            ),
+        );
     }
 }
