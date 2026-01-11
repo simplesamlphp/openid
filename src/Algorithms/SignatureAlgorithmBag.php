@@ -47,4 +47,20 @@ class SignatureAlgorithmBag
             $this->getAll(),
         );
     }
+
+
+    /**
+     * @return string[]
+     */
+    public function getAllNamesUnique(): array
+    {
+        return array_unique(
+            array_values(
+                array_map(
+                    fn(SignatureAlgorithmEnum $signatureAlgorithmEnum): string => $signatureAlgorithmEnum->value,
+                    $this->getAll(),
+                ),
+            ),
+        );
+    }
 }

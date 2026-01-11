@@ -92,4 +92,20 @@ class SignatureKeyPairBag
             ),
         );
     }
+
+
+    /**
+     * @return string[]
+     */
+    public function getAllAlgorithmNamesUnique(): array
+    {
+        return array_unique(
+            array_values(
+                array_map(
+                    fn(SignatureKeyPair $signatureKeyPair): string => $signatureKeyPair->getSignatureAlgorithm()->value,
+                    $this->getAll(),
+                ),
+            ),
+        );
+    }
 }

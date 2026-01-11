@@ -45,4 +45,22 @@ class SignatureKeyPairConfigBag
     {
         return $this->signatureKeyPairConfigs;
     }
+
+
+    /**
+     * @return string[]
+     */
+    public function getAllAlgorithmNamesUnique(): array
+    {
+        return array_unique(
+            array_values(
+                array_map(
+                    fn(
+                        SignatureKeyPairConfig $signatureKeyPairConfig,
+                    ): string => $signatureKeyPairConfig->getSignatureAlgorithm()->value,
+                    $this->getAll(),
+                ),
+            ),
+        );
+    }
 }
