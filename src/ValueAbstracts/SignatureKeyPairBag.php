@@ -6,6 +6,7 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 
 class SignatureKeyPairBag
 {
@@ -105,6 +106,20 @@ class SignatureKeyPairBag
                     fn(SignatureKeyPair $signatureKeyPair): string => $signatureKeyPair->getSignatureAlgorithm()->value,
                     $this->getAll(),
                 ),
+            ),
+        );
+    }
+
+
+    /**
+     * @return \SimpleSAML\OpenID\Jwk\JwkDecorator[]
+     */
+    public function getAllPublicKeys(): array
+    {
+        return array_values(
+            array_map(
+                fn(SignatureKeyPair $signatureKeyPair): JwkDecorator => $signatureKeyPair->getKeyPair()->getPublicKey(),
+                $this->getAll(),
             ),
         );
     }
