@@ -16,6 +16,8 @@ enum JwtTypesEnum: string
 
     case Jwt = 'JWT';
 
+    case LogoutJwt = 'logout+jwt';
+
     case OpenId4VciProofJwt = 'openid4vci-proof+jwt';
 
     case TrustMarkJwt = 'trust-mark+jwt';
