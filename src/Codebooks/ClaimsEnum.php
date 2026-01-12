@@ -158,6 +158,8 @@ enum ClaimsEnum: string
     // EncryptionValuesSupported
     case EncValuesSupported = 'enc_values_supported';
 
+    case Events = 'events';
+
     case Evidence = 'evidence';
 
     // ExpirationTime

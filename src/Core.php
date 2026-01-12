@@ -11,6 +11,7 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\IdTokenFactory;
+use SimpleSAML\OpenID\Core\Factories\LogoutTokenFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
@@ -57,6 +58,8 @@ class Core
     protected ?ClaimFactory $claimFactory = null;
 
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
+
+    protected ?LogoutTokenFactory $logoutTokenFactory = null;
 
 
     public function __construct(
@@ -227,6 +230,20 @@ class Core
     {
         return $this->claimFactory ??= new ClaimFactory(
             $this->helpers(),
+        );
+    }
+
+
+    public function logoutTokenFactory(): LogoutTokenFactory
+    {
+        return $this->logoutTokenFactory ??= new LogoutTokenFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
         );
     }
 }
