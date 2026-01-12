@@ -359,6 +359,9 @@ enum ClaimsEnum: string
 
     case ServiceDocumentation = 'service_documentation';
 
+    // Session ID
+    case Sid = 'sid';
+
     case SignedJwksUri = 'signed_jwks_uri';
 
     case SignedMetadata = 'signed_metadata';
