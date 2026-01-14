@@ -63,4 +63,10 @@ class SignatureKeyPairConfigBag
             ),
         );
     }
+
+
+    public function getFirst(): ?SignatureKeyPairConfig
+    {
+        return $this->signatureKeyPairConfigs[array_key_first($this->signatureKeyPairConfigs)] ?? null;
+    }
 }
