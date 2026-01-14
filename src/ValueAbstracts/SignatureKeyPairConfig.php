@@ -11,7 +11,7 @@ class SignatureKeyPairConfig
     /**
      * @param \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum $signatureAlgorithm Signature algorithm
      * to use for signing JWTs.
-     * @param \SimpleSAML\OpenID\ValueAbstracts\KeyPairFilenameConfig $keyPairConfig Key pair configuration to use for
+     * @param \SimpleSAML\OpenID\ValueAbstracts\KeyPairConfigInterface $keyPairConfig Key pair configuration to use for
      * signing JWTs.
      */
     public function __construct(
@@ -27,7 +27,7 @@ class SignatureKeyPairConfig
     }
 
 
-    public function getKeyPairConfig(): KeyPairFilenameConfig
+    public function getKeyPairConfig(): KeyPairConfigInterface
     {
         return $this->keyPairConfig;
     }

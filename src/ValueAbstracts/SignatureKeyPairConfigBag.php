@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
+use SimpleSAML\OpenID\Exceptions\OpenIdException;
+
 class SignatureKeyPairConfigBag
 {
     /**
@@ -68,5 +70,16 @@ class SignatureKeyPairConfigBag
     public function getFirst(): ?SignatureKeyPairConfig
     {
         return $this->signatureKeyPairConfigs[array_key_first($this->signatureKeyPairConfigs)] ?? null;
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     */
+    public function getFirstOrFail(): SignatureKeyPairConfig
+    {
+        return $this->getFirst() ?? throw new OpenIdException(
+            'Signature key pair config is not set.',
+        );
     }
 }
