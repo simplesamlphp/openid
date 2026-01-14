@@ -54,7 +54,11 @@ class SignatureKeyPairBag
 
     public function getFirst(): ?SignatureKeyPair
     {
-        return $this->signatureKeyPairs[array_key_first($this->signatureKeyPairs)] ?? null;
+        if (is_null($firstKey = array_key_first($this->signatureKeyPairs))) {
+            return null;
+        }
+
+        return $this->signatureKeyPairs[$firstKey] ?? null;
     }
 
 
