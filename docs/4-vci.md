@@ -42,7 +42,8 @@ $verifiableCredentialTools = new VerifiableCredentials(
     $timestampValidationLeeway,
 );
 
-// You can also use the JWK Tools to create a JWK decorator from a private key file.
+// You can also use the JWK Tools to create a JWK decorator from a private key
+// file.
 $jwkTools = new Jwk();
 ```
 
@@ -56,6 +57,7 @@ The following example shows how to create a SD-JWT VC.
 ```php
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
 /** @var \SimpleSAML\OpenID\VerifiableCredentials $verifiableCredentialTools */
 /** @var \SimpleSAML\OpenID\Jwk $jwkTools */
@@ -81,7 +83,7 @@ foreach ($disclosedData as $key => $value) {
     $disclosureBag->add($disclosure);
 }
 
-$issuedAt = new \DateTimeImmutable();
+$issuedAt = new DateTimeImmutable('now', new DateTimeZone('UTC'));
 
 // Use any logic necessary to prepare basic JWT payload data.
 $jwtPayload = [
@@ -94,8 +96,9 @@ $jwtPayload = [
     // ...
 ];
 
-// Use any logic necessary to prepare SD JWT header data.
+// Use any logic necessary to prepare JWT header data.
 $jwtHeader = [
+    ClaimsEnum::Kid->value 'abc123',
     //...
 ];
 
@@ -116,6 +119,7 @@ $verifiableCredential = $verifiableCredentialTools->sdJwtVcFactory()->fromData(
     $disclosureBag,
 );
 
-// Get the credential token string.
+// Get the credential token string (JWS). Default serialization is
+// JwsSerializerEnum::Compact.
 $token = $verifiableCredential->getToken();
 ```

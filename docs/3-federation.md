@@ -285,3 +285,60 @@ try {
 }
 
 ```
+
+## Prepare Entity Statements
+
+You can use an Entity Statement Factory to quickly create Entity Statements.
+Since Entity Statements are signed JWTs (JWS), you have to have your private
+key prepared which will be used to sign them. 
+
+```php
+
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Jwk;
+use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
+
+/** @var \SimpleSAML\OpenID\Federation $federationTools */
+
+// You can use the JWK Tools to create a JWK decorator from a private key file.
+$jwkTools = new Jwk();
+
+// Prepare a signing key decorator. Check other methods on `jwkDecoratorFactory`
+// for alternative ways to create a key decorator. 
+$signingKey = $jwkTools->jwkDecoratorFactory()->fromPkcs1Or8KeyFile(
+    '/path/to/private/key.pem',
+);
+
+// Set the signature algorithm to use.
+$signatureAlgorithm = SignatureAlgorithmEnum::ES256;
+
+// Use any logic necessary to prepare JWT payload data.
+$issuedAt = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+
+$jwtPayload = [
+    ClaimsEnum::Iss->value => 'https://example.com/issuer',
+    ClaimsEnum::Iat->value => $issuedAt->getTimestamp(),
+    ClaimsEnum::Nbf->value => $issuedAt->getTimestamp(),
+    ClaimsEnum::Sub->value => 'subject-id',
+    // ...
+];
+
+// Use any logic necessary to prepare JWT header data.
+$jwtHeader = [
+    ClaimsEnum::Kid->value 'abc123',
+    //...
+];
+
+// Build Entity Statement instance.
+$entityStatement = $federationTools->entityStatementFactory()->fromData(
+    $signingKey,
+    $signatureAlgorithm,
+    $jwtPayload,
+    $jwtHeader,
+);
+
+// Get Entity Statement token string (JWS). Default serialization is
+// JwsSerializerEnum::Compact.
+$entityStatementToken = $entityStatement->getToken();
+
+```
