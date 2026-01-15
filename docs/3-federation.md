@@ -290,7 +290,7 @@ try {
 
 You can use an Entity Statement Factory to quickly create Entity Statements.
 Since Entity Statements are signed JWTs (JWS), you have to have your private
-key prepared which will be used to sign them. 
+key prepared which will be used to sign them.
 
 ```php
 
