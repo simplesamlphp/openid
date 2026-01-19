@@ -442,4 +442,9 @@ class Federation
             $this->helpers(),
         );
     }
+
+    public function timestampValidationLeewayDecorator(): DateIntervalDecorator
+    {
+        return $this->timestampValidationLeewayDecorator;
+    }
 }
