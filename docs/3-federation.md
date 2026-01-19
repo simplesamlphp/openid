@@ -1,4 +1,4 @@
-# OpenID Federation Tools (draft 44)
+# OpenID Federation Tools (draft 45)
 
 To use it, create an instance of the class `\SimpleSAML\OpenID\Federation`.
 
