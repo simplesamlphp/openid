@@ -69,6 +69,8 @@ enum ParamsEnum: string
 
     case State = 'state';
 
+    case TargetLinkUri = 'target_link_uri';
+
     case TrustMarked = 'trust_marked';
 
     case TrustMarkType = 'trust_mark_type';
