@@ -163,7 +163,7 @@ class Federation
         return $this->entityStatementFetcher ??= new EntityStatementFetcher(
             $this->entityStatementFactory(),
             $this->artifactFetcher(),
-            $this->maxCacheDurationDecorator,
+            $this->maxCacheDurationDecorator(),
             $this->helpers(),
             $this->logger,
         );
@@ -186,7 +186,7 @@ class Federation
     {
         return $this->trustChainFactory ??= new TrustChainFactory(
             $this->entityStatementFactory(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->metadataPolicyResolver(),
             $this->metadataPolicyApplicator(),
             $this->helpers(),
@@ -200,7 +200,7 @@ class Federation
             $this->entityStatementFetcher(),
             $this->trustChainFactory(),
             $this->trustChainBagFactory(),
-            $this->maxCacheDurationDecorator,
+            $this->maxCacheDurationDecorator(),
             $this->cacheDecorator,
             $this->logger,
             $this->maxTrustChainDepth,
@@ -215,7 +215,7 @@ class Federation
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->helpers(),
             $this->claimFactory(),
         );
@@ -229,7 +229,7 @@ class Federation
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->helpers(),
             $this->claimFactory(),
         );
@@ -243,7 +243,7 @@ class Federation
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->helpers(),
             $this->claimFactory(),
         );
@@ -257,7 +257,7 @@ class Federation
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->helpers(),
             $this->claimFactory(),
         );
@@ -271,7 +271,7 @@ class Federation
             $this->jwsVerifierDecorator(),
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
-            $this->timestampValidationLeewayDecorator,
+            $this->timestampValidationLeewayDecorator(),
             $this->helpers(),
             $this->claimFactory(),
         );
@@ -283,7 +283,7 @@ class Federation
         return $this->trustMarkStatusResponseFetcher ??= new TrustMarkStatusResponseFetcher(
             $this->trustMarkStatusResponseFactory(),
             $this->artifactFetcher(),
-            $this->maxCacheDurationDecorator,
+            $this->maxCacheDurationDecorator(),
             $this->helpers(),
             $this->logger,
         );
@@ -297,10 +297,10 @@ class Federation
             $this->trustMarkFactory(),
             $this->trustMarkDelegationFactory(),
             $this->trustMarkStatusResponseFetcher(),
-            $this->maxCacheDurationDecorator,
+            $this->maxCacheDurationDecorator(),
             $this->cacheDecorator(),
             $this->logger,
-            $this->defaultTrustMarkStatusEndpointUsagePolicyEnum,
+            $this->defaultTrustMarkStatusEndpointUsagePolicyEnum(),
         );
     }
 
@@ -310,7 +310,7 @@ class Federation
         return $this->trustMarkFetcher ??= new TrustMarkFetcher(
             $this->trustMarkFactory(),
             $this->artifactFetcher(),
-            $this->maxCacheDurationDecorator,
+            $this->maxCacheDurationDecorator(),
             $this->helpers(),
             $this->logger,
         );
@@ -443,8 +443,15 @@ class Federation
         );
     }
 
+
     public function timestampValidationLeewayDecorator(): DateIntervalDecorator
     {
         return $this->timestampValidationLeewayDecorator;
+    }
+
+
+    public function defaultTrustMarkStatusEndpointUsagePolicyEnum(): TrustMarkStatusEndpointUsagePolicyEnum
+    {
+        return $this->defaultTrustMarkStatusEndpointUsagePolicyEnum;
     }
 }
