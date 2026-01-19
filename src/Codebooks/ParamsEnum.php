@@ -40,6 +40,9 @@ enum ParamsEnum: string
 
     case Intermediate = 'intermediate';
 
+    // Issuer
+    case Iss = 'iss';
+
     case IssuerState = 'issuer_state';
 
     case LoginHint = 'login_hint';
