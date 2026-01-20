@@ -38,12 +38,43 @@ class TrustAnchorConfigBag implements \IteratorAggregate
     }
 
 
+    public function getByEntityIdOrFail(string $entityId): TrustAnchorConfig
+    {
+        return $this->trustAnchorConfigs[$entityId] ??
+        throw new \InvalidArgumentException(sprintf("No trust anchor config found for entity ID '%s'.", $entityId));
+    }
+
+
     /**
      * @return array<non-empty-string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
      */
     public function getAll(): array
     {
         return $this->trustAnchorConfigs;
+    }
+
+
+    /**
+     * @return array<non-empty-string>
+     */
+    public function getAllEntityIds(): array
+    {
+        return array_keys($this->trustAnchorConfigs);
+    }
+
+
+    public function has(string $entityId): bool
+    {
+        return isset($this->trustAnchorConfigs[$entityId]);
+    }
+
+
+    /**
+     * @return array<non-empty-string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
+     */
+    public function getInCommonWith(TrustAnchorConfigBag $otherBag): array
+    {
+        return array_intersect_key($this->getAll(), $otherBag->getAll());
     }
 
 
