@@ -289,6 +289,8 @@ enum ClaimsEnum: string
 
     case Path = 'path';
 
+    case PeerTrustChain = 'peer_trust_chain';
+
     case PolicyUri = 'policy_uri';
 
     case PostLogoutRedirectUris = 'post_logout_redirect_uris';
