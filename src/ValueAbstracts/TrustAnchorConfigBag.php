@@ -4,12 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
-use Traversable;
-
-/**
- * @implements \IteratorAggregate<non-empty-string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
- */
-class TrustAnchorConfigBag implements \IteratorAggregate
+class TrustAnchorConfigBag
 {
     /**
      * @var array<non-empty-string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
@@ -72,14 +67,5 @@ class TrustAnchorConfigBag implements \IteratorAggregate
     public function getInCommonWith(TrustAnchorConfigBag $otherBag): TrustAnchorConfigBag
     {
         return new self(...array_intersect_key($this->getAll(), $otherBag->getAll()));
-    }
-
-
-    /**
-     * @return \ArrayIterator<string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
-     */
-    public function getIterator(): Traversable
-    {
-        return new \ArrayIterator($this->getAll());
     }
 }
