@@ -69,12 +69,9 @@ class TrustAnchorConfigBag implements \IteratorAggregate
     }
 
 
-    /**
-     * @return array<non-empty-string,\SimpleSAML\OpenID\ValueAbstracts\TrustAnchorConfig>
-     */
-    public function getInCommonWith(TrustAnchorConfigBag $otherBag): array
+    public function getInCommonWith(TrustAnchorConfigBag $otherBag): TrustAnchorConfigBag
     {
-        return array_intersect_key($this->getAll(), $otherBag->getAll());
+        return new self(...array_intersect_key($this->getAll(), $otherBag->getAll()));
     }
 
 
