@@ -23,17 +23,8 @@ final class UniqueStringBagTest extends TestCase
     }
 
 
-    public function testIsIterable(): void
+    public function testCanCreateInstance(): void
     {
-        $bag = $this->sut();
-
-        $this->assertInstanceOf(\Traversable::class, $bag);
-
-        $result = [];
-        foreach ($bag as $item) {
-            $result[] = $item;
-        }
-
-        $this->assertSame(['foo', 'bar'], $result);
+        $this->assertInstanceOf(UniqueStringBag::class, $this->sut());
     }
 }

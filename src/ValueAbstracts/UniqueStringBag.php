@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
-/**
- * @implements \IteratorAggregate<int, string>
- */
-class UniqueStringBag implements \JsonSerializable, \IteratorAggregate
+class UniqueStringBag implements \JsonSerializable
 {
     /**
      * @var string[]
@@ -19,15 +16,6 @@ class UniqueStringBag implements \JsonSerializable, \IteratorAggregate
         string ...$values,
     ) {
         $this->add(...$values);
-    }
-
-
-    /**
-     * @return \ArrayIterator<int, string>
-     */
-    public function getIterator(): \ArrayIterator
-    {
-        return new \ArrayIterator($this->values);
     }
 
 
