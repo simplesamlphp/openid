@@ -204,6 +204,7 @@ class Federation
             $this->cacheDecorator,
             $this->logger,
             $this->maxTrustChainDepth,
+            // TODO mivanci Enable defining maxAuthorityHints
         );
     }
 

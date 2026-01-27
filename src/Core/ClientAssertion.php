@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Core;
 use SimpleSAML\OpenID\Exceptions\ClientAssertionException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * For `private_key_jwt` authentication method.
+ */
 class ClientAssertion extends ParsedJws
 {
     /**

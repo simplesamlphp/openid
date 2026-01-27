@@ -36,6 +36,8 @@ enum ParamsEnum: string
 
     case ErrorDescription = 'error_description';
 
+    case Hint = 'hint';
+
     case IdTokenHint = 'id_token_hint';
 
     case Intermediate = 'intermediate';
