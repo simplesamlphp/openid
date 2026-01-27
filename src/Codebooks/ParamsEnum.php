@@ -38,6 +38,8 @@ enum ParamsEnum: string
 
     case ErrorDescription = 'error_description';
 
+    case GrantType = 'grant_type';
+
     case Hint = 'hint';
 
     case IdTokenHint = 'id_token_hint';
