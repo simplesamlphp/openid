@@ -6,6 +6,8 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ParamsEnum: string
 {
+    case AccessToken = 'access_token';
+
     case AcrValues = 'acr_values';
 
     case Assertion = 'assertion';
@@ -42,6 +44,8 @@ enum ParamsEnum: string
 
     case Hint = 'hint';
 
+    case IdToken = 'id_token';
+
     case IdTokenHint = 'id_token_hint';
 
     case Intermediate = 'intermediate';
@@ -76,6 +80,8 @@ enum ParamsEnum: string
     case State = 'state';
 
     case TargetLinkUri = 'target_link_uri';
+
+    case TokenType = 'token_type';
 
     case TrustMarked = 'trust_marked';
 
