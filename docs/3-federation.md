@@ -1,4 +1,4 @@
-# OpenID Federation Tools (draft 45)
+# OpenID Federation Tools (draft 47)
 
 To use it, create an instance of the class `\SimpleSAML\OpenID\Federation`.
 
@@ -29,7 +29,7 @@ class Test
     {
         // Instantiation example by using default options.
         // * 'RS256' as a supported algorithm 
-        // * no caching support (not recommended for production environment)
+        // * no caching support (not recommended for a production environment)
         // * no logging support
         $federationTools = new Federation();
         
@@ -290,7 +290,7 @@ try {
 
 You can use an Entity Statement Factory to quickly create Entity Statements.
 Since Entity Statements are signed JWTs (JWS), you have to have your private
-key prepared which will be used to sign them.
+key prepared, which will be used to sign them.
 
 ```php
 
@@ -337,7 +337,7 @@ $entityStatement = $federationTools->entityStatementFactory()->fromData(
     $jwtHeader,
 );
 
-// Get Entity Statement token string (JWS). Default serialization is
+// Get Entity Statement token string (JWS). The default serialization is
 // JwsSerializerEnum::Compact.
 $entityStatementToken = $entityStatement->getToken();
 
