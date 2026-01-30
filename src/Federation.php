@@ -40,6 +40,7 @@ use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
+use SimpleSAML\OpenID\Utils\KeyPairResolver;
 
 class Federation
 {
@@ -110,6 +111,8 @@ class Federation
     protected ?TrustMarkStatusResponseFactory $trustMarkStatusResponseFactory = null;
 
     protected ?TrustMarkStatusResponseFetcher $trustMarkStatusResponseFetcher = null;
+
+    protected ?KeyPairResolver $keyPairResolver = null;
 
 
     public function __construct(
@@ -454,5 +457,14 @@ class Federation
     public function defaultTrustMarkStatusEndpointUsagePolicyEnum(): TrustMarkStatusEndpointUsagePolicyEnum
     {
         return $this->defaultTrustMarkStatusEndpointUsagePolicyEnum;
+    }
+
+
+    public function keyPairResolver(): KeyPairResolver
+    {
+        return $this->keyPairResolver ??= new KeyPairResolver(
+            $this->helpers(),
+            $this->logger,
+        );
     }
 }
