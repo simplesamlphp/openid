@@ -6,9 +6,7 @@ namespace SimpleSAML\Test\OpenID\SdJwt\Factories;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\SdJwt\Disclosure;
 use SimpleSAML\OpenID\SdJwt\DisclosureBag;
 use SimpleSAML\OpenID\SdJwt\Factories\DisclosureBagFactory;
 
@@ -16,12 +14,8 @@ use SimpleSAML\OpenID\SdJwt\Factories\DisclosureBagFactory;
 #[UsesClass(DisclosureBag::class)]
 final class DisclosureBagFactoryTest extends TestCase
 {
-    protected MockObject $disclosureMock;
-
-
     protected function setUp(): void
     {
-        $this->disclosureMock = $this->createMock(Disclosure::class);
     }
 
 
@@ -46,7 +40,7 @@ final class DisclosureBagFactoryTest extends TestCase
 
         $this->assertInstanceOf(
             DisclosureBag::class,
-            $this->sut()->build($this->disclosureMock),
+            $this->sut()->build($this->createStub(\SimpleSAML\OpenID\SdJwt\Disclosure::class)),
         );
     }
 }

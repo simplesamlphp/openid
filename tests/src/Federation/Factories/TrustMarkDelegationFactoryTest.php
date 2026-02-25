@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\TrustMarkDelegation;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
@@ -31,19 +30,19 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
     protected MockObject $jwsDecoratorBuilderMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -64,8 +63,6 @@ final class TrustMarkDelegationFactoryTest extends TestCase
 
     protected array $validPayload;
 
-    protected MockObject $jwkDecoratorMock;
-
 
     protected function setUp(): void
     {
@@ -83,10 +80,10 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
         $this->jwsDecoratorBuilderMock->method('fromData')->willReturn($jwsDecoratorMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
@@ -97,12 +94,10 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
-
-        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
     }
 
 
@@ -161,7 +156,7 @@ final class TrustMarkDelegationFactoryTest extends TestCase
         $this->assertInstanceOf(
             TrustMarkDelegation::class,
             $this->sut()->fromData(
-                $this->jwkDecoratorMock,
+                $this->createStub(\SimpleSAML\OpenID\Jwk\JwkDecorator::class),
                 SignatureAlgorithmEnum::ES256,
                 $this->validPayload,
                 $this->sampleHeader,

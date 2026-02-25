@@ -26,7 +26,7 @@ final class TrustChainResolverTest extends TestCase
 
     protected MockObject $trustChainBagFactoryMock;
 
-    protected MockObject $maxCacheDurationDecorator;
+    protected \PHPUnit\Framework\MockObject\Stub $maxCacheDurationDecorator;
 
     protected MockObject $cacheDecoratorMock;
 
@@ -50,7 +50,7 @@ final class TrustChainResolverTest extends TestCase
         $this->entityStatementFetcherMock = $this->createMock(EntityStatementFetcher::class);
         $this->trustChainFactoryMock = $this->createMock(TrustChainFactory::class);
         $this->trustChainBagFactoryMock = $this->createMock(TrustChainBagFactory::class);
-        $this->maxCacheDurationDecorator = $this->createMock(DateIntervalDecorator::class);
+        $this->maxCacheDurationDecorator = $this->createStub(DateIntervalDecorator::class);
         $this->cacheDecoratorMock = $this->createMock(CacheDecorator::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->maxTrustChainDepth = 5;

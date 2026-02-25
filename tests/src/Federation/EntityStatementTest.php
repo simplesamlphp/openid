@@ -34,11 +34,11 @@ final class EntityStatementTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
@@ -123,9 +123,9 @@ final class EntityStatementTest extends TestCase
         $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);

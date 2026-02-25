@@ -47,7 +47,7 @@ class JwksFetcher
                 $message,
                 ['jwksJson' => $jwksJson],
             );
-            throw new JwksException($message);
+            throw new JwksException($message, $jsonException->getCode(), $jsonException);
         }
 
         return $this->claimFactory->buildJwks($jwks)->getValue();

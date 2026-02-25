@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Federation\Claims;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarkOwnersClaimValue;
 use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
@@ -17,7 +16,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
 
     protected string $subject = 'subject';
 
-    protected MockObject $jwksClaimMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksClaimMock;
 
     protected array $otherClaims;
 
@@ -26,7 +25,7 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
     {
         $this->trustMarkType = 'trustMarkType';
         $this->subject = 'subject';
-        $this->jwksClaimMock = $this->createMock(JwksClaim::class);
+        $this->jwksClaimMock = $this->createStub(JwksClaim::class);
         $this->otherClaims = ['key' => 'value'];
     }
 

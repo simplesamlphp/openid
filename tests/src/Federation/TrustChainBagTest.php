@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Federation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\TrustChain;
@@ -14,12 +13,12 @@ use SimpleSAML\OpenID\Federation\TrustChainBag;
 #[CoversClass(TrustChainBag::class)]
 final class TrustChainBagTest extends TestCase
 {
-    protected MockObject $trustChainMock;
+    protected \PHPUnit\Framework\MockObject\Stub $trustChainMock;
 
 
     protected function setUp(): void
     {
-        $this->trustChainMock = $this->createMock(TrustChain::class);
+        $this->trustChainMock = $this->createStub(TrustChain::class);
     }
 
 

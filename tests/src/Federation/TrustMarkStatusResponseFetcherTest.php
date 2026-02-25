@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
-use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\AbstractJwsFetcher;
@@ -33,32 +32,29 @@ final class TrustMarkStatusResponseFetcherTest extends TestCase
 
     protected MockObject $artifactFetcherMock;
 
-    protected MockObject $maxCacheDurationMock;
+    protected \PHPUnit\Framework\MockObject\Stub $maxCacheDurationMock;
 
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected MockObject $responseMock;
 
     protected MockObject $entityStatementMock;
-
-    protected MockObject $trustMarkMock;
 
 
     protected function setUp(): void
     {
         $this->trustMarkStatusResponseFactoryMock = $this->createMock(TrustMarkStatusResponseFactory::class);
         $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
-        $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->maxCacheDurationMock = $this->createStub(DateIntervalDecorator::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
         $this->artifactFetcherMock->method('fromNetwork')->willReturn($this->responseMock);
 
         $this->entityStatementMock = $this->createMock(EntityStatement::class);
-        $this->trustMarkMock = $this->createMock(TrustMark::class);
     }
 
 
@@ -116,7 +112,7 @@ final class TrustMarkStatusResponseFetcherTest extends TestCase
         $this->trustMarkStatusResponseFactoryMock->expects($this->once())->method('fromToken');
 
         $this->sut()->fromFederationTrustMarkStatusEndpoint(
-            $this->trustMarkMock,
+            $this->createStub(\SimpleSAML\OpenID\Federation\TrustMark::class),
             $this->entityStatementMock,
         );
     }
@@ -132,7 +128,7 @@ final class TrustMarkStatusResponseFetcherTest extends TestCase
         $this->expectExceptionMessage('endpoint');
 
         $this->sut()->fromFederationTrustMarkStatusEndpoint(
-            $this->trustMarkMock,
+            $this->createStub(\SimpleSAML\OpenID\Federation\TrustMark::class),
             $this->entityStatementMock,
         );
     }

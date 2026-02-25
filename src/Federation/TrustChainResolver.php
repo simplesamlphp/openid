@@ -298,7 +298,7 @@ class TrustChainResolver
         } catch (Throwable $throwable) {
             $message = 'Error building Trust Chain Bag: ' . $throwable->getMessage();
             $this->logger?->error($message, $debugStartInfo);
-            throw new TrustChainException($message);
+            throw new TrustChainException($message, $throwable->getCode(), $throwable);
         }
 
         return $trustChainBag;

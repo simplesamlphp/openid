@@ -27,19 +27,19 @@ final class RequestObjectTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $expiredPayload = [
         'iat' => 1731178665,
@@ -58,20 +58,18 @@ final class RequestObjectTest extends TestCase
 
     protected function setUp(): void
     {
-        $signatureMock = $this->createMock(Signature::class);
-
         $jwsMock = $this->createMock(JWS::class);
         $jwsMock->method('getPayload')
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
-        $jwsMock->method('getSignature')->willReturn($signatureMock);
+        $jwsMock->method('getSignature')->willReturn($this->createStub(Signature::class));
 
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
@@ -82,7 +80,7 @@ final class RequestObjectTest extends TestCase
         $typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;

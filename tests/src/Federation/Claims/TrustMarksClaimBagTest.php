@@ -97,7 +97,7 @@ final class TrustMarksClaimBagTest extends TestCase
     {
         $sut = $this->sut($this->trustMarkClaimMock);
         $this->assertCount(1, $sut->jsonSerialize());
-        $sut->add($this->createMock(TrustMarksClaimValue::class));
+        $sut->add($this->createStub(TrustMarksClaimValue::class));
         $this->assertCount(2, $sut->jsonSerialize());
     }
 }

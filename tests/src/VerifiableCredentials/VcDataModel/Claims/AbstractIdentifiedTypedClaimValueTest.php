@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\AbstractIdentifiedTypedClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
@@ -15,7 +14,7 @@ final class AbstractIdentifiedTypedClaimValueTest extends TestCase
 {
     protected string $id = "id";
 
-    protected MockObject $typeClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $typeClaimValueMock;
 
     protected array $otherClaims = [];
 
@@ -24,7 +23,7 @@ final class AbstractIdentifiedTypedClaimValueTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->typeClaimValueMock = $this->createMock(TypeClaimValue::class);
+        $this->typeClaimValueMock = $this->createStub(TypeClaimValue::class);
     }
 
 

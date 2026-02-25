@@ -23,7 +23,7 @@ final class KeyPairResolverTest extends TestCase
 {
     private MockObject $helpersMock;
 
-    private MockObject $loggerMock;
+    private \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     private MockObject $signatureKeyPairBagMock;
 
@@ -35,7 +35,7 @@ final class KeyPairResolverTest extends TestCase
         $this->helpersMock = $this->createMock(\SimpleSAML\OpenID\Helpers::class);
         $typeHelper = new Type();
         $this->helpersMock->method('type')->willReturn($typeHelper);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
 
         $this->signatureKeyPairBagMock = $this->createMock(SignatureKeyPairBag::class);
 

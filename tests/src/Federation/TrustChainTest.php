@@ -20,9 +20,9 @@ use SimpleSAML\OpenID\Helpers;
 #[CoversClass(TrustChain::class)]
 final class TrustChainTest extends TestCase
 {
-    protected MockObject $timestampValidationLeewayDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayDecoratorMock;
 
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected MockObject $metadataPolicyResolverMock;
 
@@ -39,10 +39,10 @@ final class TrustChainTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->timestampValidationLeewayDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->timestampValidationLeewayDecoratorMock = $this->createStub(DateIntervalDecorator::class);
         $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
         $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
 
         $this->expirationTime = time() + 60;
         $this->leafMock = $this->createMock(EntityStatement::class);

@@ -12,12 +12,12 @@ use SimpleSAML\OpenID\Jws\JwsDecorator;
 #[CoversClass(JwsDecorator::class)]
 final class JwsDecoratorTest extends TestCase
 {
-    protected \PHPUnit\Framework\MockObject\MockObject $jwsMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsMock;
 
 
     protected function setUp(): void
     {
-        $this->jwsMock = $this->createMock(JWS::class);
+        $this->jwsMock = $this->createStub(JWS::class);
     }
 
 

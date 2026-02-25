@@ -8,7 +8,6 @@ use DateInterval;
 use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -57,30 +56,30 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(ClaimFactory::class)]
 final class JwksTest extends TestCase
 {
-    protected MockObject $supportedAlgorithmsMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
-    protected MockObject $supportedSerializersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedSerializersMock;
 
     protected DateInterval $maxCacheDuration;
 
-    protected MockObject $cacheMock;
+    protected \PHPUnit\Framework\MockObject\Stub $cacheMock;
 
-    protected MockObject $httpClientMock;
+    protected \PHPUnit\Framework\MockObject\Stub $httpClientMock;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected DateInterval $timestampValidationLeeway;
 
 
     protected function setUp(): void
     {
-        $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
+        $this->supportedAlgorithmsMock = $this->createStub(SupportedAlgorithms::class);
+        $this->supportedSerializersMock = $this->createStub(SupportedSerializers::class);
         $this->maxCacheDuration = new DateInterval('PT1M');
         $this->timestampValidationLeeway = new DateInterval('PT1M');
-        $this->cacheMock = $this->createMock(CacheInterface::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->httpClientMock = $this->createMock(Client::class);
+        $this->cacheMock = $this->createStub(CacheInterface::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
+        $this->httpClientMock = $this->createStub(Client::class);
     }
 
 

@@ -29,7 +29,7 @@ final class JwsFetcherTest extends TestCase
 
     protected MockObject $maxCacheDurationMock;
 
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected MockObject $loggerMock;
 
@@ -43,12 +43,11 @@ final class JwsFetcherTest extends TestCase
         $this->parsedJwsFactoryMock = $this->createMock(ParsedJwsFactory::class);
         $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
-        $responseBodyMock = $this->createMock(StreamInterface::class);
-        $this->responseMock->method('getBody')->willReturn($responseBodyMock);
+        $this->responseMock->method('getBody')->willReturn($this->createStub(StreamInterface::class));
         $this->artifactFetcherMock->method('fromNetwork')->willReturn($this->responseMock);
 
         $this->parsedJwsMock = $this->createMock(ParsedJws::class);

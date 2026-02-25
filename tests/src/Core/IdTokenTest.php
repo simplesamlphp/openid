@@ -23,19 +23,19 @@ final class IdTokenTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $expiredPayload = [
         'iss' => 'https://server.example.com',
@@ -61,10 +61,10 @@ final class IdTokenTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
@@ -79,7 +79,7 @@ final class IdTokenTest extends TestCase
         $typeHelperMock->method('ensureArrayWithKeysAndValuesAsNonEmptyStrings')
             ->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;

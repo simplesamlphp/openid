@@ -8,8 +8,6 @@ use Jose\Component\Signature\JWSVerifier;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use SimpleSAML\OpenID\Jwks\JwksDecorator;
-use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 
 #[CoversClass(JwsVerifierDecorator::class)]
@@ -17,17 +15,10 @@ final class JwsVerifierDecoratorTest extends TestCase
 {
     protected MockObject $jwsVerifierMock;
 
-    protected MockObject $jwsDecoratorMock;
-
-    protected MockObject $jwksDecoratorMock;
-
 
     protected function setUp(): void
     {
         $this->jwsVerifierMock = $this->createMock(JWSVerifier::class);
-
-        $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-        $this->jwksDecoratorMock = $this->createMock(JwksDecorator::class);
     }
 
 
@@ -59,8 +50,8 @@ final class JwsVerifierDecoratorTest extends TestCase
         $this->jwsVerifierMock->expects($this->once())->method('verifyWithKeySet');
 
         $this->sut()->verifyWithKeySet(
-            $this->jwsDecoratorMock,
-            $this->jwksDecoratorMock,
+            $this->createStub(\SimpleSAML\OpenID\Jws\JwsDecorator::class),
+            $this->createStub(\SimpleSAML\OpenID\Jwks\JwksDecorator::class),
             0,
         );
     }

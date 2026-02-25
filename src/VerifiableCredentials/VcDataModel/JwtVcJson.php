@@ -261,7 +261,11 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             try {
                 return $this->vcIssuanceDate = $this->helpers->dateTime()->fromTimestamp($nbf);
             } catch (Exception $e) {
-                throw new VcDataModelException('Error parsing Not Before claim: ' . $e->getMessage());
+                throw new VcDataModelException(
+                    'Error parsing Not Before claim: ' . $e->getMessage(),
+                    $e->getCode(),
+                    $e,
+                );
             }
         }
 
@@ -274,7 +278,11 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
         try {
             return $this->vcIssuanceDate = $this->helpers->dateTime()->fromXsDateTime($issuanceDate);
         } catch (Exception $exception) {
-            throw new VcDataModelException('Error parsing VC Issuance Date claim: ' . $exception->getMessage());
+            throw new VcDataModelException(
+                'Error parsing VC Issuance Date claim: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception,
+            );
         }
     }
 
@@ -332,7 +340,11 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             try {
                 return $this->vcExpirationDate = $this->helpers->dateTime()->fromTimestamp($exp);
             } catch (Exception $e) {
-                throw new VcDataModelException('Error parsing Expiration Time date claim: ' . $e->getMessage());
+                throw new VcDataModelException(
+                    'Error parsing Expiration Time date claim: ' . $e->getMessage(),
+                    $e->getCode(),
+                    $e,
+                );
             }
         }
 
@@ -348,7 +360,11 @@ class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
             try {
                 return $this->vcExpirationDate = $this->helpers->dateTime()->fromXsDateTime($expirationDate);
             } catch (Exception $exception) {
-                throw new VcDataModelException('Error parsing VC Expiration Date claim: ' . $exception->getMessage());
+                throw new VcDataModelException(
+                    'Error parsing VC Expiration Date claim: ' . $exception->getMessage(),
+                    $exception->getCode(),
+                    $exception,
+                );
             }
         }
 

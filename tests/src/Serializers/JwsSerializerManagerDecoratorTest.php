@@ -19,8 +19,6 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
 {
     protected MockObject $jwsSerializerMock;
 
-    protected MockObject $jwsDecoratorMock;
-
     protected JWSSerializerManager $jwsSerializerManager;
 
 
@@ -28,8 +26,6 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
     {
         $this->jwsSerializerMock = $this->createMock(JWSSerializer::class);
         $this->jwsSerializerMock->method('name')->willReturn('mockSerializer');
-
-        $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
 
         // Can not mock, since it is final.
         $this->jwsSerializerManager = new JWSSerializerManager([
@@ -61,7 +57,7 @@ final class JwsSerializerManagerDecoratorTest extends TestCase
 
         $this->assertSame(
             'token',
-            $this->sut()->serialize('mockSerializer', $this->jwsDecoratorMock),
+            $this->sut()->serialize('mockSerializer', $this->createStub(\SimpleSAML\OpenID\Jws\JwsDecorator::class)),
         );
     }
 

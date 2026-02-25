@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Factories;
 
 use DateTimeImmutable;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\AtContextsEnum;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
@@ -52,13 +51,13 @@ final class VcDataModelClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
 
     protected function setUp(): void
     {
         $this->helpers = new Helpers();
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
     }
 
 
@@ -84,12 +83,12 @@ final class VcDataModelClaimFactoryTest extends TestCase
         $this->assertInstanceOf(
             VcClaimValue::class,
             $this->sut()->buildVcClaimValue(
-                $this->createMock(VcAtContextClaimValue::class),
+                $this->createStub(VcAtContextClaimValue::class),
                 'id',
-                $this->createMock(TypeClaimValue::class),
-                $this->createMock(VcCredentialSubjectClaimBag::class),
-                $this->createMock(VcIssuerClaimValue::class),
-                $this->createMock(DateTimeImmutable::class),
+                $this->createStub(TypeClaimValue::class),
+                $this->createStub(VcCredentialSubjectClaimBag::class),
+                $this->createStub(VcIssuerClaimValue::class),
+                $this->createStub(DateTimeImmutable::class),
                 null,
                 null,
                 null,

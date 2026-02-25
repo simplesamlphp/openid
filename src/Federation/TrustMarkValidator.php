@@ -708,7 +708,7 @@ class TrustMarkValidator
             );
 
             $this->logger?->error($error);
-            throw new TrustMarkException($error);
+            throw new TrustMarkException($error, $throwable->getCode(), $throwable);
         }
 
         $this->logger?->debug(
@@ -747,7 +747,7 @@ class TrustMarkValidator
                 $error,
                 ['trustMarkIssuerJwks' => $trustMarkIssuerEntityConfiguration->getJwks()],
             );
-            throw new TrustMarkException($error);
+            throw new TrustMarkException($error, $throwable->getCode(), $throwable);
         }
 
         $this->logger?->debug('Trust Mark signature validated.');
@@ -838,7 +838,7 @@ class TrustMarkValidator
                 $error,
                 ['trustMarkOwnersJwks' => $trustMarkOwnersClaimValue->getJwks()->getValue()],
             );
-            throw new TrustMarkException($error);
+            throw new TrustMarkException($error, $throwable->getCode(), $throwable);
         }
 
         $this->logger?->debug('Trust Mark Delegation signature validated.');
@@ -966,7 +966,7 @@ class TrustMarkValidator
                 'error' => $throwable->getMessage(),
             ]);
 
-            throw new TrustMarkException($message);
+            throw new TrustMarkException($message, $throwable->getCode(), $throwable);
         }
 
         $this->logger?->debug(

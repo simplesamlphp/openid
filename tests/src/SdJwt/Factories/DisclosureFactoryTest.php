@@ -20,8 +20,7 @@ final class DisclosureFactoryTest extends TestCase
     protected function setUp(): void
     {
         $this->helpersMock = $this->createMock(Helpers::class);
-        $radomHelperMock = $this->createMock(Helpers\Random::class);
-        $this->helpersMock->method('random')->willReturn($radomHelperMock);
+        $this->helpersMock->method('random')->willReturn($this->createStub(Helpers\Random::class));
     }
 
 

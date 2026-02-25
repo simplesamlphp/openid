@@ -544,7 +544,7 @@ final class TrustMarkValidatorTest extends TestCase
         $this->expectException(TrustMarkException::class);
         $this->expectExceptionMessage('signature');
 
-        $trustMarkIssuerEntityConfiguration = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfiguration = $this->createStub(EntityStatement::class);
 
         $this->sut()->validateTrustMarkSignature(
             $this->trustMarkMock,
@@ -875,7 +875,7 @@ final class TrustMarkValidatorTest extends TestCase
 
     public function testShouldUseTrustMarkStatusForNonExpiringTrustMarks(): void
     {
-        $trustMarkIssuerEntityConfiguration = $this->createMock(EntityStatement::class);
+        $trustMarkIssuerEntityConfiguration = $this->createStub(EntityStatement::class);
 
         $nonExpiringTrustMark = $this->createMock(TrustMark::class);
         $nonExpiringTrustMark->method('getExpirationTime')->willReturn(null);

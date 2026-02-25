@@ -82,9 +82,7 @@ final class JwksFetcherTest extends TestCase
 
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
-
-        $typeHelperMock = $this->createMock(Helpers\Type::class);
-        $this->helpersMock->method('type')->willReturn($typeHelperMock);
+        $this->helpersMock->method('type')->willReturn($this->createStub(Helpers\Type::class));
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
         $this->responseBodyMock = $this->createMock(StreamInterface::class);

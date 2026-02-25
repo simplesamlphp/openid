@@ -29,17 +29,17 @@ final class RequestObjectTest extends TestCase
 
     protected MockObject $jwsDecoratorMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -58,21 +58,20 @@ final class RequestObjectTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
-        $jsonHelperMock = $this->createMock(Helpers\Json::class);
-        $this->helpersMock->method('json')->willReturn($jsonHelperMock);
+        $this->helpersMock->method('json')->willReturn($this->createStub(Helpers\Json::class));
         $typeHelperMock = $this->createMock(Helpers\Type::class);
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
     }
 
 

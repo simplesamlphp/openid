@@ -29,11 +29,11 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $timestampValidationLeewayMock;
+    protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayMock;
 
     protected MockObject $helpersMock;
 
@@ -45,7 +45,7 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $arrHelperMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
@@ -111,9 +111,9 @@ final class ParsedJwsTest extends TestCase
     {
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
+        $this->timestampValidationLeewayMock = $this->createStub(DateIntervalDecorator::class);
         $this->helpersMock = $this->createMock(Helpers::class);
 
         $this->jwsMock = $this->createMock(JWS::class);
@@ -133,7 +133,7 @@ final class ParsedJwsTest extends TestCase
         $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;

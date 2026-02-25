@@ -33,11 +33,11 @@ final class TrustMarkFetcherTest extends TestCase
 
     protected MockObject $artifactFetcherMock;
 
-    protected MockObject $maxCacheDurationMock;
+    protected \PHPUnit\Framework\MockObject\Stub $maxCacheDurationMock;
 
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected MockObject $responseMock;
 
@@ -48,9 +48,9 @@ final class TrustMarkFetcherTest extends TestCase
     {
         $this->trustMarkFactoryMock = $this->createMock(TrustMarkFactory::class);
         $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
-        $this->maxCacheDurationMock = $this->createMock(DateIntervalDecorator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->maxCacheDurationMock = $this->createStub(DateIntervalDecorator::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
         $this->artifactFetcherMock->method('fromNetwork')->willReturn($this->responseMock);

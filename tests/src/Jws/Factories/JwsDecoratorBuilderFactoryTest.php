@@ -8,35 +8,26 @@ use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Signature\Algorithm\RS256;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
-use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(JwsDecoratorBuilderFactory::class)]
 #[UsesClass(JwsDecoratorBuilder::class)]
 #[UsesClass(AlgorithmManagerDecorator::class)]
 final class JwsDecoratorBuilderFactoryTest extends TestCase
 {
-    protected MockObject $jwsSerializerManagerDecoratorMock;
-
     protected AlgorithmManagerDecorator $algorithmManagerDecorator;
-
-    protected MockObject $helpersMock;
 
 
     protected function setUp(): void
     {
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->algorithmManagerDecorator = new AlgorithmManagerDecorator(
             new AlgorithmManager( // Final class, can't mock.
                 [new RS256()],
             ),
         );
-        $this->helpersMock = $this->createMock(Helpers::class);
     }
 
 
@@ -57,9 +48,9 @@ final class JwsDecoratorBuilderFactoryTest extends TestCase
         $this->assertInstanceOf(
             JwsDecoratorBuilder::class,
             $this->sut()->build(
-                $this->jwsSerializerManagerDecoratorMock,
+                $this->createStub(\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator::class),
                 $this->algorithmManagerDecorator,
-                $this->helpersMock,
+                $this->createStub(\SimpleSAML\OpenID\Helpers::class),
             ),
         );
     }

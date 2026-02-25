@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
@@ -21,47 +20,47 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaim
 #[\PHPUnit\Framework\Attributes\CoversClass(VcClaimValue::class)]
 final class VcClaimValueTest extends TestCase
 {
-    protected MockObject $vcAtContextClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $vcAtContextClaimValueMock;
 
     protected string $id = 'id';
 
-    protected MockObject $typeClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $typeClaimValueMock;
 
-    protected MockObject $vcCredentialSubjectClaimBagMock;
+    protected \PHPUnit\Framework\MockObject\Stub $vcCredentialSubjectClaimBagMock;
 
-    protected MockObject $issuerClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $issuerClaimValueMock;
 
-    protected MockObject $issuanceDateMock;
+    protected \PHPUnit\Framework\MockObject\Stub $issuanceDateMock;
 
-    protected MockObject $proofClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $proofClaimValueMock;
 
-    protected MockObject $expirationDateMock;
+    protected \PHPUnit\Framework\MockObject\Stub $expirationDateMock;
 
-    protected MockObject $credentialStatusClaimValueMock;
+    protected \PHPUnit\Framework\MockObject\Stub $credentialStatusClaimValueMock;
 
-    protected MockObject $credentialSchemaClaimBagMock;
+    protected \PHPUnit\Framework\MockObject\Stub $credentialSchemaClaimBagMock;
 
-    protected MockObject $refreshServiceClaimBagMock;
+    protected \PHPUnit\Framework\MockObject\Stub $refreshServiceClaimBagMock;
 
-    protected MockObject $termsOfUserClaimBagMock;
+    protected \PHPUnit\Framework\MockObject\Stub $termsOfUserClaimBagMock;
 
-    protected MockObject $evidenceClaimBagMock;
+    protected \PHPUnit\Framework\MockObject\Stub $evidenceClaimBagMock;
 
 
     protected function setUp(): void
     {
-        $this->vcAtContextClaimValueMock = $this->createMock(VcAtContextClaimValue::class);
-        $this->typeClaimValueMock = $this->createMock(TypeClaimValue::class);
-        $this->vcCredentialSubjectClaimBagMock = $this->createMock(VcCredentialSubjectClaimBag::class);
-        $this->issuerClaimValueMock = $this->createMock(VcIssuerClaimValue::class);
-        $this->issuanceDateMock = $this->createMock(\DateTimeImmutable::class);
-        $this->proofClaimValueMock = $this->createMock(VcProofClaimValue::class);
-        $this->expirationDateMock = $this->createMock(\DateTimeImmutable::class);
-        $this->credentialStatusClaimValueMock = $this->createMock(VcCredentialStatusClaimValue::class);
-        $this->credentialSchemaClaimBagMock = $this->createMock(VcCredentialSchemaClaimBag::class);
-        $this->refreshServiceClaimBagMock = $this->createMock(VcRefreshServiceClaimBag::class);
-        $this->termsOfUserClaimBagMock = $this->createMock(VcTermsOfUseClaimBag::class);
-        $this->evidenceClaimBagMock = $this->createMock(VcEvidenceClaimBag::class);
+        $this->vcAtContextClaimValueMock = $this->createStub(VcAtContextClaimValue::class);
+        $this->typeClaimValueMock = $this->createStub(TypeClaimValue::class);
+        $this->vcCredentialSubjectClaimBagMock = $this->createStub(VcCredentialSubjectClaimBag::class);
+        $this->issuerClaimValueMock = $this->createStub(VcIssuerClaimValue::class);
+        $this->issuanceDateMock = $this->createStub(\DateTimeImmutable::class);
+        $this->proofClaimValueMock = $this->createStub(VcProofClaimValue::class);
+        $this->expirationDateMock = $this->createStub(\DateTimeImmutable::class);
+        $this->credentialStatusClaimValueMock = $this->createStub(VcCredentialStatusClaimValue::class);
+        $this->credentialSchemaClaimBagMock = $this->createStub(VcCredentialSchemaClaimBag::class);
+        $this->refreshServiceClaimBagMock = $this->createStub(VcRefreshServiceClaimBag::class);
+        $this->termsOfUserClaimBagMock = $this->createStub(VcTermsOfUseClaimBag::class);
+        $this->evidenceClaimBagMock = $this->createStub(VcEvidenceClaimBag::class);
     }
 
 

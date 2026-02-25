@@ -416,7 +416,11 @@ class DidKeyJwkResolver
 
             return $jwk;
         } catch (\JsonException $jsonException) {
-            throw new DidException('Failed to parse JWK JSON: ' . $jsonException->getMessage());
+            throw new DidException(
+                'Failed to parse JWK JSON: ' . $jsonException->getMessage(),
+                $jsonException->getCode(),
+                $jsonException,
+            );
         }
     }
 }

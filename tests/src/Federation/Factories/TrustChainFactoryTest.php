@@ -24,22 +24,22 @@ final class TrustChainFactoryTest extends TestCase
 {
     protected MockObject $entityStatementFactoryMock;
 
-    protected MockObject $timestampValidationLeewayMock;
+    protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayMock;
 
-    protected MockObject $metadataPolicyResolverMock;
+    protected \PHPUnit\Framework\MockObject\Stub $metadataPolicyResolverMock;
 
-    protected MockObject $metadataPolicyApplicatorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $metadataPolicyApplicatorMock;
 
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
 
     protected function setUp(): void
     {
         $this->entityStatementFactoryMock = $this->createMock(EntityStatementFactory::class);
-        $this->timestampValidationLeewayMock = $this->createMock(DateIntervalDecorator::class);
-        $this->metadataPolicyResolverMock = $this->createMock(MetadataPolicyResolver::class);
-        $this->metadataPolicyApplicatorMock = $this->createMock(MetadataPolicyApplicator::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->timestampValidationLeewayMock = $this->createStub(DateIntervalDecorator::class);
+        $this->metadataPolicyResolverMock = $this->createStub(MetadataPolicyResolver::class);
+        $this->metadataPolicyApplicatorMock = $this->createStub(MetadataPolicyApplicator::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
     }
 
 

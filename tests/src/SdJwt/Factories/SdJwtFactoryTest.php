@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Codebooks\HashAlgorithmsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -49,23 +48,19 @@ final class SdJwtFactoryTest extends TestCase
 {
     protected MockObject $jwsDecoratorBuilderMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
-    protected MockObject $jwkDecoratorMock;
-
-    protected MockObject $disclosureBagMock;
-
-    protected MockObject $disclosureFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $disclosureFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'ES256',
@@ -86,12 +81,10 @@ final class SdJwtFactoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $signatureMock = $this->createMock(Signature::class);
-
         $jwsMock = $this->createMock(JWS::class);
         $jwsMock->method('getPayload')
             ->willReturn('json-payload-string'); // Just so we have non-empty value.
-        $jwsMock->method('getSignature')->willReturn($signatureMock);
+        $jwsMock->method('getSignature')->willReturn($this->createStub(Signature::class));
 
         $jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $jwsDecoratorMock->method('jws')->willReturn($jwsMock);
@@ -99,29 +92,25 @@ final class SdJwtFactoryTest extends TestCase
         $this->jwsDecoratorBuilderMock = $this->createMock(JwsDecoratorBuilder::class);
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
-        $jsonHelperMock = $this->createMock(Helpers\Json::class);
-        $this->helpersMock->method('json')->willReturn($jsonHelperMock);
+        $this->helpersMock->method('json')->willReturn($this->createStub(Helpers\Json::class));
         $typeHelperMock = $this->createMock(Helpers\Type::class);
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
         $this->validPayload = $this->expiredPayload;
         $this->validPayload['exp'] = time() + 3600;
 
-        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
-        $this->disclosureBagMock = $this->createMock(DisclosureBag::class);
-
-        $this->disclosureFactoryMock = $this->createMock(DisclosureFactory::class);
+        $this->disclosureFactoryMock = $this->createStub(DisclosureFactory::class);
     }
 
 
@@ -168,11 +157,11 @@ final class SdJwtFactoryTest extends TestCase
         $this->assertInstanceOf(
             SdJwt::class,
             $this->sut()->fromData(
-                $this->jwkDecoratorMock,
+                $this->createStub(\SimpleSAML\OpenID\Jwk\JwkDecorator::class),
                 SignatureAlgorithmEnum::ES256,
                 $this->validPayload,
                 $this->sampleHeader,
-                $this->disclosureBagMock,
+                $this->createStub(\SimpleSAML\OpenID\SdJwt\DisclosureBag::class),
             ),
         );
     }

@@ -7,7 +7,6 @@ namespace SimpleSAML\Test\OpenID;
 use DateInterval;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
@@ -47,21 +46,21 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(IdTokenFactory::class)]
 final class CoreTest extends TestCase
 {
-    protected MockObject $supportedAlgorithmsMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
-    protected MockObject $supportedSerializerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedSerializerMock;
 
     protected DateInterval $timestampValidationLeeway;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
 
     protected function setUp(): void
     {
-        $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->supportedSerializerMock = $this->createMock(SupportedSerializers::class);
+        $this->supportedAlgorithmsMock = $this->createStub(SupportedAlgorithms::class);
+        $this->supportedSerializerMock = $this->createStub(SupportedSerializers::class);
         $this->timestampValidationLeeway = new DateInterval('PT1M');
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
     }
 
 

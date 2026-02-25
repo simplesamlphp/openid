@@ -8,7 +8,6 @@ use DateInterval;
 use GuzzleHttp\Client;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -81,9 +80,9 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(TrustMarkStatusResponseFetcher::class)]
 final class FederationTest extends TestCase
 {
-    protected MockObject $supportedAlgorithmsMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
-    protected MockObject $supportedSerializersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedSerializersMock;
 
     protected DateInterval $maxCacheDuration;
 
@@ -91,23 +90,23 @@ final class FederationTest extends TestCase
 
     protected int $maxTrustChainDepth;
 
-    protected MockObject $cacheMock;
+    protected \PHPUnit\Framework\MockObject\Stub $cacheMock;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
-    protected MockObject $clientMock;
+    protected \PHPUnit\Framework\MockObject\Stub $clientMock;
 
 
     protected function setUp(): void
     {
-        $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
+        $this->supportedAlgorithmsMock = $this->createStub(SupportedAlgorithms::class);
+        $this->supportedSerializersMock = $this->createStub(SupportedSerializers::class);
         $this->maxCacheDuration = new DateInterval('PT6H');
         $this->timestampValidationLeeway = new DateInterval('PT1M');
         $this->maxTrustChainDepth = 9;
-        $this->cacheMock = $this->createMock(CacheInterface::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->clientMock = $this->createMock(Client::class);
+        $this->cacheMock = $this->createStub(CacheInterface::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
+        $this->clientMock = $this->createStub(Client::class);
     }
 
 

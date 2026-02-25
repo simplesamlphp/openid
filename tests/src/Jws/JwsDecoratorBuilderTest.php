@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -25,27 +24,20 @@ final class JwsDecoratorBuilderTest extends TestCase
 
     protected MockObject $jwsBuilderMock;
 
-    protected MockObject $helpersMock;
-
-    protected MockObject $jwsDecoratorMock;
-
-    protected MockObject $jwkDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
 
     protected function setUp(): void
     {
         $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
         $this->jwsBuilderMock = $this->createMock(JWSBuilder::class);
-        $this->helpersMock = $this->createMock(Helpers::class);
-        $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
-
-        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
     }
 
 
     protected function sut(
         ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null,
-        ?JwsBuilder $jwsBuilder = null,
+        ?JWSBuilder $jwsBuilder = null,
         ?Helpers $helpers = null,
     ): JwsDecoratorBuilder {
         $jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorMock;
@@ -69,7 +61,7 @@ final class JwsDecoratorBuilderTest extends TestCase
     public function testCanParseToken(): void
     {
         $this->jwsSerializerManagerDecoratorMock->expects($this->once())->method('unserialize')
-            ->willReturn($this->jwsDecoratorMock);
+            ->willReturn($this->createStub(\SimpleSAML\OpenID\Jws\JwsDecorator::class));
 
         $this->assertInstanceOf(JwsDecorator::class, $this->sut()->fromToken('token'));
     }
@@ -92,7 +84,7 @@ final class JwsDecoratorBuilderTest extends TestCase
         $this->assertInstanceOf(
             JwsDecorator::class,
             $this->sut()->fromData(
-                $this->jwkDecoratorMock,
+                $this->createStub(\SimpleSAML\OpenID\Jwk\JwkDecorator::class),
                 SignatureAlgorithmEnum::RS256,
                 [],
                 [],
@@ -110,7 +102,7 @@ final class JwsDecoratorBuilderTest extends TestCase
         $this->expectExceptionMessage('build');
 
         $this->sut()->fromData(
-            $this->jwkDecoratorMock,
+            $this->createStub(\SimpleSAML\OpenID\Jwk\JwkDecorator::class),
             SignatureAlgorithmEnum::RS256,
             [],
             [],

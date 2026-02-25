@@ -6,7 +6,6 @@ namespace SimpleSAML\Test\OpenID;
 
 use DateInterval;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
@@ -58,20 +57,20 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFacto
 #[UsesClass(TxCodeFactory::class)]
 final class VerifiableCredentialsTest extends TestCase
 {
-    protected MockObject $supportedSerializersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedSerializersMock;
 
-    protected MockObject $supportedAlgorithmsMock;
+    protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
-    protected MockObject $loggerMock;
+    protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected DateInterval $timestampValidationLeeway;
 
 
     protected function setUp(): void
     {
-        $this->supportedSerializersMock = $this->createMock(SupportedSerializers::class);
-        $this->supportedAlgorithmsMock = $this->createMock(SupportedAlgorithms::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->supportedSerializersMock = $this->createStub(SupportedSerializers::class);
+        $this->supportedAlgorithmsMock = $this->createStub(SupportedAlgorithms::class);
+        $this->loggerMock = $this->createStub(LoggerInterface::class);
         $this->timestampValidationLeeway = new DateInterval('PT1M');
     }
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\VerifiableCredentials\Factories;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Exceptions\CredentialOfferException;
 use SimpleSAML\OpenID\Helpers;
@@ -21,7 +20,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
 #[\PHPUnit\Framework\Attributes\UsesClass(CredentialOfferGrantsValue::class)]
 final class CredentialOfferFactoryTest extends TestCase
 {
-    protected MockObject $helpersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected array $sampleParameters = [
         'credential_issuer' => 'https://example.com/issuer',
@@ -41,7 +40,7 @@ final class CredentialOfferFactoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->helpersMock = $this->createMock(Helpers::class);
+        $this->helpersMock = $this->createStub(Helpers::class);
     }
 
 

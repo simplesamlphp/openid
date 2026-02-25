@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\VerifiableCredentials;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Exceptions\CredentialOfferException;
 use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer;
@@ -13,14 +12,14 @@ use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParam
 #[\PHPUnit\Framework\Attributes\CoversClass(CredentialOffer::class)]
 final class CredentialOfferTest extends TestCase
 {
-    protected MockObject $credentialOfferParametersMock;
+    protected \PHPUnit\Framework\MockObject\Stub $credentialOfferParametersMock;
 
     protected string $uri = 'https://example.com/credential-offer';
 
 
     protected function setUp(): void
     {
-        $this->credentialOfferParametersMock = $this->createMock(CredentialOfferParameters::class);
+        $this->credentialOfferParametersMock = $this->createStub(CredentialOfferParameters::class);
     }
 
 

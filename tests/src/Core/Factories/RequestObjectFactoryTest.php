@@ -16,7 +16,6 @@ use SimpleSAML\OpenID\Core\RequestObject;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
@@ -34,25 +33,23 @@ final class RequestObjectFactoryTest extends TestCase
 
     protected MockObject $jwsDecoratorBuilderMock;
 
-    protected MockObject $jwsVerifierDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
-    protected MockObject $jwksDecoratorFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
-    protected MockObject $jwsSerializerManagerDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
-    protected MockObject $dateIntervalDecoratorMock;
+    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
-    protected MockObject $claimFactoryMock;
+    protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $sampleHeader = [
         'alg' => 'RS256',
         'typ' => 'jwt',
         'kid' => 'LfgZECDYkSTHmbllBD5_Tkwvy3CtOpNYQ7-DfQawTww',
     ];
-
-    protected MockObject $jwkDecoratorMock;
 
 
     protected function setUp(): void
@@ -69,18 +66,15 @@ final class RequestObjectFactoryTest extends TestCase
         $this->jwsDecoratorBuilderMock->method('fromToken')->willReturn($jwsDecoratorMock);
         $this->jwsDecoratorBuilderMock->method('fromData')->willReturn($jwsDecoratorMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createMock(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createMock(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createMock(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createMock(DateIntervalDecorator::class);
+        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
+        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
+        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
+        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
 
         $this->helpersMock = $this->createMock(Helpers::class);
-        $jsonHelperMock = $this->createMock(Helpers\Json::class);
-        $this->helpersMock->method('json')->willReturn($jsonHelperMock);
+        $this->helpersMock->method('json')->willReturn($this->createStub(Helpers\Json::class));
 
-        $this->claimFactoryMock = $this->createMock(ClaimFactory::class);
-
-        $this->jwkDecoratorMock = $this->createMock(JwkDecorator::class);
+        $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
     }
 
 
@@ -137,7 +131,7 @@ final class RequestObjectFactoryTest extends TestCase
         $this->assertInstanceOf(
             RequestObject::class,
             $this->sut()->fromData(
-                $this->jwkDecoratorMock,
+                $this->createStub(\SimpleSAML\OpenID\Jwk\JwkDecorator::class),
                 SignatureAlgorithmEnum::ES256,
                 [],
                 $this->sampleHeader,
