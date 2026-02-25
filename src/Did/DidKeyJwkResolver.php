@@ -196,7 +196,7 @@ class DidKeyJwkResolver
             /** @phpstan-ignore argument.type */
             [$numQuotient, $remainder] = gmp_div_qr($num, 256); // Use a different variable for quotient
             $num = $numQuotient; // Reassign $num
-            /** @phpstan-ignore argument.type */
+            /** @phpstan-ignore-next-line */
             $result = chr(gmp_intval($remainder)) . $result;
         }
 
