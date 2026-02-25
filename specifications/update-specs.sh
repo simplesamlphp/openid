@@ -14,6 +14,7 @@ URLS=(
     "https://openid.net/specs/openid-federation-1_0.html"
     "https://www.w3.org/TR/vc-data-model-2.0/"
     "https://www.w3.org/TR/vc-jose-cose/"
+    "https://fidescommunity.github.io/DIIP/"
     "https://openid.net/specs/openid-connect-core-1_0.html"
     "https://openid.net/specs/openid-connect-discovery-1_0.html"
     "https://openid.net/specs/openid-connect-rpinitiated-1_0.html"
