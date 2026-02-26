@@ -97,7 +97,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid @context claim.');
         }
 
-        return $this->vcAtContextClaimValue = $this->claimFactory->forVcDataModel()->buildVcAtContextClaimValue(
+        return $this->vcAtContextClaimValue = $this->claimFactory->forVcDataModel2()->buildVcAtContextClaimValue(
             $baseContext,
             $vcContext,
         );
@@ -140,7 +140,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Type claim.');
         }
 
-        return $this->vcTypeClaimValue = $this->claimFactory->forVcDataModel()->buildTypeClaimValue($vcType);
+        return $this->vcTypeClaimValue = $this->claimFactory->forVcDataModel2()->buildTypeClaimValue($vcType);
     }
 
 
@@ -161,7 +161,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Credential Subject claim.');
         }
 
-        return $this->vcCredentialSubjectClaimBag = $this->claimFactory->forVcDataModel()
+        return $this->vcCredentialSubjectClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcCredentialSubjectClaimBag(
                 $vcCredentialSubject,
                 $this->getSubject(),
@@ -192,13 +192,13 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
         }
 
         if (is_string($vcIssuer)) {
-            return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel()->buildVcIssuerClaimValue(
+            return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel2()->buildVcIssuerClaimValue(
                 [ClaimsEnum::Id->value => $vcIssuer],
             );
         }
 
         if (is_array($vcIssuer)) {
-            return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel()->buildVcIssuerClaimValue(
+            return $this->vcIssuerClaimValue = $this->claimFactory->forVcDataModel2()->buildVcIssuerClaimValue(
                 $vcIssuer,
             );
         }
@@ -233,14 +233,15 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
                     throw new VcDataModelException('Invalid Not Before or Issued At claim.', $e->getCode(), $e);
                 }
             }
+
             throw new VcDataModelException('Valid From claim is missing.');
         }
 
         try {
             $validFromStr = $this->helpers->type()->ensureNonEmptyString($validFrom, ClaimsEnum::ValidFrom->value);
             return $this->validFrom = $this->helpers->dateTime()->fromXsDateTime($validFromStr);
-        } catch (Exception $e) {
-            throw new VcDataModelException('Invalid Valid From claim.', (int) $e->getCode(), $e);
+        } catch (Exception $exception) {
+            throw new VcDataModelException('Invalid Valid From claim.', (int) $exception->getCode(), $exception);
         }
     }
 
@@ -287,6 +288,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
                     throw new VcDataModelException('Invalid Expiration Time claim.', $e->getCode(), $e);
                 }
             }
+
             $this->validUntil = false;
             return null;
         }
@@ -294,8 +296,8 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
         try {
             $validUntilStr = $this->helpers->type()->ensureNonEmptyString($validUntil, ClaimsEnum::ValidUntil->value);
             return $this->validUntil = $this->helpers->dateTime()->fromXsDateTime($validUntilStr);
-        } catch (Exception $e) {
-            throw new VcDataModelException('Invalid Valid Until claim.', (int) $e->getCode(), $e);
+        } catch (Exception $exception) {
+            throw new VcDataModelException('Invalid Valid Until claim.', (int) $exception->getCode(), $exception);
         }
     }
 
@@ -336,7 +338,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Proof claim.');
         }
 
-        return $this->vcProofClaimValue = $this->claimFactory->forVcDataModel()->buildVcProofClaimValue($vcProof);
+        return $this->vcProofClaimValue = $this->claimFactory->forVcDataModel2()->buildVcProofClaimValue($vcProof);
     }
 
 
@@ -364,7 +366,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Credential Status claim.');
         }
 
-        return $this->vcCredentialStatusClaimValue = $this->claimFactory->forVcDataModel()
+        return $this->vcCredentialStatusClaimValue = $this->claimFactory->forVcDataModel2()
             ->buildVcCredentialStatusClaimValue($vcCredentialStatus);
     }
 
@@ -393,7 +395,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Credential Schema claim.');
         }
 
-        return $this->vcCredentialSchemaClaimBag = $this->claimFactory->forVcDataModel()
+        return $this->vcCredentialSchemaClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcCredentialSchemaClaimBag($vcCredentialSchema);
     }
 
@@ -422,7 +424,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Refresh Service claim.');
         }
 
-        return $this->vcRefreshServiceClaimBag = $this->claimFactory->forVcDataModel()
+        return $this->vcRefreshServiceClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcRefreshServiceClaimBag($vcRefreshService);
     }
 
@@ -451,7 +453,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Terms Of Use claim.');
         }
 
-        return $this->vcTermsOfUseClaimBag = $this->claimFactory->forVcDataModel()
+        return $this->vcTermsOfUseClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcTermsOfUseClaimBag($vcTermsOfUse);
     }
 
@@ -480,7 +482,7 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Evidence claim.');
         }
 
-        return $this->vcEvidenceClaimBag = $this->claimFactory->forVcDataModel()
+        return $this->vcEvidenceClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcEvidenceClaimBag($vcEvidence);
     }
 }

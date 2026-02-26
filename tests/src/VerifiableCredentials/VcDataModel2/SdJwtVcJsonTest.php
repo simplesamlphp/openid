@@ -10,19 +10,15 @@ use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
-use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
-use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
-use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\SdJwtVcJson;
 
 #[\PHPUnit\Framework\Attributes\CoversClass(SdJwtVcJson::class)]
@@ -33,18 +29,6 @@ final class SdJwtVcJsonTest extends TestCase
 
     /** @var \SimpleSAML\OpenID\Jws\JwsDecorator&\PHPUnit\Framework\MockObject\MockObject */
     protected MockObject $jwsDecoratorMock;
-
-    /** @var \SimpleSAML\OpenID\Jws\JwsVerifierDecorator&\PHPUnit\Framework\MockObject\Stub */
-    protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
-
-    /** @var \SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory&\PHPUnit\Framework\MockObject\Stub */
-    protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
-
-    /** @var \SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator&\PHPUnit\Framework\MockObject\Stub */
-    protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
-
-    /** @var \SimpleSAML\OpenID\Decorators\DateIntervalDecorator&\PHPUnit\Framework\MockObject\Stub */
-    protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     /** @var \SimpleSAML\OpenID\Helpers&\PHPUnit\Framework\MockObject\MockObject */
     protected MockObject $helpersMock;
@@ -60,7 +44,7 @@ final class SdJwtVcJsonTest extends TestCase
 
     protected array $validPayload = [
         "@context" => [
-            "https://www.w3.org/2018/credentials/v1",
+            "https://www.w3.org/ns/credentials/v2",
             "https://www.w3.org/2018/credentials/examples/v1",
         ],
         "id" => "https://credential-issuer.example.com/credentials/3732",
@@ -103,11 +87,6 @@ final class SdJwtVcJsonTest extends TestCase
         $this->jwsDecoratorMock = $this->createMock(JwsDecorator::class);
         $this->jwsDecoratorMock->method('jws')->willReturn($jwsMock);
 
-        $this->jwsVerifierDecoratorMock = $this->createStub(JwsVerifierDecorator::class);
-        $this->jwksDecoratorFactoryMock = $this->createStub(JwksDecoratorFactory::class);
-        $this->jwsSerializerManagerDecoratorMock = $this->createStub(JwsSerializerManagerDecorator::class);
-        $this->dateIntervalDecoratorMock = $this->createStub(DateIntervalDecorator::class);
-
         $this->helpersMock = $this->createMock(Helpers::class);
         $this->jsonHelperMock = $this->createMock(Helpers\Json::class);
         $this->helpersMock->method('json')->willReturn($this->jsonHelperMock);
@@ -142,10 +121,10 @@ final class SdJwtVcJsonTest extends TestCase
     {
         return new SdJwtVcJson(
             $this->jwsDecoratorMock,
-            $this->jwsVerifierDecoratorMock,
-            $this->jwksDecoratorFactoryMock,
-            $this->jwsSerializerManagerDecoratorMock,
-            $this->dateIntervalDecoratorMock,
+            $this->createStub(\SimpleSAML\OpenID\Jws\JwsVerifierDecorator::class),
+            $this->createStub(\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory::class),
+            $this->createStub(\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator::class),
+            $this->createStub(\SimpleSAML\OpenID\Decorators\DateIntervalDecorator::class),
             $this->helpersMock,
             $this->claimFactoryMock,
         );
@@ -168,7 +147,7 @@ final class SdJwtVcJsonTest extends TestCase
 
         $sut = $this->sut();
 
-        $vcDataModelClaimFactoryMock = $this->createStub(VcDataModelClaimFactory::class);
+        $vcDataModelClaimFactoryMock = $this->createStub(VcDataModel2ClaimFactory::class);
         $vcDataModelClaimFactoryMock->method('buildVcAtContextClaimValue')
             ->willReturn($this->createStub(VcAtContextClaimValue::class));
         $vcDataModelClaimFactoryMock->method('buildTypeClaimValue')
@@ -178,7 +157,7 @@ final class SdJwtVcJsonTest extends TestCase
         $vcDataModelClaimFactoryMock->method('buildVcIssuerClaimValue')
             ->willReturn($this->createStub(VcIssuerClaimValue::class));
 
-        $this->claimFactoryMock->method('forVcDataModel')->willReturn($vcDataModelClaimFactoryMock);
+        $this->claimFactoryMock->method('forVcDataModel2')->willReturn($vcDataModelClaimFactoryMock);
 
         $this->dateTimeHelperMock->method('fromXsDateTime')->willReturn(new DateTimeImmutable());
 
