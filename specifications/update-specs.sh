@@ -23,6 +23,8 @@ URLS=(
     "https://www.w3.org/TR/vc-jose-cose/"
     "https://www.w3.org/TR/vc-imp-guide/"
     "https://www.w3.org/TR/did-1.0/"
+    "https://www.w3.org/TR/vc-data-integrity/"
+    "https://www.w3.org/TR/json-ld11/"
     # DIIP specifications
     "https://fidescommunity.github.io/DIIP/"
 )

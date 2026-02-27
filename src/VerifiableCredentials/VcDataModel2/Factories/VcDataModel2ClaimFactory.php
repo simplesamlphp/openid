@@ -14,8 +14,14 @@ class VcDataModel2ClaimFactory extends VcDataModelClaimFactory
      * @param mixed[] $otherContexts
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      */
-    public function buildVcAtContextClaimValue(string $baseContext, array $otherContexts): VcAtContextClaimValue
-    {
-        return new VcAtContextClaimValue($baseContext, $otherContexts, AtContextsEnum::W3OrgNsCredentialsV2);
+    public function buildVcAtContextClaimValue(
+        string $baseContext,
+        array $otherContexts,
+    ): VcAtContextClaimValue {
+        return new VcAtContextClaimValue(
+            $baseContext,
+            $otherContexts,
+            AtContextsEnum::W3OrgNsCredentialsV2,
+        );
     }
 }

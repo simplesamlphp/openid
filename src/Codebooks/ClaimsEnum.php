@@ -9,38 +9,44 @@ enum ClaimsEnum: string
     // _SelectiveDisclosure
     case _Sd = '_sd';
 
-        // _SelectiveDisclosureAlgorithm
+    // _SelectiveDisclosureAlgorithm
     case _SdAlg = '_sd_alg';
 
-        // @context
+    // @context
     case AtContext = '@context';
 
-        // @type
+    case AtDirection = '@direction';
+
+    case AtLanguage = '@language';
+
+    // @type
     case AtType = '@type';
 
-        // Authentication Context Class Reference
+    case AtValue = '@value';
+
+    // Authentication Context Class Reference
     case Acr = 'acr';
 
     case AcrValuesSupported = 'acr_values_supported';
 
-        // Algorithm
+    // Algorithm
     case Alg = 'alg';
 
-        // AlgorithmValuesSupported
+    // AlgorithmValuesSupported
     case AlgValuesSupported = 'alg_values_supported';
 
-        // AlternativeText
+    // AlternativeText
     case AltText = 'alt_text';
 
-        // Authentication Methods References
+    // Authentication Methods References
     case Amr = 'amr';
 
     case ApplicationType = 'application_type';
 
-        // Access Token hash
+    // Access Token hash
     case ATHash = 'at_hash';
 
-        // Audience
+    // Audience
     case Aud = 'aud';
 
     case AuthTime = 'auth_time';
@@ -53,7 +59,7 @@ enum ClaimsEnum: string
 
     case AuthorizationServers = 'authorization_servers';
 
-        // Authorized party
+    // Authorized party
     case Azp = 'azp';
 
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
@@ -70,7 +76,7 @@ enum ClaimsEnum: string
 
     case BatchSize = 'batch_size';
 
-        // Code hash
+    // Code hash
     case CHash = 'c_hash';
 
     case ClaimTypesSupported = 'claim_types_supported';
@@ -93,7 +99,7 @@ enum ClaimsEnum: string
 
     case ClientUri = 'client_uri';
 
-        // Confirmation
+    // Confirmation
     case Cnf = 'cnf';
 
     case CodeChallengeMethodsSupported = 'code_challenge_methods_supported';
@@ -122,7 +128,7 @@ enum ClaimsEnum: string
 
     case Credential_Schema = 'credentialSchema';
 
-        // CredentialSigningAlgorithmValuesSupported
+    // CredentialSigningAlgorithmValuesSupported
     case CredentialSigningAlgValuesSupported = 'credential_signing_alg_values_supported';
 
     case Credential_Status = 'credentialStatus';
@@ -155,14 +161,14 @@ enum ClaimsEnum: string
 
     case EncryptionRequired = 'encryption_required';
 
-        // EncryptionValuesSupported
+    // EncryptionValuesSupported
     case EncValuesSupported = 'enc_values_supported';
 
     case Events = 'events';
 
     case Evidence = 'evidence';
 
-        // ExpirationTime
+    // ExpirationTime
     case Exp = 'exp';
 
     case Expiration_Date = 'expirationDate';
@@ -185,10 +191,10 @@ enum ClaimsEnum: string
 
     case HomepageUri = 'homepage_uri';
 
-        // IssuedAt
+    // IssuedAt
     case Iat = 'iat';
 
-        // Identifier
+    // Identifier
     case Id = 'id';
 
     case InputMode = 'input_mode';
@@ -216,7 +222,7 @@ enum ClaimsEnum: string
     case IntrospectionEndpointAuthSigningAlgValuesSupported =
     'introspection_endpoint_auth_signing_alg_values_supported';
 
-        // Issuer
+    // Issuer
     case Iss = 'iss';
 
     case Issuance_Date = 'issuanceDate';
@@ -225,20 +231,20 @@ enum ClaimsEnum: string
 
     case IssuerState = 'issuer_state';
 
-        // JWT ID
+    // JWT ID
     case Jti = 'jti';
 
-        // JsonWebKey
+    // JsonWebKey
     case Jwk = 'jwk';
 
-        // JsonWebKeySet
+    // JsonWebKeySet
     case Jwks = 'jwks';
 
     case JwksUri = 'jwks_uri';
 
     case Keywords = 'keywords';
 
-        // KeyId
+    // KeyId
     case Kid = 'kid';
 
     case KeyAttestationsRequired = 'key_attestations_required';
@@ -261,7 +267,7 @@ enum ClaimsEnum: string
 
     case MetadataPolicy = 'metadata_policy';
 
-        // MetadataPolicyCritical
+    // MetadataPolicyCritical
     case MetadataPolicyCrit = 'metadata_policy_crit';
 
     case Name = 'name';
@@ -270,17 +276,17 @@ enum ClaimsEnum: string
 
     case NonceEndpoint = 'nonce_endpoint';
 
-        // NotBefore
+    // NotBefore
     case Nbf = 'nbf';
 
     case Notification = 'notification';
 
     case NotificationEndpoint = 'notification_endpoint';
 
-        // OpenIDProviderPolicyUri
+    // OpenIDProviderPolicyUri
     case OpPolicyUri = 'op_policy_uri';
 
-        // OpenIDProviderTermsOfServiceUri
+    // OpenIDProviderTermsOfServiceUri
     case OpTosUri = 'op_tos_uri';
 
     case OrganizationName = 'organization_name';
@@ -303,14 +309,14 @@ enum ClaimsEnum: string
 
     case Proofs = 'proofs';
 
-        // ProofSigningAlgorithmValuesSupported
+    // ProofSigningAlgorithmValuesSupported
     case ProofSigningAlgValuesSupported = 'proof_signing_alg_values_supported';
 
     case ProofTypesSupported = 'proof_types_supported';
 
     case RedirectUris = 'redirect_uris';
 
-        // Reference
+    // Reference
     case Ref = 'ref';
 
     case Refresh_Service = 'refreshService';
@@ -363,7 +369,7 @@ enum ClaimsEnum: string
 
     case ServiceDocumentation = 'service_documentation';
 
-        // Session ID
+    // Session ID
     case Sid = 'sid';
 
     case SignedJwksUri = 'signed_jwks_uri';
@@ -376,10 +382,10 @@ enum ClaimsEnum: string
 
     case Status = 'status';
 
-        // Subject
+    // Subject
     case Sub = 'sub';
 
-        // Subject JWK
+    // Subject JWK
     case SubJwk = 'sub_jwk';
 
     case SubjectType = 'subject_type';
@@ -402,7 +408,7 @@ enum ClaimsEnum: string
 
     case TosUri = 'tos_uri';
 
-        // Type
+    // Type
     case Typ = 'typ';
 
     case Type = 'type';
@@ -421,10 +427,10 @@ enum ClaimsEnum: string
 
     case TrustMarks = 'trust_marks';
 
-        // TransactionCode
+    // TransactionCode
     case TxCode = 'tx_code';
 
-        // UserInterfaceLocalesSupported
+    // UserInterfaceLocalesSupported
     case UiLocalesSupported = 'ui_locales_supported';
 
     case Uri = 'uri';
@@ -451,12 +457,12 @@ enum ClaimsEnum: string
 
     case ValidUntil = 'validUntil';
 
-        // VerifiableCredential
+    // VerifiableCredential
     case Vc = 'vc';
 
-        // VerifiableCredentialType
+    // VerifiableCredentialType
     case Vct = 'vct';
 
-        // X509certificateChain
+    // X509certificateChain
     case X5c = 'x5c';
 }

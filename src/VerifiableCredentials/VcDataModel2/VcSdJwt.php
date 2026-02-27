@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\SdJwt\SdJwt;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableStringValueBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
@@ -22,7 +23,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceC
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
-class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
+class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 {
     protected ?VcAtContextClaimValue $vcAtContextClaimValue = null;
 
@@ -49,6 +50,10 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
     protected null|false|VcTermsOfUseClaimBag $vcTermsOfUseClaimBag = null;
 
     protected null|false|VcEvidenceClaimBag $vcEvidenceClaimBag = null;
+
+    protected null|false|LocalizableStringValueBag $vcName = null;
+
+    protected null|false|LocalizableStringValueBag $vcDescription = null;
 
 
     /**
@@ -484,5 +489,65 @@ class SdJwtVcJson extends SdJwt implements VerifiableCredentialInterface
 
         return $this->vcEvidenceClaimBag = $this->claimFactory->forVcDataModel2()
             ->buildVcEvidenceClaimBag($vcEvidence);
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcName(): null|LocalizableStringValueBag
+    {
+        if ($this->vcName === false) {
+            return null;
+        }
+
+        if ($this->vcName instanceof LocalizableStringValueBag) {
+            return $this->vcName;
+        }
+
+        $vcName = $this->getPayloadClaim(ClaimsEnum::Name->value);
+
+        if (is_null($vcName)) {
+            $this->vcName = false;
+            return null;
+        }
+
+        try {
+            return $this->vcName = $this->claimFactory->forVcDataModel2()
+                ->buildLocalizableStringValueBag($vcName, ClaimsEnum::Name->value);
+        } catch (Exception $exception) {
+            throw new VcDataModelException('Invalid Name claim.', (int) $exception->getCode(), $exception);
+        }
+    }
+
+
+    /**
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getVcDescription(): null|LocalizableStringValueBag
+    {
+        if ($this->vcDescription === false) {
+            return null;
+        }
+
+        if ($this->vcDescription instanceof LocalizableStringValueBag) {
+            return $this->vcDescription;
+        }
+
+        $vcDescription = $this->getPayloadClaim(ClaimsEnum::Description->value);
+
+        if (is_null($vcDescription)) {
+            $this->vcDescription = false;
+            return null;
+        }
+
+        try {
+            return $this->vcDescription = $this->claimFactory->forVcDataModel2()
+                ->buildLocalizableStringValueBag($vcDescription, ClaimsEnum::Description->value);
+        } catch (Exception $exception) {
+            throw new VcDataModelException('Invalid Description claim.', (int) $exception->getCode(), $exception);
+        }
     }
 }

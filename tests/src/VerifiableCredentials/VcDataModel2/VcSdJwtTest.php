@@ -19,10 +19,10 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimV
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactory;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\SdJwtVcJson;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
-#[\PHPUnit\Framework\Attributes\CoversClass(SdJwtVcJson::class)]
-final class SdJwtVcJsonTest extends TestCase
+#[\PHPUnit\Framework\Attributes\CoversClass(VcSdJwt::class)]
+final class VcSdJwtTest extends TestCase
 {
     /** @var \Jose\Component\Signature\Signature&\PHPUnit\Framework\MockObject\MockObject */
     protected MockObject $signatureMock;
@@ -117,9 +117,9 @@ final class SdJwtVcJsonTest extends TestCase
     }
 
 
-    protected function sut(): SdJwtVcJson
+    protected function sut(): VcSdJwt
     {
-        return new SdJwtVcJson(
+        return new VcSdJwt(
             $this->jwsDecoratorMock,
             $this->createStub(\SimpleSAML\OpenID\Jws\JwsVerifierDecorator::class),
             $this->createStub(\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory::class),
@@ -136,7 +136,7 @@ final class SdJwtVcJsonTest extends TestCase
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
         $this->jsonHelperMock->method('decode')->willReturn($this->validPayload);
 
-        $this->assertInstanceOf(SdJwtVcJson::class, $this->sut());
+        $this->assertInstanceOf(VcSdJwt::class, $this->sut());
     }
 
 
