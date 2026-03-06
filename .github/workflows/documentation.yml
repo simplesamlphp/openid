@@ -33,7 +33,7 @@ jobs:
           path: '**/*.md'
           check_filenames: true
           ignore_words_list: tekst
-          skip: './.git', './specifications', './vendor'
+          skip: './.git, ./specifications, ./vendor'
 
   build:
     name: Build documentation
