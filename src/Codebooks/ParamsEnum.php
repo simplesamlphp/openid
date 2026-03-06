@@ -81,6 +81,10 @@ enum ParamsEnum: string
 
     case TargetLinkUri = 'target_link_uri';
 
+    case Token = 'token';
+
+    case TokenTypeHint = 'token_type_hint';
+
     case TokenType = 'token_type';
 
     case TrustMarked = 'trust_marked';
