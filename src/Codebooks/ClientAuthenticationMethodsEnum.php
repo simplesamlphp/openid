@@ -15,4 +15,16 @@ enum ClientAuthenticationMethodsEnum: string
     case PrivateKeyJwt = 'private_key_jwt';
 
     case None = 'none';
+
+
+    public function isNone(): bool
+    {
+        return $this === ClientAuthenticationMethodsEnum::None;
+    }
+
+
+    public function isNotNone(): bool
+    {
+        return !$this->isNone();
+    }
 }
