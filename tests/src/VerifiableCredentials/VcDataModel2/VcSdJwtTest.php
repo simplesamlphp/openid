@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2;
 use DateTimeImmutable;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Codebooks\CredentialFormatIdentifiersEnum;
@@ -22,6 +23,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2C
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
 #[\PHPUnit\Framework\Attributes\CoversClass(VcSdJwt::class)]
+#[UsesClass(\SimpleSAML\OpenID\Helpers\DateTime::class)]
 final class VcSdJwtTest extends TestCase
 {
     /** @var \Jose\Component\Signature\Signature&\PHPUnit\Framework\MockObject\MockObject */
@@ -36,13 +38,10 @@ final class VcSdJwtTest extends TestCase
     /** @var \SimpleSAML\OpenID\Helpers\Json&\PHPUnit\Framework\MockObject\MockObject */
     protected MockObject $jsonHelperMock;
 
-    /** @var \SimpleSAML\OpenID\Helpers\DateTime&\PHPUnit\Framework\MockObject\MockObject */
-    protected MockObject $dateTimeHelperMock;
-
     /** @var \SimpleSAML\OpenID\Factories\ClaimFactory&\PHPUnit\Framework\MockObject\Stub */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
-    protected array $validPayload = [
+    protected array $expiredPayload = [
         "@context" => [
             "https://www.w3.org/ns/credentials/v2",
             "https://www.w3.org/2018/credentials/examples/v1",
@@ -69,6 +68,8 @@ final class VcSdJwtTest extends TestCase
         "sub" => "did:example:123",
     ];
 
+    protected array $validPayload;
+
     protected array $sampleHeader = [
         'alg' => 'ES256',
         'typ' => 'vc+sd-jwt',
@@ -94,8 +95,16 @@ final class VcSdJwtTest extends TestCase
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
         $arrHelperMock = $this->createMock(Helpers\Arr::class);
         $this->helpersMock->method('arr')->willReturn($arrHelperMock);
-        $this->dateTimeHelperMock = $this->createMock(Helpers\DateTime::class);
-        $this->helpersMock->method('dateTime')->willReturn($this->dateTimeHelperMock);
+        $dateTimeHelperMock = $this->createMock(Helpers\DateTime::class);
+        $this->helpersMock->method('dateTime')->willReturn($dateTimeHelperMock);
+
+        $realDateTimeHelper = new Helpers\DateTime();
+        $dateTimeHelperMock->method('fromXsDateTime')
+            ->willReturnCallback(fn(string $input): \DateTimeImmutable => $realDateTimeHelper->fromXsDateTime($input));
+        $dateTimeHelperMock->method('fromTimestamp')
+            ->willReturnCallback(
+                fn(int $timestamp): \DateTimeImmutable => $realDateTimeHelper->fromTimestamp($timestamp),
+            );
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
@@ -110,6 +119,8 @@ final class VcSdJwtTest extends TestCase
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
+        $this->validPayload = $this->expiredPayload;
+
         $this->validPayload['exp'] = time() + 3600;
         $this->validPayload['validUntil'] = (new \DateTimeImmutable())
             ->modify('+1 hour')
@@ -119,12 +130,15 @@ final class VcSdJwtTest extends TestCase
 
     protected function sut(): VcSdJwt
     {
+        $leewayMock = $this->createMock(\SimpleSAML\OpenID\Decorators\DateIntervalDecorator::class);
+        $leewayMock->method('getInSeconds')->willReturn(0);
+
         return new VcSdJwt(
             $this->jwsDecoratorMock,
             $this->createStub(\SimpleSAML\OpenID\Jws\JwsVerifierDecorator::class),
             $this->createStub(\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory::class),
             $this->createStub(\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator::class),
-            $this->createStub(\SimpleSAML\OpenID\Decorators\DateIntervalDecorator::class),
+            $leewayMock,
             $this->helpersMock,
             $this->claimFactoryMock,
         );
@@ -158,8 +172,6 @@ final class VcSdJwtTest extends TestCase
             ->willReturn($this->createStub(VcIssuerClaimValue::class));
 
         $this->claimFactoryMock->method('forVcDataModel2')->willReturn($vcDataModelClaimFactoryMock);
-
-        $this->dateTimeHelperMock->method('fromXsDateTime')->willReturn(new DateTimeImmutable());
 
         $this->assertInstanceOf(VcAtContextClaimValue::class, $sut->getVcAtContext());
         $this->assertIsString($sut->getVcId());

@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimV
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimValue;
@@ -211,6 +212,39 @@ class VcDataModelClaimFactory
         $typeClaimValue = $this->buildTypeClaimValue($type);
 
         return new VcCredentialStatusClaimValue($id, $typeClaimValue, $data);
+    }
+
+
+    /**
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     */
+    public function buildVcCredentialStatusClaimBag(array $data): VcCredentialStatusClaimBag
+    {
+        // If this is a single credential status claim, wrap it in a
+        // CredentialStatusClaimBag.
+        if ($this->helpers->arr()->isAssociative($data)) {
+            return new VcCredentialStatusClaimBag(
+                $this->buildVcCredentialStatusClaimValue($data),
+            );
+        }
+
+        // We have multiple credential status claims. Wrap them in a
+        // CredentialStatusClaimBag.
+        $data = $this->helpers->type()->enforceNonEmptyArrayOfNonEmptyArrays($data);
+
+        $vcCredentialStatusClaims = [];
+        foreach ($data as $credentialStatusClaimValueData) {
+            $vcCredentialStatusClaims[] = $this->buildVcCredentialStatusClaimValue($credentialStatusClaimValueData);
+        }
+
+        $firstCredentialStatusClaim = array_shift($vcCredentialStatusClaims);
+
+        return new VcCredentialStatusClaimBag(
+            $firstCredentialStatusClaim,
+            ...$vcCredentialStatusClaims,
+        );
     }
 
 

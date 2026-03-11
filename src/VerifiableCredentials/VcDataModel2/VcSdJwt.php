@@ -14,7 +14,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableString
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
@@ -41,7 +41,7 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
     protected null|false|VcProofClaimValue $vcProofClaimValue = null;
 
-    protected null|false|VcCredentialStatusClaimValue $vcCredentialStatusClaimValue = null;
+    protected null|false|VcCredentialStatusClaimBag $vcCredentialStatusClaimBag = null;
 
     protected null|false|VcCredentialSchemaClaimBag $vcCredentialSchemaClaimBag = null;
 
@@ -74,6 +74,10 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
         if (array_key_exists('vp', $payload)) {
             throw new VcDataModelException('SD-JWT VC MUST NOT contain a "vp" claim.');
         }
+
+        // Validate validFrom and validUntil claims
+        $this->getValidFrom();
+        $this->getValidUntil();
     }
 
 
@@ -244,15 +248,23 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
         try {
             $validFromStr = $this->helpers->type()->ensureNonEmptyString($validFrom, ClaimsEnum::ValidFrom->value);
-            return $this->validFrom = $this->helpers->dateTime()->fromXsDateTime($validFromStr);
+            $validFrom  = $this->helpers->dateTime()->fromXsDateTime($validFromStr);
         } catch (Exception $exception) {
             throw new VcDataModelException('Invalid Valid From claim.', (int) $exception->getCode(), $exception);
         }
+
+        if ($validFrom->getTimestamp() - $this->timestampValidationLeeway->getInSeconds() > time()) {
+            throw new VcDataModelException('Credential is not valid yet.');
+        }
+
+        return $this->validFrom = $validFrom;
     }
 
 
     /**
-     * Alias for getValidFrom to remain fully backwards compatible with consumers expecting getVcIssuanceDate
+     * Alias for getValidFrom to remain fully backwards compatible with
+     * consumers expecting `getVcIssuanceDate`.
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -300,10 +312,16 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
         try {
             $validUntilStr = $this->helpers->type()->ensureNonEmptyString($validUntil, ClaimsEnum::ValidUntil->value);
-            return $this->validUntil = $this->helpers->dateTime()->fromXsDateTime($validUntilStr);
+            $validUntil = $this->helpers->dateTime()->fromXsDateTime($validUntilStr);
         } catch (Exception $exception) {
             throw new VcDataModelException('Invalid Valid Until claim.', (int) $exception->getCode(), $exception);
         }
+
+        if ($validUntil->getTimestamp() + $this->timestampValidationLeeway->getInSeconds() < time()) {
+            throw new VcDataModelException('Credential is expired.');
+        }
+
+        return $this->validUntil = $validUntil;
     }
 
 
@@ -349,21 +367,23 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
-    public function getVcCredentialStatus(): ?VcCredentialStatusClaimValue
+    public function getVcCredentialStatus(): ?VcCredentialStatusClaimBag
     {
-        if ($this->vcCredentialStatusClaimValue === false) {
+        if ($this->vcCredentialStatusClaimBag === false) {
             return null;
         }
 
-        if ($this->vcCredentialStatusClaimValue instanceof VcCredentialStatusClaimValue) {
-            return $this->vcCredentialStatusClaimValue;
+        if ($this->vcCredentialStatusClaimBag instanceof VcCredentialStatusClaimBag) {
+            return $this->vcCredentialStatusClaimBag;
         }
 
         $vcCredentialStatus = $this->getPayloadClaim(ClaimsEnum::Credential_Status->value);
 
         if (is_null($vcCredentialStatus)) {
-            $this->vcCredentialStatusClaimValue = false;
+            $this->vcCredentialStatusClaimBag = false;
             return null;
         }
 
@@ -371,8 +391,8 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
             throw new VcDataModelException('Invalid Credential Status claim.');
         }
 
-        return $this->vcCredentialStatusClaimValue = $this->claimFactory->forVcDataModel2()
-            ->buildVcCredentialStatusClaimValue($vcCredentialStatus);
+        return $this->vcCredentialStatusClaimBag = $this->claimFactory->forVcDataModel2()
+            ->buildVcCredentialStatusClaimBag($vcCredentialStatus);
     }
 
 
