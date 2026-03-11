@@ -14,13 +14,13 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableString
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcCredentialStatusClaimBag;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
 class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
@@ -427,6 +427,8 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\VcDataModelException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     public function getVcRefreshService(): ?VcRefreshServiceClaimBag
     {
@@ -450,7 +452,7 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
         }
 
         return $this->vcRefreshServiceClaimBag = $this->claimFactory->forVcDataModel2()
-            ->buildVcRefreshServiceClaimBag($vcRefreshService);
+            ->buildVcRefreshServiceClaimBag2($vcRefreshService);
     }
 
 

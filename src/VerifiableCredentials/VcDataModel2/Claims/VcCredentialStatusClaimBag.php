@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
+namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue;
 
 class VcCredentialStatusClaimBag implements ClaimInterface
 {
