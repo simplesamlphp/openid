@@ -18,5 +18,17 @@ enum ContentTypesEnum: string
 
     case ApplicationVc = 'application/vc';
 
+    case ApplicationVcCose = 'application/vc+cose';
+
+    case ApplicationVcJwt = 'application/vc+jwt';
+
+    case ApplicationVcSdJwt = 'application/vc+sd-jwt';
+
     case ApplicationVp = 'application/vp';
+
+    case ApplicationVpCose = 'application/vp+cose';
+
+    case ApplicationVpJwt = 'application/vp+jwt';
+
+    case ApplicationVpSdJwt = 'application/vp+sd-jwt';
 }
