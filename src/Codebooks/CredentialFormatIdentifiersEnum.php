@@ -10,6 +10,10 @@ enum CredentialFormatIdentifiersEnum: string
     // VC signed as a JWT, not using JSON-LD
     case JwtVcJson = 'jwt_vc_json';
 
+    // VC Data Model v2.0 secured with SD-JWT
+    // https://www.w3.org/TR/vc-jose-cose/#with-sd-jwt
+    case VcSdJwt = 'vc+sd-jwt';
+
     // VC signed as a JWT, using JSON-LD
     case JwtVcJsonLd = 'jwt_vc_json-ld';
 
@@ -22,7 +26,4 @@ enum CredentialFormatIdentifiersEnum: string
 
     // IETF SD-JWT VC
     case DcSdJwt = 'dc+sd-jwt';
-
-    // Deprecated identifier for IETF SD-JWT VC. Use 'dc+sd-jwt' instead.
-    case VcSdJwt = 'vc+sd-jwt';
 }

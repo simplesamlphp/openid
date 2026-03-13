@@ -14,17 +14,21 @@ final class VcAtContextClaimValueTest extends TestCase
 {
     protected string $baseContext = AtContextsEnum::W3Org2018CredentialsV1->value;
 
+    protected AtContextsEnum $expectedBaseContext = AtContextsEnum::W3Org2018CredentialsV1;
+
     protected array $otherContexts = [];
 
 
     protected function sut(
         ?string $baseContext = null,
         ?array $otherContexts = null,
+        ?AtContextsEnum $expectedBaseContext = null,
     ): VcAtContextClaimValue {
         $baseContext ??= $this->baseContext;
         $otherContexts ??= $this->otherContexts;
+        $expectedBaseContext ??= $this->expectedBaseContext;
 
-        return new VcAtContextClaimValue($baseContext, $otherContexts);
+        return new VcAtContextClaimValue($baseContext, $otherContexts, $expectedBaseContext);
     }
 
 
