@@ -137,25 +137,37 @@ enum MetadataPolicyOperatorsEnum: string
 
 
     /**
-     * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
+     * @param mixed[] $superset
      */
     public function isValueSubsetOf(mixed $value, array $superset): bool
     {
         $value = is_array($value) ? $value : [$value];
 
-        return array_diff($value, $superset) === [];
+        foreach ($value as $item) {
+            if (!in_array($item, $superset, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
     /**
-     * @phpstan-ignore missingType.iterableValue (We can handle mixed type using array_diff)
+     * @param mixed[] $subset
      */
     public function isValueSupersetOf(mixed $value, array $subset): bool
     {
         $value = is_array($value) ? $value : [$value];
 
-        // Like subset, but from different perspective.
-        return array_diff($subset, $value) === [];
+        // Like subset, but from a different perspective.
+        foreach ($subset as $item) {
+            if (!in_array($item, $value, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
@@ -301,7 +313,7 @@ enum MetadataPolicyOperatorsEnum: string
 
             $operatorValue = $parameterOperations[$metadataPolicyOperatorsEnum->value];
             // Check common policy resolving rules for each supported operator.
-            // If operator value type is not supported, throw.
+            // If an operator value type is not supported, throw.
             if (!$metadataPolicyOperatorsEnum->isOperatorValueTypeSupported($operatorValue)) {
                 throw new MetadataPolicyException(
                     sprintf(
@@ -312,7 +324,7 @@ enum MetadataPolicyOperatorsEnum: string
                 );
             }
 
-            // If operator combination is not allowed, throw.
+            // If an operator combination is not allowed, throw.
             if (!$metadataPolicyOperatorsEnum->isOperatorCombinationSupported($parameterOperatorKeys)) {
                 throw new MetadataPolicyException(
                     sprintf(
@@ -342,13 +354,14 @@ enum MetadataPolicyOperatorsEnum: string
 
             $operatorValue = $parameterOperations[$metadataPolicyOperatorEnum->value];
 
-            // Start with operator 'value'.
+            // Start with the operator 'value'.
             if ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Value) {
-                // MAY be combined with add, in which case the values of add MUST be a subset of the values of value.
+                // MAY be combined with 'add', in which case the values of 'add' MUST be a subset of the values
+                // of value.
                 if (
                     in_array(MetadataPolicyOperatorsEnum::Add->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array<mixed> $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is an array. */
                     $subset = $parameterOperations[MetadataPolicyOperatorsEnum::Add->value];
                     if (!MetadataPolicyOperatorsEnum::Value->isValueSupersetOf($operatorValue, $subset)) {
                         throw new MetadataPolicyException(
@@ -362,7 +375,7 @@ enum MetadataPolicyOperatorsEnum: string
                     }
                 }
 
-                // MAY be combined with default if the value of value is not null.
+                // MAY be combined with default if the value of 'value' is not null.
                 if (
                     in_array(MetadataPolicyOperatorsEnum::Default->value, $parameterOperatorKeys, true) &&
                     is_null($operatorValue)
@@ -379,7 +392,7 @@ enum MetadataPolicyOperatorsEnum: string
                 if (
                     in_array(MetadataPolicyOperatorsEnum::OneOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array<mixed> $oneOf We ensured this is array. */
+                    /** @var array<mixed> $oneOf We ensured this is an array. */
                     $oneOf = $parameterOperations[MetadataPolicyOperatorsEnum::OneOf->value];
                     if (!in_array($operatorValue, $oneOf)) {
                         throw new MetadataPolicyException(
@@ -398,7 +411,7 @@ enum MetadataPolicyOperatorsEnum: string
                 if (
                     in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array<mixed> $superset We ensured this is array. */
+                    /** @var array<mixed> $superset We ensured this is an array. */
                     $superset = $parameterOperations[MetadataPolicyOperatorsEnum::SubsetOf->value];
                     if (!MetadataPolicyOperatorsEnum::Value->isValueSubsetOf($operatorValue, $superset)) {
                         throw new MetadataPolicyException(
@@ -417,7 +430,7 @@ enum MetadataPolicyOperatorsEnum: string
                 if (
                     in_array(MetadataPolicyOperatorsEnum::SupersetOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array<mixed> $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is an array. */
                     $subset = $parameterOperations[MetadataPolicyOperatorsEnum::SupersetOf->value];
                     if (!MetadataPolicyOperatorsEnum::Value->isValueSupersetOf($operatorValue, $subset)) {
                         throw new MetadataPolicyException(
@@ -447,15 +460,15 @@ enum MetadataPolicyOperatorsEnum: string
                     }
                 }
             } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Add) {
-                // MAY be combined with value, in which case the values of add MUST be a subset of the values of value.
-                // We handle this in value case.
+                // MAY be combined with value, in which case the values of 'add' MUST be a subset of the values of
+                // 'value'. We handle this in value case.
 
-                // MAY be combined with subset_of, in which case the values of add MUST be a subset of the values of
+                // MAY be combined with subset_of, in which case the values of 'add' MUST be a subset of the values of
                 // subset_of.
                 if (
                     in_array(MetadataPolicyOperatorsEnum::SubsetOf->value, $parameterOperatorKeys, true)
                 ) {
-                    /** @var array<mixed> $superset We ensured this is array. */
+                    /** @var array<mixed> $superset We ensured this is an array. */
                     $superset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SubsetOf->value
                     ];
@@ -481,8 +494,8 @@ enum MetadataPolicyOperatorsEnum: string
                 // MAY be combined with value, in which case the values of value MUST be a subset of the values of
                 // subset_of. -> handled in value case.
 
-                // MAY be combined with add, in which case the values of add MUST be a subset of the values of
-                // subset_of. -> handled in add case.
+                // MAY be combined with 'add', in which case the values of 'add' MUST be a subset of the values of
+                // subset_of. -> handled in the 'add' case.
 
                 // MAY be combined with superset_of, in which case the values of subset_of MUST be a superset of the
                 // values of superset_of.
@@ -493,7 +506,7 @@ enum MetadataPolicyOperatorsEnum: string
                         true,
                     )
                 ) {
-                    /** @var array<mixed> $subset We ensured this is array. */
+                    /** @var array<mixed> $subset We ensured this is an array. */
                     $subset = $parameterOperations[
                     MetadataPolicyOperatorsEnum::SupersetOf->value
                     ];
