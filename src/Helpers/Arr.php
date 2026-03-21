@@ -8,7 +8,7 @@ use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
 class Arr
 {
-    public const MAX_DEPTH = 99;
+    public const int MAX_DEPTH = 99;
 
 
     /**
