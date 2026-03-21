@@ -172,7 +172,7 @@ final class JwsFetcherTest extends TestCase
         ->willReturn(60);
 
         $this->artifactFetcherMock->expects($this->once())->method('cacheIt')
-            ->with($this->isType('string'), 60, 'uri');
+            ->with($this->isString(), 60, 'uri');
 
 
         $this->sut()->fromNetwork('uri');
