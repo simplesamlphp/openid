@@ -53,4 +53,20 @@ final class SignatureAlgorithmBagTest extends TestCase
     {
         $this->assertNotEmpty($this->sut()->getAllInstances());
     }
+
+
+    public function testCanGetAllNamesUnique(): void
+    {
+        $signatureAlgorithmBag = $this->sut(
+            SignatureAlgorithmEnum::RS256,
+            SignatureAlgorithmEnum::RS384,
+            SignatureAlgorithmEnum::RS256,
+        );
+        $signatureAlgorithmBag->add(SignatureAlgorithmEnum::RS512);
+        $signatureAlgorithmBag->add(SignatureAlgorithmEnum::RS384);
+
+        $names = $signatureAlgorithmBag->getAllNamesUnique();
+        $this->assertCount(3, $names);
+        $this->assertSame(['RS256', 'RS384', 'RS512'], $names);
+    }
 }
