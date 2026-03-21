@@ -21,7 +21,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
  */
 class SdJwt extends ParsedJws
 {
-    public const string TILDE = '~';
+    public const TILDE = '~';
 
 
     public function __construct(
