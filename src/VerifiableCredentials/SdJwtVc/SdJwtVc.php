@@ -17,7 +17,7 @@ class SdJwtVc extends SdJwt
      * As per https://datatracker.ietf.org/doc/html/draft-ietf-oauth-sd-jwt-vc#section-3.2.2.2
      * @var string[]
      */
-    public const array NON_SELECTIVELY_DISCLOSABLE_CLAIMS = [
+    public const NON_SELECTIVELY_DISCLOSABLE_CLAIMS = [
         ClaimsEnum::Iss->value,
         ClaimsEnum::Nbf->value,
         ClaimsEnum::Exp->value,
