@@ -52,6 +52,11 @@
             "phpstan/extension-installer": true
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.2.x-dev"
+        }
+    },
     "scripts": {
         "pre-commit": [
             "vendor/bin/phpcbf",
