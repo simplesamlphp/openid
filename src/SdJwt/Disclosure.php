@@ -16,7 +16,7 @@ class Disclosure implements JsonSerializable
     /**
      * @var non-empty-array<string|int>
      */
-    public const FORBIDDEN_NAMES = [
+    public const array FORBIDDEN_NAMES = [
         ClaimsEnum::_SdAlg->value,
         ClaimsEnum::_Sd->value,
         ClaimsEnum::DotDotDot->value,

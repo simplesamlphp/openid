@@ -6,7 +6,7 @@ namespace SimpleSAML\Test\OpenID;
 
 class Help
 {
-    public const DIR_DATA = 'data';
+    public const string DIR_DATA = 'data';
 
 
     public function getTestRootDir(string ...$pathElements): string
