@@ -20,7 +20,7 @@ abstract class AbstractTypedClaimValue implements ClaimInterface
         protected readonly TypeClaimValue $typeClaimValue,
         array $otherClaims = [],
     ) {
-        $this->data = array_merge(
+        $this->data = array_replace(
             $otherClaims,
             [ClaimsEnum::Type->value => $this->typeClaimValue->jsonSerialize()],
         );

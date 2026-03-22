@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Core;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\IdTokenFactory;
+use SimpleSAML\OpenID\Core\Factories\LogoutTokenFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
@@ -44,6 +45,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(JwsSerializerManagerDecorator::class)]
 #[UsesClass(ClaimFactory::class)]
 #[UsesClass(IdTokenFactory::class)]
+#[UsesClass(LogoutTokenFactory::class)]
 final class CoreTest extends TestCase
 {
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
@@ -110,6 +112,11 @@ final class CoreTest extends TestCase
         $this->assertInstanceOf(
             IdTokenFactory::class,
             $sut->idTokenFactory(),
+        );
+
+        $this->assertInstanceOf(
+            LogoutTokenFactory::class,
+            $sut->logoutTokenFactory(),
         );
     }
 }

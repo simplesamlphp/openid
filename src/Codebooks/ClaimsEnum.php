@@ -15,8 +15,14 @@ enum ClaimsEnum: string
     // @context
     case AtContext = '@context';
 
+    case AtDirection = '@direction';
+
+    case AtLanguage = '@language';
+
     // @type
     case AtType = '@type';
+
+    case AtValue = '@value';
 
     // Authentication Context Class Reference
     case Acr = 'acr';
@@ -446,6 +452,10 @@ enum ClaimsEnum: string
     case UserinfoSignedResponseAlg = 'userinfo_signed_response_alg';
 
     case UserinfoSigningAlgValuesSupported = 'userinfo_signing_alg_values_supported';
+
+    case ValidFrom = 'validFrom';
+
+    case ValidUntil = 'validUntil';
 
     // VerifiableCredential
     case Vc = 'vc';

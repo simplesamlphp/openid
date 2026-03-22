@@ -14,6 +14,7 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\ValueAbstracts\GenericClaim;
 use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactory;
 
 #[CoversClass(ClaimFactory::class)]
 #[UsesClass(Helpers::class)]
@@ -73,6 +74,12 @@ final class ClaimFactoryTest extends TestCase
     public function testCanGetForVcDataModel(): void
     {
         $this->assertInstanceOf(VcDataModelClaimFactory::class, $this->sut()->forVcDataModel());
+    }
+
+
+    public function testCanGetForVcDataModel2(): void
+    {
+        $this->assertInstanceOf(VcDataModel2ClaimFactory::class, $this->sut()->forVcDataModel2());
     }
 
 

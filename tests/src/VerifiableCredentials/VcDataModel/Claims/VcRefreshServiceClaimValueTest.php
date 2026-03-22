@@ -50,4 +50,53 @@ final class VcRefreshServiceClaimValueTest extends TestCase
         $this->assertSame($this->typeClaimValue, $sut->getType());
         $this->assertSame('refreshService', $sut->getName());
     }
+
+
+    public function testCanGetOtherClaimValues(): void
+    {
+        $otherClaims = ['foo' => 'bar'];
+        $sut = $this->sut(otherClaims: $otherClaims);
+
+        $this->assertSame('bar', $sut->getKey('foo'));
+        $this->assertSame($this->id, $sut->getKey('id'));
+        $this->assertNull($sut->getKey('baz'));
+
+        $otherClaims = [123 => 'integer key content'];
+        $sut = $this->sut(otherClaims: $otherClaims);
+        $this->assertSame('integer key content', $sut->getKey(123));
+    }
+
+
+    public function testOverwritingIdAndType(): void
+    {
+        $otherClaims = [
+            'id' => 'overwritten id',
+            'type' => 'overwritten type',
+            'foo' => 'bar',
+        ];
+        $sut = $this->sut(otherClaims: $otherClaims);
+
+        $this->assertSame($this->id, $sut->getId());
+        $this->assertSame($this->id, $sut->getKey('id'));
+        /** @phpstan-ignore method.notFound */
+        $this->assertSame($this->typeClaimValue->jsonSerialize(), $sut->getKey('type'));
+        $this->assertSame('bar', $sut->getKey('foo'));
+    }
+
+
+    public function testCanGetValue(): void
+    {
+        $this->typeClaimValue->method('jsonSerialize')->willReturn(['RefreshService']);
+        $otherClaims = ['foo' => 'bar'];
+        $sut = $this->sut(otherClaims: $otherClaims);
+
+        $expected = [
+            'foo' => 'bar',
+            'id' => $this->id,
+            'type' => ['RefreshService'],
+        ];
+
+        $this->assertSame($expected, $sut->getValue());
+        $this->assertSame($expected, $sut->jsonSerialize());
+    }
 }
