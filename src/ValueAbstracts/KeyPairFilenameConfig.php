@@ -89,7 +89,7 @@ class KeyPairFilenameConfig implements KeyPairConfigInterface
             throw new \RuntimeException(sprintf('File %s does not exist.', $filename));
         }
 
-        $fileContents = file_get_contents($filename);
+        $fileContents = @file_get_contents($filename);
 
         if ($fileContents === false) {
             throw new \RuntimeException(sprintf('Could not read file %s.', $filename));

@@ -41,7 +41,7 @@ class VcCredentialStatusClaimBag implements ClaimInterface
 
     public function getName(): string
     {
-        return ClaimsEnum::Credential_Subject->value;
+        return ClaimsEnum::Credential_Status->value;
     }
 
 

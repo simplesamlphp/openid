@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims;
+namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2\Claims;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
-use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimValue;
 
-#[\PHPUnit\Framework\Attributes\CoversClass(VcRefreshServiceClaimValue::class)]
+#[CoversClass(VcRefreshServiceClaimValue::class)]
 final class VcRefreshServiceClaimValueTest extends TestCase
 {
-    protected string $id = 'id';
+    private Stub $typeClaimValue;
 
-    protected \PHPUnit\Framework\MockObject\Stub $typeClaimValue;
-
-    protected array $otherClaims = [];
+    private array $otherClaims = [];
 
 
     protected function setUp(): void
@@ -25,15 +25,13 @@ final class VcRefreshServiceClaimValueTest extends TestCase
 
 
     protected function sut(
-        ?string $id = null,
         ?TypeClaimValue $typeClaimValue = null,
         ?array $otherClaims = null,
     ): VcRefreshServiceClaimValue {
-        $id ??= $this->id;
         $typeClaimValue ??= $this->typeClaimValue;
         $otherClaims ??= $this->otherClaims;
 
-        return new VcRefreshServiceClaimValue($id, $typeClaimValue, $otherClaims);
+        return new VcRefreshServiceClaimValue($typeClaimValue, $otherClaims);
     }
 
 
@@ -46,7 +44,6 @@ final class VcRefreshServiceClaimValueTest extends TestCase
     public function testCanGetProperties(): void
     {
         $sut = $this->sut();
-        $this->assertSame($this->id, $sut->getId());
         $this->assertSame($this->typeClaimValue, $sut->getType());
         $this->assertSame('refreshService', $sut->getName());
     }
@@ -58,7 +55,6 @@ final class VcRefreshServiceClaimValueTest extends TestCase
         $sut = $this->sut(otherClaims: $otherClaims);
 
         $this->assertSame('bar', $sut->getKey('foo'));
-        $this->assertSame($this->id, $sut->getKey('id'));
         $this->assertNull($sut->getKey('baz'));
 
         $otherClaims = [123 => 'integer key content'];
@@ -67,19 +63,16 @@ final class VcRefreshServiceClaimValueTest extends TestCase
     }
 
 
-    public function testOverwritingIdAndType(): void
+    public function testOverwritingType(): void
     {
         $otherClaims = [
-            'id' => 'overwritten id',
             'type' => 'overwritten type',
             'foo' => 'bar',
         ];
+        $this->typeClaimValue->method('jsonSerialize')->willReturn(['RefreshService']);
         $sut = $this->sut(otherClaims: $otherClaims);
 
-        $this->assertSame($this->id, $sut->getId());
-        $this->assertSame($this->id, $sut->getKey('id'));
-        /** @phpstan-ignore method.notFound */
-        $this->assertSame($this->typeClaimValue->jsonSerialize(), $sut->getKey('type'));
+        $this->assertSame(['RefreshService'], $sut->getKey('type'));
         $this->assertSame('bar', $sut->getKey('foo'));
     }
 
@@ -92,7 +85,6 @@ final class VcRefreshServiceClaimValueTest extends TestCase
 
         $expected = [
             'foo' => 'bar',
-            'id' => $this->id,
             'type' => ['RefreshService'],
         ];
 
