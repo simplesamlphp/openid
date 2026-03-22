@@ -73,10 +73,14 @@ class MetadataPolicyApplicator
 
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
-                    $metadataParameterValue = array_values(array_unique(array_merge(
-                        $metadataParameterValueBeforePolicy,
-                        $operatorValue,
-                    )));
+                    $uniqueValues = [];
+                    foreach (array_merge($metadataParameterValueBeforePolicy, $operatorValue) as $item) {
+                        if (!in_array($item, $uniqueValues, true)) {
+                            $uniqueValues[] = $item;
+                        }
+                    }
+
+                    $metadataParameterValue = $uniqueValues;
 
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $metadataParameterValue,
@@ -127,10 +131,12 @@ class MetadataPolicyApplicator
 
                     /** @var array<mixed> $metadataParameterValueBeforePolicy */
                     /** @var array<mixed> $operatorValue */
-                    $intersection = array_values(array_intersect(
-                        $metadataParameterValueBeforePolicy,
-                        $operatorValue,
-                    ));
+                    $intersection = [];
+                    foreach ($metadataParameterValueBeforePolicy as $item) {
+                        if (in_array($item, $operatorValue, true)) {
+                            $intersection[] = $item;
+                        }
+                    }
 
                     $metadata[$policyParameterName] = $this->resolveParameterValueAfterPolicy(
                         $intersection,
@@ -198,7 +204,7 @@ class MetadataPolicyApplicator
     {
         $value = $metadata[$parameter] ?? null;
 
-        // Special case for 'scope' parameter, which needs to be converted to array before policy application.
+        // Special case for the 'scope' parameter, which needs to be converted to array before policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_string($value)) {
             return explode(' ', $value);
         }
@@ -209,8 +215,12 @@ class MetadataPolicyApplicator
 
     protected function resolveParameterValueAfterPolicy(mixed $value, string $parameter): mixed
     {
-        // Special case for 'scope' parameter, which needs to be converted to string after policy application.
+        // Special case for the 'scope' parameter, which needs to be converted to string after policy application.
         if (($parameter === ClaimsEnum::Scope->value) && is_array($value)) {
+            $value = array_filter(
+                $value,
+                is_string(...),
+            );
             return implode(' ', $value);
         }
 

@@ -18,9 +18,9 @@ class MetadataPolicyResolver
 
 
     /**
+     * @param array<mixed> $metadataPolicies
      * @return array<string,array<string,array<string,mixed>>>
      * @throws \SimpleSAML\OpenID\Exceptions\MetadataPolicyException
-     * @phpstan-ignore missingType.iterableValue (We validate it here)
      */
     public function ensureFormat(array $metadataPolicies): array
     {
@@ -90,12 +90,21 @@ class MetadataPolicyResolver
             );
 
             // Disregard unsupported if not critical, otherwise throw.
-            if (
-                ($unsupportedCriticalOperators = array_values(array_intersect(
-                    $criticalMetadataPolicyOperators,
-                    array_diff($allNextPolicyOperators, $supportedOperators), // Unsupported operators, but ignored
-                ))) !== []
-            ) {
+            $unsupportedOperators = [];
+            foreach ($allNextPolicyOperators as $operator) {
+                if (!in_array($operator, $supportedOperators, true)) {
+                    $unsupportedOperators[] = $operator;
+                }
+            }
+
+            $unsupportedCriticalOperators = [];
+            foreach ($criticalMetadataPolicyOperators as $operator) {
+                if (in_array($operator, $unsupportedOperators, true)) {
+                    $unsupportedCriticalOperators[] = $operator;
+                }
+            }
+
+            if ($unsupportedCriticalOperators !== []) {
                 throw new MetadataPolicyException(
                     'Unsupported critical metadata policy operator(s) encountered: ' .
                     implode(', ', $unsupportedCriticalOperators),
@@ -159,24 +168,33 @@ class MetadataPolicyResolver
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::SupersetOf
                     ) {
                         // We merge with existing values.
-                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =
-                        array_values(array_unique(array_merge(
-                                /** @phpstan-ignore argument.type (We ensured this is array.) */
-                            $operatorValue,
-                            /** @phpstan-ignore argument.type (We ensured this is array.) */
-                                $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                        )));
+                    /** @var array<mixed> $operatorValue */
+                    /** @var array<mixed> $existingValue */
+                        $existingValue = $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value];
+
+                        $uniqueValues = [];
+                        foreach (array_merge($operatorValue, $existingValue) as $item) {
+                            if (!in_array($item, $uniqueValues, true)) {
+                                $uniqueValues[] = $item;
+                            }
+                        }
+
+                        $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] = $uniqueValues;
                     } elseif (
                         $metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf
                     ) {
                         // The result of merging the values of two operators is the intersection of the
                         // operator values.
-                        $intersection = array_values(array_intersect(
-                            /** @phpstan-ignore argument.type (We ensured this is array.) */
-                            $operatorValue,
-                            /** @phpstan-ignore argument.type (We ensured this is array.) */
-                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                        ));
+                        /** @var array<mixed> $operatorValue */
+                        /** @var array<mixed> $existingValue */
+                        $existingValue = $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value];
+
+                        $intersection = [];
+                        foreach ($operatorValue as $item) {
+                            if (in_array($item, $existingValue, true)) {
+                                $intersection[] = $item;
+                            }
+                        }
 
                         if ($intersection === []) {
                             throw new MetadataPolicyException(
@@ -200,12 +218,16 @@ class MetadataPolicyResolver
                     ) {
                         // The result of merging the values of two operators is the intersection of the
                         // operator values.
-                        $intersection = array_values(array_intersect(
-                        /** @phpstan-ignore argument.type (We ensured this is array.) */
-                            $operatorValue,
-                            /** @phpstan-ignore argument.type (We ensured this is array.) */
-                            $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value],
-                        ));
+                        /** @var array<mixed> $operatorValue */
+                        /** @var array<mixed> $existingValue */
+                        $existingValue = $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value];
+
+                        $intersection = [];
+                        foreach ($operatorValue as $item) {
+                            if (in_array($item, $existingValue, true)) {
+                                $intersection[] = $item;
+                            }
+                        }
 
                         // Set it as new operator value, even if its empty.
                         $currentPolicy[$nextPolicyParameter][$metadataPolicyOperatorEnum->value] =

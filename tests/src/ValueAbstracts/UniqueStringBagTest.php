@@ -27,4 +27,59 @@ final class UniqueStringBagTest extends TestCase
     {
         $this->assertInstanceOf(UniqueStringBag::class, $this->sut());
     }
+
+
+    public function testGetAll(): void
+    {
+        $bag = $this->sut();
+        $this->assertSame($this->sampleValues, $bag->getAll());
+    }
+
+
+    public function testHas(): void
+    {
+        $bag = $this->sut();
+        $this->assertTrue($bag->has('foo'));
+        $this->assertTrue($bag->has('bar'));
+        $this->assertFalse($bag->has('unknown'));
+    }
+
+
+    public function testAdd(): void
+    {
+        $bag = new UniqueStringBag();
+        $this->assertSame([], $bag->getAll());
+
+        $bag->add('foo');
+        $this->assertSame(['foo'], $bag->getAll());
+
+        $bag->add('bar', 'baz');
+        $this->assertSame(['foo', 'bar', 'baz'], $bag->getAll());
+    }
+
+
+    public function testUniqueness(): void
+    {
+        // Constructor uniqueness
+        $bag = new UniqueStringBag('foo', 'foo', 'bar');
+        $this->assertSame(['foo', 'bar'], $bag->getAll());
+
+        // add() uniqueness
+        $bag->add('foo');
+        $this->assertSame(['foo', 'bar'], $bag->getAll());
+
+        $bag->add('baz', 'bar', 'qux');
+        $this->assertSame(['foo', 'bar', 'baz', 'qux'], $bag->getAll());
+    }
+
+
+    public function testJsonSerialize(): void
+    {
+        $bag = $this->sut();
+        $this->assertSame($this->sampleValues, $bag->jsonSerialize());
+        $this->assertSame(
+            json_encode($this->sampleValues),
+            json_encode($bag),
+        );
+    }
 }

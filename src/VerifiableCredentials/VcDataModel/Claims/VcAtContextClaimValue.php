@@ -18,11 +18,12 @@ class VcAtContextClaimValue implements ClaimInterface
     public function __construct(
         protected readonly string $baseContext,
         protected readonly array $otherContexts,
+        AtContextsEnum $expectedBaseContext = AtContextsEnum::W3Org2018CredentialsV1,
     ) {
-        if ($this->baseContext !== AtContextsEnum::W3Org2018CredentialsV1->value) {
+        if ($this->baseContext !== $expectedBaseContext->value) {
             throw new VcDataModelException(sprintf(
                 'Invalid VC @context claim. Base context should be %s, %s given.',
-                AtContextsEnum::W3Org2018CredentialsV1->value,
+                $expectedBaseContext->value,
                 $this->baseContext,
             ));
         }
@@ -64,7 +65,7 @@ class VcAtContextClaimValue implements ClaimInterface
      */
     public function getValue(): array
     {
-        return[
+        return [
             $this->baseContext,
             ...$this->otherContexts,
         ];

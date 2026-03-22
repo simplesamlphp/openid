@@ -68,7 +68,10 @@ class KeyPairResolver
         }
 
         // If both sides have designated algorithms, they MUST match.
-        if (count($targetAlgorithms) === 2 && $targetAlgorithms['receiver'] !== $targetAlgorithms['sender']) {
+        if (
+            (isset($targetAlgorithms['receiver']) && isset($targetAlgorithms['sender']))
+            && $targetAlgorithms['receiver'] !== $targetAlgorithms['sender']
+        ) {
             $this->logger?->error(
                 'Conflict in designated signature algorithms between receiver and sender.',
                 $targetAlgorithms,

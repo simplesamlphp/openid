@@ -11,12 +11,15 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\ValueAbstracts\GenericClaim;
 use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactory;
 
 class ClaimFactory
 {
     protected FederationClaimFactory $federationClaimFactory;
 
     protected VcDataModelClaimFactory $vcDataModelClaimFactory;
+
+    protected VcDataModel2ClaimFactory $vcDataModel2ClaimFactory;
 
 
     public function __construct(
@@ -37,6 +40,15 @@ class ClaimFactory
     public function forVcDataModel(): VcDataModelClaimFactory
     {
         return $this->vcDataModelClaimFactory ??= new VcDataModelClaimFactory(
+            $this->helpers,
+            $this,
+        );
+    }
+
+
+    public function forVcDataModel2(): VcDataModel2ClaimFactory
+    {
+        return $this->vcDataModel2ClaimFactory ??= new VcDataModel2ClaimFactory(
             $this->helpers,
             $this,
         );

@@ -10,16 +10,23 @@ then
 fi
 
 URLS=(
+    # OpenID specifications
     "https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html"
     "https://openid.net/specs/openid-federation-1_0.html"
-    "https://www.w3.org/TR/vc-data-model-2.0/"
-    "https://www.w3.org/TR/vc-jose-cose/"
-    "https://fidescommunity.github.io/DIIP/"
     "https://openid.net/specs/openid-connect-core-1_0.html"
     "https://openid.net/specs/openid-connect-discovery-1_0.html"
     "https://openid.net/specs/openid-connect-rpinitiated-1_0.html"
     "https://openid.net/specs/openid-connect-frontchannel-1_0.html"
     "https://openid.net/specs/openid-connect-backchannel-1_0.html"
+    # W3C specifications
+    "https://www.w3.org/TR/vc-data-model-2.0/"
+    "https://www.w3.org/TR/vc-jose-cose/"
+    "https://www.w3.org/TR/vc-imp-guide/"
+    "https://www.w3.org/TR/did-1.0/"
+    "https://www.w3.org/TR/vc-data-integrity/"
+    "https://www.w3.org/TR/json-ld11/"
+    # DIIP specifications
+    "https://fidescommunity.github.io/DIIP/"
 )
 
 # For each of the specifications, fetch the content from the URL and save it

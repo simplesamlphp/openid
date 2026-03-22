@@ -45,6 +45,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 use SimpleSAML\OpenID\SupportedSerializers;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
+use SimpleSAML\OpenID\Utils\KeyPairResolver;
 
 #[CoversClass(Federation::class)]
 #[UsesClass(ParsedJwsFactory::class)]
@@ -78,6 +79,7 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(TrustMarkValidator::class)]
 #[UsesClass(TrustMarkFetcher::class)]
 #[UsesClass(TrustMarkStatusResponseFetcher::class)]
+#[UsesClass(KeyPairResolver::class)]
 final class FederationTest extends TestCase
 {
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
@@ -166,5 +168,6 @@ final class FederationTest extends TestCase
         $this->assertInstanceOf(TrustMarkDelegationFactory::class, $sut->trustMarkDelegationFactory());
         $this->assertInstanceOf(TrustMarkValidator::class, $sut->trustMarkValidator());
         $this->assertInstanceOf(TrustMarkFetcher::class, $sut->trustMarkFetcher());
+        $this->assertInstanceOf(KeyPairResolver::class, $sut->keyPairResolver());
     }
 }

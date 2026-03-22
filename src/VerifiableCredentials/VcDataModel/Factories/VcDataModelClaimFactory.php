@@ -6,9 +6,13 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories;
 
 use DateTimeImmutable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\ValueAbstracts\LanguageValueObject;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableStringValue;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableStringValueBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValue;
@@ -106,7 +110,7 @@ class VcDataModelClaimFactory
     /**
      * @param non-empty-array<mixed> $data
      */
-    public function buildVcCredentialSubjectClaimValue(array $data, ?string $id = null): VcCredentialSubjectClaimValue
+    public function buildVcCredentialSubjectClaimValue(array $data): VcCredentialSubjectClaimValue
     {
         return new VcCredentialSubjectClaimValue($data);
     }
@@ -144,7 +148,7 @@ class VcDataModelClaimFactory
         $vcCredentialSubjectClaimValue = $this->buildVcCredentialSubjectClaimValue($vcCredentialSubjectClaimValueData);
 
         $vcCredentialSubjectClaimValues = array_map(
-            fn (array $data): VcCredentialSubjectClaimValue => $this->buildVcCredentialSubjectClaimValue($data),
+            $this->buildVcCredentialSubjectClaimValue(...),
             $data,
         );
 
@@ -398,6 +402,101 @@ class VcDataModelClaimFactory
         return new VcEvidenceClaimBag(
             $vcEvidenceClaimValue,
             ...$vcEvidenceClaimValues,
+        );
+    }
+
+
+    /**
+     * Build a LanguageValueObject from language value object data.
+     *
+     * @param mixed[] $data
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function buildLanguageValueObject(array $data): LanguageValueObject
+    {
+        $value = $data[ClaimsEnum::AtValue->value] ?? null;
+
+        if (!is_string($value) || ($value === '' || $value === '0')) {
+            throw new InvalidValueException('Language value object @value must be a non-empty string.');
+        }
+
+        $language = $data[ClaimsEnum::AtLanguage->value] ?? null;
+        if ($language !== null && (!is_string($language) || ($language === '' || $language === '0'))) {
+            throw new InvalidValueException('Language value object @language must be a non-empty string.');
+        }
+
+        $direction = $data[ClaimsEnum::AtDirection->value] ?? null;
+        if ($direction !== null && (!in_array($direction, ['ltr', 'rtl'], true))) {
+            throw new InvalidValueException('Language value object @direction must be "ltr" or "rtl".');
+        }
+
+        return new LanguageValueObject($value, $language, $direction);
+    }
+
+
+    /**
+     * Build a LocalizableStringValueBag from name or description property data.
+     *
+     * @param mixed $data String or array of language value objects
+     * @param non-empty-string $claimName The name of the claim (e.g., 'name' or 'description')
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function buildLocalizableStringValueBag(mixed $data, string $claimName): LocalizableStringValueBag
+    {
+        if (is_string($data)) {
+            // Simple string case: create a single LanguageValueObject with just the value
+            if ($data === '' || $data === '0') {
+                throw new InvalidValueException(
+                    sprintf('%s must be a non-empty string or language value object.', $claimName),
+                );
+            }
+
+            $languageValueObject = new LanguageValueObject($data);
+            return new LocalizableStringValueBag(new LocalizableStringValue($languageValueObject, $claimName));
+        }
+
+        if (!is_array($data)) {
+            throw new InvalidValueException(
+                sprintf('%s must be a string or language value object.', $claimName),
+            );
+        }
+
+        // Check if this is a single language value object (associative array with @value key)
+        // or an array of language value objects (indexed array or array of objects)
+        if ($this->helpers->arr()->isAssociative($data) && isset($data[ClaimsEnum::AtValue->value])) {
+            // Single language value object
+            $languageValueObject = $this->buildLanguageValueObject($data);
+            return new LocalizableStringValueBag(new LocalizableStringValue($languageValueObject, $claimName));
+        }
+
+        // Array of language value objects
+        if (!$this->helpers->arr()->isAssociative($data)) {
+            // Indexed array - each element should be a language value object
+            $localizableStringValues = [];
+            foreach ($data as $item) {
+                if (!is_array($item)) {
+                    throw new InvalidValueException(
+                        sprintf('%s array items must be language value objects.', $claimName),
+                    );
+                }
+
+                $languageValueObject = $this->buildLanguageValueObject($item);
+                $localizableStringValues[] = new LocalizableStringValue($languageValueObject, $claimName);
+            }
+
+            if ($localizableStringValues === []) {
+                throw new InvalidValueException(
+                    sprintf('%s array must not be empty.', $claimName),
+                );
+            }
+
+            $firstValue = array_shift($localizableStringValues);
+            return new LocalizableStringValueBag($firstValue, ...$localizableStringValues);
+        }
+
+        // Associative array without @value - invalid
+        throw new InvalidValueException(
+            sprintf('%s must be a string or language value object.', $claimName),
         );
     }
 }
