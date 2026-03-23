@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2;
 use DateTimeImmutable;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -756,9 +757,7 @@ final class VcSdJwtTest extends TestCase
     }
 
 
-    /**
-     * @dataProvider invalidBagProvider
-     */
+    #[DataProvider('invalidBagProvider')]
     public function testBagsThrowOnInvalidType(string $claim, string $method): void
     {
         $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);

@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimValue;
 
-/**
- * @covers \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBag
- */
+#[\PHPUnit\Framework\Attributes\CoversClass(VcRefreshServiceClaimBag::class)]
 final class VcRefreshServiceClaimBagTest extends TestCase
 {
     protected MockObject $vcRefreshServiceClaimValueMock;
