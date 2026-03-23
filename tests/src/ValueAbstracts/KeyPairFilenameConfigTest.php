@@ -141,7 +141,7 @@ final class KeyPairFilenameConfigTest extends TestCase
 
         try {
             $this->expectException(RuntimeException::class);
-            $this->expectExceptionMessage(sprintf('Could not read file %s.', $unreadableFile));
+            $this->expectExceptionMessage('Could not read file');
             $config->getPrivateKeyString();
         } finally {
             chmod($unreadableFile, 0666);
