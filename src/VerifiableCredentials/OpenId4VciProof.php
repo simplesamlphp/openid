@@ -99,7 +99,7 @@ class OpenId4VciProof extends ParsedJws
     {
         $claimKey = ClaimsEnum::Nonce->value;
 
-        $nonce = $this->getHeaderClaim($claimKey);
+        $nonce = $this->getPayloadClaim($claimKey);
 
         return is_null($nonce) ? null : $this->helpers->type()->ensureNonEmptyString($nonce, $claimKey);
     }
