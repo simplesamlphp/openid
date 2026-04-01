@@ -32,6 +32,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\TxCodeFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcSdJwtFactory;
 
 #[\PHPUnit\Framework\Attributes\CoversClass(VerifiableCredentials::class)]
 #[UsesClass(DateIntervalDecorator::class)]
@@ -213,6 +214,11 @@ final class VerifiableCredentialsTest extends TestCase
         $this->assertInstanceOf(
             SdJwtVcFactory::class,
             $sut->sdJwtVcFactory(),
+        );
+
+        $this->assertInstanceOf(
+            VcSdJwtFactory::class,
+            $sut->vcSdJwtFactory(),
         );
 
         $this->assertInstanceOf(

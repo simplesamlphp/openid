@@ -26,6 +26,7 @@ use SimpleSAML\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\Factories\TxCodeFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
+use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcSdJwtFactory;
 
 class VerifiableCredentials
 {
@@ -68,6 +69,8 @@ class VerifiableCredentials
     protected ?SdJwtVcFactory $sdJwtVcFactory = null;
 
     protected ?DisclosureBagFactory $disclosureBagFactory = null;
+
+    protected ?VcSdJwtFactory $vcSdJwtFactory = null;
 
     protected ?TxCodeFactory $txCodeFactory = null;
 
@@ -234,6 +237,20 @@ class VerifiableCredentials
             $this->helpers(),
             $this->claimFactory(),
             $this->disclosureFactory(),
+        );
+    }
+
+
+    public function vcSdJwtFactory(): VcSdJwtFactory
+    {
+        return $this->vcSdJwtFactory ??= new VcSdJwtFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $this->timestampValidationLeewayDecorator,
+            $this->helpers(),
+            $this->claimFactory(),
         );
     }
 
