@@ -251,6 +251,7 @@ class VerifiableCredentials
             $this->timestampValidationLeewayDecorator,
             $this->helpers(),
             $this->claimFactory(),
+            $this->disclosureFactory(),
         );
     }
 

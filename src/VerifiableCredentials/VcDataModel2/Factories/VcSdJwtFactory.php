@@ -6,12 +6,15 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Codebooks\HashAlgorithmsEnum;
 use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
-use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
+use SimpleSAML\OpenID\SdJwt\DisclosureBag;
+use SimpleSAML\OpenID\SdJwt\Factories\SdJwtFactory;
+use SimpleSAML\OpenID\SdJwt\KbJwt;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
-class VcSdJwtFactory extends ParsedJwsFactory
+class VcSdJwtFactory extends SdJwtFactory
 {
     public function fromToken(string $token): VcSdJwt
     {
@@ -31,14 +34,25 @@ class VcSdJwtFactory extends ParsedJwsFactory
      * @param array<non-empty-string,mixed> $payload
      * @param array<non-empty-string,mixed> $header
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
      */
     public function fromData(
         JwkDecorator $signingKey,
         SignatureAlgorithmEnum $signatureAlgorithm,
         array $payload,
         array $header,
+        ?DisclosureBag $disclosureBag = null,
+        ?KbJwt $kbJwt = null,
+        JwtTypesEnum $jwtTypesEnum = JwtTypesEnum::VcSdJwt,
+        HashAlgorithmsEnum $hashAlgorithmsEnum = HashAlgorithmsEnum::SHA_256,
     ): VcSdJwt {
-        $header[ClaimsEnum::Typ->value] = JwtTypesEnum::VcSdJwt->value;
+        $header[ClaimsEnum::Typ->value] = $jwtTypesEnum->value;
+
+        if ($disclosureBag instanceof DisclosureBag) {
+            $payload = $this->updatePayloadWithDisclosures($payload, $disclosureBag, $hashAlgorithmsEnum);
+        }
+
+        /** @var array<non-empty-string,mixed> $payload */
 
         return new VcSdJwt(
             $this->jwsDecoratorBuilder->fromData(
@@ -53,6 +67,8 @@ class VcSdJwtFactory extends ParsedJwsFactory
             $this->timestampValidationLeeway,
             $this->helpers,
             $this->claimFactory,
+            $disclosureBag,
+            $kbJwt,
         );
     }
 }
