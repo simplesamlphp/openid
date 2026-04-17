@@ -16,17 +16,19 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
-use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\SdJwt\DisclosureBag;
+use SimpleSAML\OpenID\SdJwt\Factories\DisclosureFactory;
+use SimpleSAML\OpenID\SdJwt\Factories\SdJwtFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcSdJwtFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
 #[CoversClass(VcSdJwtFactory::class)]
-#[UsesClass(ParsedJwsFactory::class)]
+#[UsesClass(SdJwtFactory::class)]
 #[UsesClass(VcSdJwt::class)]
 #[UsesClass(ParsedJws::class)]
 #[UsesClass(DateIntervalDecorator::class)]
@@ -50,6 +52,8 @@ final class VcSdJwtFactoryTest extends TestCase
 
     protected \PHPUnit\Framework\MockObject\Stub&ClaimFactory $claimFactoryMock;
 
+    protected \PHPUnit\Framework\MockObject\Stub&DisclosureFactory $disclosureFactoryMock;
+
 
     protected function setUp(): void
     {
@@ -60,6 +64,7 @@ final class VcSdJwtFactoryTest extends TestCase
         $this->dateIntervalDecorator = new DateIntervalDecorator(new \DateInterval('PT0S'));
         $this->helpers = new Helpers();
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
+        $this->disclosureFactoryMock = $this->createStub(DisclosureFactory::class);
     }
 
 
@@ -73,6 +78,7 @@ final class VcSdJwtFactoryTest extends TestCase
             $this->dateIntervalDecorator,
             $this->helpers,
             $this->claimFactoryMock,
+            $this->disclosureFactoryMock,
         );
     }
 
@@ -146,5 +152,44 @@ final class VcSdJwtFactoryTest extends TestCase
                 $header,
             ),
         );
+    }
+
+
+    public function testCanBuildFromDataWithDisclosureBag(): void
+    {
+        $signingKey = $this->createStub(JwkDecorator::class);
+        $signatureAlgorithm = SignatureAlgorithmEnum::RS256;
+        $payload = ['foo' => 'bar'];
+        $header = ['alg' => 'RS256'];
+        $disclosureBag = $this->createStub(DisclosureBag::class);
+        $disclosureBag->method('all')->willReturn([]);
+
+        $jwsDecoratorMock = $this->createJwsDecoratorMock($payload);
+
+        $this->jwsDecoratorBuilderMock
+            ->expects($this->once())
+            ->method('fromData')
+            ->with(
+                $signingKey,
+                $signatureAlgorithm,
+                $payload,
+                $this->callback(function (array $header): true {
+                    $this->assertArrayHasKey(ClaimsEnum::Typ->value, $header);
+                    $this->assertSame(JwtTypesEnum::VcSdJwt->value, $header[ClaimsEnum::Typ->value]);
+                    return true;
+                }),
+            )
+            ->willReturn($jwsDecoratorMock);
+
+        $vcSdJwt = $this->sut()->fromData(
+            $signingKey,
+            $signatureAlgorithm,
+            $payload,
+            $header,
+            $disclosureBag,
+        );
+
+        $this->assertInstanceOf(VcSdJwt::class, $vcSdJwt);
+        $this->assertSame($disclosureBag, $vcSdJwt->getDisclosureBag());
     }
 }
