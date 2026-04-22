@@ -58,6 +58,19 @@ class Type
 
 
     /**
+     * @return non-empty-string|null
+     */
+    public function getNonEmptyStringOrNull(mixed $value): ?string
+    {
+        if (is_string($value) && $value !== '') {
+            return $value;
+        }
+
+        return null;
+    }
+
+
+    /**
      * @return mixed[]
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */

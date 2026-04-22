@@ -387,6 +387,54 @@ class EntityStatement extends ParsedJws
 
 
     /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getFederationListEndpoint(): ?string
+    {
+        $federationListEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationListEndpoint->value,
+        );
+
+        if (is_null($federationListEndpoint)) {
+            return null;
+        }
+
+        return $this->helpers->type()->ensureNonEmptyString($federationListEndpoint);
+    }
+
+
+    /**
+     * @return ?non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     * @throws \SimpleSAML\OpenID\Exceptions\OpenIdException
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function getFederationCollectionEndpoint(): ?string
+    {
+        $federationCollectionEndpoint = $this->helpers->arr()->getNestedValue(
+            $this->getPayload(),
+            ClaimsEnum::Metadata->value,
+            EntityTypesEnum::FederationEntity->value,
+            ClaimsEnum::FederationCollectionEndpoint->value,
+        );
+
+        if (is_null($federationCollectionEndpoint)) {
+            return null;
+        }
+
+        return $this->helpers->type()->ensureNonEmptyString($federationCollectionEndpoint);
+    }
+
+
+    /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\OpenId4VciProofException
@@ -449,6 +497,8 @@ class EntityStatement extends ParsedJws
             $this->getTrustMarkOwners(...),
             $this->getTrustMarkIssuers(...),
             $this->getFederationFetchEndpoint(...),
+            $this->getFederationListEndpoint(...),
+            $this->getFederationCollectionEndpoint(...),
             $this->getFederationTrustMarkEndpoint(...),
             $this->getFederationTrustMarkStatusEndpoint(...),
         );

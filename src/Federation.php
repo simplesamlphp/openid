@@ -19,6 +19,13 @@ use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
+use SimpleSAML\OpenID\Federation\CacheEntityCollectionStore;
+use SimpleSAML\OpenID\Federation\EntityCollectionBuilder;
+use SimpleSAML\OpenID\Federation\EntityCollectionFetcher;
+use SimpleSAML\OpenID\Federation\EntityCollectionFilter;
+use SimpleSAML\OpenID\Federation\EntityCollectionPaginator;
+use SimpleSAML\OpenID\Federation\EntityCollectionSorter;
+use SimpleSAML\OpenID\Federation\EntityCollectionStoreInterface;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
@@ -27,12 +34,16 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkStatusResponseFactory;
+use SimpleSAML\OpenID\Federation\FederationDiscovery;
+use SimpleSAML\OpenID\Federation\InMemoryEntityCollectionStore;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
+use SimpleSAML\OpenID\Federation\SubordinateListingFetcher;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkValidator;
+use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
@@ -50,6 +61,8 @@ class Federation
 
     protected int $maxTrustChainDepth;
 
+    protected int $maxDiscoveryDepth;
+
     protected ?CacheDecorator $cacheDecorator;
 
     protected HttpClientDecorator $httpClientDecorator;
@@ -59,6 +72,20 @@ class Federation
     protected ?JwsDecoratorBuilder $jwsDecoratorBuilder = null;
 
     protected ?JwsVerifierDecorator $jwsVerifierDecorator  = null;
+
+    protected ?SubordinateListingFetcher $subordinateListingFetcher = null;
+
+    protected ?FederationDiscovery $federationDiscovery = null;
+
+    protected ?EntityCollectionFetcher $entityCollectionFetcher = null;
+
+    protected ?EntityCollectionFilter $entityCollectionFilter = null;
+
+    protected ?EntityCollectionSorter $entityCollectionSorter = null;
+
+    protected ?EntityCollectionPaginator $entityCollectionPaginator = null;
+
+    protected ?EntityCollectionBuilder $entityCollectionBuilder = null;
 
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
 
@@ -126,11 +153,13 @@ class Federation
         ?Client $client = null,
         // phpcs:ignore
         protected readonly TrustMarkStatusEndpointUsagePolicyEnum $defaultTrustMarkStatusEndpointUsagePolicyEnum = TrustMarkStatusEndpointUsagePolicyEnum::NotUsed,
+        int $maxDiscoveryDepth = 10,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
+        $this->maxDiscoveryDepth = max(1, $maxDiscoveryDepth);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
     }
@@ -317,6 +346,80 @@ class Federation
             $this->maxCacheDurationDecorator(),
             $this->helpers(),
             $this->logger,
+        );
+    }
+
+
+    public function subordinateListingFetcher(): SubordinateListingFetcher
+    {
+        return $this->subordinateListingFetcher ??= new SubordinateListingFetcher(
+            $this->artifactFetcher(),
+            $this->helpers(),
+            $this->logger,
+        );
+    }
+
+
+    public function federationDiscovery(?EntityCollectionStoreInterface $store = null): FederationDiscovery
+    {
+        if (!$this->federationDiscovery instanceof \SimpleSAML\OpenID\Federation\FederationDiscovery) {
+            $effectiveStore = $store ?? ($this->cacheDecorator() instanceof \SimpleSAML\OpenID\Decorators\CacheDecorator
+                ? new CacheEntityCollectionStore($this->cacheDecorator())
+                : new InMemoryEntityCollectionStore());
+
+            $this->federationDiscovery = new FederationDiscovery(
+                $this->entityStatementFetcher(),
+                $this->subordinateListingFetcher(),
+                $effectiveStore,
+                $this->maxCacheDurationDecorator(),
+                $this->logger,
+                $this->maxDiscoveryDepth,
+            );
+        }
+
+        return $this->federationDiscovery;
+    }
+
+
+    public function entityCollectionFetcher(): EntityCollectionFetcher
+    {
+        return $this->entityCollectionFetcher ??= new EntityCollectionFetcher(
+            $this->artifactFetcher(),
+            $this->helpers(),
+            $this->logger,
+        );
+    }
+
+
+    public function entityCollectionFilter(): EntityCollectionFilter
+    {
+        return $this->entityCollectionFilter ??= new EntityCollectionFilter($this->helpers());
+    }
+
+
+    public function entityCollectionSorter(): EntityCollectionSorter
+    {
+        return $this->entityCollectionSorter ??= new EntityCollectionSorter($this->helpers());
+    }
+
+
+    public function entityCollectionPaginator(): EntityCollectionPaginator
+    {
+        return $this->entityCollectionPaginator ??= new EntityCollectionPaginator();
+    }
+
+
+    /**
+     * @param \SimpleSAML\OpenID\Federation\EntityCollectionStoreInterface|null $store  Forwarded to
+     * federationDiscovery()
+     */
+    public function entityCollectionBuilder(?EntityCollectionStoreInterface $store = null): EntityCollectionBuilder
+    {
+        return $this->entityCollectionBuilder ??= new EntityCollectionBuilder(
+            $this->federationDiscovery($store),
+            $this->entityCollectionFilter(),
+            $this->entityCollectionSorter(),
+            $this->entityCollectionPaginator(),
         );
     }
 

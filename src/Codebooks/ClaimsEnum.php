@@ -173,6 +173,10 @@ enum ClaimsEnum: string
 
     case Expiration_Date = 'expirationDate';
 
+    case EntityTypes = 'entity_types';
+
+    case FederationCollectionEndpoint = 'federation_collection_endpoint';
+
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
 
     case FederationListEndpoint = 'federation_list_endpoint';
