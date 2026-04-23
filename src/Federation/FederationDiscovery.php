@@ -38,14 +38,12 @@ class FederationDiscovery
         array $filters = [],
         bool $forceRefresh = false,
     ): array {
-        if ($forceRefresh) {
-            $this->entityCollectionStore->clearEntityIds($trustAnchorId);
-        }
-
-        $cachedIds = $this->entityCollectionStore->getEntityIds($trustAnchorId);
-        if (is_array($cachedIds)) {
-            $this->logger?->debug('Returning discovered entity IDs from store.', ['trustAnchorId' => $trustAnchorId]);
-            return $cachedIds;
+        if (!$forceRefresh) {
+            $cachedIds = $this->entityCollectionStore->getEntityIds($trustAnchorId);
+            if (is_array($cachedIds)) {
+                $this->logger?->debug('Returning discovered entity IDs from store.', ['trustAnchorId' => $trustAnchorId]);
+                return $cachedIds;
+            }
         }
 
         $this->logger?->info(
