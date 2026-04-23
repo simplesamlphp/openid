@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
@@ -14,9 +14,9 @@ use Throwable;
 class EntityCollectionFetcher
 {
     public function __construct(
-        private readonly ArtifactFetcher $artifactFetcher,
-        private readonly Helpers $helpers,
-        private readonly ?LoggerInterface $logger = null,
+        protected readonly ArtifactFetcher $artifactFetcher,
+        protected readonly Helpers $helpers,
+        protected readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -47,21 +47,26 @@ class EntityCollectionFetcher
         try {
             $responseBody = $this->artifactFetcher->fromNetworkAsString($uri);
 
-            /** @var mixed $decoded */
-            $decoded = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = $this->helpers->json()->decode($responseBody);
 
-            if (!is_array($decoded) || !isset($decoded['entities']) || !is_array($decoded['entities'])) {
+            if (
+                !is_array($decoded) ||
+                !isset($decoded[ClaimsEnum::Entities->value]) ||
+                !is_array($decoded[ClaimsEnum::Entities->value])
+            ) {
                 throw new EntityDiscoveryException('Entity collection response is missing "entities" array.');
             }
 
             $entries = [];
-            foreach ($decoded['entities'] as $entryData) {
+            foreach ($decoded[ClaimsEnum::Entities->value] as $entryData) {
                 if (!is_array($entryData)) {
                     continue;
                 }
 
                 /** @var array<string, mixed>|null $uiInfo */
-                $uiInfo = is_array($entryData['ui_info'] ?? null) ? $entryData['ui_info'] : null;
+                $uiInfo = is_array($entryData[ClaimsEnum::UiInfos->value] ?? null) ?
+                $entryData[ClaimsEnum::UiInfos->value] :
+                null;
                 /** @var array<array<mixed>>|null $trustMarks */
                 $trustMarks = is_array($entryData[ClaimsEnum::TrustMarks->value] ?? null)
                 ? $entryData[ClaimsEnum::TrustMarks->value]
@@ -71,19 +76,22 @@ class EntityCollectionFetcher
                     $this->helpers->type()->ensureNonEmptyString($entryData[ClaimsEnum::Id->value] ?? null),
                     $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings(
                         $entryData[ClaimsEnum::EntityTypes->value] ?? [],
-                        'entity_types',
+                        ClaimsEnum::EntityTypes->value,
                     ),
                     $uiInfo,
                     $trustMarks,
                 );
             }
 
-            $lastUpdated = $decoded['last_updated'] ?? null;
+            $next = is_string($next = $decoded[ClaimsEnum::Next->value] ?? null) ? $next : null;
+            $lastUpdated = is_numeric($lastUpdated = $decoded[ClaimsEnum::LastUpdated->value] ?? null) ?
+            $this->helpers->type()->ensureInt($lastUpdated) :
+            null;
 
             return new EntityCollectionResponse(
                 $entries,
-                $this->helpers->type()->getNonEmptyStringOrNull($decoded['next'] ?? null),
-                is_numeric($lastUpdated) ? (int)$lastUpdated : null,
+                $next,
+                $lastUpdated,
             );
         } catch (Throwable $throwable) {
             $message = sprintf('Unable to fetch entity collection from %s. Error: %s', $uri, $throwable->getMessage());

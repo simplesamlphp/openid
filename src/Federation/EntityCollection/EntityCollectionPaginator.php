@@ -2,10 +2,19 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
+
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionPaginator
 {
+    public function __construct(
+        protected readonly Helpers $helpers,
+    ) {
+    }
+
+
     /**
      * @template T
      * @param array<string, T> $entities  Full ordered result set (pre-sorted)
@@ -19,12 +28,10 @@ class EntityCollectionPaginator
         $offset = 0;
 
         if (!is_null($from)) {
-            $fromId = base64_decode($from, true);
-            if ($fromId !== false) {
-                $index = array_search($fromId, $keys, true);
-                if ($index !== false) {
-                    $offset = $index + 1;
-                }
+            $fromId = $this->helpers->base64Url()->decode($from);
+            $index = array_search($fromId, $keys, true);
+            if ($index !== false) {
+                $offset = $index + 1;
             }
         }
 
@@ -33,12 +40,14 @@ class EntityCollectionPaginator
 
         if ($offset + $limit < count($keys)) {
             $lastIdInPage = array_key_last($pageItems);
-            $next = base64_encode((string)$lastIdInPage);
+            if ($lastIdInPage !== null) {
+                $next = $this->helpers->base64Url()->encode((string)$lastIdInPage);
+            }
         }
 
         return [
-            'entities' => $pageItems,
-            'next' => $next,
+            ClaimsEnum::Entities->value => $pageItems,
+            ClaimsEnum::Next->value => $next,
         ];
     }
 }

@@ -14,9 +14,9 @@ use Throwable;
 class SubordinateListingFetcher
 {
     public function __construct(
-        private readonly ArtifactFetcher $artifactFetcher,
-        private readonly Helpers $helpers,
-        private readonly ?LoggerInterface $logger = null,
+        protected readonly ArtifactFetcher $artifactFetcher,
+        protected readonly Helpers $helpers,
+        protected readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -40,8 +40,7 @@ class SubordinateListingFetcher
             $responseBody = $this->artifactFetcher->fromNetworkAsString($uri);
             $this->logger?->debug('Fetched subordinate listing from network.', ['uri' => $uri]);
 
-            /** @var mixed $decoded */
-            $decoded = json_decode($responseBody, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = $this->helpers->json()->decode($responseBody);
 
             if (!is_array($decoded)) {
                 throw new EntityDiscoveryException('Subordinate listing response is not a JSON array.');

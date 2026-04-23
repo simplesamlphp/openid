@@ -10,7 +10,16 @@ class EntityCollection
      * @param array<string, \SimpleSAML\OpenID\Federation\EntityStatement> $entities  Keyed by entity ID
      */
     public function __construct(
-        public readonly array $entities,
+        protected readonly array $entities,
     ) {
+    }
+
+
+    /**
+     * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>
+     */
+    public function all(): array
+    {
+        return $this->entities;
     }
 }

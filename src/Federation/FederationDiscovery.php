@@ -6,17 +6,18 @@ namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
 use Throwable;
 
 class FederationDiscovery
 {
     public function __construct(
-        private readonly EntityStatementFetcher $entityStatementFetcher,
-        private readonly SubordinateListingFetcher $subordinateListingFetcher,
-        private readonly EntityCollectionStoreInterface $store,
-        private readonly DateIntervalDecorator $maxCacheDurationDecorator,
-        private readonly ?LoggerInterface $logger = null,
-        private readonly int $maxDepth = 10,
+        protected readonly EntityStatementFetcher $entityStatementFetcher,
+        protected readonly SubordinateListingFetcher $subordinateListingFetcher,
+        protected readonly EntityCollectionStoreInterface $entityCollectionStore,
+        protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
+        protected readonly ?LoggerInterface $logger = null,
+        protected readonly int $maxDepth = 10,
     ) {
     }
 
@@ -38,10 +39,10 @@ class FederationDiscovery
         bool $forceRefresh = false,
     ): array {
         if ($forceRefresh) {
-            $this->store->clearEntityIds($trustAnchorId);
+            $this->entityCollectionStore->clearEntityIds($trustAnchorId);
         }
 
-        $cachedIds = $this->store->getEntityIds($trustAnchorId);
+        $cachedIds = $this->entityCollectionStore->getEntityIds($trustAnchorId);
         if (is_array($cachedIds)) {
             $this->logger?->debug('Returning discovered entity IDs from store.', ['trustAnchorId' => $trustAnchorId]);
             return $cachedIds;
@@ -66,7 +67,7 @@ class FederationDiscovery
                 $taConfig->getExpirationTime(),
             );
 
-            $this->store->storeEntityIds($trustAnchorId, $discoveredIds, $ttl);
+            $this->entityCollectionStore->storeEntityIds($trustAnchorId, $discoveredIds, $ttl);
             $this->logger?->info('Federation discovery completed.', [
                 'trustAnchorId' => $trustAnchorId,
                 'discoveredCount' => count($discoveredIds),

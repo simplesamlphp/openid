@@ -2,15 +2,18 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
-class EntityCollectionBuilder
+use SimpleSAML\OpenID\Federation\EntityCollection;
+use SimpleSAML\OpenID\Federation\FederationDiscovery;
+
+class EntityCollectionResponseFactory
 {
     public function __construct(
-        private readonly FederationDiscovery $federationDiscovery,
-        private readonly EntityCollectionFilter $filter,
-        private readonly EntityCollectionSorter $sorter,
-        private readonly EntityCollectionPaginator $paginator,
+        protected readonly FederationDiscovery $federationDiscovery,
+        protected readonly EntityCollectionFilter $filter,
+        protected readonly EntityCollectionSorter $sorter,
+        protected readonly EntityCollectionPaginator $paginator,
     ) {
     }
 

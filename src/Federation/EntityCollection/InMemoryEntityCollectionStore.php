@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
 {

@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Federation\EntityCollection;
+use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionFilter
 {
     public function __construct(
-        private readonly Helpers $helpers,
+        protected readonly Helpers $helpers,
     ) {
     }
 
@@ -25,9 +27,9 @@ class EntityCollectionFilter
      * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>  Filtered
      * entity configurations keyed by entity ID
      */
-    public function filter(EntityCollection $collection, array $criteria): array
+    public function filter(EntityCollection $entityCollection, array $criteria): array
     {
-        $filtered = $collection->entities;
+        $filtered = $entityCollection->all();
 
         // 1. entity_type
         if (isset($criteria['entity_type']) && $criteria['entity_type'] !== []) {
@@ -85,13 +87,13 @@ class EntityCollectionFilter
                         continue;
                     }
 
-                    $displayNameValue = $typePayload['display_name'] ?? '';
+                    $displayNameValue = $typePayload[ClaimsEnum::DisplayName->value] ?? '';
                     $displayName = mb_strtolower(is_string($displayNameValue) ? $displayNameValue : '');
                     if ($displayName !== '' && str_contains($displayName, $q)) {
                         return true;
                     }
 
-                    $orgNameValue = $typePayload['organization_name'] ?? '';
+                    $orgNameValue = $typePayload[ClaimsEnum::OrganizationName->value] ?? '';
                     $orgName = mb_strtolower(is_string($orgNameValue) ? $orgNameValue : '');
                     if ($orgName !== '' && str_contains($orgName, $q)) {
                         return true;

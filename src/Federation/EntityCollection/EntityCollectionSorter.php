@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace SimpleSAML\OpenID\Federation;
+namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
+use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionSorter
 {
     public function __construct(
-        private readonly Helpers $helpers,
+        protected readonly Helpers $helpers,
     ) {
     }
 
