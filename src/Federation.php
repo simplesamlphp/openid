@@ -431,6 +431,7 @@ class Federation
             $this->entityCollectionFilter(),
             $this->entityCollectionSorter(),
             $this->entityCollectionPaginator(),
+            $this->entityCollectionStore(),
         );
     }
 

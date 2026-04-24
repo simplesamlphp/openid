@@ -15,6 +15,7 @@ class EntityCollectionResponseFactory
         protected readonly EntityCollectionFilter $filter,
         protected readonly EntityCollectionSorter $sorter,
         protected readonly EntityCollectionPaginator $paginator,
+        protected readonly EntityCollectionStoreInterface $entityCollectionStore,
     ) {
     }
 
@@ -115,9 +116,9 @@ class EntityCollectionResponseFactory
         $paginated = $this->paginator->paginate($entries, $limit, $from);
 
         return new EntityCollectionResponse(
-            array_values($paginated['entities']),
-            $paginated['next'],
-            time(), // last_updated
+            entities: array_values($paginated['entities']),
+            next: $paginated['next'],
+            lastUpdated: $this->entityCollectionStore->getLastUpdated($trustAnchorId) ?? time(),
         );
     }
 }

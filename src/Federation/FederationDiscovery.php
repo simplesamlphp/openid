@@ -68,6 +68,8 @@ class FederationDiscovery
             );
 
             $this->entityCollectionStore->store($trustAnchorId, $discoveredEntities, $ttl);
+            $this->entityCollectionStore->storeLastUpdated($trustAnchorId, time(), $ttl);
+
             $this->logger?->info('Federation discovery completed.', [
                 'trustAnchorId' => $trustAnchorId,
                 'discoveredCount' => count($discoveredEntities),
