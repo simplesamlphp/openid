@@ -31,7 +31,7 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     {
         try {
             $this->cacheDecorator->set(
-                $this->helpers->json()->encode($entities),
+                $entities,
                 $ttl,
                 self::KEY_FEDERATED_ENTITIES,
                 $trustAnchorId,
@@ -52,21 +52,14 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     public function get(string $trustAnchorId): ?array
     {
         try {
-            /** @var ?string $cached */
             $cached = $this->cacheDecorator->get(null, self::KEY_FEDERATED_ENTITIES, $trustAnchorId);
 
-            if (is_null($cached)) {
+            if (!is_array($cached)) {
                 return null;
             }
 
-            $decoded = $this->helpers->json()->decode($cached);
-
-            if (!is_array($decoded)) {
-                return null;
-            }
-
-            /** @var array<string, array<string, mixed>> $decoded */
-            return $decoded;
+            /** @var array<string, array<string, mixed>> $cached */
+            return $cached;
         } catch (Throwable $throwable) {
             $this->logger?->error('Unable to retrieve entities from cache.', [
                 'trustAnchorId' => $trustAnchorId,
