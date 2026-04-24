@@ -16,20 +16,6 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
 class VcSdJwtFactory extends SdJwtFactory
 {
-    public function fromToken(string $token): VcSdJwt
-    {
-        return new VcSdJwt(
-            $this->jwsDecoratorBuilder->fromToken($token),
-            $this->jwsVerifierDecorator,
-            $this->jwksDecoratorFactory,
-            $this->jwsSerializerManagerDecorator,
-            $this->timestampValidationLeeway,
-            $this->helpers,
-            $this->claimFactory,
-        );
-    }
-
-
     /**
      * @param array<non-empty-string,mixed> $payload
      * @param array<non-empty-string,mixed> $header

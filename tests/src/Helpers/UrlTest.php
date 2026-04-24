@@ -43,4 +43,31 @@ final class UrlTest extends TestCase
             $this->sut()->withParams($url, ['c' => 'd']),
         );
     }
+
+
+    public function testCanAddMultiValueParams(): void
+    {
+        $url = 'https://example.com/';
+
+        $this->assertSame(
+            'https://example.com/',
+            $this->sut()->withMultiValueParams($url, []),
+        );
+
+        $this->assertSame(
+            'https://example.com/?a=b&a=c',
+            $this->sut()->withMultiValueParams($url, ['a' => ['b', 'c']]),
+        );
+
+        $this->assertSame(
+            'https://example.com/?a=b&c=d',
+            $this->sut()->withMultiValueParams($url, ['a' => 'b', 'c' => 'd']),
+        );
+
+        $url = 'https://example.com/?x=y';
+        $this->assertSame(
+            'https://example.com/?x=y&a=b&a=c',
+            $this->sut()->withMultiValueParams($url, ['a' => ['b', 'c']]),
+        );
+    }
 }

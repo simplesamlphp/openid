@@ -102,23 +102,6 @@ final class VcSdJwtFactoryTest extends TestCase
     }
 
 
-    public function testCanBuildFromToken(): void
-    {
-        $jwsDecoratorMock = $this->createJwsDecoratorMock();
-
-        $this->jwsDecoratorBuilderMock
-            ->expects($this->once())
-            ->method('fromToken')
-            ->with('token')
-            ->willReturn($jwsDecoratorMock);
-
-        $this->assertInstanceOf(
-            VcSdJwt::class,
-            $this->sut()->fromToken('token'),
-        );
-    }
-
-
     public function testCanBuildFromData(): void
     {
         $signingKey = $this->createStub(JwkDecorator::class);
