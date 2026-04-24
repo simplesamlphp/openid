@@ -23,26 +23,29 @@ class FederationDiscovery
 
 
     /**
-     * Discover all entity IDs in the federation rooted at $trustAnchorId.
+     * Discover all entities (ID -> payload map) in the federation rooted at $trustAnchorId.
      * Results are stored in the EntityCollectionStoreInterface and returned.
      *
      * @param non-empty-string $trustAnchorId
      * @param array<string, string|string[]> $filters  Passed through to
      * SubordinateListingFetcher
-     * @param bool $forceRefresh  If true, ignore stored entity IDs and
+     * @param bool $forceRefresh  If true, ignore stored entities and
      * re-traverse the federation
-     * @return non-empty-string[]
+     * @return array<string, array<string, mixed>>
      */
-    public function discoverEntities(
+    public function discover(
         string $trustAnchorId,
         array $filters = [],
         bool $forceRefresh = false,
     ): array {
         if (!$forceRefresh) {
-            $cachedIds = $this->entityCollectionStore->getEntityIds($trustAnchorId);
-            if (is_array($cachedIds)) {
-                $this->logger?->debug('Returning discovered entity IDs from store.', ['trustAnchorId' => $trustAnchorId]);
-                return $cachedIds;
+            $cachedEntities = $this->entityCollectionStore->get($trustAnchorId);
+            if (is_array($cachedEntities)) {
+                $this->logger?->debug(
+                    'Returning discovered entities from store.',
+                    ['trustAnchorId' => $trustAnchorId],
+                );
+                return $cachedEntities;
             }
         }
 
@@ -51,24 +54,23 @@ class FederationDiscovery
             ['trustAnchorId' => $trustAnchorId, 'filters' => $filters],
         );
 
-        $discoveredIds = [];
+        $discoveredEntities = [];
         try {
             // Step 1: Fetch TA config
             $taConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($trustAnchorId);
 
             // Recursive traversal
-            $discoveredIds = $this->traverse($trustAnchorId, $taConfig, $filters);
-            $discoveredIds = array_unique($discoveredIds);
+            $discoveredEntities = $this->traverse($trustAnchorId, $taConfig, $filters);
 
             // Compute TTL: lowest of maxCacheDuration and TA expiry
             $ttl = $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime(
                 $taConfig->getExpirationTime(),
             );
 
-            $this->entityCollectionStore->storeEntityIds($trustAnchorId, $discoveredIds, $ttl);
+            $this->entityCollectionStore->store($trustAnchorId, $discoveredEntities, $ttl);
             $this->logger?->info('Federation discovery completed.', [
                 'trustAnchorId' => $trustAnchorId,
-                'discoveredCount' => count($discoveredIds),
+                'discoveredCount' => count($discoveredEntities),
             ]);
         } catch (Throwable $throwable) {
             $this->logger?->error('Federation discovery failed.', [
@@ -77,7 +79,23 @@ class FederationDiscovery
             ]);
         }
 
-        return $discoveredIds;
+        return $discoveredEntities;
+    }
+
+
+    /**
+     * Discover just the entity IDs in the federation.
+     *
+     * @param non-empty-string $trustAnchorId
+     * @param array<string, string|string[]> $filters
+     * @return string[]
+     */
+    public function discoverEntityIds(
+        string $trustAnchorId,
+        array $filters = [],
+        bool $forceRefresh = false,
+    ): array {
+        return array_keys($this->discover($trustAnchorId, $filters, $forceRefresh));
     }
 
 
@@ -85,7 +103,7 @@ class FederationDiscovery
      * @param non-empty-string $entityId
      * @param array<string, string|string[]> $filters
      * @param string[] $visited
-     * @return non-empty-string[]
+     * @return array<string, array<string, mixed>>
      */
     private function traverse(
         string $entityId,
@@ -99,21 +117,26 @@ class FederationDiscovery
         }
 
         $visited[] = $entityId;
-        $allCollectedIds = [$entityId];
+        $allCollectedEntities = [$entityId => $entityConfig->getPayload()];
 
         $listEndpoint = $entityConfig->getFederationListEndpoint();
         if (is_null($listEndpoint)) {
-            return $allCollectedIds;
+            return $allCollectedEntities;
         }
 
         try {
             $subordinateIds = $this->subordinateListingFetcher->fetch($listEndpoint, $filters);
 
             foreach ($subordinateIds as $subId) {
+                // If we've already visited this subId (loop), skip to avoid infinite recursion
+                if (in_array($subId, $visited, true)) {
+                    continue;
+                }
+
                 try {
                     $subConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($subId);
-                    $allCollectedIds = array_merge(
-                        $allCollectedIds,
+                    $allCollectedEntities = array_merge(
+                        $allCollectedEntities,
                         $this->traverse($subId, $subConfig, $filters, $depth + 1, $visited),
                     );
                 } catch (Throwable $e) {
@@ -122,8 +145,10 @@ class FederationDiscovery
                         'subId' => $subId,
                         'error' => $e->getMessage(),
                     ]);
-                    // Still include the ID if we discovered it from the list
-                    $allCollectedIds[] = $subId;
+                    // Still include the ID if we discovered it from the list, but with an empty payload
+                    if (!isset($allCollectedEntities[$subId])) {
+                        $allCollectedEntities[$subId] = [];
+                    }
                 }
             }
         } catch (Throwable $throwable) {
@@ -133,47 +158,6 @@ class FederationDiscovery
             ]);
         }
 
-        return $allCollectedIds;
-    }
-
-
-    /**
-     * Return Entity Configurations for the given entity IDs, fetched from cache or network.
-     *
-     * @param non-empty-string[] $entityIds
-     * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>  keyed by entity ID
-     */
-    public function fetchEntityConfigurations(array $entityIds): array
-    {
-        $entities = [];
-        foreach ($entityIds as $id) {
-            try {
-                $entities[$id] = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($id);
-            } catch (Throwable $e) {
-                $this->logger?->warning('Failed to fetch entity configuration.', [
-                    'entityId' => $id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return $entities;
-    }
-
-
-    /**
-     * Convenience: discover entity IDs then fetch their Entity Configurations.
-     *
-     * @param non-empty-string $trustAnchorId
-     * @param array<string, string|string[]> $filters
-     * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>
-     */
-    public function discoverAndFetch(
-        string $trustAnchorId,
-        array $filters = [],
-        bool $forceRefresh = false,
-    ): array {
-        $ids = $this->discoverEntities($trustAnchorId, $filters, $forceRefresh);
-        return $this->fetchEntityConfigurations($ids);
+        return $allCollectedEntities;
     }
 }

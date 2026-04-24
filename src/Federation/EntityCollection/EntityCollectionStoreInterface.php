@@ -7,27 +7,27 @@ namespace SimpleSAML\OpenID\Federation\EntityCollection;
 interface EntityCollectionStoreInterface
 {
     /**
-     * Persist the discovered entity IDs for a given Trust Anchor.
+     * Persist discovered entities (ID → payload) for a given Trust Anchor.
      *
-     * @param non-empty-string   $trustAnchorId
-     * @param non-empty-string[] $entityIds
+     * @param non-empty-string $trustAnchorId
+     * @param array<string, array<string, mixed>> $entities  Keyed by entity ID, value is JWT payload
      */
-    public function storeEntityIds(string $trustAnchorId, array $entityIds, int $ttl): void;
+    public function store(string $trustAnchorId, array $entities, int $ttl): void;
 
 
     /**
-     * Retrieve previously discovered entity IDs for a Trust Anchor.
+     * Retrieve previously discovered entities.
      *
      * @param non-empty-string $trustAnchorId
-     * @return non-empty-string[]|null  null when not found / expired
+     * @return array<string, array<string, mixed>>|null  null when not found / expired
      */
-    public function getEntityIds(string $trustAnchorId): ?array;
+    public function get(string $trustAnchorId): ?array;
 
 
     /**
-     * Remove all stored entity IDs for a Trust Anchor (force re-discovery).
+     * Remove stored entities (force re-discovery).
      *
      * @param non-empty-string $trustAnchorId
      */
-    public function clearEntityIds(string $trustAnchorId): void;
+    public function clear(string $trustAnchorId): void;
 }

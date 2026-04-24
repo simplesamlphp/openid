@@ -61,27 +61,26 @@ The store interface is minimal:
 interface EntityCollectionStoreInterface
 {
     /**
-     * Persist discovered entity IDs for a given Trust Anchor.
+     * Persist discovered entities for a given Trust Anchor.
      */
-    public function storeEntityIds(string $trustAnchorId, array $entityIds, int $ttl): void;
+    public function store(string $trustAnchorId, array $entities, int $ttl): void;
 
     /**
-     * Retrieve previously discovered entity IDs.
+     * Retrieve previously discovered entities.
      * Return null when not found or expired.
      */
-    public function getEntityIds(string $trustAnchorId): ?array;
+    public function get(string $trustAnchorId): ?array;
 
     /**
-     * Remove stored entity IDs (for force re-discovery).
+     * Remove stored entities (for force re-discovery).
      */
-    public function clearEntityIds(string $trustAnchorId): void;
+    public function clear(string $trustAnchorId): void;
 }
 ```
 
-> **Note**: The store tracks only the list of entity IDs per Trust Anchor, not
-> the Entity Configurations themselves. Entity Configurations are fetched
-> dynamically through `EntityStatementFetcher::fromCacheOrWellKnownEndpoint()`,
-> which already handles JWS-level caching and respects expiry.
+> **Note**: The store tracks the JWT payload arrays per Trust Anchor.
+> Entity Configurations are fetched dynamically through `EntityStatementFetcher::fromCacheOrWellKnownEndpoint()`
+> during the traversal process, which handles JWS-level caching and respects expiry.
 
 ## Federation Discovery
 
@@ -89,7 +88,7 @@ Federation Discovery performs a top-down traversal of the federation hierarchy.
 Starting from a Trust Anchor, it follows `federation_list_endpoint` links on
 each entity to collect all subordinate entity IDs recursively.
 
-### Discovering Entity IDs
+### Discovering Entities
 
 ```php
 /** @var \SimpleSAML\OpenID\Federation $federationTools */
@@ -97,12 +96,15 @@ each entity to collect all subordinate entity IDs recursively.
 $trustAnchorId = 'https://trust-anchor.example.org/';
 
 try {
-    // Discover all entity IDs in the federation.
-    $entityIds = $federationTools->federationDiscovery()
-        ->discoverEntities($trustAnchorId);
+    // Discover all entities (ID -> payload map) in the federation.
+    $entities = $federationTools->federationDiscovery()
+        ->discover($trustAnchorId);
 
-    // $entityIds is an array of entity ID strings, e.g.:
-    // ['https://trust-anchor.example.org/', 'https://intermediate.example.org/', ...]
+    // $entities is an array keyed by entity ID, where values are JWT payload arrays:
+    // [
+    //     'https://trust-anchor.example.org/' => ['iss' => '...', 'metadata' => [...]],
+    //     ...
+    // ]
 } catch (\Throwable $exception) {
     $logger->error('Federation discovery failed: ' . $exception->getMessage());
 }
@@ -115,9 +117,16 @@ The discovery algorithm:
 3. Calls the subordinate listing endpoint to get immediate subordinate IDs.
 4. For each subordinate, fetches its Entity Configuration and, if it has its own
    `federation_list_endpoint`, recurses (up to `maxDiscoveryDepth`).
-5. Deduplicates all collected entity IDs.
-6. Persists the ID list in the store with a TTL based on the Trust Anchor's
+5. Deduplicates all collected entities.
+6. Persists the entity payloads in the store with a TTL based on the Trust Anchor's
    expiry and the configured `maxCacheDuration`.
+
+If you only need the list of entity IDs without their payloads, use the convenience method:
+
+```php
+$entityIds = $federationTools->federationDiscovery()
+    ->discoverEntityIds($trustAnchorId);
+```
 
 ### Applying Filters During Discovery
 
@@ -125,53 +134,29 @@ You can pass filter parameters (e.g. `entity_type`) to the subordinate listing
 endpoint:
 
 ```php
-$entityIds = $federationTools->federationDiscovery()
-    ->discoverEntities(
+$entities = $federationTools->federationDiscovery()
+    ->discover(
         $trustAnchorId,
         filters: ['entity_type' => 'openid_relying_party'],
     );
 ```
 
-### Discovering and Fetching Entity Configurations
-
-The convenience method `discoverAndFetch()` performs discovery and then fetches
-the Entity Configuration for each discovered entity:
-
-```php
-try {
-    // Returns array<string, EntityStatement> keyed by entity ID.
-    $entities = $federationTools->federationDiscovery()
-        ->discoverAndFetch($trustAnchorId);
-
-    foreach ($entities as $entityId => $entityStatement) {
-        $metadata = $entityStatement->getMetadata();
-        // ...
-    }
-} catch (\Throwable $exception) {
-    $logger->error('Discovery failed: ' . $exception->getMessage());
-}
-```
-
-> **Note**: Entity Configurations are fetched through the existing
-> `EntityStatementFetcher`, which caches JWS at the network level. If a cached
-> configuration has expired, a fresh one is fetched automatically.
-
 ### Periodic Refresh (Cron / Background Jobs)
 
-Use the `forceRefresh` parameter to clear the stored entity ID list and
+Use the `forceRefresh` parameter to clear the stored entities and
 re-traverse the federation. This is the intended pattern for cron or background
 refresh jobs:
 
 ```php
 // In a scheduled task / cron job:
 $federationTools->federationDiscovery()
-    ->discoverAndFetch($trustAnchorId, forceRefresh: true);
+    ->discover($trustAnchorId, forceRefresh: true);
 ```
 
 When `forceRefresh` is `true`:
 
 - The full federation traversal is re-executed.
-- The new entity ID list is stored.
+- The new entity payload map is stored.
 - Entity Configurations that haven't expired in the JWS cache are served from
   cache; only stale or new ones trigger network requests.
 
@@ -309,7 +294,7 @@ use SimpleSAML\OpenID\Federation\EntityCollection;
 
 // Prepare a collection from discovery or any other source.
 $entities = $federationTools->federationDiscovery()
-    ->discoverAndFetch($trustAnchorId);
+    ->discover($trustAnchorId);
 $collection = new EntityCollection($entities);
 
 // Filter by entity type and text query.
@@ -321,7 +306,7 @@ $filtered = $federationTools->entityCollectionFilter()->filter(
     ],
 );
 
-// $filtered is array<string, EntityStatement> keyed by entity ID.
+// $filtered is array<string, array<string, mixed>> keyed by entity ID.
 ```
 
 #### EntityCollectionSorter
@@ -333,7 +318,7 @@ Sorts entities by a metadata claim value:
 
 // Sort by display_name under the federation_entity metadata.
 $sorted = $federationTools->entityCollectionSorter()->sortByMetadataClaim(
-    $filtered, // array<string, EntityStatement>
+    $filtered, // array<string, array<string, mixed>>
     ['federation_entity', 'display_name'],
     'asc',
 );
@@ -356,7 +341,7 @@ Slices a pre-sorted result set into a page with an opaque cursor:
 /** @var \SimpleSAML\OpenID\Federation $federationTools */
 
 $paginated = $federationTools->entityCollectionPaginator()->paginate(
-    $sorted, // Pre-sorted array<string, EntityStatement|EntityCollectionEntry>
+    $sorted, // Pre-sorted array<string, array<string, mixed>|EntityCollectionEntry>
     20,      // Limit (page size)
     null,    // Cursor from a previous response's 'next' value, or null
 );

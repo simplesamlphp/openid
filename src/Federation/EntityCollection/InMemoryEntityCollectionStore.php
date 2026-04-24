@@ -6,20 +6,20 @@ namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
 {
-    /** @var array<string, array{ids: non-empty-string[], expires: int}> */
+    /** @var array<string, array{entities: array<string, array<string, mixed>>, expires: int}> */
     private array $store = [];
 
 
-    public function storeEntityIds(string $trustAnchorId, array $entityIds, int $ttl): void
+    public function store(string $trustAnchorId, array $entities, int $ttl): void
     {
         $this->store[$trustAnchorId] = [
-            'ids' => $entityIds,
+            'entities' => $entities,
             'expires' => time() + $ttl,
         ];
     }
 
 
-    public function getEntityIds(string $trustAnchorId): ?array
+    public function get(string $trustAnchorId): ?array
     {
         if (!isset($this->store[$trustAnchorId])) {
             return null;
@@ -30,11 +30,11 @@ class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
             return null;
         }
 
-        return $this->store[$trustAnchorId]['ids'];
+        return $this->store[$trustAnchorId]['entities'];
     }
 
 
-    public function clearEntityIds(string $trustAnchorId): void
+    public function clear(string $trustAnchorId): void
     {
         unset($this->store[$trustAnchorId]);
     }

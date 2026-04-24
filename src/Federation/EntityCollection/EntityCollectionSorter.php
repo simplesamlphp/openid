@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
-use SimpleSAML\OpenID\Federation\EntityStatement;
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionSorter
@@ -18,11 +18,11 @@ class EntityCollectionSorter
     /**
      * Sort entities by a claim nested inside their metadata.
      *
-     * @param array<string, \SimpleSAML\OpenID\Federation\EntityStatement> $entities  Keyed by entity ID
+     * @param array<string, array<string, mixed>> $entities  Keyed by entity ID
      * @param non-empty-string[] $claimPath  Nested claim path within the metadata
      * object (e.g. ['federation_entity', 'display_name'])
      * @param 'asc'|'desc'  $direction
-     * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>  Sorted copy
+     * @return array<string, array<string, mixed>>  Sorted copy
      */
     public function sortByMetadataClaim(
         array $entities,
@@ -33,9 +33,13 @@ class EntityCollectionSorter
             return [];
         }
 
-        uasort($entities, function (EntityStatement $a, EntityStatement $b) use ($claimPath, $direction): int {
-            $metadataA = $a->getMetadata() ?? [];
-            $metadataB = $b->getMetadata() ?? [];
+        uasort($entities, function (array $a, array $b) use ($claimPath, $direction): int {
+            $metadataA = $a[ClaimsEnum::Metadata->value] ?? [];
+            $metadataA = is_array($metadataA) ? $metadataA : [];
+
+            $metadataB = $b[ClaimsEnum::Metadata->value] ?? [];
+            $metadataB = is_array($metadataB) ? $metadataB : [];
+
             $valA = $this->helpers->arr()->getNestedValue($metadataA, ...$claimPath);
             $valB = $this->helpers->arr()->getNestedValue($metadataB, ...$claimPath);
 

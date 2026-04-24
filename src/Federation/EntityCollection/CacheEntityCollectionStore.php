@@ -11,7 +11,7 @@ use Throwable;
 
 class CacheEntityCollectionStore implements EntityCollectionStoreInterface
 {
-    protected const PREFIX = 'federation_entity_ids';
+    protected const PREFIX = 'federation_entities';
 
 
     public function __construct(
@@ -22,26 +22,26 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     }
 
 
-    public function storeEntityIds(string $trustAnchorId, array $entityIds, int $ttl): void
+    public function store(string $trustAnchorId, array $entities, int $ttl): void
     {
         try {
             $this->cacheDecorator->set(
-                $this->helpers->json()->encode($entityIds),
+                $this->helpers->json()->encode($entities),
                 $ttl,
                 self::PREFIX,
                 $trustAnchorId,
             );
         } catch (Throwable $throwable) {
-            $this->logger?->error('Unable to store entity IDs in cache.', [
+            $this->logger?->error('Unable to store entities in cache.', [
                 'trustAnchorId' => $trustAnchorId,
-                'entityIds' => $entityIds,
+                'entities' => $entities,
                 'exception_message' => $throwable->getMessage(),
             ]);
         }
     }
 
 
-    public function getEntityIds(string $trustAnchorId): ?array
+    public function get(string $trustAnchorId): ?array
     {
         try {
             /** @var ?string $cached */
@@ -52,9 +52,15 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
             }
 
             $decoded = $this->helpers->json()->decode($cached);
-            return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($decoded);
+
+            if (!is_array($decoded)) {
+                return null;
+            }
+
+            /** @var array<string, array<string, mixed>> $decoded */
+            return $decoded;
         } catch (Throwable $throwable) {
-            $this->logger?->error('Unable to retrieve entity IDs from cache.', [
+            $this->logger?->error('Unable to retrieve entities from cache.', [
                 'trustAnchorId' => $trustAnchorId,
                 'exception_message' => $throwable->getMessage(),
             ]);
@@ -63,12 +69,12 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     }
 
 
-    public function clearEntityIds(string $trustAnchorId): void
+    public function clear(string $trustAnchorId): void
     {
         try {
             $this->cacheDecorator->delete(self::PREFIX, $trustAnchorId);
         } catch (Throwable $throwable) {
-            $this->logger?->error('Unable to clear entity IDs from cache.', [
+            $this->logger?->error('Unable to clear entities from cache.', [
                 'trustAnchorId' => $trustAnchorId,
                 'exception_message' => $throwable->getMessage(),
             ]);

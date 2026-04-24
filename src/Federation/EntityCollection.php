@@ -7,7 +7,7 @@ namespace SimpleSAML\OpenID\Federation;
 class EntityCollection
 {
     /**
-     * @param array<string, \SimpleSAML\OpenID\Federation\EntityStatement> $entities  Keyed by entity ID
+     * @param array<string, array<string, mixed>> $entities  Keyed by entity ID, value is JWT payload
      */
     public function __construct(
         protected readonly array $entities,
@@ -16,7 +16,7 @@ class EntityCollection
 
 
     /**
-     * @return array<string, \SimpleSAML\OpenID\Federation\EntityStatement>
+     * @return array<string, array<string, mixed>>
      */
     public function all(): array
     {

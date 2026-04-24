@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Federation\EntityCollection;
 use SimpleSAML\OpenID\Federation\FederationDiscovery;
 
@@ -37,8 +38,8 @@ class EntityCollectionResponseFactory
      */
     public function build(string $trustAnchorId, array $requestParams = []): EntityCollectionResponse
     {
-        // 1. Discover and fetch full configurations
-        $entities = $this->federationDiscovery->discoverAndFetch($trustAnchorId);
+        // 1. Discover full configurations
+        $entities = $this->federationDiscovery->discover($trustAnchorId);
         $collection = new EntityCollection($entities);
 
         // 2. Filter
@@ -59,8 +60,12 @@ class EntityCollectionResponseFactory
         $entries = [];
         $uiClaims = $requestParams['ui_claims'] ?? null;
 
-        foreach ($filtered as $id => $statement) {
-            $metadata = $statement->getMetadata() ?? [];
+        foreach ($filtered as $id => $payload) {
+            $metadata = $payload[ClaimsEnum::Metadata->value] ?? [];
+            if (!is_array($metadata)) {
+                $metadata = [];
+            }
+
             /** @var non-empty-string[] $entityTypes */
             $entityTypes = array_keys($metadata);
 
@@ -68,14 +73,14 @@ class EntityCollectionResponseFactory
             $uiInfo = null;
             if (is_array($uiClaims) && $uiClaims !== []) {
                 $uiInfo = [];
-                foreach ($metadata as $payload) {
-                    if (!is_array($payload)) {
+                foreach ($metadata as $typePayload) {
+                    if (!is_array($typePayload)) {
                         continue;
                     }
 
                     foreach ($uiClaims as $claim) {
-                        if (isset($payload[$claim])) {
-                            $uiInfo[$claim] = $payload[$claim];
+                        if (isset($typePayload[$claim])) {
+                            $uiInfo[$claim] = $typePayload[$claim];
                         }
                     }
                 }
@@ -83,11 +88,10 @@ class EntityCollectionResponseFactory
 
             // trust_marks projection is handled by getting them from statement
             $trustMarks = null;
-            try {
-                // In a real projection, we might filter which trust marks to return,
-                // but for now we return all if asked or if no specific selection is implemented.
-                $trustMarks = $statement->getTrustMarks();
-            } catch (\Throwable) {
+            $marks = $payload[ClaimsEnum::TrustMarks->value] ?? null;
+            if (is_array($marks)) {
+                /** @var array<array<mixed>> $marks */
+                $trustMarks = $marks;
             }
 
             // If entity_claims is provided, we might want to filter the metadata itself,
@@ -98,7 +102,7 @@ class EntityCollectionResponseFactory
                 $id,
                 $entityTypes,
                 $uiInfo,
-                $trustMarks?->jsonSerialize(),
+                $trustMarks,
             );
         }
 
