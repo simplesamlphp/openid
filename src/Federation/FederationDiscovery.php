@@ -42,7 +42,7 @@ class FederationDiscovery
             $cachedEntities = $this->entityCollectionStore->get($trustAnchorId);
             if (is_array($cachedEntities)) {
                 $this->logger?->debug(
-                    'Returning discovered entities from store.',
+                    'Returning discovered entities from entity collection store.',
                     ['trustAnchorId' => $trustAnchorId],
                 );
                 return $cachedEntities;
