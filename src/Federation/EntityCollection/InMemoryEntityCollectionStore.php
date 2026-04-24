@@ -7,7 +7,10 @@ namespace SimpleSAML\OpenID\Federation\EntityCollection;
 class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
 {
     /** @var array<string, array{entities: array<string, array<string, mixed>>, expires: int}> */
-    private array $store = [];
+    protected array $store = [];
+
+    /** @var array<string, int> */
+    protected array $lastUpdatedStore = [];
 
 
     public function store(string $trustAnchorId, array $entities, int $ttl): void
@@ -37,5 +40,23 @@ class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
     public function clear(string $trustAnchorId): void
     {
         unset($this->store[$trustAnchorId]);
+    }
+
+
+    public function storeLastUpdated(string $trustAnchorId, int $timestamp, int $ttl): void
+    {
+        $this->lastUpdatedStore[$trustAnchorId] = $timestamp;
+    }
+
+
+    public function getLastUpdated(string $trustAnchorId): ?int
+    {
+        return $this->lastUpdatedStore[$trustAnchorId] ?? null;
+    }
+
+
+    public function clearLastUpdated(string $trustAnchorId): void
+    {
+        unset($this->lastUpdatedStore[$trustAnchorId]);
     }
 }

@@ -30,4 +30,25 @@ interface EntityCollectionStoreInterface
      * @param non-empty-string $trustAnchorId
      */
     public function clear(string $trustAnchorId): void;
+
+
+    /**
+     * Set the last update timestamp for a given trust anchor.
+     *
+     * @param non-empty-string $trustAnchorId
+     */
+    public function storeLastUpdated(string $trustAnchorId, int $timestamp, int $ttl): void;
+
+
+    /**
+     * Get the last update timestamp for a given trust anchor.
+     * @param non-empty-string $trustAnchorId
+     */
+    public function getLastUpdated(string $trustAnchorId): ?int;
+
+
+    /**
+     * Clear the last update timestamp for a given trust anchor.
+     */
+    public function clearLastUpdated(string $trustAnchorId): void;
 }

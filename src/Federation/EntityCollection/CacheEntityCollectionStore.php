@@ -11,7 +11,9 @@ use Throwable;
 
 class CacheEntityCollectionStore implements EntityCollectionStoreInterface
 {
-    protected const PREFIX = 'federation_entities';
+    protected const KEY_FEDERATED_ENTITIES = 'federation_entities';
+
+    protected const KEY_LAST_UPDATED = 'last_updated';
 
 
     public function __construct(
@@ -22,13 +24,16 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     }
 
 
+    /**
+     * @inheritDoc
+     */
     public function store(string $trustAnchorId, array $entities, int $ttl): void
     {
         try {
             $this->cacheDecorator->set(
                 $this->helpers->json()->encode($entities),
                 $ttl,
-                self::PREFIX,
+                self::KEY_FEDERATED_ENTITIES,
                 $trustAnchorId,
             );
         } catch (Throwable $throwable) {
@@ -41,11 +46,14 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     }
 
 
+    /**
+     * @inheritDoc
+     */
     public function get(string $trustAnchorId): ?array
     {
         try {
             /** @var ?string $cached */
-            $cached = $this->cacheDecorator->get(null, self::PREFIX, $trustAnchorId);
+            $cached = $this->cacheDecorator->get(null, self::KEY_FEDERATED_ENTITIES, $trustAnchorId);
 
             if (is_null($cached)) {
                 return null;
@@ -69,12 +77,76 @@ class CacheEntityCollectionStore implements EntityCollectionStoreInterface
     }
 
 
+    /**
+     * @inheritDoc
+     */
     public function clear(string $trustAnchorId): void
     {
         try {
-            $this->cacheDecorator->delete(self::PREFIX, $trustAnchorId);
+            $this->cacheDecorator->delete(self::KEY_FEDERATED_ENTITIES, $trustAnchorId);
         } catch (Throwable $throwable) {
             $this->logger?->error('Unable to clear entities from cache.', [
+                'trustAnchorId' => $trustAnchorId,
+                'exception_message' => $throwable->getMessage(),
+            ]);
+        }
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function storeLastUpdated(string $trustAnchorId, int $timestamp, int $ttl): void
+    {
+        try {
+            $this->cacheDecorator->set(
+                (string)$timestamp,
+                $ttl,
+                self::KEY_LAST_UPDATED,
+                $trustAnchorId,
+            );
+        } catch (Throwable $throwable) {
+            $this->logger?->error('Unable to store last updated timestamp in cache.', [
+                'trustAnchorId' => $trustAnchorId,
+                'timestamp' => $timestamp,
+                'exception_message' => $throwable->getMessage(),
+            ]);
+        }
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function getLastUpdated(string $trustAnchorId): ?int
+    {
+        try {
+            $lastUpdated = $this->cacheDecorator->get(null, self::KEY_LAST_UPDATED, $trustAnchorId);
+        } catch (Throwable $throwable) {
+            $this->logger?->error('Unable to retrieve last updated timestamp from cache.', [
+                'trustAnchorId' => $trustAnchorId,
+                'exception_message' => $throwable->getMessage(),
+            ]);
+            return null;
+        }
+
+        if (is_int($lastUpdated)) {
+            return $lastUpdated;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function clearLastUpdated(string $trustAnchorId): void
+    {
+        try {
+            $this->cacheDecorator->delete(self::KEY_LAST_UPDATED, $trustAnchorId);
+        } catch (Throwable $throwable) {
+            $this->logger?->error('Unable to clear last updated timestamp from cache.', [
                 'trustAnchorId' => $trustAnchorId,
                 'exception_message' => $throwable->getMessage(),
             ]);
