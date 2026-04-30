@@ -67,7 +67,7 @@ class EntityCollectionResponseFactory
 
             if ($claimPaths !== []) {
                 /** @var non-empty-array<int, non-empty-string[]> $claimPaths */
-                $collection->sortByMetadataClaims(
+                $collection->sort(
                     $claimPaths,
                     (string)($requestParams['sort_dir'] ?? 'asc'),
                 );

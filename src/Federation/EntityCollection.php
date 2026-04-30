@@ -62,9 +62,9 @@ class EntityCollection
      * @param 'asc'|'desc' $sortOrder
      * @return $this
      */
-    public function sortByMetadataClaims(array $claimPaths, string $sortOrder): static
+    public function sort(array $claimPaths, string $sortOrder): static
     {
-        $this->entities = $this->entityCollectionSorter->sortByMetadataClaims(
+        $this->entities = $this->entityCollectionSorter->sort(
             $this->entities,
             $claimPaths,
             $sortOrder,
