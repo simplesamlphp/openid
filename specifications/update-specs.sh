@@ -13,7 +13,7 @@ URLS=(
     # OpenID specifications
     "https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html"
     "https://openid.net/specs/openid-federation-1_0.html"
-    #"https://openid.github.io/federation-entity-collection/main.html"
+    "https://openid.net/specs/openid-federation-entity-collection-1_0.html"
     "https://openid.net/specs/openid-connect-core-1_0.html"
     "https://openid.net/specs/openid-connect-discovery-1_0.html"
     "https://openid.net/specs/openid-connect-rpinitiated-1_0.html"
