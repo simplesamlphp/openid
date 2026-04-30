@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
-use SimpleSAML\OpenID\Federation\EntityCollection;
 use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionFilter
@@ -17,23 +16,35 @@ class EntityCollectionFilter
 
 
     /**
+     * Filters a list of entities based on the provided criteria.
+     *
+     * The method applies multiple filters in the following order:
+     * 1. Filters entities by their type, based on the 'entity_type' criteria.
+     * 2. Filters entities by their trust mark type, based on the
+     * 'trust_mark_type' criteria.
+     * 3. Filters entities by a textual query that checks multiple fields
+     * (e.g., `display_name` or `organization_name`).
+     *
+     * @param array<string, array<string, mixed>> $entities The list of entities
+     * to be filtered. Each entity is expected to be an associative array.
      * @param array{
-     *   entity_type?: string[],
-     *   trust_mark_type?: string,
-     *   query?: string,
-     *   trust_anchor?: string,
-     * } $criteria
-     * @return array<string, array<string, mixed>>  Filtered
-     * entity payloads keyed by entity ID
+     *    entity_type?: string[],
+     *    trust_mark_type?: string[],
+     *    query?: string,
+     *  } $criteria The array of filtering criteria. It may contain:
+     *  - 'entity_type': An array of entity types to filter by.
+     *  - 'trust_mark_type': An array of trust mark types to filter by.
+     *  - 'query': A string used to perform a case-insensitive search on
+     *  specific fields.
+     * @return array<string, array<string, mixed>> The filtered list of entities
+     * that match all provided criteria.
      */
-    public function filter(EntityCollection $entityCollection, array $criteria): array
+    public function filter(array $entities, array $criteria): array
     {
-        $filtered = $entityCollection->all();
-
         // 1. entity_type
         if (isset($criteria['entity_type']) && $criteria['entity_type'] !== []) {
             $types = $criteria['entity_type'];
-            $filtered = array_filter($filtered, function (array $payload) use ($types): bool {
+            $entities = array_filter($entities, function (array $payload) use ($types): bool {
                 $metadata = $payload[ClaimsEnum::Metadata->value] ?? null;
                 if (!is_array($metadata)) {
                     return false;
@@ -50,26 +61,35 @@ class EntityCollectionFilter
         }
 
         // 2. trust_mark_type
-        if (isset($criteria['trust_mark_type'])) {
-            $tmType = $criteria['trust_mark_type'];
-            $filtered = array_filter($filtered, function (array $payload) use ($tmType): bool {
-                $marks = $payload[ClaimsEnum::TrustMarks->value] ?? null;
-                if (is_array($marks)) {
-                    foreach ($marks as $mark) {
-                        if (is_array($mark) && ($mark[ClaimsEnum::TrustMarkType->value] ?? null) === $tmType) {
-                            return true;
-                        }
+        if (isset($criteria['trust_mark_type']) && $criteria['trust_mark_type'] !== []) {
+            $criteriaTrustMarkTypes = $criteria['trust_mark_type'];
+            $entities = array_filter($entities, function (array $payload) use ($criteriaTrustMarkTypes): bool {
+                $entityTrustMarks = $payload[ClaimsEnum::TrustMarks->value] ?? null;
+                if (!is_array($entityTrustMarks)) {
+                    return false;
+                }
+
+                $entityTrustMarkTypes = [];
+                foreach ($entityTrustMarks as $mark) {
+                    if (is_array($mark) && isset($mark[ClaimsEnum::TrustMarkType->value])) {
+                        $entityTrustMarkTypes[] = $mark[ClaimsEnum::TrustMarkType->value];
                     }
                 }
 
-                return false;
+                foreach ($criteriaTrustMarkTypes as $tmType) {
+                    if (!in_array($tmType, $entityTrustMarkTypes, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
             });
         }
 
         // 3. query
         if (isset($criteria['query']) && $criteria['query'] !== '') {
             $q = mb_strtolower($criteria['query']);
-            $filtered = array_filter($filtered, function (array $payload) use ($q): bool {
+            $entities = array_filter($entities, function (array $payload) use ($q): bool {
                 $sub = is_string($payload[ClaimsEnum::Sub->value] ?? null) ?
                 mb_strtolower($payload[ClaimsEnum::Sub->value]) :
                 '';
@@ -105,28 +125,6 @@ class EntityCollectionFilter
             });
         }
 
-        // 4. trust_anchor (simple prefix match for now as per spec suggestion,
-        // or more complex if needed). Historically, in some federation
-        // implementations, subordination is indicated via id prefix or
-        // specific claims. For this building block, we'll implement it as a
-        // filter on the authority hint if possible.
-        if (isset($criteria['trust_anchor'])) {
-            $ta = $criteria['trust_anchor'];
-            $filtered = array_filter($filtered, function (array $payload) use ($ta): bool {
-                // In a top-down traversal, everything is subordinate to the TA we started with.
-                // If the collection contains multiple TAs, we would check authority_hints.
-                $hints = $this->helpers->arr()->getNestedValue(
-                    $payload,
-                    ClaimsEnum::AuthorityHints->value,
-                );
-                if (is_array($hints)) {
-                    return in_array($ta, $hints, true);
-                }
-
-                return false;
-            });
-        }
-
-        return $filtered;
+        return $entities;
     }
 }

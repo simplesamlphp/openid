@@ -7,6 +7,7 @@ namespace SimpleSAML\OpenID\Federation;
 use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
+use SimpleSAML\OpenID\Federation\Factories\EntityCollectionFactory;
 use Throwable;
 
 class FederationDiscovery
@@ -16,6 +17,7 @@ class FederationDiscovery
         protected readonly SubordinateListingFetcher $subordinateListingFetcher,
         protected readonly EntityCollectionStoreInterface $entityCollectionStore,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
+        protected readonly EntityCollectionFactory $entityCollectionFactory,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly int $maxDepth = 10,
     ) {
@@ -31,13 +33,12 @@ class FederationDiscovery
      * SubordinateListingFetcher
      * @param bool $forceRefresh  If true, ignore stored entities and
      * re-traverse the federation
-     * @return array<string, array<string, mixed>>
      */
     public function discover(
         string $trustAnchorId,
         array $filters = [],
         bool $forceRefresh = false,
-    ): array {
+    ): EntityCollection {
         if (!$forceRefresh) {
             $cachedEntities = $this->entityCollectionStore->get($trustAnchorId);
             if (is_array($cachedEntities)) {
@@ -45,7 +46,7 @@ class FederationDiscovery
                     'Returning discovered entities from entity collection store.',
                     ['trustAnchorId' => $trustAnchorId],
                 );
-                return $cachedEntities;
+                return $this->entityCollectionFactory->build($cachedEntities);
             }
         }
 
@@ -67,6 +68,8 @@ class FederationDiscovery
                 $taConfig->getExpirationTime(),
             );
 
+            ksort($discoveredEntities);
+
             $this->entityCollectionStore->store($trustAnchorId, $discoveredEntities, $ttl);
             $this->entityCollectionStore->storeLastUpdated($trustAnchorId, time(), $ttl);
 
@@ -81,7 +84,7 @@ class FederationDiscovery
             ]);
         }
 
-        return $discoveredEntities;
+        return $this->entityCollectionFactory->build($discoveredEntities);
     }
 
 
@@ -97,7 +100,7 @@ class FederationDiscovery
         array $filters = [],
         bool $forceRefresh = false,
     ): array {
-        return array_keys($this->discover($trustAnchorId, $filters, $forceRefresh));
+        return array_keys($this->discover($trustAnchorId, $filters, $forceRefresh)->getEntities());
     }
 
 

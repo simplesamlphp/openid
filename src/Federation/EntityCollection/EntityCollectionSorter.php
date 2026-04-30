@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
+use SimpleSAML\OpenID\Exceptions\OpenIdException;
 use SimpleSAML\OpenID\Helpers;
 
 class EntityCollectionSorter
@@ -16,40 +17,57 @@ class EntityCollectionSorter
 
 
     /**
-     * Sort entities by a claim nested inside their metadata.
+     * Sort entities by one or more claims nested inside their metadata.
      *
      * @param array<string, array<string, mixed>> $entities  Keyed by entity ID
-     * @param non-empty-string[] $claimPath  Nested claim path within the metadata
-     * object (e.g. ['federation_entity', 'display_name'])
+     * @param non-empty-array<int, non-empty-string[]> $claimPaths Array of
+     * nested claim paths within the metadata object
+     * (e.g. [['openid_provider', 'display_name'], ['federation_entity', 'display_name']])
      * @param 'asc'|'desc'  $direction
      * @return array<string, array<string, mixed>>  Sorted copy
      */
-    public function sortByMetadataClaim(
+    public function sortByMetadataClaims(
         array $entities,
-        array $claimPath,
+        array $claimPaths,
         string $direction = 'asc',
     ): array {
         if ($entities === []) {
             return [];
         }
 
-        uasort($entities, function (array $a, array $b) use ($claimPath, $direction): int {
+        uasort($entities, function (array $a, array $b) use ($claimPaths, $direction): int {
             $metadataA = $a[ClaimsEnum::Metadata->value] ?? [];
             $metadataA = is_array($metadataA) ? $metadataA : [];
 
             $metadataB = $b[ClaimsEnum::Metadata->value] ?? [];
             $metadataB = is_array($metadataB) ? $metadataB : [];
 
-            $valA = $this->helpers->arr()->getNestedValue($metadataA, ...$claimPath);
-            $valB = $this->helpers->arr()->getNestedValue($metadataB, ...$claimPath);
+            foreach ($claimPaths as $claimPath) {
+                try {
+                    $valA = $this->helpers->arr()->getNestedValue($metadataA, ...$claimPath);
+                } catch (OpenIdException $e) {
+                    // If the claim path doesn't exist, treat it as null
+                    $valA = null;
+                }
+                try {
+                    $valB = $this->helpers->arr()->getNestedValue($metadataB, ...$claimPath);
+                } catch (OpenIdException $e) {
+                    // If the claim path doesn't exist, treat it as null
+                    $valB = null;
+                }
 
-            // Treat nulls or non-strings as empty strings for comparison
-            $strA = is_string($valA) ? $valA : '';
-            $strB = is_string($valB) ? $valB : '';
+                // Treat nulls or non-strings as empty strings for comparison
+                $strA = is_string($valA) ? $valA : '';
+                $strB = is_string($valB) ? $valB : '';
 
-            $cmp = strcasecmp($strA, $strB);
+                $cmp = strcasecmp($strA, $strB);
 
-            return $direction === 'desc' ? -$cmp : $cmp;
+                if ($cmp !== 0) {
+                    return $direction === 'desc' ? -$cmp : $cmp;
+                }
+            }
+
+            return 0;
         });
 
         return $entities;

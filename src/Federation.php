@@ -28,6 +28,7 @@ use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionSorter;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
 use SimpleSAML\OpenID\Federation\EntityCollection\InMemoryEntityCollectionStore;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
+use SimpleSAML\OpenID\Federation\Factories\EntityCollectionFactory;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
@@ -139,6 +140,8 @@ class Federation
     protected ?TrustMarkStatusResponseFetcher $trustMarkStatusResponseFetcher = null;
 
     protected ?KeyPairResolver $keyPairResolver = null;
+
+    protected ?EntityCollectionFactory $entityCollectionFactory = null;
 
 
     public function __construct(
@@ -377,6 +380,16 @@ class Federation
     }
 
 
+    public function entityCollectionFactory(): EntityCollectionFactory
+    {
+        return $this->entityCollectionFactory ??= new EntityCollectionFactory(
+            $this->entityCollectionFilter(),
+            $this->entityCollectionSorter(),
+            $this->entityCollectionPaginator(),
+        );
+    }
+
+
     public function federationDiscovery(): FederationDiscovery
     {
         if (!$this->federationDiscovery instanceof \SimpleSAML\OpenID\Federation\FederationDiscovery) {
@@ -385,6 +398,7 @@ class Federation
                 $this->subordinateListingFetcher(),
                 $this->entityCollectionStore(),
                 $this->maxCacheDurationDecorator(),
+                $this->entityCollectionFactory(),
                 $this->logger,
                 $this->maxDiscoveryDepth,
             );

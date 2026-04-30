@@ -87,18 +87,19 @@ class Url
         return $this->prepareUri($parsedUri, $newQueryString);
     }
 
+
     /**
-     * @param false|array|int|string|null $parsedUri
+     * @param array<string|int> $parsedUri
      * @param string $newQueryString
      * @return string
      */
     protected function prepareUri(false|array|int|string|null $parsedUri, string $newQueryString): string
     {
         return (isset($parsedUri['scheme']) ? $parsedUri['scheme'] . '://' : '') .
-            ($parsedUri['host'] ?? '') .
-            (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') .
-            ($parsedUri['path'] ?? '') .
-            '?' . $newQueryString .
-            (isset($parsedUri['fragment']) ? '#' . $parsedUri['fragment'] : '');
+        ($parsedUri['host'] ?? '') .
+        (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') .
+        ($parsedUri['path'] ?? '') .
+        '?' . $newQueryString .
+        (isset($parsedUri['fragment']) ? '#' . $parsedUri['fragment'] : '');
     }
 }

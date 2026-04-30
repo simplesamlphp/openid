@@ -16,11 +16,11 @@ class EntityCollectionPaginator
 
 
     /**
-     * @template T
-     * @param array<string, T> $entities  Full ordered result set (pre-sorted)
-     * @param positive-int $limit  Maximum number of entries to return
-     * @param string|null  $from   Opaque cursor (base64 encoded entity ID to start AFTER)
-     * @return array{entities: array<string, T>, next: ?string}
+     * @param array<string, array<string, mixed>> $entities The list of entities
+     * to be paginate, ordered (pre-sorted).
+     * @param positive-int $limit Maximum number of entries to return
+     * @param string|null  $from Opaque cursor (base64 encoded entity ID to start AFTER)
+     * @return array{entities: array<string, array<string, mixed>>, next: ?string}
      */
     public function paginate(array $entities, int $limit, ?string $from = null): array
     {

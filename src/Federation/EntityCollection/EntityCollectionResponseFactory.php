@@ -29,7 +29,7 @@ class EntityCollectionResponseFactory
      *   trust_mark_type?: string,
      *   query?: string,
      *   trust_anchor?: string,
-     *   sort_by?: string,
+     *   sort_by?: string|string[],
      *   sort_dir?: 'asc'|'desc',
      *   entity_claims?: string[],
      *   ui_claims?: string[],
@@ -41,27 +41,44 @@ class EntityCollectionResponseFactory
     {
         // 1. Discover full configurations
         $entities = $this->federationDiscovery->discover($trustAnchorId);
-        $collection = new EntityCollection($entities);
+        $collection = new EntityCollection(
+            $this->filter,
+            $this->sorter,
+            $this->paginator,
+            $entities->getEntities(),
+        );
 
         // 2. Filter
-        $filtered = $this->filter->filter($collection, $requestParams);
+        $collection->filter($requestParams);
 
         // 3. Sort
         if (isset($requestParams['sort_by'])) {
-            $path = explode('.', $requestParams['sort_by']);
-            /** @var non-empty-string[] $path */
-            $filtered = $this->sorter->sortByMetadataClaim(
-                $filtered,
-                $path,
-                (string)($requestParams['sort_dir'] ?? 'asc'),
-            );
+            $sortByParams = is_array($requestParams['sort_by'])
+            ? $requestParams['sort_by']
+            : [$requestParams['sort_by']];
+
+            $claimPaths = [];
+            foreach ($sortByParams as $sortBy) {
+                if (!is_string($sortBy)) {
+                    continue;
+                }
+                $claimPaths[] = explode('.', $sortBy);
+            }
+
+            if ($claimPaths !== []) {
+                /** @var non-empty-array<int, non-empty-string[]> $claimPaths */
+                $collection->sortByMetadataClaims(
+                    $claimPaths,
+                    (string)($requestParams['sort_dir'] ?? 'asc'),
+                );
+            }
         }
 
         // 4. Claims sub-selection (Projection)
         $entries = [];
         $uiClaims = $requestParams['ui_claims'] ?? null;
 
-        foreach ($filtered as $id => $payload) {
+        foreach ($collection->getEntities() as $id => $payload) {
             $metadata = $payload[ClaimsEnum::Metadata->value] ?? [];
             if (!is_array($metadata)) {
                 $metadata = [];
