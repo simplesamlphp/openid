@@ -22,14 +22,22 @@ use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Federation;
+use SimpleSAML\OpenID\Federation\EntityCollection\CacheEntityCollectionStore;
+use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionFilter;
+use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionPaginator;
+use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionSorter;
+use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
+use SimpleSAML\OpenID\Federation\Factories\EntityCollectionFactory;
 use SimpleSAML\OpenID\Federation\Factories\EntityStatementFactory;
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
+use SimpleSAML\OpenID\Federation\FederationDiscovery;
 use SimpleSAML\OpenID\Federation\MetadataPolicyApplicator;
 use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
+use SimpleSAML\OpenID\Federation\SubordinateListingFetcher;
 use SimpleSAML\OpenID\Federation\TrustChainResolver;
 use SimpleSAML\OpenID\Federation\TrustMarkFetcher;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponseFetcher;
@@ -80,6 +88,13 @@ use SimpleSAML\OpenID\Utils\KeyPairResolver;
 #[UsesClass(TrustMarkFetcher::class)]
 #[UsesClass(TrustMarkStatusResponseFetcher::class)]
 #[UsesClass(KeyPairResolver::class)]
+#[UsesClass(CacheEntityCollectionStore::class)]
+#[UsesClass(EntityCollectionFilter::class)]
+#[UsesClass(EntityCollectionPaginator::class)]
+#[UsesClass(EntityCollectionSorter::class)]
+#[UsesClass(EntityCollectionFactory::class)]
+#[UsesClass(FederationDiscovery::class)]
+#[UsesClass(SubordinateListingFetcher::class)]
 final class FederationTest extends TestCase
 {
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
@@ -169,5 +184,12 @@ final class FederationTest extends TestCase
         $this->assertInstanceOf(TrustMarkValidator::class, $sut->trustMarkValidator());
         $this->assertInstanceOf(TrustMarkFetcher::class, $sut->trustMarkFetcher());
         $this->assertInstanceOf(KeyPairResolver::class, $sut->keyPairResolver());
+        $this->assertInstanceOf(SubordinateListingFetcher::class, $sut->subordinateListingFetcher());
+        $this->assertInstanceOf(EntityCollectionStoreInterface::class, $sut->entityCollectionStore());
+        $this->assertInstanceOf(EntityCollectionFactory::class, $sut->entityCollectionFactory());
+        $this->assertInstanceOf(FederationDiscovery::class, $sut->federationDiscovery());
+        $this->assertInstanceOf(EntityCollectionFilter::class, $sut->entityCollectionFilter());
+        $this->assertInstanceOf(EntityCollectionSorter::class, $sut->entityCollectionSorter());
+        $this->assertInstanceOf(EntityCollectionPaginator::class, $sut->entityCollectionPaginator());
     }
 }
