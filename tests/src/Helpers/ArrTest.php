@@ -161,4 +161,71 @@ final class ArrTest extends TestCase
         $arr = ['a' => 'b'];
         $this->sut()->addNestedValue($arr, 'c', 'a');
     }
+
+
+    public function testIsAssociative(): void
+    {
+        $this->assertFalse($this->sut()->isAssociative([]));
+        $this->assertFalse($this->sut()->isAssociative(['a', 'b', 'c']));
+        $this->assertTrue($this->sut()->isAssociative(['a' => 'b']));
+        $this->assertTrue($this->sut()->isAssociative([1 => 'b'])); // Not sequential from 0
+        $this->assertTrue($this->sut()->isAssociative([0 => 'a', 2 => 'b']));
+    }
+
+
+    public function testIsOfArrays(): void
+    {
+        $this->assertTrue($this->sut()->isOfArrays([]));
+        $this->assertTrue($this->sut()->isOfArrays([[], [1]]));
+        $this->assertFalse($this->sut()->isOfArrays([[], 'a']));
+    }
+
+
+    public function testContainsKey(): void
+    {
+        $arr = ['a' => ['b' => ['c' => 'd']], 'e' => 'f'];
+        $this->assertTrue($this->sut()->containsKey($arr, 'a'));
+        $this->assertTrue($this->sut()->containsKey($arr, 'b'));
+        $this->assertTrue($this->sut()->containsKey($arr, 'c'));
+        $this->assertTrue($this->sut()->containsKey($arr, 'e'));
+        $this->assertFalse($this->sut()->containsKey($arr, 'd'));
+        $this->assertFalse($this->sut()->containsKey($arr, 'f'));
+        $this->assertFalse($this->sut()->containsKey($arr, 'g'));
+    }
+
+
+    public function testHybridSort(): void
+    {
+        // Numeric keys
+        $arr = [3, 1, 2];
+        $this->sut()->hybridSort($arr);
+        $this->assertSame([1, 2, 3], $arr);
+
+        // String keys
+        $arr = ['b' => 2, 'a' => 1, 'c' => 3];
+        $this->sut()->hybridSort($arr);
+        $this->assertSame(['a' => 1, 'b' => 2, 'c' => 3], $arr);
+
+        // Nested
+        $arr = [
+            'b' => [3, 1, 2],
+            'a' => ['y' => 2, 'x' => 1],
+        ];
+        $this->sut()->hybridSort($arr);
+        $this->assertSame([
+            'a' => ['x' => 1, 'y' => 2],
+            'b' => [1, 2, 3],
+        ], $arr);
+    }
+
+
+    public function testValidateMaxDepth(): void
+    {
+        $this->sut()->validateMaxDepth(Arr::MAX_DEPTH);
+        $this->assertTrue(true);
+
+        $this->expectException(OpenIdException::class);
+        $this->expectExceptionMessage('Refusing to recurse');
+        $this->sut()->validateMaxDepth(Arr::MAX_DEPTH + 1);
+    }
 }

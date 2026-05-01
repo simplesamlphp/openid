@@ -173,6 +173,14 @@ enum ClaimsEnum: string
 
     case Expiration_Date = 'expirationDate';
 
+    case Entities = 'entities';
+
+    case EntityId = 'entity_id';
+
+    case EntityTypes = 'entity_types';
+
+    case FederationCollectionEndpoint = 'federation_collection_endpoint';
+
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
 
     case FederationListEndpoint = 'federation_list_endpoint';
@@ -253,6 +261,8 @@ enum ClaimsEnum: string
 
     case Keys = 'keys';
 
+    case LastUpdated = 'last_updated';
+
     case Length = 'length';
 
     case Locale = 'locale';
@@ -271,6 +281,8 @@ enum ClaimsEnum: string
     case MetadataPolicyCrit = 'metadata_policy_crit';
 
     case Name = 'name';
+
+    case Next = 'next';
 
     case Nonce = 'nonce';
 
@@ -429,6 +441,9 @@ enum ClaimsEnum: string
 
     // TransactionCode
     case TxCode = 'tx_code';
+
+    // UI Infos
+    case UiInfos = 'ui_infos';
 
     // UserInterfaceLocalesSupported
     case UiLocalesSupported = 'ui_locales_supported';

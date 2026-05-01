@@ -13,7 +13,7 @@ title: OpenID Federation Entity Collection Endpoint 1.0 - draft 00
 viewport: initial-scale=1.0
 ---
 
-             openid-federation-entity-collection   March 2026
+             openid-federation-entity-collection   April 2026
   ---------- ------------------------------------- ------------
   Zachmann   Standards Track                       \[Page\]
 
@@ -21,7 +21,7 @@ Workgroup:
 :   individual
 
 Published:
-:   27 March 2026
+:   28 April 2026
 
 Author:
 
@@ -65,7 +65,7 @@ This specification acts as an extension to \[[OpenID.Federation](#OpenID.Federat
 
         -   [3.4.1](#section-3.4.1).  [Response Format](#name-response-format)
 
-        -   [3.4.2](#section-3.4.2).  [Response Claims](#name-response-claims)
+        -   [3.4.2](#section-3.4.2).  [Error Response Format](#name-error-response-format)
 
 -   [4](#section-4).  [Claims Languages and Scripts](#name-claims-languages-and-script)
 
@@ -175,31 +175,31 @@ The following is a non-normative example of an Entity Configuration payload, for
 
 When client authentication is not used, the request to the `federation_collection_endpoint` MUST be an HTTP request using the GET method with the following query parameters, encoded in `application/x-www-form-urlencoded` format:[¶](#section-3.3.1-1)
 
--   **from**: (OPTIONAL) If this parameter is present, the resulting list MUST be the subset of the overall ordered response starting from this pointer. This parameter MUST be copied from the `next` response parameter of a previous request. If the pointer in this parameter is not or not longer known to the responder, it MUST use the HTTP status code 404 and the content type `application/json` with the error code `page_not_found`.\
-    If the responder does not support this feature, it MUST use the HTTP status code 400 and the content type `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.1.1)
+-   **from**: (OPTIONAL) If this parameter is present, the resulting list MUST be the subset of the overall ordered response starting from this pointer. This parameter MUST be copied from the `next` response parameter of a previous request. If the pointer in this parameter is not or not longer known to the responder, it MUST return an error response with the error code `page_not_found` as defined in [Error Response Format](#error-response-format).\
+    If the responder does not support this feature, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.1.1)
 
--   **limit**: (OPTIONAL) Requested number of results included in the response. If this parameter is present, the number of results in the returned list MUST NOT be greater than the minimum of the responder's upper limit and the value of this parameter. If this parameter is not present the server MUST fall back on the upper limit.\
-    If the responder does not support this feature, it MUST use the HTTP status code 400 and the content type `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.2.1)
+-   **limit**: (OPTIONAL) Requested number of results included in the response. If this parameter is present, the number of results in the returned list MUST NOT be greater than the minimum of the responder\'s upper limit and the value of this parameter. If this parameter is not present the server MUST fall back on the upper limit.\
+    If the responder does not support this feature, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.2.1)
 
--   **entity_type**: (OPTIONAL) The value of this parameter is an Entity Type Identifier. The result MUST be filtered to include only those entities that include the specified Entity Type. When multiple `entity_type` parameters are present, for example `entity_type=openid_provider&entity_type=openid_relying_party`, the result MUST be filtered to include all Entities that include any of the specified Entity Types. If the responder does not support this feature, it MUST use the HTTP status code 400 and the content type `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.3.1)
+-   **entity_type**: (OPTIONAL) The value of this parameter is an Entity Type Identifier. The result MUST be filtered to include only those entities that include the specified Entity Type. When multiple `entity_type` parameters are present, for example `entity_type=openid_provider&entity_type=openid_relying_party`, the result MUST be filtered to include all Entities that include any of the specified Entity Types. If the responder does not support this feature, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.3.1)
 
 -   **trust_mark_type**: (OPTIONAL) The value of this parameter is a Trust Mark Type Identifier. The result MUST be filtered to include only Entities that publish a Trust Mark of this Trust Mark Type in their Entity Configuration and that Trust Mark MUST be verified by the responder. The responder SHOULD verify the Trust Mark using the same Trust Anchor that is used to collect the Entities. When multiple `trust_mark_type` parameters are present, the result MUST be filtered to include only Entities that have a Trust Mark for all the specified Trust Mark Types.\
-    If the responder does not support this feature, it MUST use the HTTP status code 400 and set the content type to `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.4.1)
+    If the responder does not support this feature, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.4.1)
 
--   **trust_anchor**: (RECOMMENDED) The Trust Anchor that the collection endpoint MUST use when collecting Entities. The value is an Entity Identifier. If omitted, the responder sets this parameter to its own Entity Identifier. If the responder does not have a defined Entity Identifier, it MUST use the HTTP status code 400 and set the content type to `application/json`, with the error code `invalid_request`.[¶](#section-3.3.1-2.5.1)
+-   **trust_anchor**: (RECOMMENDED) The Trust Anchor that the collection endpoint MUST use when collecting Entities. The value is an Entity Identifier. If omitted, the responder sets this parameter to its own Entity Identifier. If the responder does not have a defined Entity Identifier, it MUST return an error response with the error code `invalid_request` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.5.1)
 
 -   **query**: (OPTIONAL) The value of this parameter is used by the responder to filter down the list of returned Entities to only entities that match this parameter value. It is entirely up to the responder to define when an Entity matches the query.\
-    If the responder does not support this feature, it SHOULD use the HTTP status code 400 and the content type `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.6.1)
+    If the responder does not support this feature, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.6.1)
 
 -   **entity_claims**: (OPTIONAL) Array of claims to be included in the Entity Info Object included in the response for each collected Entity.\
     If this parameter is NOT present it is at the discretion of the responder which claims are included or not.\
     If this parameter is present and it is NOT an empty array, each Entity Info Object that represents an Entity MUST include the requested claims unless a specific claim is not available for that Entity. Also Claims that are optional to return and not present in the array MUST NOT be included in the Entity Info.\
-    If the responder does not support a requested claim, it MUST use the HTTP status code 400 and set the content type to `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.7.1)
+    If the responder does not support a requested claim, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.7.1)
 
 -   **ui_claims**: (OPTIONAL) Array of claims to be included in the Entity Type UI Info Object included in the response for each returned Entity.\
     If this parameter is NOT present it is at the discretion of the responder which claims are included or not.\
     If this parameter is present and it is NOT an empty array, each Entity Type UI Info Object MUST include the requested claims unless a specific claim is not available for that Entity and Entity Type.\
-    If the responder does not support a requested claim, it MUST use the HTTP status code 400 and set the content type to `application/json`, with the error code `unsupported_parameter`.[¶](#section-3.3.1-2.8.1)
+    If the responder does not support a requested claim, it MUST return an error response with the error code `unsupported_parameter` as defined in [Error Response Format](#error-response-format).[¶](#section-3.3.1-2.8.1)
 
 When Client authentication is used, the request MUST be an HTTP request using the POST method, with the parameters passed in the POST body.[¶](#section-3.3.1-3)
 
@@ -218,53 +218,47 @@ The following is a non-normative example of a collection request:[¶](#section-3
 
 A successful response MUST use the HTTP status code 200 and the content type `application/json`.[¶](#section-3.4.1-1)
 
-The response is a JSON object as described below.[¶](#section-3.4.1-2)
+The response is a JSON object with the following claims:[¶](#section-3.4.1-2)
 
-If the response is negative, it will be a JSON object and the content type MUST be `application/json` and use the errors defined here or in \[[OpenID.Federation](#OpenID.Federation)\].[¶](#section-3.4.1-3)
+-   **entities**: (REQUIRED) Array of JSON objects, each representing a Federation Entity as described in [Entity Info](#entity-info). The list of Entities MUST only contain Entities that are in line with the requested parameters. The responder MAY also filter down the list further at its own discretion.[¶](#section-3.4.1-3.1)
+-   **next**: (OPTIONAL) An opaque pointer to the next page in the result list. This attribute is REQUIRED when additional results are available beyond those included in the `entities` array. To content of this attribute is entirely up to the responder and its pagination implementation strategy.[¶](#section-3.4.1-3.2)
+-   **last_updated**: (RECOMMENDED) Number. Time when the responder last updated the result list. This is expressed as Seconds Since the Epoch, per \[[RFC7519](#RFC7519)\]. If the `last_updated` time changes between paginated calls, this might be an indication for the client that it might have received outdated information in a previous call.[¶](#section-3.4.1-3.3)
 
-#### [3.4.2.](#section-3.4.2) [Response Claims](#name-response-claims)
+Additional claims MAY be defined and used in conjunction with the claims above.[¶](#section-3.4.1-4)
 
-The claims in the entity collection response are:[¶](#section-3.4.2-1)
+##### [3.4.1.1.](#section-3.4.1.1) [Entity Info](#name-entity-info)
 
--   **entities**: (REQUIRED) Array of JSON objects, each representing a Federation Entity as described in [Entity Info](#entity-info). The list of Entities MUST only contain Entities that are in line with the requested parameters. The responder MAY also filter down the list further at its own discretion.[¶](#section-3.4.2-2.1)
--   **next**: (OPTIONAL) An opaque pointer to the next page in the result list. This attribute is REQUIRED when additional results are available beyond those included in the `entities` array. To content of this attribute is entirely up to the responder and its pagination implementation strategy.[¶](#section-3.4.2-2.2)
--   **last_updated**: (RECOMMENDED) Number. Time when the responder last updated the result list. This is expressed as Seconds Since the Epoch, per \[[RFC7519](#RFC7519)\]. If the `last_updated` time changes between paginated calls, this might be an indication for the client that it might have received outdated information in a previous call.[¶](#section-3.4.2-2.3)
+Each JSON Object in the returned `entities` array MAY contain the following claims:[¶](#section-3.4.1.1-1)
 
-Additional claims MAY be defined and used in conjunction with the claims above.[¶](#section-3.4.2-3)
+-   **entity_id**: (REQUIRED) The Entity Identifier for the subject entity of the current record.[¶](#section-3.4.1.1-2.1)
 
-##### [3.4.2.1.](#section-3.4.2.1) [Entity Info](#name-entity-info)
-
-Each JSON Object in the returned `entities` array MAY contain the following claims:[¶](#section-3.4.2.1-1)
-
--   **entity_id**: (REQUIRED) The Entity Identifier for the subject entity of the current record.[¶](#section-3.4.2.1-2.1)
-
--   **entity_types**: (RECOMMENDED) Array of string Entity Type Identifiers. If present this claim MUST contain all Entity Type Identifiers of the subject\'s Entity the responder knows about.[¶](#section-3.4.2.1-2.2)
+-   **entity_types**: (RECOMMENDED) Array of string Entity Type Identifiers. If present this claim MUST contain all Entity Type Identifiers of the subject\'s Entity the responder knows about.[¶](#section-3.4.1.1-2.2)
 
 -   **ui_infos**: (OPTIONAL) JSON Object containing information intended to be displayed to the user for each entity type as described in [UI Infos](#ui-infos).\
-    If the request contains the `entity_type` parameter, the UI Infos Object MUST only contain Entity Type Identifiers that are among the ones requested, with the exception of the `federation_entity` Entity Type Identifier, which MAY also appear if not explicitly requested.[¶](#section-3.4.2.1-2.3.1)
+    If the request contains the `entity_type` parameter, the UI Infos Object MUST only contain Entity Type Identifiers that are among the ones requested, with the exception of the `federation_entity` Entity Type Identifier, which MAY also appear if not explicitly requested.[¶](#section-3.4.1.1-2.3.1)
 
--   **trust_marks**: (OPTIONAL) Array of objects, each representing a Trust Mark, as defined in Section 3 of \[[OpenID.Federation](#OpenID.Federation)\].[¶](#section-3.4.2.1-2.4.1)
+-   **trust_marks**: (OPTIONAL) Array of objects, each representing a Trust Mark, as defined in Section 3 of \[[OpenID.Federation](#OpenID.Federation)\].[¶](#section-3.4.1.1-2.4.1)
 
-Additional claims MAY be defined and used in conjunction with the claims above.[¶](#section-3.4.2.1-3)
+Additional claims MAY be defined and used in conjunction with the claims above.[¶](#section-3.4.1.1-3)
 
-###### [3.4.2.1.1.](#section-3.4.2.1.1) [UI Infos](#name-ui-infos)
+###### [3.4.1.1.1.](#section-3.4.1.1.1) [UI Infos](#name-ui-infos)
 
-UI Infos is a JSON Object containing UI-related information about a single Entity, but differentiated by its Entity Types.[¶](#section-3.4.2.1.1-1)
+UI Infos is a JSON Object containing UI-related information about a single Entity, but differentiated by its Entity Types.[¶](#section-3.4.1.1.1-1)
 
-Each member name of the JSON object is an Entity Type Identifier and each value is an Entity Type UI Info Object as defined in [Entity Type UI Info](#entity-type-ui-info).[¶](#section-3.4.2.1.1-2)
+Each member name of the JSON object is an Entity Type Identifier and each value is an Entity Type UI Info Object as defined in [Entity Type UI Info](#entity-type-ui-info).[¶](#section-3.4.1.1.1-2)
 
-###### [3.4.2.1.1.1.](#section-3.4.2.1.1.1) [Entity Type UI Info](#name-entity-type-ui-info)
+###### [3.4.1.1.1.1.](#section-3.4.1.1.1.1) [Entity Type UI Info](#name-entity-type-ui-info)
 
-Entity Type UI Info is a JSON Object containing UI-related information about a single Entity Type of an Entity.[¶](#section-3.4.2.1.1.1-1)
+Entity Type UI Info is a JSON Object containing UI-related information about a single Entity Type of an Entity.[¶](#section-3.4.1.1.1.1-1)
 
-All Claims specified in section 5.2.2 \"Informational Metadata Extensions\" of \[[OpenID.Federation](#OpenID.Federation)\] MAY be used.[¶](#section-3.4.2.1.1.1-2)
+All Claims specified in section 5.2.2 \"Informational Metadata Extensions\" of \[[OpenID.Federation](#OpenID.Federation)\] MAY be used.[¶](#section-3.4.1.1.1.1-2)
 
-Additional Claims MAY be defined and used in conjunction with the Claims above.[¶](#section-3.4.2.1.1.1-3)
+Additional Claims MAY be defined and used in conjunction with the Claims above.[¶](#section-3.4.1.1.1.1-3)
 
-##### [3.4.2.2.](#section-3.4.2.2) [Example Response](#name-example-response)
+##### [3.4.1.2.](#section-3.4.1.2) [Example Response](#name-example-response)
 
     {
-      "federation_entities": [
+      "entities": [
         {
           "entity_id": "https://green.example.com",
           "entity_types": [
@@ -303,7 +297,33 @@ Additional Claims MAY be defined and used in conjunction with the Claims above.[
       ]
     }
 
-[¶](#section-3.4.2.2-1)
+[¶](#section-3.4.1.2-1)
+
+#### [3.4.2.](#section-3.4.2) [Error Response Format](#name-error-response-format)
+
+If the request was malformed or an error occurred during the processing of the request, the response body MUST be a JSON object with the content type `application/json`. In compliance with \[[RFC6749](#RFC6749)\] and \[[OpenID.Federation](#OpenID.Federation)\], the following standardized error format MUST be used:[¶](#section-3.4.2-1)
+
+-   **error**: (REQUIRED) Error codes in the IANA \"OAuth Extensions Error Registry\" \[[IANA.OAuth.Parameters](#IANA.OAuth.Parameters)\] MAY be used. In particular, these existing error codes are used by this specification:[¶](#section-3.4.2-2.1.1)
+
+    -   **unsupported_parameter**: The server does not support a requested parameter. The HTTP response status code SHOULD be 400 (Bad Request).[¶](#section-3.4.2-2.1.2.1)
+    -   **invalid_request**: The request is incomplete or does not comply with current specifications. The HTTP response status code SHOULD be 400 (Bad Request).\
+        \
+        In addition the following error codes defined by this specification MAY be used:[¶](#section-3.4.2-2.1.2.2)
+    -   **page_not_found**: The pagination pointer provided in the `from` parameter is not or no longer known to the responder. The HTTP response status code SHOULD be 404 (Not Found).[¶](#section-3.4.2-2.1.2.3)
+
+-   **error_description**: (REQUIRED) Human-readable text providing additional information used to assist the developer in understanding the error that occurred.[¶](#section-3.4.2-2.2)
+
+The following is a non-normative example of an error response:[¶](#section-3.4.2-3)
+
+    400 Bad Request
+    Content-Type: application/json
+
+    {
+      "error": "unsupported_parameter",
+      "error_description": "The 'limit' parameter is not supported by this endpoint."
+    }
+
+[¶](#section-3.4.2-4)
 
 ## [4.](#section-4) [Claims Languages and Scripts](#name-claims-languages-and-script)
 
@@ -366,22 +386,26 @@ The responder is free to restrict the scope of its Entity Collection Endpoint, s
 
 ## [6.](#section-6) [Security Considerations](#name-security-considerations)
 
-In additional to the considerations below, the security considerations of OpenID Federation 1.0 \[[OpenID.Federation](#OpenID.Federation)\] apply to this specification.[¶](#section-6-1)
+In addition to the considerations below, the security considerations of OpenID Federation 1.0 \[[OpenID.Federation](#OpenID.Federation)\] apply to this specification.[¶](#section-6-1)
 
 ### [6.1.](#section-6.1) [Unsigned Response](#name-unsigned-response)
 
-The response from the Entity Collection Endpoint is not signed and the obtained information MUST be considered as informational. To verify an Entity proper trust validation according to OpenID Federation 1.0 \[[OpenID.Federation](#OpenID.Federation)\] still MUST be done.[¶](#section-6.1-1)
+The response from the Entity Collection Endpoint is not signed and the obtained information MUST be considered as informational. To verify an Entity, proper trust validation according to OpenID Federation 1.0 \[[OpenID.Federation](#OpenID.Federation)\] still MUST be done.[¶](#section-6.1-1)
 
 It is also noted that Trust Marks returned in the response MAY not be verified and clients MUST consider them as not yet verified.[¶](#section-6.1-2)
 
 ## [7.](#section-7) [Normative References](#name-normative-references)
+
+\[IANA.OAuth.Parameters\]
+:   IANA, \"OAuth Parameters\", 25 March 2026, \<<https://www.iana.org/assignments/oauth-parameters>\>.
+:   
 
 \[OpenID.Core\]
 :   Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, \"OpenID Connect Core 1.0 incorporating errata set 2\", 15 December 2023, \<<http://openid.net/specs/openid-connect-core-1_0.html>\>.
 :   
 
 \[OpenID.Federation\]
-:   Ed., R. H., Jones, M. B., Solberg, A., Bradley, J., Marco, G. D., and V. Dzhuvinov, \"OpenID Federation 1.0\", 24 October 2024, \<<https://openid.net/specs/openid-federation-1_0.html>\>.
+:   Ed., R. H., Jones, M. B., Solberg, A., Bradley, J., Marco, G. D., and V. Dzhuvinov, \"OpenID Federation 1.0\", 17 February 2026, \<<https://openid.net/specs/openid-federation-1_0.html>\>.
 :   
 
 \[RFC2119\]
@@ -406,7 +430,7 @@ It is also noted that Trust Marks returned in the response MAY not be verified a
 
 ## [Appendix A.](#appendix-A) [Notices](#name-notices)
 
-Copyright (c) 2025 The OpenID Foundation.[¶](#appendix-A-1)
+Copyright (c) 2026 The OpenID Foundation.[¶](#appendix-A-1)
 
 The OpenID Foundation (OIDF) grants to any Contributor, developer, implementer, or other interested party a non-exclusive, royalty free, worldwide copyright license to reproduce, prepare derivative works from, distribute, perform and display, this Implementers Draft, Final Specification, or Final Specification Incorporating Errata Corrections solely for the purposes of (i) developing specifications, and (ii) implementing Implementers Drafts, Final Specifications, and Final Specification Incorporating Errata Corrections based on such documents, provided that attribution be made to the OIDF as the source of the material, but that such attribution does not indicate an endorsement by the OIDF.[¶](#appendix-A-2)
 
@@ -414,7 +438,7 @@ The technology described in this specification was made available from contribut
 
 ## [Appendix B.](#appendix-B) [Acknowledgements](#name-acknowledgements)
 
-We would like to thank the following individuals for their contributions to this specification: Niels van Dijk, Michael Fraser, Łukasz Jaromin, Michael B. Jones, Giuseppe De Marco, Stefan Santesson, Phil Smart, Zacharias Törnblom, and the Geant Trust & Identity Incubator of Geant5-2.[¶](#appendix-B-1)
+We would like to thank the following individuals for their contributions to this specification: Niels van Dijk, Michael Fraser, Marko Ivančić, Łukasz Jaromin, Michael B. Jones, Giuseppe De Marco, Stefan Santesson, Phil Smart, Zacharias Törnblom, and the Geant Trust & Identity Incubator of Geant5-2.[¶](#appendix-B-1)
 
 ## [Appendix C.](#appendix-C) [Document History](#name-document-history)
 

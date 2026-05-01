@@ -135,9 +135,7 @@ class Arr
      */
     public function getNestedValue(array $array, int|string ...$keys): mixed
     {
-        if (count($keys) > 99) {
-            throw new OpenIdException('Refusing to recurse to given depth.');
-        }
+        $this->validateMaxDepth(count($keys));
 
         if (count($keys) < 1) {
             return null;
@@ -162,6 +160,10 @@ class Arr
      */
     public function isAssociative(array $array): bool
     {
+        if ($array === []) {
+            return false;
+        }
+
         // Has at least one string key or non-sequential numeric keys
         return array_keys($array) !== range(0, count($array) - 1);
     }

@@ -33,6 +33,66 @@ class Url
         $queryParams = array_merge($queryParams, $params);
         $newQueryString = http_build_query($queryParams);
 
+        return $this->prepareUri($parsedUri, $newQueryString);
+    }
+
+
+    /**
+     * Build a URL with repeated (multi-value) query parameters.
+     * Array values are serialized as repeated keys: ?key=a&key=b
+     *
+     * @param array<string, array<string>|string|int|float> $params
+     */
+    public function withMultiValueParams(string $url, array $params): string
+    {
+        if ($params === []) {
+            return $url;
+        }
+
+        $parsedUri = parse_url($url);
+
+        $queryParams = [];
+        if (isset($parsedUri['query'])) {
+            parse_str($parsedUri['query'], $queryParams);
+        }
+
+        $queryElements = [];
+        // Preserve existing query params
+        foreach ($queryParams as $key => $value) {
+            $strKey = (string)$key;
+            if (is_array($value)) {
+                foreach ($value as $subValue) {
+                    /** @var string $subValue */
+                    $queryElements[] = urlencode($strKey) . '=' . urlencode($subValue);
+                }
+            } else {
+                /** @var string $value */
+                $queryElements[] = urlencode($strKey) . '=' . urlencode($value);
+            }
+        }
+
+        // Add new multi-value params
+        foreach ($params as $key => $value) {
+            if (is_array($value)) {
+                foreach ($value as $subValue) {
+                    $queryElements[] = urlencode($key) . '=' . urlencode((string)$subValue);
+                }
+            } else {
+                $queryElements[] = urlencode($key) . '=' . urlencode((string)$value);
+            }
+        }
+
+        $newQueryString = implode('&', $queryElements);
+
+        return $this->prepareUri($parsedUri, $newQueryString);
+    }
+
+
+    /**
+     * @param array<string|int> $parsedUri
+     */
+    protected function prepareUri(false|array|int|string|null $parsedUri, string $newQueryString): string
+    {
         return (isset($parsedUri['scheme']) ? $parsedUri['scheme'] . '://' : '') .
         ($parsedUri['host'] ?? '') .
         (isset($parsedUri['port']) ? ':' . $parsedUri['port'] : '') .
