@@ -71,7 +71,7 @@ class FederationDiscovery
             $taConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($trustAnchorId);
 
             // Recursive traversal
-            $discoveredEntities = $this->traverse($trustAnchorId, $taConfig, $filters);
+            $discoveredEntities = $this->traverse($trustAnchorId, $taConfig, $filters, 0, [], $forceRefresh);
 
             // Compute TTL: lowest of maxCacheDuration and TA expiry
             $ttl = $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime(
@@ -115,7 +115,7 @@ class FederationDiscovery
      * } $filters
      * @throws \SimpleSAML\OpenID\Exceptions\EntityDiscoveryException
      */
-    public function discoverFromCollectionEndpoint(
+    public function fetchFromCollectionEndpoint(
         string $endpointUri,
         array $filters = [],
         bool $forceRefresh = false,
@@ -157,7 +157,7 @@ class FederationDiscovery
     }
 
 
-    private function buildEntityCollectionFromResponse(string $responseBody): EntityCollection
+    protected function buildEntityCollectionFromResponse(string $responseBody): EntityCollection
     {
         $decoded = $this->helpers->json()->decode($responseBody);
 
@@ -237,12 +237,13 @@ class FederationDiscovery
      * @param string[] $visited
      * @return array<string, array<string, mixed>>
      */
-    private function traverse(
+    protected function traverse(
         string $entityId,
         EntityStatement $entityConfig,
         array $filters,
         int $depth = 0,
         array $visited = [],
+        bool $forceRefresh = false,
     ): array {
         if ($depth > $this->maxDepth || in_array($entityId, $visited, true)) {
             return [];
@@ -257,7 +258,7 @@ class FederationDiscovery
         }
 
         try {
-            $subordinateIds = $this->subordinateListingFetcher->fetch($listEndpoint, $filters);
+            $subordinateIds = $this->subordinateListingFetcher->fetch($listEndpoint, $filters, $forceRefresh);
 
             foreach ($subordinateIds as $subId) {
                 // If we've already visited this subId (loop), skip to avoid infinite recursion
@@ -269,7 +270,7 @@ class FederationDiscovery
                     $subConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($subId);
                     $allCollectedEntities = array_merge(
                         $allCollectedEntities,
-                        $this->traverse($subId, $subConfig, $filters, $depth + 1, $visited),
+                        $this->traverse($subId, $subConfig, $filters, $depth + 1, $visited, $forceRefresh),
                     );
                 } catch (Throwable $e) {
                     $this->logger?->warning('Failed to fetch subordinate configuration during discovery.', [

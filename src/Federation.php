@@ -352,6 +352,7 @@ class Federation
         return $this->subordinateListingFetcher ??= new SubordinateListingFetcher(
             $this->artifactFetcher(),
             $this->helpers(),
+            $this->maxCacheDurationDecorator(),
             $this->logger,
         );
     }
