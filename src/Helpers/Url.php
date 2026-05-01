@@ -90,8 +90,6 @@ class Url
 
     /**
      * @param array<string|int> $parsedUri
-     * @param string $newQueryString
-     * @return string
      */
     protected function prepareUri(false|array|int|string|null $parsedUri, string $newQueryString): string
     {

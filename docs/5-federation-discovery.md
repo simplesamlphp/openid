@@ -1,21 +1,19 @@
 # Federation Discovery and Entity Collection
 
-This library provides tools for discovering entities within an OpenID Federation
-and for working with the Entity Collection Endpoint. The functionality is split
-into two main areas:
+This library provides a high-performance, specification-compliant toolkit for discovering entities within an OpenID Federation and interacting with Entity Collection Endpoints.
 
-1. **Federation Discovery** — Top-down traversal of a federation hierarchy to
-   collect all entity IDs.
-2. **Entity Collection** — Client-side fetching from a remote
-   `federation_collection_endpoint`, and server-side building blocks (filtering,
-   sorting, pagination) for implementing your own collection endpoint.
+The functionality is split into two main operational modes:
 
-All components are accessible through the `\SimpleSAML\OpenID\Federation` facade.
+1.  **Federation Discovery** — A top-down, recursive traversal of a federation hierarchy starting from a Trust Anchor.
+2.  **Entity Collection** — A specialized protocol for optimized bulk-fetching of entities, featuring support for server-side filtering, sorting, and cursor-based pagination.
 
-## Setup
+All components are integrated and accessible through the `\SimpleSAML\OpenID\Federation` facade.
 
-Federation discovery extends the standard `Federation` instantiation with two
-additional constructor parameters:
+---
+
+## Setup and Configuration
+
+To enable federation discovery, initialize the `Federation` facade with a cache and (optionally) a logger.
 
 ```php
 <?php
@@ -25,68 +23,46 @@ declare(strict_types=1);
 use SimpleSAML\OpenID\Federation;
 
 $federationTools = new Federation(
-    cache: $cache,          // \Psr\SimpleCache\CacheInterface
-    logger: $logger,        // \Psr\Log\LoggerInterface
-    maxDiscoveryDepth: 10,  // Maximum recursion depth for federation traversal
+    cache: $cache,              // \Psr\SimpleCache\CacheInterface (Highly Recommended)
+    logger: $logger,            // \Psr\Log\LoggerInterface
+    maxDiscoveryDepth: 10,      // Recursion limit for top-down traversal
 );
 ```
-
-The `maxDiscoveryDepth` parameter limits how deep the traversal will recurse
-when following `federation_list_endpoint` links. The default is `10`.
 
 ### Custom Entity Collection Store
 
-By default, discovered entity IDs are stored using the PSR-16 cache
-(`CacheEntityCollectionStore`). If no cache is configured, an
-`InMemoryEntityCollectionStore` is used instead. You can provide your own
-implementation of `EntityCollectionStoreInterface`:
+By default, the library persists discovered entity payloads using the configured PSR-16 cache (`CacheEntityCollectionStore`). If no cache is provided, it falls back to an `InMemoryEntityCollectionStore` (ephemeral).
+
+For production environments requiring persistent storage (e.g., Database, Redis), you should implement the `EntityCollectionStoreInterface`:
 
 ```php
-use SimpleSAML\OpenID\Federation;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
 
-// Your custom store implementation.
-$customStore = new YourCustomEntityCollectionStore();
+class MyDatabaseStore implements EntityCollectionStoreInterface 
+{
+    public function store(string $trustAnchorId, array $entities, int $ttl): void { /* ... */ }
+    public function get(string $trustAnchorId): ?array { /* ... */ }
+    public function clear(string $trustAnchorId): void { /* ... */ }
+    
+    // New in v2.0: Track last update time for 'last_updated' response field
+    public function storeLastUpdated(string $trustAnchorId, int $timestamp, int $ttl): void { /* ... */ }
+    public function getLastUpdated(string $trustAnchorId): ?int { /* ... */ }
+    public function clearLastUpdated(string $trustAnchorId): void { /* ... */ }
+}
 
 $federationTools = new Federation(
-    cache: $cache,
-    logger: $logger,
-    entityCollectionStore: $customStore, // Custom store
+    entityCollectionStore: new MyDatabaseStore(),
 );
 ```
 
-The store interface is minimal:
+> [!NOTE]
+> The store caches the **JWT payload arrays** of discovered entities. Actual JWS signatures and original JWT strings are managed by the `EntityStatementFetcher` which handles its own caching and validation logic.
 
-```php
-interface EntityCollectionStoreInterface
-{
-    /**
-     * Persist discovered entities for a given Trust Anchor.
-     */
-    public function store(string $trustAnchorId, array $entities, int $ttl): void;
+---
 
-    /**
-     * Retrieve previously discovered entities.
-     * Return null when not found or expired.
-     */
-    public function get(string $trustAnchorId): ?array;
+## Federation Discovery (Top-Down)
 
-    /**
-     * Remove stored entities (for force re-discovery).
-     */
-    public function clear(string $trustAnchorId): void;
-}
-```
-
-> **Note**: The store tracks the JWT payload arrays per Trust Anchor.
-> Entity Configurations are fetched dynamically through `EntityStatementFetcher::fromCacheOrWellKnownEndpoint()`
-> during the traversal process, which handles JWS-level caching and respects expiry.
-
-## Federation Discovery
-
-Federation Discovery performs a top-down traversal of the federation hierarchy.
-Starting from a Trust Anchor, it follows `federation_list_endpoint` links on
-each entity to collect all subordinate entity IDs recursively.
+Federation Discovery performs a recursive traversal of the hierarchy. It starts at the Trust Anchor and follows `federation_list_endpoint` links to discover all subordinates.
 
 ### Discovering Entities
 
@@ -96,326 +72,184 @@ each entity to collect all subordinate entity IDs recursively.
 $trustAnchorId = 'https://trust-anchor.example.org/';
 
 try {
-    // Discover all entities (ID -> payload map) in the federation.
-    $entities = $federationTools->federationDiscovery()
-        ->discover($trustAnchorId);
+    // Traverse the federation and return an EntityCollection object.
+    $collection = $federationTools->federationDiscovery()->discover($trustAnchorId);
 
-    // $entities is an array keyed by entity ID, where values are JWT payload arrays:
-    // [
-    //     'https://trust-anchor.example.org/' => ['iss' => '...', 'metadata' => [...]],
-    //     ...
-    // ]
+    // Get the raw map of Entity ID => Payload
+    $entities = $collection->getEntities();
+
+    // Convenience: Get just the discovered entity IDs
+    $ids = $federationTools->federationDiscovery()->discoverEntityIds($trustAnchorId);
 } catch (\Throwable $exception) {
     $logger->error('Federation discovery failed: ' . $exception->getMessage());
 }
 ```
 
-The discovery algorithm:
+### Discovery Logic & Loop Protection
 
-1. Fetches the Entity Configuration of the Trust Anchor.
-2. Extracts the `federation_list_endpoint` from its metadata.
-3. Calls the subordinate listing endpoint to get immediate subordinate IDs.
-4. For each subordinate, fetches its Entity Configuration and, if it has its own
-   `federation_list_endpoint`, recurses (up to `maxDiscoveryDepth`).
-5. Deduplicates all collected entities.
-6. Persists the entity payloads in the store with a TTL based on the Trust Anchor's
-   expiry and the configured `maxCacheDuration`.
-
-If you only need the list of entity IDs without their payloads, use the convenience method:
-
-```php
-$entityIds = $federationTools->federationDiscovery()
-    ->discoverEntityIds($trustAnchorId);
-```
+1.  **Trust Anchor Config**: Fetches and validates the TA's Entity Configuration.
+2.  **Subordinate Listing**: Fetches the `federation_list_endpoint`. If filters are provided, they are passed as query parameters to this endpoint.
+3.  **Recursion**: For each discovered subordinate, it fetches its configuration and repeats the process.
+4.  **Loop Protection**: The algorithm tracks visited IDs to prevent infinite loops and is limited by `maxDiscoveryDepth`.
+5.  **Deduplication**: Entities appearing in multiple branches are only stored once.
 
 ### Applying Filters During Discovery
 
-You can pass filter parameters (e.g. `entity_type`) to the subordinate listing
-endpoint:
+You can pass filters (like `entity_type`) directly to the discovery process. These are passed to the remote `federation_list_endpoint` to optimize the traversal:
 
 ```php
-$entities = $federationTools->federationDiscovery()
-    ->discover(
-        $trustAnchorId,
-        filters: ['entity_type' => 'openid_relying_party'],
-    );
+$collection = $federationTools->federationDiscovery()
+    ->discover($trustAnchorId, filters: ['entity_type' => 'openid_provider']);
 ```
 
-### Periodic Refresh (Cron / Background Jobs)
+### Performance: Scheduled Refresh
 
-Use the `forceRefresh` parameter to clear the stored entities and
-re-traverse the federation. This is the intended pattern for cron or background
-refresh jobs:
+Discovery is an expensive network-heavy operation. You should run it in a background process (Cron) using `forceRefresh: true` to populate the cache:
 
 ```php
-// In a scheduled task / cron job:
+// In a background job:
 $federationTools->federationDiscovery()
     ->discover($trustAnchorId, forceRefresh: true);
+
+// In your web application (uses cache):
+$collection = $federationTools->federationDiscovery()->discover($trustAnchorId);
 ```
 
-When `forceRefresh` is `true`:
-
-- The full federation traversal is re-executed.
-- The new entity payload map is stored.
-- Entity Configurations that haven't expired in the JWS cache are served from
-  cache; only stale or new ones trigger network requests.
+---
 
 ## Entity Collection Client
 
-The Entity Collection Client fetches from a remote
-`federation_collection_endpoint` and deserializes the response into typed
-objects.
+The Entity Collection Client allows fetching pre-filtered lists of entities from a remote `federation_collection_endpoint`. This is much more efficient than full traversal if the remote side supports it.
 
-### Fetching from a Remote Endpoint
+### Bulk Fetching with Filters
+
+The client supports all standard OpenID Federation query parameters:
 
 ```php
-/** @var \SimpleSAML\OpenID\Federation $federationTools */
+$endpoint = 'https://federation.example.org/collection';
 
-$collectionEndpointUri = 'https://trust-anchor.example.org/federation_collection';
+$collection = $federationTools->federationDiscovery()->discoverFromCollectionEndpoint(
+    $endpoint,
+    [
+        'entity_type'     => ['openid_provider'],
+        'trust_mark_type' => ['https://example.org/marks/certified'],
+        'trust_anchor'    => 'https://trust-anchor.example.org/',
+        'query'           => 'university',
+        'limit'           => 50,
+        'entity_claims'   => ['display_name', 'contacts'], // Request specific claims
+    ]
+);
 
-try {
-    $response = $federationTools->entityCollectionFetcher()
-        ->fetch($collectionEndpointUri);
-
-    // Iterate over the entries.
-    foreach ($response->entities as $entry) {
-        echo $entry->entityId . PHP_EOL;
-        echo 'Types: ' . implode(', ', $entry->entityTypes) . PHP_EOL;
-
-        if ($entry->uiInfos !== null) {
-            echo 'Display: ' . ($entry->uiInfos['display_name'] ?? 'N/A') . PHP_EOL;
-        }
-    }
-
-    // Check if there are more pages.
-    if ($response->next !== null) {
-        // Fetch next page using the cursor.
-        $nextPage = $federationTools->entityCollectionFetcher()
-            ->fetch($collectionEndpointUri, ['from' => $response->next]);
-    }
-} catch (\Throwable $exception) {
-    $logger->error('Entity collection fetch failed: ' . $exception->getMessage());
+foreach ($collection->getEntities() as $id => $payload) {
+    // Process entity...
 }
 ```
 
-### Applying Filters
+### Client-Side Caching
 
-The `fetch()` method accepts filter parameters as defined by the Entity
-Collection Endpoint specification:
+`discoverFromCollectionEndpoint()` automatically caches the remote response body. If you need fresh data, pass `forceRefresh: true`.
+
+### Pagination Handling
+
+The `EntityCollection` object encapsulates the `next` cursor for seamless pagination:
 
 ```php
-$response = $federationTools->entityCollectionFetcher()->fetch(
-    $collectionEndpointUri,
-    [
-        'entity_type' => ['openid_provider', 'openid_relying_party'],
-        'trust_mark_type' => 'https://example.com/trust-mark/member',
-        'query' => 'university',
-        'limit' => 20,
-    ],
-);
+$results = [];
+$cursor = null;
+
+do {
+    $page = $federationTools->federationDiscovery()->discoverFromCollectionEndpoint(
+        $endpoint,
+        ['limit' => 100, 'from' => $cursor]
+    );
+    
+    $results = array_merge($results, $page->getEntities());
+    $cursor = $page->getNextPageToken();
+} while ($cursor !== null);
 ```
 
-Multi-value parameters (like `entity_type`) are serialized as repeated query
-keys (`?entity_type=openid_provider&entity_type=openid_relying_party`) per the
-specification.
+---
 
-### Response Objects
+## Server-Side Implementation
 
-- **`EntityCollectionResponse`** — Contains the `entities` array,
-  an optional `next` cursor for pagination, and an optional `lastUpdated`
-  timestamp. Implements `JsonSerializable`.
-- **`EntityCollectionEntry`** — Represents a single entity in the collection.
-  Contains `entityId`, `entityTypes`, optional `uiInfos`, and optional
-  `trustMarks`. Implements `JsonSerializable`.
+If you are implementing your own `federation_collection_endpoint`, the library provides high-level building blocks to handle filtering, sorting, and pagination.
 
-## Server-Side Building Blocks
+### The Pipeline Pattern
 
-If you want to implement and serve your own `federation_collection_endpoint`,
-this library provides building-block components that handle the core logic. You
-only need to wire them into your HTTP framework's controller.
-
-### Overview
-
-The server-side pipeline follows this order:
-
-1. **Discover** — Collect entities from the federation.
-2. **Filter** — Apply client-requested filters (entity type, trust mark, query).
-3. **Sort** — Order by a metadata claim (e.g. `display_name`).
-4. **Project** — Select only the requested UI claims.
-5. **Paginate** — Slice the result set and produce a cursor.
-6. **Serialize** — Return a `JsonSerializable` response.
-
-### Using EntityCollectionResponseFactory
-
-The `EntityCollectionResponseFactory` is a convenience orchestrator that wires
-all the above steps into a single call:
+The recommended implementation follows this pipeline: **Discover → Filter → Sort → Paginate → Serialize**.
 
 ```php
-/** @var \SimpleSAML\OpenID\Federation $federationTools */
-
-$trustAnchorId = 'https://trust-anchor.example.org/';
-
-// In your controller, pass the incoming request parameters directly.
-$requestParams = $request->getQueryParams();
-
-$response = $federationTools->entityCollectionResponseFactory()
-    ->build($trustAnchorId, $requestParams);
-
-// The response implements JsonSerializable.
-return new JsonResponse(json_encode($response));
-```
-
-Supported request parameters:
-
-| Parameter | Type | Description |
-|---|---|---|
-| `entity_type` | `string[]` | Filter by entity type keys (e.g. `openid_provider`) |
-| `trust_mark_type` | `string` | Filter by Trust Mark type |
-| `query` | `string` | Free-text search on entity ID, `display_name`, `organization_name` |
-| `trust_anchor` | `string` | Filter by Trust Anchor (via `authority_hints`) |
-| `sort_by` | `string` | Dot-separated claim path (e.g. `federation_entity.display_name`) |
-| `sort_dir` | `'asc'\|'desc'` | Sort direction, defaults to `asc` |
-| `ui_claims` | `string[]` | Claims to include in the `ui_infos` projection |
-| `limit` | `int` | Maximum entries per page (default 100) |
-| `from` | `string` | Opaque cursor from a previous response's `next` field |
-
-### Using Individual Components
-
-You can also use each building block independently for maximum control.
-
-#### EntityCollectionFilter
-
-Filters entity configurations by various criteria:
-
-```php
-use SimpleSAML\OpenID\Federation\EntityCollection;
-
-/** @var \SimpleSAML\OpenID\Federation $federationTools */
-
-// Prepare a collection from discovery or any other source.
-$entities = $federationTools->federationDiscovery()
-    ->discover($trustAnchorId);
-$collection = new EntityCollection($entities);
-
-// Filter by entity type and text query.
-$filtered = $federationTools->entityCollectionFilter()->filter(
-    $collection,
-    [
-        'entity_type' => ['openid_provider'],
-        'query' => 'university',
-    ],
-);
-
-// $filtered is array<string, array<string, mixed>> keyed by entity ID.
-```
-
-#### EntityCollectionSorter
-
-Sorts entities by a metadata claim value:
-
-```php
-/** @var \SimpleSAML\OpenID\Federation $federationTools */
-
-// Sort by display_name under the federation_entity metadata.
-$sorted = $federationTools->entityCollectionSorter()->sortByMetadataClaim(
-    $filtered, // array<string, array<string, mixed>>
-    ['federation_entity', 'display_name'],
-    'asc',
-);
-
-// Sort by organization_name under the openid_provider metadata.
-$sorted = $federationTools->entityCollectionSorter()->sortByMetadataClaim(
-    $filtered,
-    ['openid_provider', 'organization_name'],
-    'desc',
-);
-```
-
-Entities missing the specified claim are placed at the end of the result set.
-
-#### EntityCollectionPaginator
-
-Slices a pre-sorted result set into a page with an opaque cursor:
-
-```php
-/** @var \SimpleSAML\OpenID\Federation $federationTools */
-
-$paginated = $federationTools->entityCollectionPaginator()->paginate(
-    $sorted, // Pre-sorted array<string, array<string, mixed>|EntityCollectionEntry>
-    20,      // Limit (page size)
-    null,    // Cursor from a previous response's 'next' value, or null
-);
-
-$pageEntities = $paginated['entities']; // array<string, ...>
-$nextCursor = $paginated['next'];       // ?string — null when on the last page
-```
-
-The `next` cursor is an opaque base64url-encoded pointer. Pass it as the `from`
-parameter in the next request to continue pagination.
-
-## Full Server-Side Example
-
-Here is a complete example of wiring the building blocks into a controller
-action:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace Your\App\Controllers;
-
-use SimpleSAML\OpenID\Federation;
-use Psr\Http\Message\ServerRequestInterface;
-
-class FederationCollectionController
+public function __invoke(ServerRequestInterface $request): ResponseInterface
 {
-    public function __construct(
-        private readonly Federation $federationTools,
-        private readonly string $trustAnchorId,
-    ) {
+    $params = $request->getQueryParams();
+    
+    // 1. Load entities from the Federation traversal cache
+    $collection = $this->federationTools->federationDiscovery()->discover($this->trustAnchorId);
+    
+    // 2. Filter (Standard OpenID Federation criteria)
+    // Supports 'entity_type' (OR), 'trust_mark_type' (AND), and 'query' (Search)
+    $collection->filter($params);
+    
+    // 3. Sort (By nested metadata claims)
+    if (isset($params['sort_by'])) {
+        $path = explode('.', $params['sort_by']); // e.g. "federation_entity.display_name"
+        $collection->sort([$path], $params['sort_dir'] ?? 'asc');
     }
-
-
-    public function __invoke(ServerRequestInterface $request): string
-    {
-        $response = $this->federationTools
-            ->entityCollectionResponseFactory()
-            ->build($this->trustAnchorId, $request->getQueryParams());
-
-        // EntityCollectionResponse implements JsonSerializable.
-        return json_encode($response, JSON_THROW_ON_ERROR);
-    }
+    
+    // 4. Paginate (Using opaque cursors)
+    $collection->paginate(
+        limit: (int) ($params['limit'] ?? 100),
+        from: $params['from'] ?? null
+    );
+    
+    // 5. Serialize to spec-compliant array
+    return new JsonResponse($collection->toCollectionEndpointResponseArray());
 }
 ```
 
-Example request:
+### Filtering Technical Details
 
-```
-GET /federation_collection?entity_type=openid_provider&query=university&sort_by=federation_entity.display_name&limit=10
+| Criteria | Behavior | Fields Checked |
+| :--- | :--- | :--- |
+| `entity_type` | **OR** (Any match) | Metadata keys |
+| `trust_mark_type` | **AND** (All must match) | `trust_marks[].id` |
+| `query` | **Case-Insensitive** | `sub`, `display_name`, `organization_name` |
+
+### Sorting Technical Details
+
+The `sort()` method accepts an array of claim paths relative to the **JWT payload root**. When sorting by metadata claims, you must explicitly include the `metadata` prefix:
+
+```php
+$collection->sort([
+    ['metadata', 'openid_provider', 'display_name'],   // Primary (Metadata)
+    ['metadata', 'federation_entity', 'display_name'], // Fallback 1 (Metadata)
+    ['sub']                                            // Fallback 2 (Entity ID root claim)
+], 'asc');
 ```
 
-Example response:
+---
+
+## Serialized Response Format
+
+The `toCollectionEndpointResponseArray()` method produces a structure compatible with the OpenID Federation specification:
 
 ```json
 {
-    "entities": [
-        {
-            "entity_id": "https://idp.university-a.example.org/",
-            "entity_types": ["openid_provider"],
-            "ui_infos": {
-                "display_name": "University A Identity Provider"
-            }
-        },
-        {
-            "entity_id": "https://idp.university-b.example.org/",
-            "entity_types": ["openid_provider"],
-            "ui_infos": {
-                "display_name": "University B Identity Provider"
-            }
+  "entities": [
+    {
+      "entity_id": "https://idp.example.org/",
+      "entity_types": ["openid_provider"],
+      "ui_infos": {
+        "openid_provider": {
+          "display_name": "Example IDP"
         }
-    ],
-    "next": "aHR0cHM6Ly9pZHAudW5pdmVyc2l0eS1iLmV4YW1wbGUub3JnLw",
-    "last_updated": 1745410000
+      },
+      "trust_marks": [
+        { "id": "https://example.org/marks/certified", "trust_mark": "..." }
+      ]
+    }
+  ],
+  "next": "aHR0cHM6Ly9pZHAuZXhhbXBsZS5vcmcv",
+  "last_updated": 1745410000
 }
 ```

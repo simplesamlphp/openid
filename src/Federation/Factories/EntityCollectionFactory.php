@@ -23,13 +23,17 @@ class EntityCollectionFactory
      * @param array<string, array<string, mixed>> $entities  Keyed by entity ID,
      * value is JWT payload
      */
-    public function build(array $entities, ?int $lastUpdated): EntityCollection
-    {
+    public function build(
+        array $entities,
+        ?int $lastUpdated,
+        ?string $nextPageToken = null,
+    ): EntityCollection {
         return new EntityCollection(
             $this->entityCollectionFilter,
             $this->entityCollectionSorter,
             $this->entityCollectionPaginator,
             $entities,
+            $nextPageToken,
             $lastUpdated,
         );
     }

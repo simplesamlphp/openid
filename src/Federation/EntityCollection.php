@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation;
 
+use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionFilter;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionPaginator;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionSorter;
@@ -31,6 +32,60 @@ class EntityCollection
     public function getEntities(): array
     {
         return $this->entities;
+    }
+
+
+    public function getLastUpdated(): ?int
+    {
+        return $this->lastUpdated;
+    }
+
+
+    /**
+     * @return array{
+     *     entities: array<int, array<string, mixed>>,
+     *     next?: string,
+     *     last_updated?: int
+     * }
+     */
+    public function toCollectionEndpointResponseArray(): array
+    {
+        $entities = [];
+        foreach ($this->entities as $payload) {
+            $metadata = $payload[ClaimsEnum::Metadata->value] ?? [];
+            if (!is_array($metadata)) {
+                $metadata = [];
+            }
+
+            $entry = [
+                ClaimsEnum::EntityId->value => $payload[ClaimsEnum::Sub->value] ?? '',
+                ClaimsEnum::EntityTypes->value => array_keys($metadata),
+            ];
+
+            if ($metadata !== []) {
+                $entry[ClaimsEnum::UiInfos->value] = $metadata;
+            }
+
+            if (isset($payload[ClaimsEnum::TrustMarks->value])) {
+                $entry[ClaimsEnum::TrustMarks->value] = $payload[ClaimsEnum::TrustMarks->value];
+            }
+
+            $entities[] = $entry;
+        }
+
+        $data = [
+            ClaimsEnum::Entities->value => $entities,
+        ];
+
+        if (!is_null($this->nextPageToken)) {
+            $data[ClaimsEnum::Next->value] = $this->nextPageToken;
+        }
+
+        if (!is_null($this->lastUpdated)) {
+            $data[ClaimsEnum::LastUpdated->value] = $this->lastUpdated;
+        }
+
+        return $data;
     }
 
 

@@ -20,10 +20,8 @@ use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Federation\EntityCollection\CacheEntityCollectionStore;
-use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionFetcher;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionFilter;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionPaginator;
-use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionResponseFactory;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionSorter;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionStoreInterface;
 use SimpleSAML\OpenID\Federation\EntityCollection\InMemoryEntityCollectionStore;
@@ -77,15 +75,11 @@ class Federation
 
     protected ?FederationDiscovery $federationDiscovery = null;
 
-    protected ?EntityCollectionFetcher $entityCollectionFetcher = null;
-
     protected ?EntityCollectionFilter $entityCollectionFilter = null;
 
     protected ?EntityCollectionSorter $entityCollectionSorter = null;
 
     protected ?EntityCollectionPaginator $entityCollectionPaginator = null;
-
-    protected ?EntityCollectionResponseFactory $entityCollectionBuilder = null;
 
     protected ?EntityStatementFetcher $entityStatementFetcher = null;
 
@@ -399,22 +393,14 @@ class Federation
                 $this->entityCollectionStore(),
                 $this->maxCacheDurationDecorator(),
                 $this->entityCollectionFactory(),
+                $this->artifactFetcher(),
+                $this->helpers(),
                 $this->logger,
                 $this->maxDiscoveryDepth,
             );
         }
 
         return $this->federationDiscovery;
-    }
-
-
-    public function entityCollectionFetcher(): EntityCollectionFetcher
-    {
-        return $this->entityCollectionFetcher ??= new EntityCollectionFetcher(
-            $this->artifactFetcher(),
-            $this->helpers(),
-            $this->logger,
-        );
     }
 
 
@@ -434,18 +420,6 @@ class Federation
     {
         return $this->entityCollectionPaginator ??= new EntityCollectionPaginator(
             $this->helpers(),
-        );
-    }
-
-
-    public function entityCollectionResponseFactory(): EntityCollectionResponseFactory
-    {
-        return $this->entityCollectionBuilder ??= new EntityCollectionResponseFactory(
-            $this->federationDiscovery(),
-            $this->entityCollectionFilter(),
-            $this->entityCollectionSorter(),
-            $this->entityCollectionPaginator(),
-            $this->entityCollectionStore(),
         );
     }
 

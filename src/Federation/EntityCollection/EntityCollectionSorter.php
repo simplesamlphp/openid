@@ -38,13 +38,14 @@ class EntityCollectionSorter
             foreach ($claimPaths as $claimPath) {
                 try {
                     $valA = $this->helpers->arr()->getNestedValue($a, ...$claimPath);
-                } catch (OpenIdException $e) {
+                } catch (OpenIdException) {
                     // If the claim path doesn't exist, treat it as null
                     $valA = null;
                 }
+
                 try {
                     $valB = $this->helpers->arr()->getNestedValue($b, ...$claimPath);
-                } catch (OpenIdException $e) {
+                } catch (OpenIdException) {
                     // If the claim path doesn't exist, treat it as null
                     $valB = null;
                 }
