@@ -20,6 +20,7 @@ class EntityCollection
         protected readonly EntityCollectionPaginator $entityCollectionPaginator,
         protected array $entities,
         protected ?string $nextPageToken = null,
+        protected ?int $lastUpdated = null,
     ) {
     }
 

@@ -27,7 +27,7 @@ class EntityCollectionFetcher
      * @param non-empty-string $endpointUri
      * @param array{
      *   entity_type?: string[],
-     *   trust_mark_type?: string,
+     *   trust_mark_type?: string[],
      *   query?: string,
      *   trust_anchor?: string,
      *   entity_claims?: string[],

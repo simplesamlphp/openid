@@ -46,7 +46,10 @@ class FederationDiscovery
                     'Returning discovered entities from entity collection store.',
                     ['trustAnchorId' => $trustAnchorId],
                 );
-                return $this->entityCollectionFactory->build($cachedEntities);
+                return $this->entityCollectionFactory->build(
+                    $cachedEntities,
+                    $this->entityCollectionStore->getLastUpdated($trustAnchorId),
+                );
             }
         }
 
@@ -56,6 +59,7 @@ class FederationDiscovery
         );
 
         $discoveredEntities = [];
+        $lastUpdated = null;
         try {
             // Step 1: Fetch TA config
             $taConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($trustAnchorId);
@@ -71,7 +75,8 @@ class FederationDiscovery
             ksort($discoveredEntities);
 
             $this->entityCollectionStore->store($trustAnchorId, $discoveredEntities, $ttl);
-            $this->entityCollectionStore->storeLastUpdated($trustAnchorId, time(), $ttl);
+            $lastUpdated = time();
+            $this->entityCollectionStore->storeLastUpdated($trustAnchorId, $lastUpdated, $ttl);
 
             $this->logger?->info('Federation discovery completed.', [
                 'trustAnchorId' => $trustAnchorId,
@@ -84,7 +89,7 @@ class FederationDiscovery
             ]);
         }
 
-        return $this->entityCollectionFactory->build($discoveredEntities);
+        return $this->entityCollectionFactory->build($discoveredEntities, $lastUpdated);
     }
 
 
