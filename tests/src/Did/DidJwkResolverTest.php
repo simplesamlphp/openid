@@ -68,4 +68,19 @@ final class DidJwkResolverTest extends TestCase
         // 'abc' in base64url is 'YWJj'
         $this->resolver->extractJwkFromDidJwk('did:jwk:YWJj');
     }
+
+
+    public function testGenerateDidJwkFromJwkSucceeds(): void
+    {
+        $jwk = [
+            'kty' => 'OKP',
+            'crv' => 'Ed25519',
+            'x' => '11-O_J6_K8_mu2_5_K8_mu2_5_K8_mu2_5',
+        ];
+        // phpcs:ignore
+        $expectedDidJwk = 'did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IjExLU9fSjZfSzhfbXUyXzVfSzhfbXUyXzVfSzhfbXUyXzUifQ';
+
+        $didJwk = $this->resolver->generateDidJwkFromJwk($jwk);
+        $this->assertSame($expectedDidJwk, $didJwk);
+    }
 }

@@ -51,4 +51,20 @@ class DidJwkResolver
             throw new DidException('Error processing did:jwk: ' . $exception->getMessage(), 0, $exception);
         }
     }
+
+
+    /**
+     * Generate a did:jwk value from a JWK array.
+     *
+     * @param mixed[] $jwk The JWK representation of the key
+     * @return string The did:jwk value (e.g., did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwidXNlIjoic2lnIiwieCI6IjExLU9fSjZfSzhfbXUyXzVfSzhfbXUyXzVfSzhfbXUyXzUifQ)
+     * @throws \JsonException If the JWK cannot be encoded to JSON
+     */
+    public function generateDidJwkFromJwk(array $jwk): string
+    {
+        $jsonJwk = $this->helpers->json()->encode($jwk);
+        $encodedJwk = $this->helpers->base64Url()->encode($jsonJwk);
+
+        return 'did:jwk:' . $encodedJwk;
+    }
 }
