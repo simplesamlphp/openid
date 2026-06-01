@@ -29,6 +29,7 @@ URLS=(
     # DIIP specifications
     "https://fidescommunity.github.io/DIIP/"
     # OAuth 2.0 specifications
+    "https://www.rfc-editor.org/rfc/rfc6749.html" # RFC 6749 OAuth 2.0 Authorization Framework
     "https://www.rfc-editor.org/rfc/rfc9126.html" # RFC 9126 OAuth 2.0 Pushed Authorization Requests
 )
 
