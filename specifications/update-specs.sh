@@ -28,6 +28,8 @@ URLS=(
     "https://www.w3.org/TR/json-ld11/"
     # DIIP specifications
     "https://fidescommunity.github.io/DIIP/"
+    # OAuth 2.0 specifications
+    "https://www.rfc-editor.org/rfc/rfc9126.html" # RFC 9126 OAuth 2.0 Pushed Authorization Requests
 )
 
 # For each of the specifications, fetch the content from the URL and save it
