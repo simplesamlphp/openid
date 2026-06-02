@@ -19,6 +19,7 @@ URLS=(
     "https://openid.net/specs/openid-connect-rpinitiated-1_0.html"
     "https://openid.net/specs/openid-connect-frontchannel-1_0.html"
     "https://openid.net/specs/openid-connect-backchannel-1_0.html"
+    "https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html"
     # W3C specifications
     "https://www.w3.org/TR/vc-data-model-2.0/"
     "https://www.w3.org/TR/vc-jose-cose/"
