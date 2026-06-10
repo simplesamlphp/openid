@@ -326,6 +326,8 @@ enum ClaimsEnum: string
 
     case ProofTypesSupported = 'proof_types_supported';
 
+    case PushedAuthorizationRequestEndpoint = 'pushed_authorization_request_endpoint';
+
     case RedirectUris = 'redirect_uris';
 
     // Reference
@@ -359,7 +361,11 @@ enum ClaimsEnum: string
 
     case RequireAuthTime = 'require_auth_time';
 
+    case RequirePushedAuthorizationRequests = 'require_pushed_authorization_requests';
+
     case RequireRequestUriRegistration = 'require_request_uri_registration';
+
+    case RequireSignedRequestObject = 'require_signed_request_object';
 
     case ResponseModesSupported = 'response_modes_supported';
 

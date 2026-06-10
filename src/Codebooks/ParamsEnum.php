@@ -71,6 +71,8 @@ enum ParamsEnum: string
 
     case Request = 'request';
 
+    case RequestUri = 'request_uri';
+
     case ResponseMode = 'response_mode';
 
     case ResponseType = 'response_type';
