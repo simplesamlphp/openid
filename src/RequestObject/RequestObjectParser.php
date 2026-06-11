@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\RequestObject;
 
 use Psr\Log\LoggerInterface;
-use SimpleSAML\OpenID\Exceptions\RequestObjectException;
+use Throwable;
 
 class RequestObjectParser
 {
@@ -25,10 +25,14 @@ class RequestObjectParser
             try {
                 $requestObject = $factory->fromToken($token);
                 $requestObjectBag->add($requestObject);
-            } catch (RequestObjectException) {
+            } catch (Throwable $throwable) {
                 // Ignore and try the next factory
                 $this->logger?->debug(
-                    sprintf('Failed to parse request object using factory %s. Skipping.', $factory::class),
+                    sprintf(
+                        'Failed to parse request object using factory %s. Error was: %s. Skipping.',
+                        $factory::class,
+                        $throwable->getMessage(),
+                    ),
                 );
             }
         }
