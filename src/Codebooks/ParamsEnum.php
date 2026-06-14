@@ -40,6 +40,8 @@ enum ParamsEnum: string
 
     case ErrorDescription = 'error_description';
 
+    case ExpiresIn = 'expires_in';
+
     case GrantType = 'grant_type';
 
     case Hint = 'hint';
