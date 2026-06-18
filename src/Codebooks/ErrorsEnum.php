@@ -10,6 +10,8 @@ enum ErrorsEnum: string
 
     case InvalidClient = 'invalid_client';
 
+    case InvalidClientMetadata = 'invalid_client_metadata';
+
     case InvalidIssuer = 'invalid_issuer';
 
     case InvalidMetadata = 'invalid_metadata';
