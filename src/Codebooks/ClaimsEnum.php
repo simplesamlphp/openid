@@ -288,6 +288,9 @@ enum ClaimsEnum: string
 
     case NonceEndpoint = 'nonce_endpoint';
 
+    // NonceValue
+    case NonceVal = 'nonce_val';
+
     // NotBefore
     case Nbf = 'nbf';
 
