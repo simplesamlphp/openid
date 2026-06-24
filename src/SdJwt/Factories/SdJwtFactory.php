@@ -22,6 +22,9 @@ use SimpleSAML\OpenID\SdJwt\KbJwt;
 use SimpleSAML\OpenID\SdJwt\SdJwt;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\SdJwt\Factories\SdJwtFactoryTest
+ */
 class SdJwtFactory extends ParsedJwsFactory
 {
     public function __construct(

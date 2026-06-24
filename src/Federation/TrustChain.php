@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustChainTest
+ */
 class TrustChain implements JsonSerializable
 {
     /** @var \SimpleSAML\OpenID\Federation\EntityStatement[] Entities which belong to the trust chain. */

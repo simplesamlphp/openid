@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Exceptions\RequestObjectException;
 use SimpleSAML\OpenID\Federation\RequestObject as FederationRequestObject;
 use SimpleSAML\OpenID\Jar\RequestObject as JarRequestObject;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\RequestObject\RequestObjectBagTest
+ */
 class RequestObjectBag
 {
     /**

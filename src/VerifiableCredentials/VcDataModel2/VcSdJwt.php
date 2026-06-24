@@ -23,6 +23,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcCredentialStat
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwtTest
+ */
 class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 {
     protected ?VcAtContextClaimValue $vcAtContextClaimValue = null;

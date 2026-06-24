@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Core\IdToken;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Core\Factories\IdTokenFactoryTest
+ */
 class IdTokenFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): IdToken

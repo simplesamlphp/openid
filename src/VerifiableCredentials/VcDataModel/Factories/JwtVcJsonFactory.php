@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\JwtVcJson;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactoryTest
+ */
 class JwtVcJsonFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): JwtVcJson

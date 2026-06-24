@@ -10,6 +10,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\Factories\JwsDecoratorBuilderFactoryTest
+ */
 class JwsDecoratorBuilderFactory
 {
     public function build(

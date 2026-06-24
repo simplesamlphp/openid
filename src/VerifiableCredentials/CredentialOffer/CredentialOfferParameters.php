@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParametersTest
+ */
 class CredentialOfferParameters implements \JsonSerializable
 {
     /**

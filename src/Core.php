@@ -25,6 +25,9 @@ use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\CoreTest
+ */
 class Core
 {
     protected DateIntervalDecorator $timestampValidationLeewayDecorator;

@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
 /**
  * Supported signature (and in the future encryption) algorithms.
+ * @see \SimpleSAML\Test\OpenID\SupportedAlgorithmsTest
  */
 class SupportedAlgorithms
 {

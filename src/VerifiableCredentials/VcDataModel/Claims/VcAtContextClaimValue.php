@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\VcDataModelException;
 use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValueTest
+ */
 class VcAtContextClaimValue implements ClaimInterface
 {
     /**

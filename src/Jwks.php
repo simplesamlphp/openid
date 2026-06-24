@@ -27,6 +27,9 @@ use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\JwksTest
+ */
 class Jwks
 {
     protected DateIntervalDecorator $maxCacheDurationDecorator;

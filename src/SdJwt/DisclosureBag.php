@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\SdJwt;
 
 use SimpleSAML\OpenID\Exceptions\SdJwtException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\SdJwt\DisclosureBagTest
+ */
 class DisclosureBag
 {
     /**

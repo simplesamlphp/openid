@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 /**
  * Logout Token abstraction from
  * https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken
+ * @see \SimpleSAML\Test\OpenID\Core\LogoutTokenTest
  */
 class LogoutToken extends ParsedJws
 {

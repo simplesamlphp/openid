@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\SignedJwks;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwks\Factories\SignedJwksFactoryTest
+ */
 class SignedJwksFactory extends ParsedJwsFactory
 {
     /**

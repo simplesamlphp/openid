@@ -17,6 +17,9 @@ use SimpleSAML\OpenID\Federation\Factories\TrustMarkDelegationFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustMarkFactory;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustMarkValidatorTest
+ */
 class TrustMarkValidator
 {
     /**

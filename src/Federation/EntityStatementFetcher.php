@@ -17,6 +17,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityStatementFetcherTest
+ */
 class EntityStatementFetcher extends JwsFetcher
 {
     public function __construct(

@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Helpers;
 
 /**
  * Utility class for resolving DID JWK values to JWK format.
+ * @see \SimpleSAML\Test\OpenID\Did\DidJwkResolverTest
  */
 class DidJwkResolver
 {

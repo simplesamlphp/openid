@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\JwsFetcherTest
+ */
 class JwsFetcher extends AbstractJwsFetcher
 {
     public function __construct(

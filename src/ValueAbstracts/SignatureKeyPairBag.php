@@ -8,6 +8,9 @@ use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\SignatureKeyPairBagTest
+ */
 class SignatureKeyPairBag
 {
     /**

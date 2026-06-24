@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Federation\EntityCollection;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityCollection\InMemoryEntityCollectionStoreTest
+ */
 class InMemoryEntityCollectionStore implements EntityCollectionStoreInterface
 {
     /** @var array<string, array{entities: array<string, array<string, mixed>>, expires: int}> */

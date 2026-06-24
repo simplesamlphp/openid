@@ -17,6 +17,9 @@ use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Jwks\Factories\SignedJwksFactory;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwks\JwksFetcherTest
+ */
 class JwksFetcher
 {
     public function __construct(

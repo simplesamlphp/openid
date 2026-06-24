@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Federation\EntityCollection;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityCollection\EntityCollectionFilterTest
+ */
 class EntityCollectionFilter
 {
     public function __construct(

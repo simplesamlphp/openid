@@ -8,6 +8,9 @@ use JsonSerializable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\LanguageValueObjectTest
+ */
 class LanguageValueObject implements JsonSerializable
 {
     /**

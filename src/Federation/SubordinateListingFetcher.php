@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\SubordinateListingFetcherTest
+ */
 class SubordinateListingFetcher
 {
     public function __construct(

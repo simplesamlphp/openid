@@ -8,6 +8,9 @@ use JsonSerializable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Claims\TrustMarkOwnersClaimValueTest
+ */
 class TrustMarkOwnersClaimValue implements JsonSerializable
 {
     /**

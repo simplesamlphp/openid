@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Core\RequestObject;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Core\Factories\RequestObjectFactoryTest
+ */
 class RequestObjectFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): RequestObject

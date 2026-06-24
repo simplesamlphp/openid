@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Federation\Claims;
 
 use JsonSerializable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Claims\TrustMarkIssuersClaimBagTest
+ */
 class TrustMarkIssuersClaimBag implements JsonSerializable
 {
     /** @var array<non-empty-string,\SimpleSAML\OpenID\Federation\Claims\TrustMarkIssuersClaimValue> */

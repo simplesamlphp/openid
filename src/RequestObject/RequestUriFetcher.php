@@ -8,6 +8,9 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\RequestObject\RequestUriFetcherTest
+ */
 class RequestUriFetcher
 {
     public function __construct(

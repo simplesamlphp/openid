@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\RequestObject;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\RequestObject\RequestObjectParserTest
+ */
 class RequestObjectParser
 {
     public function __construct(

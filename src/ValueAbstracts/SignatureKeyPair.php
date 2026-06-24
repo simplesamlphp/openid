@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\SignatureKeyPairTest
+ */
 class SignatureKeyPair
 {
     public function __construct(

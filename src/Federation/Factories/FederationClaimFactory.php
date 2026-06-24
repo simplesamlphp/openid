@@ -15,6 +15,9 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimValue;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\FederationClaimFactoryTest
+ */
 class FederationClaimFactory
 {
     public function __construct(

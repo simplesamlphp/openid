@@ -28,6 +28,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\SdJwtVc\Factories\SdJwtVcFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\JwtVcJsonFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcSdJwtFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentialsTest
+ */
 class VerifiableCredentials
 {
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;

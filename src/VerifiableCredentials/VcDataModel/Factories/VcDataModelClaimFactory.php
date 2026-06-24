@@ -30,6 +30,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceC
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValue;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactoryTest
+ */
 class VcDataModelClaimFactory
 {
     public function __construct(

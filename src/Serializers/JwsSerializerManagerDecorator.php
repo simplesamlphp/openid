@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Serializers;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Serializers\JwsSerializerManagerDecoratorTest
+ */
 class JwsSerializerManagerDecorator
 {
     public function __construct(

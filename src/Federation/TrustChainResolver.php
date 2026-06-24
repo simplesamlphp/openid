@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustChainResolverTest
+ */
 class TrustChainResolver
 {
     protected int $maxTrustChainDepth;

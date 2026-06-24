@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\GrantTypesEnum;
 use SimpleSAML\OpenID\Exceptions\CredentialOfferException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferGrantsValueTest
+ */
 class CredentialOfferGrantsValue implements JsonSerializable
 {
     /**

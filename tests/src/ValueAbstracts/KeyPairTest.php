@@ -83,7 +83,7 @@ final class KeyPairTest extends TestCase
 
     public function testGetPrivateKeyPasswordReturnsNullWhenNullInjected(): void
     {
-        $sut = $this->sut(privateKeyPassword: null);
+        $sut = $this->sut();
 
         $this->assertNull($sut->getPrivateKeyPassword());
     }

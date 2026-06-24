@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Federation\Claims;
 
 use JsonSerializable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Claims\TrustMarkIssuersClaimValueTest
+ */
 class TrustMarkIssuersClaimValue implements JsonSerializable
 {
     /**

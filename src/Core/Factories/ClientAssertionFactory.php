@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Core\ClientAssertion;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Core\Factories\ClientAssertionFactoryTest
+ */
 class ClientAssertionFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): ClientAssertion

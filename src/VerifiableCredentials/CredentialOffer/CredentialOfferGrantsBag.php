@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferGrantsBagTest
+ */
 class CredentialOfferGrantsBag implements \JsonSerializable
 {
     /**

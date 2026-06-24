@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Helpers\RandomTest
+ */
 class Random
 {
     /**

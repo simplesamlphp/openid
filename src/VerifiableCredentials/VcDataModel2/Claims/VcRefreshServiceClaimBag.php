@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBagTest
+ */
 class VcRefreshServiceClaimBag implements ClaimInterface
 {
     /** @var \SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimValue[] */

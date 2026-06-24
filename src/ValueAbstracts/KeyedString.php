@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\KeyedStringTest
+ */
 class KeyedString implements \JsonSerializable
 {
     /**

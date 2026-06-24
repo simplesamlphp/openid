@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Federation\RequestObject;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\RequestObjectFactoryTest
+ */
 class RequestObjectFactory extends ParsedJwsFactory
 {
     /**

@@ -8,6 +8,9 @@ use DateTimeImmutable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims\VcClaimValueTest
+ */
 class VcClaimValue implements ClaimInterface
 {
     /**

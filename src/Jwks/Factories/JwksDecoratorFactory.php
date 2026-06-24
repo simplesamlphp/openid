@@ -8,6 +8,9 @@ use Jose\Component\Core\JWKSet;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwks\Factories\JwksDecoratorFactoryTest
+ */
 class JwksDecoratorFactory
 {
     /**

@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Helpers;
 
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Helpers\ArrTest
+ */
 class Arr
 {
     public const MAX_DEPTH = 99;

@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Utils\ArtifactFetcherTest
+ */
 class ArtifactFetcher
 {
     public function __construct(

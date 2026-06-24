@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Factories;
 use GuzzleHttp\Client;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Factories\HttpClientDecoratorFactoryTest
+ */
 class HttpClientDecoratorFactory
 {
     public function build(?Client $client = null): HttpClientDecorator

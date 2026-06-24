@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Decorators\HttpClientDecoratorTest
+ */
 class HttpClientDecorator
 {
     public const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];

@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\EntityStatementFactoryTest
+ */
 class EntityStatementFactory extends ParsedJwsFactory
 {
     /**

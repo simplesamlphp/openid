@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPair;
 use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPairBag;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Utils\KeyPairResolverTest
+ */
 class KeyPairResolver
 {
     public function __construct(

@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID;
 
 use SimpleSAML\OpenID\Jwk\Factories\JwkDecoratorFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\JwkTest
+ */
 class Jwk
 {
     protected ?JwkDecoratorFactory $jwkDecoratorFactory = null;

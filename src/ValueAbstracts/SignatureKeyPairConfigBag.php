@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\SignatureKeyPairConfigBagTest
+ */
 class SignatureKeyPairConfigBag
 {
     /**

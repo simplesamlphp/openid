@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 use SimpleSAML\OpenID\ValueAbstracts\ClaimInterface;
 use SimpleSAML\OpenID\ValueAbstracts\LanguageValueObject;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims\LocalizableStringValueTest
+ */
 class LocalizableStringValue implements ClaimInterface
 {
     /**

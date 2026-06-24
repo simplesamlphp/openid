@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\RequestObjectException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Core\RequestObjectTest
+ */
 class RequestObject extends ParsedJws
 {
     /**

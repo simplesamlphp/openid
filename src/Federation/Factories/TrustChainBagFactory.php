@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Federation\Factories;
 use SimpleSAML\OpenID\Federation\TrustChain;
 use SimpleSAML\OpenID\Federation\TrustChainBag;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\TrustChainBagFactoryTest
+ */
 class TrustChainBagFactory
 {
     public function build(TrustChain $trustChain, TrustChain ...$trustChains): TrustChainBag

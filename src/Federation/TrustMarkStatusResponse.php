@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\TrustMarkStatusException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustMarkStatusResponseTest
+ */
 class TrustMarkStatusResponse extends ParsedJws
 {
     /**

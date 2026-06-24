@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Helpers\UrlTest
+ */
 class Url
 {
     public function isValid(string $url): bool

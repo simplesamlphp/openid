@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Federation\Factories;
 use SimpleSAML\OpenID\Federation\TrustMarkStatusResponse;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\TrustMarkStatusResponseFactoryTest
+ */
 class TrustMarkStatusResponseFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): TrustMarkStatusResponse

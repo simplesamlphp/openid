@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\Factories;
 
 use SimpleSAML\OpenID\VerifiableCredentials\TxCode;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\Factories\TxCodeFactoryTest
+ */
 class TxCodeFactory
 {
     public function build(

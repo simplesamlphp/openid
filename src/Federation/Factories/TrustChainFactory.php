@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\Federation\MetadataPolicyResolver;
 use SimpleSAML\OpenID\Federation\TrustChain;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\TrustChainFactoryTest
+ */
 class TrustChainFactory
 {
     public function __construct(

@@ -10,6 +10,9 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\SignedJwksException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwks\SignedJwksTest
+ */
 class SignedJwks extends ParsedJws implements JsonSerializable
 {
     /**

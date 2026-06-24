@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Decorators;
 use DateInterval;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Decorators\CacheDecoratorTest
+ */
 class CacheDecorator
 {
     public function __construct(public readonly CacheInterface $cache)

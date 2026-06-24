@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Helpers;
 
 /**
  * @see https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#claims_path_pointer
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\ClaimsPathPointerResolverTest
  */
 class ClaimsPathPointerResolver
 {

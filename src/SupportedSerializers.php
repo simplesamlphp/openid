@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID;
 use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\SupportedSerializersTest
+ */
 class SupportedSerializers
 {
     public function __construct(

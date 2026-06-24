@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\MetadataPolicyOperatorsEnum;
 use SimpleSAML\OpenID\Exceptions\MetadataPolicyException;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\MetadataPolicyApplicatorTest
+ */
 class MetadataPolicyApplicator
 {
     public function __construct(

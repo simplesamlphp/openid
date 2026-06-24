@@ -15,6 +15,9 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\Factories\ParsedJwsFactoryTest
+ */
 class ParsedJwsFactory
 {
     public function __construct(

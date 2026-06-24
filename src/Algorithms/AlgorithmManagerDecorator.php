@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Algorithms;
 
 use Jose\Component\Core\AlgorithmManager;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Algorithms\AlgorithmManagerDecoratorTest
+ */
 class AlgorithmManagerDecorator
 {
     public function __construct(

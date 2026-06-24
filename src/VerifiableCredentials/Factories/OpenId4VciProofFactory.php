@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\OpenId4VciProof;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\Factories\OpenId4VciProofFactoryTest
+ */
 class OpenId4VciProofFactory extends ParsedJwsFactory
 {
     public function fromToken(string $token): OpenId4VciProof

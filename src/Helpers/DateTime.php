@@ -8,6 +8,9 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Helpers\DateTimeTest
+ */
 class DateTime
 {
     /**

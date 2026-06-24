@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimValueTest
+ */
 class VcTermsOfUseClaimValue extends AbstractTypedClaimValue
 {
     public function getName(): string

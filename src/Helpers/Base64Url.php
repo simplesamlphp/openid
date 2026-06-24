@@ -8,6 +8,7 @@ namespace SimpleSAML\OpenID\Helpers;
  * Utility class for Base64URL encoding and decoding.
  * Base64URL is a URL and filename safe variant of Base64 encoding.
  * It replaces '+' with '-', '/' with '_' and removes padding '='.
+ * @see \SimpleSAML\Test\OpenID\Helpers\Base64UrlTest
  */
 class Base64Url
 {

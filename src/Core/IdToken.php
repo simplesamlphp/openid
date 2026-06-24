@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 /**
  * ID Token abstraction from
  * https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+ * @see \SimpleSAML\Test\OpenID\Core\IdTokenTest
  */
 class IdToken extends ParsedJws
 {

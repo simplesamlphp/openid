@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Jwk;
 
 use Jose\Component\Core\JWK;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwk\JwkDecoratorTest
+ */
 class JwkDecorator implements \JsonSerializable
 {
     /**

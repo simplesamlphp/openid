@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\JwksClaimTest
+ */
 class JwksClaim implements ClaimInterface
 {
     /**

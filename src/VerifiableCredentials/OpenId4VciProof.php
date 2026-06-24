@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\OpenId4VciProofException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\OpenId4VciProofTest
+ */
 class OpenId4VciProof extends ParsedJws
 {
     /**

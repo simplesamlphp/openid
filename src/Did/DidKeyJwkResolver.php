@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Helpers;
 /**
  * Utility class for resolving DID Key values to JWK format.
  * Based on the W3C DID Key specification: https://w3c-ccg.github.io/did-key-spec/
+ * @see \SimpleSAML\Test\OpenID\Did\DidKeyJwkResolverTest
  */
 class DidKeyJwkResolver
 {

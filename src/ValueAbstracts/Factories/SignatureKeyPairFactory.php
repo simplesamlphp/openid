@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\ValueAbstracts\KeyPair;
 use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPair;
 use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPairConfig;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\Factories\SignatureKeyPairFactoryTest
+ */
 class SignatureKeyPairFactory
 {
     public function __construct(

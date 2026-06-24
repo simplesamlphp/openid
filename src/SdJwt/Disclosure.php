@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Codebooks\SdJwtDisclosureType;
 use SimpleSAML\OpenID\Exceptions\SdJwtException;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\SdJwt\DisclosureTest
+ */
 class Disclosure implements JsonSerializable
 {
     /**

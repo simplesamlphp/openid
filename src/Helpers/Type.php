@@ -10,6 +10,9 @@ use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use Stringable;
 use Traversable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Helpers\TypeTest
+ */
 class Type
 {
     /**

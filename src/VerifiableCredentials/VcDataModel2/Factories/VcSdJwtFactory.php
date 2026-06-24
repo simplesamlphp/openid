@@ -14,6 +14,9 @@ use SimpleSAML\OpenID\SdJwt\Factories\SdJwtFactory;
 use SimpleSAML\OpenID\SdJwt\KbJwt;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\VcSdJwt;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcSdJwtFactoryTest
+ */
 class VcSdJwtFactory extends SdJwtFactory
 {
     /**

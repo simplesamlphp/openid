@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Federation;
 
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustChainBagTest
+ */
 class TrustChainBag
 {
     /** @var \SimpleSAML\OpenID\Federation\TrustChain[] */

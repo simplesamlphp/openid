@@ -8,6 +8,9 @@ use Jose\Component\Signature\JWSVerifier;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\Factories\JwsVerifierDecoratorFactoryTest
+ */
 class JwsVerifierDecoratorFactory
 {
     public function build(AlgorithmManagerDecorator $algorithmManagerDecorator): JwsVerifierDecorator

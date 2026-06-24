@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Helpers;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityCollection\CacheEntityCollectionStoreTest
+ */
 class CacheEntityCollectionStore implements EntityCollectionStoreInterface
 {
     protected const KEY_FEDERATED_ENTITIES = 'federation_entities';

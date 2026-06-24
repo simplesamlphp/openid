@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Algorithms;
 
 use Jose\Component\Signature\Algorithm\SignatureAlgorithm;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Algorithms\SignatureAlgorithmBagTest
+ */
 class SignatureAlgorithmBag
 {
     /** @var \SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum[]  */

@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Codebooks\TxCodeInputModeEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\TxCodeTest
+ */
 class TxCode implements \JsonSerializable
 {
     protected readonly TxCodeInputModeEnum $inputMode;

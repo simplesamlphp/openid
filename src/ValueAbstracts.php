@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID;
 use SimpleSAML\OpenID\ValueAbstracts\Factories\SignatureKeyPairBagFactory;
 use SimpleSAML\OpenID\ValueAbstracts\Factories\SignatureKeyPairFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstractsTest
+ */
 class ValueAbstracts
 {
     protected ?SignatureKeyPairFactory $signatureKeyPairFactory = null;

@@ -51,6 +51,9 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 use SimpleSAML\OpenID\Utils\KeyPairResolver;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\FederationTest
+ */
 class Federation
 {
     protected DateIntervalDecorator $maxCacheDurationDecorator;

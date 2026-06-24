@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Jws;
 use Jose\Component\Signature\JWSVerifier;
 use SimpleSAML\OpenID\Jwks\JwksDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\JwsVerifierDecoratorTest
+ */
 class JwsVerifierDecorator
 {
     public function __construct(

@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Serializers;
 
 use Jose\Component\Signature\Serializer\JWSSerializer;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Serializers\JwsSerializerBagTest
+ */
 class JwsSerializerBag
 {
     /**

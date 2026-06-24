@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\JwtTypesEnum;
 use SimpleSAML\OpenID\Exceptions\TrustMarkDelegationException;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustMarkDelegationTest
+ */
 class TrustMarkDelegation extends ParsedJws
 {
     /**

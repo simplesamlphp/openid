@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Decorators;
 use DateInterval;
 use DateTimeImmutable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Decorators\DateIntervalDecoratorTest
+ */
 class DateIntervalDecorator
 {
     public int $inSeconds;

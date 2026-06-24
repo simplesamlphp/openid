@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SimpleSAML\OpenID\ValueAbstracts;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\KeyPairFilenameConfigTest
+ */
 class KeyPairFilenameConfig implements KeyPairConfigInterface
 {
     /**

@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 /**
  * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-selective-disclosure-jwt
+ * @see \SimpleSAML\Test\OpenID\SdJwt\SdJwtTest
  */
 class SdJwt extends ParsedJws
 {

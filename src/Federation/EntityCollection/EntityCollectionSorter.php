@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\Federation\EntityCollection;
 use SimpleSAML\OpenID\Exceptions\OpenIdException;
 use SimpleSAML\OpenID\Helpers;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityCollection\EntityCollectionSorterTest
+ */
 class EntityCollectionSorter
 {
     public function __construct(

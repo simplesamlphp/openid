@@ -14,6 +14,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\FederationDiscoveryTest
+ */
 class FederationDiscovery
 {
     public function __construct(

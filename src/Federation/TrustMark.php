@@ -16,6 +16,9 @@ use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustMarkTest
+ */
 class TrustMark extends ParsedJws
 {
     public function __construct(

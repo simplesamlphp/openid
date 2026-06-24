@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Codebooks\SdJwtDisclosureType;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\SdJwt\Disclosure;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\SdJwt\Factories\DisclosureFactoryTest
+ */
 class DisclosureFactory
 {
     public function __construct(

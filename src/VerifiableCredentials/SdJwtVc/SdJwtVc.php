@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\SdJwt\Disclosure;
 use SimpleSAML\OpenID\SdJwt\DisclosureBag;
 use SimpleSAML\OpenID\SdJwt\SdJwt;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\SdJwtVc\SdJwtVcTest
+ */
 class SdJwtVc extends SdJwt
 {
     /**

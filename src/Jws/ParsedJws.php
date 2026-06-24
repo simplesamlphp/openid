@@ -17,6 +17,9 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\ParsedJwsTest
+ */
 class ParsedJws
 {
     /**

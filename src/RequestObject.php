@@ -34,6 +34,9 @@ use SimpleSAML\OpenID\RequestObject\RequestUriFetcher;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\RequestObjectTest
+ */
 class RequestObject
 {
     protected DateIntervalDecorator $timestampValidationLeewayDecorator;

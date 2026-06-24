@@ -14,6 +14,9 @@ use SimpleSAML\OpenID\Federation\Claims\TrustMarksClaimBag;
 use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityStatementTest
+ */
 class EntityStatement extends ParsedJws
 {
     /**

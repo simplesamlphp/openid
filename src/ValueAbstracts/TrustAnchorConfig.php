@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\JwksException;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\TrustAnchorConfigTest
+ */
 class TrustAnchorConfig
 {
     /**

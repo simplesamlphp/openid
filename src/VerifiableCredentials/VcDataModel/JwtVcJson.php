@@ -23,6 +23,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceC
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VerifiableCredentialInterface;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel\JwtVcJsonTest
+ */
 class JwtVcJson extends ParsedJws implements VerifiableCredentialInterface
 {
     protected ?VcClaimValue $vcClaimValue = null;

@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcCredentialStat
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimBag;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshServiceClaimValue;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactoryTest
+ */
 class VcDataModel2ClaimFactory extends VcDataModelClaimFactory
 {
     /**

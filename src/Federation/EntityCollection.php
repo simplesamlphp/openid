@@ -9,6 +9,9 @@ use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionFilter;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionPaginator;
 use SimpleSAML\OpenID\Federation\EntityCollection\EntityCollectionSorter;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\EntityCollectionTest
+ */
 class EntityCollection
 {
     /**

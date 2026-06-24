@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\Federation\TrustMark;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\Factories\TrustMarkFactoryTest
+ */
 class TrustMarkFactory extends ParsedJwsFactory
 {
     public function fromToken(

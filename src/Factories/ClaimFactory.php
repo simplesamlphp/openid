@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\ValueAbstracts\JwksClaim;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Factories\VcDataModelClaimFactory;
 use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Factories\VcDataModel2ClaimFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Factories\ClaimFactoryTest
+ */
 class ClaimFactory
 {
     protected FederationClaimFactory $federationClaimFactory;

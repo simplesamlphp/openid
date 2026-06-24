@@ -8,6 +8,9 @@ use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory as ConnectRequestObjec
 use SimpleSAML\OpenID\Federation\Factories\RequestObjectFactory as FederationRequestObjectFactory;
 use SimpleSAML\OpenID\Jar\Factories\RequestObjectFactory as JarRequestObjectFactory;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\RequestObject\RequestObjectFactoriesTest
+ */
 class RequestObjectFactories
 {
     public function __construct(

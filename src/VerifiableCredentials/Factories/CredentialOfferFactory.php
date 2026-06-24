@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferGrant
 use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferGrantsValue;
 use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParameters;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\Factories\CredentialOfferFactoryTest
+ */
 class CredentialOfferFactory
 {
     public function __construct(

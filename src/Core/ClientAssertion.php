@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Jws\ParsedJws;
 
 /**
  * For `private_key_jwt` authentication method.
+ * @see \SimpleSAML\Test\OpenID\Core\ClientAssertionTest
  */
 class ClientAssertion extends ParsedJws
 {

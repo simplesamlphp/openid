@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID;
 use SimpleSAML\OpenID\Did\DidJwkResolver;
 use SimpleSAML\OpenID\Did\DidKeyJwkResolver;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\DidTest
+ */
 class Did
 {
     protected ?DidKeyJwkResolver $didKeyResolver = null;

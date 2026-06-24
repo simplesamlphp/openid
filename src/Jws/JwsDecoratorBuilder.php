@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jws\JwsDecoratorBuilderTest
+ */
 class JwsDecoratorBuilder
 {
     public function __construct(

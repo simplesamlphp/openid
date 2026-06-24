@@ -10,6 +10,7 @@ use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 /**
  * Value object representing a single Trust Mark Claim value with properties 'id' and 'trust_mark'. This object is
  * contained in trust_marks claim array in Entity Statement.
+ * @see \SimpleSAML\Test\OpenID\Federation\Claims\TrustMarksClaimValueTest
  */
 class TrustMarksClaimValue implements JsonSerializable
 {

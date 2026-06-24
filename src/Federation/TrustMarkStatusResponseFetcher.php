@@ -15,6 +15,9 @@ use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\JwsFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Federation\TrustMarkStatusResponseFetcherTest
+ */
 class TrustMarkStatusResponseFetcher extends JwsFetcher
 {
     public function __construct(

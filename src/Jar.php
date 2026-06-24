@@ -19,6 +19,9 @@ use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\JarTest
+ */
 class Jar
 {
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;

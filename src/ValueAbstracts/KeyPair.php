@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\ValueAbstracts;
 
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\ValueAbstracts\KeyPairTest
+ */
 class KeyPair
 {
     public function __construct(

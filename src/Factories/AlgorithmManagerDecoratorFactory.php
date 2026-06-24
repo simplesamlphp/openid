@@ -8,6 +8,9 @@ use Jose\Component\Core\AlgorithmManager;
 use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\SupportedAlgorithms;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Factories\AlgorithmManagerDecoratorFactoryTest
+ */
 class AlgorithmManagerDecoratorFactory
 {
     public function build(SupportedAlgorithms $supportedAlgorithms): AlgorithmManagerDecorator

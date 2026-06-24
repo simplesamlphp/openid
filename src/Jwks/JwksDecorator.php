@@ -9,6 +9,9 @@ use Jose\Component\Core\JWKSet;
 use JsonSerializable;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\Jwks\JwksDecoratorTest
+ */
 class JwksDecorator implements JsonSerializable
 {
     public function __construct(protected readonly JWKSet $jwks)

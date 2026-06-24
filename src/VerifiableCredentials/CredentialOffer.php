@@ -7,6 +7,9 @@ namespace SimpleSAML\OpenID\VerifiableCredentials;
 use SimpleSAML\OpenID\Exceptions\CredentialOfferException;
 use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParameters;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\VerifiableCredentials\CredentialOfferTest
+ */
 class CredentialOffer implements \JsonSerializable
 {
     public function __construct(

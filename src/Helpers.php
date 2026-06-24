@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\Helpers\Random;
 use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Helpers\Url;
 
+/**
+ * @see \SimpleSAML\Test\OpenID\HelpersTest
+ */
 class Helpers
 {
     protected static ?Url $url = null;
