@@ -16,6 +16,7 @@ URLS=(
     "https://openid.net/specs/openid-federation-entity-collection-1_0.html"
     "https://openid.net/specs/openid-connect-core-1_0.html"
     "https://openid.net/specs/openid-connect-discovery-1_0.html"
+    "https://openid.net/specs/openid-connect-registration-1_0.html"
     "https://openid.net/specs/openid-connect-rpinitiated-1_0.html"
     "https://openid.net/specs/openid-connect-frontchannel-1_0.html"
     "https://openid.net/specs/openid-connect-backchannel-1_0.html"
