@@ -91,11 +91,17 @@ enum ClaimsEnum: string
 
     case ClientId = 'client_id';
 
+    case ClientIdIssuedAt = 'client_id_issued_at';
+
     case ClientName = 'client_name';
 
     case ClientRegistrationTypes = 'client_registration_types';
 
     case ClientRegistrationTypesSupported = 'client_registration_types_supported';
+
+    case ClientSecret = 'client_secret';
+
+    case ClientSecretExpiresAt = 'client_secret_expires_at';
 
     case ClientUri = 'client_uri';
 
@@ -338,6 +344,10 @@ enum ClaimsEnum: string
 
     case Refresh_Service = 'refreshService';
 
+    case RegistrationAccessToken = 'registration_access_token';
+
+    case RegistrationClientUri = 'registration_client_uri';
+
     case RegistrationEndpoint = 'registration_endpoint';
 
     case RequestAuthenticationMethodsSupported = 'request_authentication_methods_supported';
@@ -398,6 +408,8 @@ enum ClaimsEnum: string
     case SignedMetadata = 'signed_metadata';
 
     case SoftwareId = 'software_id';
+
+    case SoftwareStatement = 'software_statement';
 
     case SoftwareVersion = 'software_version';
 
