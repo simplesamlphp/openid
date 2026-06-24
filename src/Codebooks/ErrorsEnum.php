@@ -16,6 +16,8 @@ enum ErrorsEnum: string
 
     case InvalidMetadata = 'invalid_metadata';
 
+    case InvalidRedirectUri = 'invalid_redirect_uri';
+
     case InvalidSubject = 'invalid_subject';
 
     case InvalidTrustAnchor = 'invalid_trust_anchor';
