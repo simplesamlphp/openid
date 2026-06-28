@@ -141,6 +141,9 @@ class Federation
     protected ?EntityCollectionFactory $entityCollectionFactory = null;
 
 
+    /**
+     * @param array<string,mixed> $httpClientConfig
+     */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
         protected readonly SupportedSerializers $supportedSerializers = new SupportedSerializers(),
@@ -154,6 +157,7 @@ class Federation
         protected readonly TrustMarkStatusEndpointUsagePolicyEnum $defaultTrustMarkStatusEndpointUsagePolicyEnum = TrustMarkStatusEndpointUsagePolicyEnum::NotUsed,
         int $maxDiscoveryDepth = 10,
         protected ?EntityCollectionStoreInterface $entityCollectionStore = null,
+        array $httpClientConfig = [],
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
@@ -161,7 +165,7 @@ class Federation
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
         $this->maxDiscoveryDepth = max(1, $maxDiscoveryDepth);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
-        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client, $httpClientConfig);
     }
 
 

@@ -12,8 +12,23 @@ use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
  */
 class HttpClientDecoratorFactory
 {
-    public function build(?Client $client = null): HttpClientDecorator
+    /**
+     * @param \GuzzleHttp\Client|null $client A pre-built client. If given, $httpClientConfig is ignored.
+     * @param array<string,mixed> $httpClientConfig Guzzle client options merged over the defaults when no
+     *        $client is supplied. See https://docs.guzzlephp.org/en/stable/request-options.html
+     */
+    public function build(?Client $client = null, array $httpClientConfig = []): HttpClientDecorator
     {
-        return is_null($client) ? new HttpClientDecorator() : new HttpClientDecorator($client);
+        if (!is_null($client)) {
+            return new HttpClientDecorator($client);
+        }
+
+        if ($httpClientConfig === []) {
+            return new HttpClientDecorator();
+        }
+
+        return new HttpClientDecorator(
+            new Client(array_merge(HttpClientDecorator::DEFAULT_HTTP_CLIENT_CONFIG, $httpClientConfig)),
+        );
     }
 }

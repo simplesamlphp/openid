@@ -31,11 +31,36 @@ final class HttpClientDecoratorFactoryTest extends TestCase
     }
 
 
-    public function testCanBuild(): void
+    public function testBuildWithClient(): void
     {
-        $this->assertInstanceOf(
-            HttpClientDecorator::class,
-            $this->sut()->build($this->createStub(\GuzzleHttp\Client::class)),
-        );
+        $client = new \GuzzleHttp\Client();
+        $decorator = $this->sut()->build($client);
+        $this->assertSame($client, $decorator->client);
+    }
+
+
+    public function testBuildWithoutClientAndConfig(): void
+    {
+        $decorator = $this->sut()->build();
+        $this->assertInstanceOf(HttpClientDecorator::class, $decorator);
+        $this->assertNotEmpty($decorator->client->getConfig('allow_redirects'));
+    }
+
+
+    public function testBuildWithConfig(): void
+    {
+        $config = ['timeout' => 10.0, 'connect_timeout' => 5.0];
+        $decorator = $this->sut()->build(null, $config);
+
+        $this->assertEqualsWithDelta(10.0, $decorator->client->getConfig('timeout'), PHP_FLOAT_EPSILON);
+        $this->assertEqualsWithDelta(5.0, $decorator->client->getConfig('connect_timeout'), PHP_FLOAT_EPSILON);
+        $this->assertNotEmpty($decorator->client->getConfig('allow_redirects'));
+    }
+
+
+    public function testBuildWithConfigOverridingDefaults(): void
+    {
+        $decorator = $this->sut()->build(null, ['allow_redirects' => false]);
+        $this->assertFalse($decorator->client->getConfig('allow_redirects'));
     }
 }

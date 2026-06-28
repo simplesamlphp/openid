@@ -84,6 +84,9 @@ class RequestObject
     protected ?Helpers $helpers = null;
 
 
+    /**
+     * @param array<string,mixed> $httpClientConfig
+     */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
             new SignatureAlgorithmBag(
@@ -98,10 +101,11 @@ class RequestObject
         protected ?RequestUriFetcher $requestUriFetcher = null,
         ?Client $client = null,
         ?CacheInterface $cache = null,
+        array $httpClientConfig = [],
     ) {
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
-        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client, $httpClientConfig);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
     }
 
