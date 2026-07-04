@@ -62,6 +62,8 @@ enum ClaimsEnum: string
     // Authorized party
     case Azp = 'azp';
 
+    case BackChannelLogoutSessionRequired = 'backchannel_logout_session_required';
+
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
 
     case BackChannelLogoutSupported = 'backchannel_logout_supported';

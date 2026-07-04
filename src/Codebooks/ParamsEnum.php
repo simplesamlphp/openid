@@ -59,6 +59,8 @@ enum ParamsEnum: string
 
     case LoginHint = 'login_hint';
 
+    case LogoutHint = 'logout_hint';
+
     case MaxAge = 'max_age';
 
     case Nonce = 'nonce';
