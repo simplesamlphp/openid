@@ -106,7 +106,6 @@ class EntityCollection
      *    trust_mark_type?: string[],
      *    query?: string,
      *  } $criteria
-     * @return $this
      */
     public function filter(array $criteria): static
     {
@@ -119,7 +118,6 @@ class EntityCollection
     /**
      * @param non-empty-array<int, non-empty-string[]> $claimPaths
      * @param 'asc'|'desc' $sortOrder
-     * @return $this
      */
     public function sort(array $claimPaths, string $sortOrder): static
     {

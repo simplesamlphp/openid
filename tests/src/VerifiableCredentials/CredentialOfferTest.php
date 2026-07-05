@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParam
 #[\PHPUnit\Framework\Attributes\CoversClass(CredentialOffer::class)]
 final class CredentialOfferTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\CredentialOffer\CredentialOfferParameters
+     */
     protected \PHPUnit\Framework\MockObject\Stub $credentialOfferParametersMock;
 
     protected string $uri = 'https://example.com/credential-offer';

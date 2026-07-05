@@ -46,12 +46,21 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(DateIntervalDecorator::class)]
 final class JwsTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedAlgorithms
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedSerializers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedSerializerMock;
 
     protected DateInterval $timestampValidationLeeway;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
 

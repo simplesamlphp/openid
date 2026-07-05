@@ -22,18 +22,39 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 #[UsesClass(ParsedJws::class)]
 final class ParsedJwsFactoryTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jws\JwsDecoratorBuilder
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsDecoratorBuilderMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jws\JwsVerifierDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
 

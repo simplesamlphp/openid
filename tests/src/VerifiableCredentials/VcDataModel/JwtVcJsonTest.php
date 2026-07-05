@@ -39,12 +39,24 @@ final class JwtVcJsonTest extends TestCase
 
     protected MockObject $jwsDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jws\JwsVerifierDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
@@ -53,6 +65,9 @@ final class JwtVcJsonTest extends TestCase
 
     protected MockObject $dateTimeHelperMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $expiredPayload = [

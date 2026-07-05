@@ -12,8 +12,14 @@ use SimpleSAML\OpenID\ValueAbstracts\KeyPair;
 #[CoversClass(KeyPair::class)]
 final class KeyPairTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwk\JwkDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $privateKeyMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwk\JwkDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $publicKeyMock;
 
 

@@ -34,10 +34,19 @@ final class EntityStatementTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;

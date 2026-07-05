@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue
 #[\PHPUnit\Framework\Attributes\CoversClass(VcProofClaimValue::class)]
 final class VcProofClaimValueTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $typeClaimValueMock;
 
     protected array $otherClaims = [];

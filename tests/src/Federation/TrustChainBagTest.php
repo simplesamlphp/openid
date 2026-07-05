@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\Federation\TrustChainBag;
 #[CoversClass(TrustChainBag::class)]
 final class TrustChainBagTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Federation\TrustChain
+     */
     protected \PHPUnit\Framework\MockObject\Stub $trustChainMock;
 
 

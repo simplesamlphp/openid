@@ -20,8 +20,14 @@ use SimpleSAML\OpenID\Helpers;
 #[CoversClass(TrustChain::class)]
 final class TrustChainTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected MockObject $metadataPolicyResolverMock;

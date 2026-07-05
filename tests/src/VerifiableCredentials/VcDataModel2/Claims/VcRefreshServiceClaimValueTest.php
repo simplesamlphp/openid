@@ -13,6 +13,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel2\Claims\VcRefreshService
 #[CoversClass(VcRefreshServiceClaimValue::class)]
 final class VcRefreshServiceClaimValueTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     private Stub $typeClaimValue;
 
     private array $otherClaims = [];

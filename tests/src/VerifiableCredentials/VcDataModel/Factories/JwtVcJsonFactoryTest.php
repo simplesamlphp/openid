@@ -34,18 +34,33 @@ final class JwtVcJsonFactoryTest extends TestCase
 
     protected MockObject $jwsDecoratorBuilderMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jws\JwsVerifierDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
 
     protected MockObject $jsonHelperMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     // https://www.w3.org/TR/vc-data-model/#example-jwt-header-of-a-jwt-based-verifiable-credential-using-jws-as-a-proof-non-normative

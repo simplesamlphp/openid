@@ -24,6 +24,9 @@ final class JwsDecoratorBuilderTest extends TestCase
 
     protected MockObject $jwsBuilderMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
 

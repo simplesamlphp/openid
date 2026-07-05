@@ -23,6 +23,9 @@ final class KeyPairResolverTest extends TestCase
 {
     private MockObject $helpersMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     private \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     private MockObject $signatureKeyPairBagMock;

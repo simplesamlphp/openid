@@ -35,6 +35,9 @@ final class VcDataModel2ClaimFactoryTest extends TestCase
 {
     protected Helpers $helpers;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
 

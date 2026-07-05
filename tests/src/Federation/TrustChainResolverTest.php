@@ -26,6 +26,9 @@ final class TrustChainResolverTest extends TestCase
 
     protected MockObject $trustChainBagFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $maxCacheDurationDecorator;
 
     protected MockObject $cacheDecoratorMock;

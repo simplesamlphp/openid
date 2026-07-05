@@ -48,12 +48,21 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(LogoutTokenFactory::class)]
 final class CoreTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedAlgorithms
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedSerializers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedSerializerMock;
 
     protected DateInterval $timestampValidationLeeway;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
 

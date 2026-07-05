@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\Jws\JwsDecorator;
 #[CoversClass(JwsDecorator::class)]
 final class JwsDecoratorTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Jose\Component\Signature\JWS
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsMock;
 
 

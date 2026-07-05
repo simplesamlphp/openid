@@ -29,10 +29,16 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
     protected MockObject $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayMock;
 
     protected MockObject $helpersMock;
@@ -45,6 +51,9 @@ final class ParsedJwsTest extends TestCase
 
     protected MockObject $arrHelperMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $sampleHeader = [

@@ -33,10 +33,19 @@ final class TrustMarkFetcherTest extends TestCase
 
     protected MockObject $artifactFetcherMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $maxCacheDurationMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected MockObject $responseMock;

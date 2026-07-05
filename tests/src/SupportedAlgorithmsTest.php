@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\SupportedAlgorithms;
 #[CoversClass(SupportedAlgorithms::class)]
 final class SupportedAlgorithmsTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $signatureAlgorithmBagMock;
 
 

@@ -56,16 +56,31 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(ClaimFactory::class)]
 final class JwksTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedAlgorithms
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedSerializers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedSerializersMock;
 
     protected DateInterval $maxCacheDuration;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\SimpleCache\CacheInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $cacheMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\GuzzleHttp\Client
+     */
     protected \PHPUnit\Framework\MockObject\Stub $httpClientMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
     protected DateInterval $timestampValidationLeeway;

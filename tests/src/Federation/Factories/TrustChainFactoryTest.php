@@ -24,12 +24,24 @@ final class TrustChainFactoryTest extends TestCase
 {
     protected MockObject $entityStatementFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $timestampValidationLeewayMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Federation\MetadataPolicyResolver
+     */
     protected \PHPUnit\Framework\MockObject\Stub $metadataPolicyResolverMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Federation\MetadataPolicyApplicator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $metadataPolicyApplicatorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
 

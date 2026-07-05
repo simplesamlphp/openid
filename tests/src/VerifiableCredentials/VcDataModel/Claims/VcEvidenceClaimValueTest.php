@@ -11,6 +11,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimVa
 #[\PHPUnit\Framework\Attributes\CoversClass(VcEvidenceClaimValue::class)]
 final class VcEvidenceClaimValueTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $typeClaimValue;
 
 

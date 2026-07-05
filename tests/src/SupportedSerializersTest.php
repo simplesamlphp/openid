@@ -12,6 +12,9 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[CoversClass(SupportedSerializers::class)]
 final class SupportedSerializersTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerBagMock;
 
 

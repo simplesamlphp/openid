@@ -29,6 +29,9 @@ final class JwsFetcherTest extends TestCase
 
     protected MockObject $maxCacheDurationMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected MockObject $loggerMock;

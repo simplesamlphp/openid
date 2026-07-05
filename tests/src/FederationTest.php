@@ -97,8 +97,14 @@ use SimpleSAML\OpenID\Utils\KeyPairResolver;
 #[UsesClass(SubordinateListingFetcher::class)]
 final class FederationTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedAlgorithms
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedAlgorithmsMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SupportedSerializers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $supportedSerializersMock;
 
     protected DateInterval $maxCacheDuration;
@@ -107,10 +113,19 @@ final class FederationTest extends TestCase
 
     protected int $maxTrustChainDepth;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\SimpleCache\CacheInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $cacheMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\Psr\Log\LoggerInterface
+     */
     protected \PHPUnit\Framework\MockObject\Stub $loggerMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\GuzzleHttp\Client
+     */
     protected \PHPUnit\Framework\MockObject\Stub $clientMock;
 
 

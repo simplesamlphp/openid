@@ -20,30 +20,66 @@ use SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaim
 #[\PHPUnit\Framework\Attributes\CoversClass(VcClaimValue::class)]
 final class VcClaimValueTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcAtContextClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $vcAtContextClaimValueMock;
 
     protected string $id = 'id';
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $typeClaimValueMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSubjectClaimBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $vcCredentialSubjectClaimBagMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcIssuerClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $issuerClaimValueMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\DateTimeImmutable
+     */
     protected \PHPUnit\Framework\MockObject\Stub $issuanceDateMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcProofClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $proofClaimValueMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\DateTimeImmutable
+     */
     protected \PHPUnit\Framework\MockObject\Stub $expirationDateMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialStatusClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $credentialStatusClaimValueMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcCredentialSchemaClaimBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $credentialSchemaClaimBagMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcRefreshServiceClaimBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $refreshServiceClaimBagMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcTermsOfUseClaimBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $termsOfUserClaimBagMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\VcEvidenceClaimBag
+     */
     protected \PHPUnit\Framework\MockObject\Stub $evidenceClaimBagMock;
 
 

@@ -29,12 +29,24 @@ final class SdJwtVcTest extends TestCase
 
     protected MockObject $jwsDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jws\JwsVerifierDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsVerifierDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksDecoratorFactoryMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwsSerializerManagerDecoratorMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Decorators\DateIntervalDecorator
+     */
     protected \PHPUnit\Framework\MockObject\Stub $dateIntervalDecoratorMock;
 
     protected MockObject $helpersMock;
@@ -43,6 +55,9 @@ final class SdJwtVcTest extends TestCase
 
     protected MockObject $arrHelperMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Factories\ClaimFactory
+     */
     protected \PHPUnit\Framework\MockObject\Stub $claimFactoryMock;
 
     protected array $expiredPayload = [
@@ -82,6 +97,9 @@ final class SdJwtVcTest extends TestCase
 
     protected MockObject $disclosureBagMock;
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\SdJwt\KbJwt
+     */
     protected \PHPUnit\Framework\MockObject\Stub $kbJwtMock;
 
 

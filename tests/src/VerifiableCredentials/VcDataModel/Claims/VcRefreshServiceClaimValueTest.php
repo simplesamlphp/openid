@@ -13,6 +13,9 @@ final class VcRefreshServiceClaimValueTest extends TestCase
 {
     protected string $id = 'id';
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $typeClaimValue;
 
     protected array $otherClaims = [];
@@ -78,7 +81,6 @@ final class VcRefreshServiceClaimValueTest extends TestCase
 
         $this->assertSame($this->id, $sut->getId());
         $this->assertSame($this->id, $sut->getKey('id'));
-        /** @phpstan-ignore method.notFound */
         $this->assertSame($this->typeClaimValue->jsonSerialize(), $sut->getKey('type'));
         $this->assertSame('bar', $sut->getKey('foo'));
     }

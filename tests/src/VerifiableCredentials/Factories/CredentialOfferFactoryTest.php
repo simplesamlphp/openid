@@ -20,6 +20,9 @@ use SimpleSAML\OpenID\VerifiableCredentials\Factories\CredentialOfferFactory;
 #[\PHPUnit\Framework\Attributes\UsesClass(CredentialOfferGrantsValue::class)]
 final class CredentialOfferFactoryTest extends TestCase
 {
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\Helpers
+     */
     protected \PHPUnit\Framework\MockObject\Stub $helpersMock;
 
     protected array $sampleParameters = [

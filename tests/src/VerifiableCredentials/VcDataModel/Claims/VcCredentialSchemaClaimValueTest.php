@@ -13,6 +13,9 @@ final class VcCredentialSchemaClaimValueTest extends TestCase
 {
     protected string $id = 'id';
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\VerifiableCredentials\VcDataModel\Claims\TypeClaimValue
+     */
     protected \PHPUnit\Framework\MockObject\Stub $typeClaimValueMock;
 
 

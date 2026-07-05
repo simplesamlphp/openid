@@ -16,6 +16,9 @@ final class TrustMarkOwnersClaimValueTest extends TestCase
 
     protected string $subject = 'subject';
 
+    /**
+     * @var \PHPUnit\Framework\MockObject\Stub&\SimpleSAML\OpenID\ValueAbstracts\JwksClaim
+     */
     protected \PHPUnit\Framework\MockObject\Stub $jwksClaimMock;
 
     protected array $otherClaims;
