@@ -27,7 +27,7 @@
         "ext-mbstring": "*",
         "ext-hash": "*",
 
-        "guzzlehttp/guzzle": "^7.8",
+        "guzzlehttp/guzzle": "^7.8 || ^8.0",
         "psr/http-client": "^1",
         "psr/http-message": "^2",
         "psr/log": "^3",
