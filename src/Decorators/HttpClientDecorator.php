@@ -16,7 +16,12 @@ use Throwable;
  */
 class HttpClientDecorator
 {
-    public const DEFAULT_HTTP_CLIENT_CONFIG = [RequestOptions::ALLOW_REDIRECTS => true,];
+    public const DEFAULT_HTTP_CLIENT_CONFIG = [
+        RequestOptions::ALLOW_REDIRECTS => true,
+        RequestOptions::CONNECT_TIMEOUT => 3,
+        RequestOptions::TIMEOUT => 10,
+        RequestOptions::HTTP_ERRORS => true,
+    ];
 
 
     public function __construct(public readonly Client $client = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG))
@@ -34,6 +39,7 @@ class HttpClientDecorator
         array $options = [],
     ): ResponseInterface {
         try {
+            /** @phpstan-ignore argument.type */
             $response = $this->client->request($httpMethodsEnum->value, $uri, $options);
         } catch (Throwable $throwable) {
             $message = sprintf(

@@ -28,6 +28,7 @@ class HttpClientDecoratorFactory
         }
 
         return new HttpClientDecorator(
+            /** @phpstan-ignore argument.type */
             new Client(array_merge(HttpClientDecorator::DEFAULT_HTTP_CLIENT_CONFIG, $httpClientConfig)),
         );
     }
