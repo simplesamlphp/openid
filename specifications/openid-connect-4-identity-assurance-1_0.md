@@ -6,9 +6,8 @@ author:
 - Alberto Pulido
 - Kai Lehmann
 - Kosuke Koiwai
-description:  This document defines an extension of OpenID Connect protocol for providing relying parties with claims about end-users that have a certain level of verification and/or additional metadata about the claim or the process of verification for access control, entitlement decisions or input to further verification processes.
 generator: xml2rfc 3.16.0
-ietf.draft: openid-connect-4-identity-assurance-1_0-16
+ietf.draft: openid-connect-4-identity-assurance-1_0-17
 keyword:
 - security
 - openid
@@ -16,19 +15,19 @@ keyword:
 - ekyc
 lang: en
 scripts: Common,Latin
-title: OpenID Connect for Identity Assurance 1.0
+title: OpenID Connect for Identity Assurance 1.0 incorporating errata set 1
 viewport: initial-scale=1.0
 ---
 
-                        openid-connect-4-identity-assurance-1_0   October 2024
-  --------------------- ----------------------------------------- --------------
+                        openid-connect-4-identity-assurance-1_0   July 2026
+  --------------------- ----------------------------------------- -----------
   Lodderstedt, et al.   Standards Track                           \[Page\]
 
 Workgroup:
 :   eKYC-IDA
 
 Published:
-:   1 October 2024
+:   1 July 2026
 
 Status:
 :   Final
@@ -59,11 +58,7 @@ Authors:
 
     KDDI Corporation
 
-# OpenID Connect for Identity Assurance 1.0
-
-## [Abstract](#abstract)
-
-This document defines an extension of OpenID Connect protocol for providing relying parties with claims about end-users that have a certain level of verification and/or additional metadata about the claim or the process of verification for access control, entitlement decisions or input to further verification processes.[¶](#section-abstract-1)
+# OpenID Connect for Identity Assurance 1.0 incorporating errata set 1
 
 ## [Foreword](#name-foreword)
 
@@ -82,16 +77,6 @@ The `acr` claim, as defined in section 2 of the OpenID Connect specification \[[
 For example, the assurance an OP typically will be able to give for an e-mail address will be "self-asserted" or \"verified\". The family name of an end-user, in contrast, might have been verified in accordance with the respective anti-money laundering law by showing an ID card to a trained employee of the OP operator.[¶](#section-note.2-4)
 
 Identity assurance requires a way to convey assurance data along with and coupled to the respective claims about the end-user. This document defines a suitable representation and mechanisms the RP will utilize to request verified claims about an end-user along with assurance data and for the OP to represent these verified claims and accompanying assurance data.[¶](#section-note.2-5)
-
-## [Warning](#name-warning)
-
-This document is not an OIDF International Standard. It is distributed for review and comment. It is subject to change without notice and may not be referred to as an International Standard.[¶](#section-note.3-1)
-
-Recipients of this draft are invited to submit, with their comments, notification of any relevant patent rights of which they are aware and to provide supporting documentation.[¶](#section-note.3-2)
-
-## [Notational conventions](#name-notational-conventions)
-
-The keywords \"shall\", \"shall not\", \"should\", \"should not\", \"may\", and \"can\" in this document are to be interpreted as described in ISO Directive Part 2 \[[ISODIR2](#ISODIR2)\]. These keywords are not used as dictionary terms such that any occurrence of them shall be interpreted as keywords and are not to be interpreted with their natural language meanings.[¶](#section-note.4-1)
 
 [▲](#)
 
@@ -181,55 +166,57 @@ The keywords \"shall\", \"shall not\", \"should\", \"should not\", \"may\", and 
 
     -   [A.1](#appendix-A.1).  [Media type registration](#name-media-type-registration)
 
--   [Appendix B](#appendix-B).  [Example requests](#name-example-requests)
+-   [Appendix B](#appendix-B).  [Annex A (Informative) Acknowledgement](#name-annex-a-informative-acknowl)
 
-    -   [B.1](#appendix-B.1).  [Verification of claims by a document](#name-verification-of-claims-by-a)
+-   [Appendix C](#appendix-C).  [Example requests](#name-example-requests)
 
-    -   [B.2](#appendix-B.2).  [Verification of claims by trust framework and evidence types](#name-verification-of-claims-by-t)
+    -   [C.1](#appendix-C.1).  [Verification of claims by a document](#name-verification-of-claims-by-a)
 
-    -   [B.3](#appendix-B.3).  [Verification of claims by trust framework and check method](#name-verification-of-claims-by-tr)
+    -   [C.2](#appendix-C.2).  [Verification of claims by trust framework and evidence types](#name-verification-of-claims-by-t)
 
-    -   [B.4](#appendix-B.4).  [Verification of claims by electronic signature](#name-verification-of-claims-by-e)
+    -   [C.3](#appendix-C.3).  [Verification of claims by trust framework and check method](#name-verification-of-claims-by-tr)
 
--   [Appendix C](#appendix-C).  [Example responses](#name-example-responses)
+    -   [C.4](#appendix-C.4).  [Verification of claims by electronic signature](#name-verification-of-claims-by-e)
 
-    -   [C.1](#appendix-C.1).  [Document](#name-document)
+-   [Appendix D](#appendix-D).  [Example responses](#name-example-responses)
 
-    -   [C.2](#appendix-C.2).  [Document and verifier details](#name-document-and-verifier-detai)
+    -   [D.1](#appendix-D.1).  [Document](#name-document)
 
-    -   [C.3](#appendix-C.3).  [Evidence with all assurance details](#name-evidence-with-all-assurance)
+    -   [D.2](#appendix-D.2).  [Document and verifier details](#name-document-and-verifier-detai)
 
-    -   [C.4](#appendix-C.4).  [Notified eID system (eIDAS)](#name-notified-eid-system-eidas)
+    -   [D.3](#appendix-D.3).  [Evidence with all assurance details](#name-evidence-with-all-assurance)
 
-    -   [C.5](#appendix-C.5).  [Electronic_record](#name-electronic_record)
+    -   [D.4](#appendix-D.4).  [Notified eID system (eIDAS)](#name-notified-eid-system-eidas)
 
-    -   [C.6](#appendix-C.6).  [Vouch](#name-vouch)
+    -   [D.5](#appendix-D.5).  [Electronic_record](#name-electronic_record)
 
-    -   [C.7](#appendix-C.7).  [Multiple verified claims](#name-multiple-verified-claims)
+    -   [D.6](#appendix-D.6).  [Vouch](#name-vouch)
 
-    -   [C.8](#appendix-C.8).  [Claims provided by the OP and external sources](#name-claims-provided-by-the-op-a)
+    -   [D.7](#appendix-D.7).  [Multiple verified claims](#name-multiple-verified-claims)
 
-    -   [C.9](#appendix-C.9).  [Self-Issued OpenID provider and external claims](#name-self-issued-openid-provider)
+    -   [D.8](#appendix-D.8).  [Claims provided by the OP and external sources](#name-claims-provided-by-the-op-a)
 
--   [Appendix D](#appendix-D).  [Example requests and responses](#name-example-requests-and-respon)
+    -   [D.9](#appendix-D.9).  [Self-Issued OpenID provider and external claims](#name-self-issued-openid-provider)
 
-    -   [D.1](#appendix-D.1).  [verified claims in UserInfo response](#name-verified-claims-in-userinfo)
+-   [Appendix E](#appendix-E).  [Example requests and responses](#name-example-requests-and-respon)
 
-        -   [D.1.1](#appendix-D.1.1).  [Request](#name-request)
+    -   [E.1](#appendix-E.1).  [verified claims in UserInfo response](#name-verified-claims-in-userinfo)
 
-        -   [D.1.2](#appendix-D.1.2).  [Response](#name-response)
+        -   [E.1.1](#appendix-E.1.1).  [Request](#name-request)
 
-    -   [D.2](#appendix-D.2).  [verified claims in ID Tokens](#name-verified-claims-in-id-token)
+        -   [E.1.2](#appendix-E.1.2).  [Response](#name-response)
 
-        -   [D.2.1](#appendix-D.2.1).  [Request](#name-request-2)
+    -   [E.2](#appendix-E.2).  [verified claims in ID Tokens](#name-verified-claims-in-id-token)
 
-        -   [D.2.2](#appendix-D.2.2).  [Response](#name-response-2)
+        -   [E.2.1](#appendix-E.2.1).  [Request](#name-request-2)
 
--   [Appendix E](#appendix-E).  [Acknowledgements](#name-acknowledgements)
+        -   [E.2.2](#appendix-E.2.2).  [Response](#name-response-2)
 
--   [Appendix F](#appendix-F).  [Notices](#name-notices)
+-   [Appendix F](#appendix-F).  [Acknowledgements](#name-acknowledgements)
 
--   [](#appendix-G)[Authors\' Addresses](#name-authors-addresses)
+-   [Appendix G](#appendix-G).  [Notices](#name-notices)
+
+-   [](#appendix-H)[Authors\' Addresses](#name-authors-addresses)
 
 ## [1.](#section-1) [Scope](#name-scope)
 
@@ -447,7 +434,13 @@ Therefore, the RP shall set fields one step deeper into the structure if it want
                 "type": {
                   "value": "document"
                 },
-                "method": null,
+                "check_details": [
+                  {
+                    "check_method": {
+                      "value": "pipp"
+                    }
+                  }
+                ],
                 "document_details": {
                   "type": null
                 }
@@ -465,7 +458,7 @@ Therefore, the RP shall set fields one step deeper into the structure if it want
 
 [¶](#section-5.4-7)
 
-The example also requests the OP to add the respective `method` and the `document` elements (including data about the document type), for every evidence array member, to the resulting `verified_claims` claim.[¶](#section-5.4-8)
+The example also requests the OP to add the respective `check_method` and the `document_details` elements (including data about the document type), for every evidence array member, to the resulting `verified_claims` claim.[¶](#section-5.4-8)
 
 A single entry in the `evidence` array represents a filter over elements of a certain evidence type. The RP therefore shall specify this type by including the `type` field including a suitable `value` sub-element value. The `values` sub-element shall not be used for the `evidence/type` field.[¶](#section-5.4-9)
 
@@ -473,9 +466,9 @@ If multiple entries are present in `evidence`, these filters are linked by a log
 
 `check_details` is an array of the processes that have been applied to the `evidence`. An RP can filter `check_details` by requesting a particular value for one or more of its sub-elements. If multiple entries for the same sub-element are present this acts as a logical OR between them.[¶](#section-5.4-11)
 
-`assurance_details` is an array representing how the `evidence` and `check_details` fulfill the requirements of the `trust_framework`. RP should only request this where they need to know this information. Where `assurance_details` has been requested by an RP the OP shall return the `assurance_details` element along with all sub-elements that it has. If an RP wants to filter what types of `evidence` and `check_methods` they shall use those methods to do so, e.g. requesting an `assurance_type` should have no filtering effect.[¶](#section-5.4-12)
+`assurance_details` is an array representing how the `evidence` and `check_details` fulfill the requirements of the `trust_framework`. RP should only request this where they need to know this information. Where `assurance_details` has been requested by an RP the OP shall return the `assurance_details` element along with all sub-elements that it has. If an RP wants to filter what types of `evidence` and `check_details` they shall specify those to do so.[¶](#section-5.4-12)
 
-The RP can also request certain data within the `document` element to be present. This again follows the syntax rules used above:[¶](#section-5.4-13)
+The RP can also request certain data within the `document_details` element to be present. This again follows the syntax rules used above:[¶](#section-5.4-13)
 
     {
       "userinfo": {
@@ -488,7 +481,11 @@ The RP can also request certain data within the `document` element to be present
                 "type": {
                   "value": "document"
                 },
-                "method": null,
+                "check_details": [
+                  {
+                  "check_method": null
+                  }
+                ],
                 "document_details": {
                   "type": null,
                   "issuer": {
@@ -516,7 +513,7 @@ The RP can also request certain data within the `document` element to be present
 
 #### [5.5.1.](#section-5.5.1) [Value/values](#name-value-values)
 
-The RP can limit the possible values of the elements `trust_framework`, `evidence/method`, `evidence/check_details`, and `evidence/document/type` by utilizing the `value` or `values` fields and the element `evidence/type` by utilizing the `value` field.[¶](#section-5.5.1-1)
+The RP can limit the possible values of the elements `trust_framework`, `evidence/check_details`, and `evidence/document_details/type` by utilizing the `value` or `values` fields and the element `evidence/type` by utilizing the `value` field.[¶](#section-5.5.1-1)
 
 Note: Examples on the usage of a restriction on `evidence/type` were given in the previous section.[¶](#section-5.5.1-2)
 
@@ -543,7 +540,7 @@ The following example shows how an RP requests claims either complying with trus
 
 [¶](#section-5.5.1-4)
 
-The following example shows that the RP wants to obtain an attestation based on the German anti-money laundering law (trust framework `de_aml`) and limited to end-users who were identified in a bank branch in person (physical in person proofing - method `pipp`) using either an `idcard` or a `passport`.[¶](#section-5.5.1-5)
+The following example shows that the RP wants to obtain an attestation based on the German anti-money laundering law (trust framework `de_aml`) and limited to end-users who were identified in person (physical in person proofing - `"check_method": "pipp"`) using either an `idcard` or a `passport`.[¶](#section-5.5.1-5)
 
     {
       "userinfo": {
@@ -557,10 +554,14 @@ The following example shows that the RP wants to obtain an attestation based on 
                 "type": {
                   "value": "document"
                 },
-                "method": {
-                  "value": "pipp"
-                },
-                "document": {
+                "check_details": [
+                  {
+                    "check_method": {
+                      "value": "pipp"
+                    }
+                  }
+                ],
+                "document_details": {
                   "type": {
                     "values": [
                       "idcard",
@@ -618,7 +619,7 @@ The OP should try to fulfill this requirement. If the verification data of the e
 
 ### [5.6.](#section-5.6) [Requesting claims sets with different verification requirements](#name-requesting-claims-sets-with)
 
-It is also possible to request different trust frameworks, assurance levels, and methods for different claim sets. This requires the RP to send an array of `verified_claims` objects instead of passing a single object.[¶](#section-5.6-1)
+It is also possible to request different trust frameworks, assurance levels, and other elements of the structure for different claim sets. This requires the RP to send an array of `verified_claims` objects instead of passing a single object.[¶](#section-5.6-1)
 
 The following example illustrates this functionality.[¶](#section-5.6-2)
 
@@ -923,7 +924,7 @@ The next example shows an ID Token containing `verified_claims` from two differe
 
 Claim sources should sign the assertions containing `verified_claims` in order to demonstrate authenticity and provide for non-repudiation. RP should determine the key material used for validation of the signed assertions is via the claim source\'s public keys. These keys should be available in the JSON web key set available in the `jwks_uri` metadata value in the `openid-configuration` metadata document. This document can be discovered using the `iss` claim of the particular JWT.[¶](#section-6.1-17)
 
-The OP can combine aggregated and distributed claims with `verified_claims` provided by itself (see [Appendix C.8](#op_attested_and_external_claims)).[¶](#section-6.1-18)
+The OP can combine aggregated and distributed claims with `verified_claims` provided by itself (see [Appendix D.8](#op_attested_and_external_claims)).[¶](#section-6.1-18)
 
 If `verified_claims` elements are contained in multiple places of a response, e.g., in the ID Token and an embedded aggregated claim, the RP shall preserve the claims source as context of the particular `verified_claims` element.[¶](#section-6.1-19)
 
@@ -1013,13 +1014,11 @@ The OP advertises its capabilities with respect to verified claims in its openid
 
 `documents_supported`: Required when `evidence_supported` contains \"document\". JSON array containing all identity document types utilized by the OP for identity verification. This array shall have at least one member.[¶](#section-8-5)
 
-`documents_methods_supported`: Optional. JSON array containing the verification methods the OP supports for evidences of type \"document\" (see \[[predefined_values_page](#predefined_values_page)\]). When present this array shall have at least one member.[¶](#section-8-6)
+`documents_check_methods_supported`: Optional. JSON array containing the \"check methods\" the OP supports for evidences of type \"document\" (see \[[predefined_values_page](#predefined_values_page)\]). When present this array shall have at least one member.[¶](#section-8-6)
 
-`documents_check_methods_supported`: Optional. JSON array containing the check methods the OP supports for evidences of type \"document\" (see \[[predefined_values_page](#predefined_values_page)\]). When present this array shall have at least one member.[¶](#section-8-7)
+`electronic_records_supported`: Required when `evidence_supported` contains \"electronic_record\". JSON array containing all electronic record types the OP supports (see \[[predefined_values_page](#predefined_values_page)\]). When present this array shall have at least one member.[¶](#section-8-7)
 
-`electronic_records_supported`: Required when `evidence_supported` contains \"electronic_record\". JSON array containing all electronic record types the OP supports (see \[[predefined_values_page](#predefined_values_page)\]). When present this array shall have at least one member.[¶](#section-8-8)
-
-This is an example openid-configuration snippet:[¶](#section-8-9)
+This is an example openid-configuration snippet:[¶](#section-8-8)
 
     {
     ...
@@ -1056,11 +1055,11 @@ This is an example openid-configuration snippet:[¶](#section-8-9)
     ...
     }
 
-[¶](#section-8-10)
+[¶](#section-8-9)
 
-If the OP supports the `claims` parameter as defined in section 5.5 of the OpenID Connect specification \[[OpenID](#OpenID)\], the OP shall advertise this in its OP metadata using the `claims_parameter_supported` element.[¶](#section-8-11)
+If the OP supports the `claims` parameter as defined in section 5.5 of the OpenID Connect specification \[[OpenID](#OpenID)\], the OP shall advertise this in its OP metadata using the `claims_parameter_supported` element.[¶](#section-8-10)
 
-If the OP supports distributed and/or aggregated claim types, as defined in section 5.6.2 of the OpenID Connect specification \[[OpenID](#OpenID)\], in `verified_claims`, the OP shall advertise this in its metadata using the `claim_types_supported` element.[¶](#section-8-12)
+If the OP supports distributed and/or aggregated claim types, as defined in section 5.6.2 of the OpenID Connect specification \[[OpenID](#OpenID)\], in `verified_claims`, the OP shall advertise this in its metadata using the `claim_types_supported` element.[¶](#section-8-11)
 
 ## [9.](#section-9) [Privacy consideration](#name-privacy-consideration)
 
@@ -1095,7 +1094,7 @@ To achieve the full security and interoperability benefits, it is important the 
 
 ## [12.](#section-12) [Predefined values](#name-predefined-values)
 
-This document focuses on the technical mechanisms to convey verified claims and thus does not define any identifiers for trust frameworks, documents, methods, check methods. This is left to adopters of the technical specification, e.g., implementers, identity schemes, or jurisdictions.[¶](#section-12-1)
+This document focuses on the technical mechanisms to convey verified claims and thus does not define any identifiers for elements such as trust frameworks, documents, check methods. This is left to adopters of the technical specification, e.g., implementers, identity schemes, or jurisdictions.[¶](#section-12-1)
 
 Each party defining such identifiers shall ensure the collision resistance of these identifiers. This is achieved by including a domain name under the control of this party into the identifier name, e.g., `https://mycompany.com/identifiers/cool_check_method`.[¶](#section-12-2)
 
@@ -1104,23 +1103,19 @@ The eKYC and Identity Assurance Working Group maintains a wiki page \[[predefine
 ## [13.](#section-13) [Normative References](#name-normative-references-2)
 
 \[IDA-verified-claims\]
-:   Lodderstedt, T., Fett, D., Haine, M., Pulido, A., Lehmann, K., and K. Koiwai, \"OpenID Identity Assurance Schema Definition\", 9 August 2023, \<<https://openid.net/specs/openid-ida-verified-claims-1_0.html>\>.
-:   
-
-\[ISODIR2\]
-:   ISO/IEC, \"ISO/IEC Directives, Part 2 - Principles and rules for the structure and drafting of ISO and IEC documents\", \<<https://www.iso.org/sites/directives/current/part2/index.xhtml>\>.
+:   Lodderstedt, T., Fett, D., Haine, M., Pulido, A., Lehmann, K., and K. Koiwai, \"OpenID Identity Assurance Schema Definition 1.0\", 1 October 2024, \<<https://openid.net/specs/openid-ida-verified-claims-1_0.html>\>.
 :   
 
 \[OpenID\]
-:   Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, \"OpenID Connect Core 1.0 incorporating errata set 2\", 8 November 2014, \<<https://openid.net/specs/openid-connect-core-1_0.html>\>.
+:   Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, \"OpenID connect core 1.0 incorporating errata set 2\", 15 December 2023, \<<https://openid.net/specs/openid-connect-core-1_0.html>\>.
 :   
 
 \[OpenID-Discovery\]
-:   Sakimura, N., Bradley, J., Jones, M., and E. Jay, \"OpenID Connect Discovery 1.0 incorporating errata set 2\", 8 November 2014, \<<https://openid.net/specs/openid-connect-discovery-1_0.html>\>.
+:   Sakimura, N., Bradley, J., Jones, M., and E. Jay, \"OpenID Connect Discovery 1.0 incorporating errata set 2\", 15 December 2023, \<<https://openid.net/specs/openid-connect-discovery-1_0.html>\>.
 :   
 
 \[OpenID4IDAClaims\]
-:   Lodderstedt, T., Fett, D., Haine, M., Pulido, A., Lehmann, K., and K. Koiwai, \"OpenID Connect for Identity Assurance Claims Registration 1.0\", 16 June 2023, \<<https://openid.net/specs/openid-connect-4-ida-claims-1_0.html>\>.
+:   Lodderstedt, T., Fett, D., Haine, M., Pulido, A., Lehmann, K., and K. Koiwai, \"OpenID Connect for Identity Assurance Claims Registration 1.0\", 1 October 2024, \<<https://openid.net/specs/openid-connect-4-ida-claims-1_0.html>\>.
 :   
 
 \[predefined_values_page\]
@@ -1134,7 +1129,7 @@ The eKYC and Identity Assurance Working Group maintains a wiki page \[[predefine
 :   
 
 \[FAPI-2-SP\]
-:   Fett, D., Tonge, D., and J. Heenan, \"FAPI 2.0 Security Profile - draft\", 3 April 2024, \<<https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html>\>.
+:   Fett, D., Tonge, D., and J. Heenan, \"FAPI 2.0 Security Profile\", 22 February 2025, \<<https://openid.net/specs/fapi-security-profile-2_0-final.html>\>.
 :   
 
 \[IANA.MediaTypes\]
@@ -1154,7 +1149,7 @@ The eKYC and Identity Assurance Working Group maintains a wiki page \[[predefine
 :   
 
 \[verified_claims_request.json\]
-:   OpenID Foundation, \"JSON Schema for requesting verified_claims\", 2020, \<<https://openid.net/wg/ekyc-ida/references/>\>.
+:   OpenID Foundation, \"JSON Schema for requesting verified_claims\", 2020, \<<https://openid.net/schemas/>\>.
 :   
 
 ## [Appendix A.](#appendix-A) [IANA considerations](#name-iana-considerations)
@@ -1173,7 +1168,7 @@ This section registers the `application/provided-claims+jwt` media type \[[RFC20
 
 -   Encoding considerations: binary; An external claims JWT is a JWT; JWT values are encoded as a series of base64url-encoded values (some of which may be the empty string) separated by period (\'.\') characters.[¶](#appendix-A.1-2.5)
 
--   Security considerations: See <https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#name-representing-verified-claim>[¶](#appendix-A.1-2.6)
+-   Security considerations: See <https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html#name-security-considerations>[¶](#appendix-A.1-2.6)
 
 -   Interoperability considerations: n/a[¶](#appendix-A.1-2.7)
 
@@ -1200,11 +1195,55 @@ This section registers the `application/provided-claims+jwt` media type \[[RFC20
 
 -   Provisional registration? No[¶](#appendix-A.1-2.17)
 
-## [Appendix B.](#appendix-B) [Example requests](#name-example-requests)
+## [Appendix B.](#appendix-B) [Annex A (Informative) Acknowledgement](#name-annex-a-informative-acknowl)
 
-This section shows examples of requests for `verified_claims`.[¶](#appendix-B-1)
+The following people at yes.com and partner companies contributed to the concept described in the initial contribution to this document:[¶](#appendix-B-1)
 
-### [B.1.](#appendix-B.1) [Verification of claims by a document](#name-verification-of-claims-by-a)
+-   Karsten Buch[¶](#appendix-B-2.1)
+-   Lukas Stiebig[¶](#appendix-B-2.2)
+-   Sven Manz[¶](#appendix-B-2.3)
+-   Waldemar Zimpfer[¶](#appendix-B-2.4)
+-   Willi Wiedergold[¶](#appendix-B-2.5)
+-   Fabian Hoffman[¶](#appendix-B-2.6)
+-   Daniel Keijsers[¶](#appendix-B-2.7)
+-   Ralf Wagner[¶](#appendix-B-2.8)
+-   Sebastian Ebling[¶](#appendix-B-2.9)
+-   Peter Eisenhofer[¶](#appendix-B-2.10)
+
+We would like to thank the following people for their valuable feedback and contributions that helped to evolve this document:[¶](#appendix-B-3)
+
+-   Julian White[¶](#appendix-B-4.1)
+-   Bjorn Hjelm[¶](#appendix-B-4.2)
+-   Stephane Mouy[¶](#appendix-B-4.3)
+-   Joseph Heenan[¶](#appendix-B-4.4)
+-   Vladimir Dzhuvinov[¶](#appendix-B-4.5)
+-   Azusa Kikuchi[¶](#appendix-B-4.6)
+-   Naohiro Fujie[¶](#appendix-B-4.7)
+-   Takahiko Kawasaki[¶](#appendix-B-4.8)
+-   Sebastian Ebling[¶](#appendix-B-4.9)
+-   Marcos Sanz[¶](#appendix-B-4.10)
+-   Tom Jones[¶](#appendix-B-4.11)
+-   Mike Pegman[¶](#appendix-B-4.12)
+-   Michael B. Jones[¶](#appendix-B-4.13)
+-   Jeff Lombardo[¶](#appendix-B-4.14)
+-   Taylor Ongaro[¶](#appendix-B-4.15)
+-   Peter Bainbridge-Clayton[¶](#appendix-B-4.16)
+-   Adrian Field[¶](#appendix-B-4.17)
+-   George Fletcher[¶](#appendix-B-4.18)
+-   Tim Cappalli[¶](#appendix-B-4.19)
+-   Michael Palage[¶](#appendix-B-4.20)
+-   Sascha Preibisch[¶](#appendix-B-4.21)
+-   Giuseppe De Marco[¶](#appendix-B-4.22)
+-   Nick Mothershaw[¶](#appendix-B-4.23)
+-   Hodari McClain[¶](#appendix-B-4.24)
+-   Dima Postnikov[¶](#appendix-B-4.25)
+-   Nat Sakimura[¶](#appendix-B-4.26)
+
+## [Appendix C.](#appendix-C) [Example requests](#name-example-requests)
+
+This section shows examples of requests for `verified_claims`.[¶](#appendix-C-1)
+
+### [C.1.](#appendix-C.1) [Verification of claims by a document](#name-verification-of-claims-by-a)
 
     {
       "userinfo": {
@@ -1217,7 +1256,13 @@ This section shows examples of requests for `verified_claims`.[¶](#appendix-B-1
                 "type": {
                   "value": "document"
                 },
-                "method": null,
+                "check_details": [
+                  {
+                    "check_method": {
+                      "value": "pipp"
+                    }
+                  }
+                ],
                 "document_details": {
                   "type": null
                 }
@@ -1233,13 +1278,13 @@ This section shows examples of requests for `verified_claims`.[¶](#appendix-B-1
       }
     }
 
-[¶](#appendix-B.1-1)
+[¶](#appendix-C.1-1)
 
-Note that, as shown in the above example, this document requires that implementations receiving requests are able to distinguish between JSON objects where a key is not present versus where a key is present with a null value.[¶](#appendix-B.1-2)
+Note that, as shown in the above example, this document requires that implementations receiving requests are able to distinguish between JSON objects where a key is not present versus where a key is present with a null value.[¶](#appendix-C.1-2)
 
-Support for these null value requests is mandatory for identity providers, so implementers are encouraged to test this behaviour early in their development process. In some programming languages many JSON libraries or HTTP frameworks will, at least by default, ignore null values and omit the relevant key when parsing the JSON.[¶](#appendix-B.1-3)
+Support for these null value requests is mandatory for identity providers, so implementers are encouraged to test this behaviour early in their development process. In some programming languages many JSON libraries or HTTP frameworks will, at least by default, ignore null values and omit the relevant key when parsing the JSON.[¶](#appendix-C.1-3)
 
-### [B.2.](#appendix-B.2) [Verification of claims by trust framework and evidence types](#name-verification-of-claims-by-t)
+### [C.2.](#appendix-C.2) [Verification of claims by trust framework and evidence types](#name-verification-of-claims-by-t)
 
     {
       "userinfo": {
@@ -1287,9 +1332,9 @@ Support for these null value requests is mandatory for identity providers, so im
       }
     }
 
-[¶](#appendix-B.2-1)
+[¶](#appendix-C.2-1)
 
-### [B.3.](#appendix-B.3) [Verification of claims by trust framework and check method](#name-verification-of-claims-by-tr)
+### [C.3.](#appendix-C.3) [Verification of claims by trust framework and check method](#name-verification-of-claims-by-tr)
 
     {
       "userinfo": {
@@ -1332,9 +1377,9 @@ Support for these null value requests is mandatory for identity providers, so im
       }
     }
 
-[¶](#appendix-B.3-1)
+[¶](#appendix-C.3-1)
 
-### [B.4.](#appendix-B.4) [Verification of claims by electronic signature](#name-verification-of-claims-by-e)
+### [C.4.](#appendix-C.4) [Verification of claims by electronic signature](#name-verification-of-claims-by-e)
 
     {
       "userinfo": {
@@ -1362,19 +1407,19 @@ Support for these null value requests is mandatory for identity providers, so im
       }
     }
 
-[¶](#appendix-B.4-1)
+[¶](#appendix-C.4-1)
 
-## [Appendix C.](#appendix-C) [Example responses](#name-example-responses)
+## [Appendix D.](#appendix-D) [Example responses](#name-example-responses)
 
-This section shows examples of responses containing `verified_claims`.[¶](#appendix-C-1)
+This section shows examples of responses containing `verified_claims`.[¶](#appendix-D-1)
 
-The first and second subsections show JSON snippets of the general identity assurance case, where the RP is provided with verification evidence for different methods along with the actual claims about the end-user.[¶](#appendix-C-2)
+The first and second subsections show JSON snippets of the general identity assurance case, where the RP is provided with verification evidence for different check methods along with the actual claims about the end-user.[¶](#appendix-D-2)
 
-The third subsection illustrates the possible contents of this object in case of a notified eID system under eIDAS, where the OP does not need to provide evidence of the identity verification process to the RP.[¶](#appendix-C-3)
+The third subsection illustrates the possible contents of this object in case of a notified eID system under eIDAS, where the OP does not need to provide evidence of the identity verification process to the RP.[¶](#appendix-D-3)
 
-Subsequent subsections contain examples for using the `verified_claims` claim on different channels and in combination with other (unverified) claims.[¶](#appendix-C-4)
+Subsequent subsections contain examples for using the `verified_claims` claim on different channels and in combination with other (unverified) claims.[¶](#appendix-D-4)
 
-### [C.1.](#appendix-C.1) [Document](#name-document)
+### [D.1.](#appendix-D.1) [Document](#name-document)
 
     {
       "verified_claims": {
@@ -1412,7 +1457,8 @@ Subsequent subsections contain examples for using the `verified_claims` claim on
                 {
                   "check_method": "vpiruv",
                   "organization": "doc_checker",
-                  "check_id": "DL1-93h506th2f45hf"
+                  "check_id": "DL1-93h506th2f45hf",
+                  "time": "2021-06-06T05:33Z"
                 },
                 {
                   "check_method": "pvp",
@@ -1420,17 +1466,16 @@ Subsequent subsections contain examples for using the `verified_claims` claim on
                   "check_id": "v-93jfk284ugjfj2093"
                 }
               ],
-              "time": "2021-06-06T05:33Z",
               "document_details": {
                 "type": "driving_permit",
                 "document_number": "I1234568",
                 "date_of_issuance": "2019-09-05",
                 "date_of_expiry": "2024-08-01",
                 "issuer": {
-                    "name": "CA DMV",
-                    "country": "US",
-                    "country_code": "USA",
-                    "jurisdiction": "CA"
+                  "name": "CA DMV",
+                  "country": "US",
+                  "country_code": "USA",
+                  "jurisdiction": "CA"
                 }
               }
             }
@@ -1453,9 +1498,9 @@ Subsequent subsections contain examples for using the `verified_claims` claim on
       }
     }
 
-[¶](#appendix-C.1-1)
+[¶](#appendix-D.1-1)
 
-Same document under a different `trust_framework`[¶](#appendix-C.1-2)
+Same document under a different `trust_framework`[¶](#appendix-D.1-2)
 
     {
       "verified_claims": {
@@ -1499,7 +1544,7 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                   "check_method": "vpiruv",
                   "organization": "doc_checker",
                   "check_id": "DL1-93h506th2f45hf",
-                  "time": "2021-06-08T11:41Z"
+                  "time": "2021-06-06T05:33Z"
                 },
                 {
                   "check_method": "pvp",
@@ -1508,17 +1553,16 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                   "time": "2021-06-08T11:42Z"
                 }
               ],
-              "time": "2021-06-06T05:33Z",
               "document_details": {
                 "type": "driving_permit",
                 "document_number": "I1234568",
                 "date_of_issuance": "2019-09-05",
                 "date_of_expiry": "2024-08-01",
                 "issuer": {
-                    "name": "CA DMV",
-                    "country": "US",
-                    "country_code": "USA",
-                    "jurisdiction": "CA"
+                  "name": "CA DMV",
+                  "country": "US",
+                  "country_code": "USA",
+                  "jurisdiction": "CA"
                 }
               }
             }
@@ -1541,9 +1585,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.1-3)
+[¶](#appendix-D.1-3)
 
-### [C.2.](#appendix-C.2) [Document and verifier details](#name-document-and-verifier-detai)
+### [D.2.](#appendix-D.2) [Document and verifier details](#name-document-and-verifier-detai)
 
     {
       "verified_claims": {
@@ -1554,10 +1598,14 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
           "evidence": [
             {
               "type": "document",
-              "method": "pipp",
-              "organization": "Deutsche Post",
-              "check_id": "1aa05779-0775-470f-a5c4-9f1f5e56cf06",
-              "time": "2012-04-22T11:30Z",
+              "check_details": [
+                {
+                  "check_method": "pipp",
+                  "organization": "Deutsche Post",
+                  "check_id": "1aa05779-0775-470f-a5c4-9f1f5e56cf06",
+                  "time": "2012-04-22T11:30Z"
+                }
+              ],
               "document_details": {
                 "type": "idcard",
                 "issuer": {
@@ -1592,9 +1640,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.2-1)
+[¶](#appendix-D.2-1)
 
-### [C.3.](#appendix-C.3) [Evidence with all assurance details](#name-evidence-with-all-assurance)
+### [D.3.](#appendix-D.3) [Evidence with all assurance details](#name-evidence-with-all-assurance)
 
     {
       "verified_claims": {
@@ -1670,14 +1718,17 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "data",
                   "organization": "DVLA",
-                  "time": "2021-04-09T14:15Z",
+                  "time": "2021-04-09T14:12Z",
                   "check_id": "DL1-85762937582385820"
                 }
               ],
-              "time": "2021-04-09T14:12Z",
+              "derived_claims": {
+                "given_name": "Sarah",
+                "family_name": "Meredyth",
+                "birthdate": "1976-03-11"
+              },
               "document_details": {
                 "type": "driving_permit",
-                "personal_number": "MORGA753116SM9IJ",
                 "document_number": "MORGA753116SM9IJ35",
                 "serial_number": "ZG21000001",
                 "date_of_issuance": "2021-01-01",
@@ -1696,10 +1747,10 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "kbv",
                   "organization": "TheCreditBureau",
-                  "check_id": "kbv1-hf934hn09234ng03jj3"
+                  "check_id": "kbv1-hf934hn09234ng03jj3",
+                  "time": "2021-04-09T14:12Z"
                 }
               ],
-              "time": "2021-04-09T14:12Z",
               "record": {
                 "type": "mortgage_account",
                 "source": {
@@ -1713,10 +1764,10 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "kbv",
                   "organization": "OpenBankingTPP",
-                  "check_id": "kbv2-nm0f23u9459fj38u5j6"
+                  "check_id": "kbv2-nm0f23u9459fj38u5j6",
+                  "time": "2021-04-09T14:12Z"
                 }
               ],
-              "time": "2021-04-09T14:12Z",
               "record": {
                 "type": "bank_account",
                 "source": {
@@ -1730,10 +1781,10 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "kbv",
                   "organization": "GSMA",
-                  "check_id": "kbv3-jf9028h023hj0f9jh23"
+                  "check_id": "kbv3-jf9028h023hj0f9jh23",
+                  "time": "2021-04-09T15:42Z"
                 }
               ],
-              "time": "2021-04-09T15:42Z",
               "record": {
                 "type": "mno",
                 "source": {
@@ -1747,10 +1798,10 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "data",
                   "organization": "GRO",
-                  "check_id": "GRO-9824hngvp9278hf5tmp924y5h"
+                  "check_id": "GRO-9824hngvp9278hf5tmp924y5h",
+                  "time": "2021-04-09T16:12Z"
                 }
               ],
-              "time": "2021-04-09T16:12Z",
               "record": {
                 "type": "death_register",
                 "source": {
@@ -1770,10 +1821,10 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
                 {
                   "check_method": "data",
                   "organization": "NextLex",
-                  "check_id": "fi-2nbf02hfn384ufn"
+                  "check_id": "fi-2nbf02hfn384ufn",
+                  "time": "2021-04-09T16:51Z"
                 }
               ],
-              "time": "2021-04-09T16:51Z",
               "record": {
                 "type": "fraud_register",
                 "source": {
@@ -1801,9 +1852,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.3-1)
+[¶](#appendix-D.3-1)
 
-### [C.4.](#appendix-C.4) [Notified eID system (eIDAS)](#name-notified-eid-system-eidas)
+### [D.4.](#appendix-D.4) [Notified eID system (eIDAS)](#name-notified-eid-system-eidas)
 
     {
       "verified_claims": {
@@ -1826,9 +1877,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.4-1)
+[¶](#appendix-D.4-1)
 
-### [C.5.](#appendix-C.5) [Electronic_record](#name-electronic_record)
+### [D.5.](#appendix-D.5) [Electronic_record](#name-electronic_record)
 
     {
       "verified_claims": {
@@ -1842,22 +1893,27 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
               "type": "electronic_record",
               "check_details": [
                 {
-                  "check_method": "data"
+                  "check_method": "data",
+                  "time": "2021-02-15T16:51Z"
                 },
                 {
                   "check_method": "token"
                 }
               ],
-              "time": "2021-02-15T16:51Z",
               "record": {
                 "type": "population_register",
                 "source": {
-                    "name": "Skatteverket",
-                    "country": "Sverige",
-                    "country_code": "SWE"
+                  "name": "Skatteverket",
+                  "country": "Sverige",
+                  "country_code": "SWE"
                 },
-                "personal_number": "4901224131",
-                "created_at": "1979-01-22"
+                "created_at": "1979-01-22T00:00Z",
+                "date_of_expiry": "2025-12-31"
+              },
+              "derived_claims": {
+                "given_name": "Fredrik",
+                "family_name": "Strömberg",
+                "birthdate": "1979-01-22"
               }
             }
           ]
@@ -1883,9 +1939,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.5-1)
+[¶](#appendix-D.5-1)
 
-### [C.6.](#appendix-C.6) [Vouch](#name-vouch)
+### [D.6.](#appendix-D.6) [Vouch](#name-vouch)
 
     {
       "verified_claims": {
@@ -1899,20 +1955,26 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
               "type": "vouch",
               "check_details": [
                 {
-                  "check_method": "vcrypt"
+                  "check_method": "vcrypt",
+                  "time": "2020-03-19T12:42Z"
                 },
                 {
                   "check_method": "bvr"
                 }
               ],
-              "time": "2020-03-19T12:42Z",
               "attestation": {
                 "type": "digital_attestation",
                 "reference_number": "6485-1619-3976-6671",
                 "date_of_issuance": "2021-06-04",
+                "date_of_expiry": "2022-06-04",
                 "voucher": {
-                    "organization": "HMP Dartmoor"
+                  "organization": "HMP Dartmoor"
                 }
+              },
+              "derived_claims": {
+                "given_name": "Sam",
+                "family_name": "Lawler",
+                "birthdate": "1981-04-13"
               }
             }
           ]
@@ -1932,9 +1994,9 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       }
     }
 
-[¶](#appendix-C.6-1)
+[¶](#appendix-D.6-1)
 
-### [C.7.](#appendix-C.7) [Multiple verified claims](#name-multiple-verified-claims)
+### [D.7.](#appendix-D.7) [Multiple verified claims](#name-multiple-verified-claims)
 
     {
       "verified_claims": [
@@ -1964,9 +2026,13 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
             "evidence": [
               {
                 "type": "document",
-                "method": "pipp",
-                "time": "2012-04-22T11:30Z",
-                "document": {
+                "check_details": [
+                  {
+                    "check_method": "pipp",
+                    "time": "2012-04-22T11:30Z"
+                  }
+                ],
+                "document_details": {
                   "type": "idcard"
                 }
               }
@@ -1984,11 +2050,11 @@ Same document under a different `trust_framework`[¶](#appendix-C.1-2)
       ]
     }
 
-[¶](#appendix-C.7-1)
+[¶](#appendix-D.7-1)
 
-### [C.8.](#appendix-C.8) [Claims provided by the OP and external sources](#name-claims-provided-by-the-op-a)
+### [D.8.](#appendix-D.8) [Claims provided by the OP and external sources](#name-claims-provided-by-the-op-a)
 
-This example shows how an OP can mix own claims and claims provided by external sources in a single ID Token.[¶](#appendix-C.8-1)
+This example shows how an OP can mix own claims and claims provided by external sources in a single ID Token.[¶](#appendix-D.8-1)
 
     {
       "iss": "https://server.example.com",
@@ -2021,11 +2087,11 @@ This example shows how an OP can mix own claims and claims provided by external 
       }
     }
 
-[¶](#appendix-C.8-2)
+[¶](#appendix-D.8-2)
 
-### [C.9.](#appendix-C.9) [Self-Issued OpenID provider and external claims](#name-self-issued-openid-provider)
+### [D.9.](#appendix-D.9) [Self-Issued OpenID provider and external claims](#name-self-issued-openid-provider)
 
-This example shows how a Self-Issued OpenID provider (SIOP) may include verified claims obtained from different external claim sources into an ID Token.[¶](#appendix-C.9-1)
+This example shows how a Self-Issued OpenID provider (SIOP) may include verified claims obtained from different external claim sources into an ID Token.[¶](#appendix-D.9-1)
 
     {
       "iss": "https://self-issued.me",
@@ -2048,21 +2114,21 @@ This example shows how a Self-Issued OpenID provider (SIOP) may include verified
       }
     }
 
-[¶](#appendix-C.9-2)
+[¶](#appendix-D.9-2)
 
-## [Appendix D.](#appendix-D) [Example requests and responses](#name-example-requests-and-respon)
+## [Appendix E.](#appendix-E) [Example requests and responses](#name-example-requests-and-respon)
 
-This section shows examples of pairs of requests and responses containing `verified_claims`.[¶](#appendix-D-1)
+This section shows examples of pairs of requests and responses containing `verified_claims`.[¶](#appendix-E-1)
 
-### [D.1.](#appendix-D.1) [verified claims in UserInfo response](#name-verified-claims-in-userinfo)
+### [E.1.](#appendix-E.1) [verified claims in UserInfo response](#name-verified-claims-in-userinfo)
 
-#### [D.1.1.](#appendix-D.1.1) [Request](#name-request)
+#### [E.1.1.](#appendix-E.1.1) [Request](#name-request)
 
-In this example we assume the RP uses the `scope` parameter to request the email address and, additionally, the `claims` parameter, to request verified claims.[¶](#appendix-D.1.1-1)
+In this example we assume the RP uses the `scope` parameter to request the email address and, additionally, the `claims` parameter, to request verified claims.[¶](#appendix-E.1.1-1)
 
-The scope value is: `scope=openid email`[¶](#appendix-D.1.1-2)
+The scope value is: `scope=openid email`[¶](#appendix-E.1.1-2)
 
-The value of the `claims` parameter is:[¶](#appendix-D.1.1-3)
+The value of the `claims` parameter is:[¶](#appendix-E.1.1-3)
 
     {
       "userinfo": {
@@ -2079,11 +2145,11 @@ The value of the `claims` parameter is:[¶](#appendix-D.1.1-3)
       }
     }
 
-[¶](#appendix-D.1.1-4)
+[¶](#appendix-E.1.1-4)
 
-#### [D.1.2.](#appendix-D.1.2) [Response](#name-response)
+#### [E.1.2.](#appendix-E.1.2) [Response](#name-response)
 
-The respective UserInfo response would be[¶](#appendix-D.1.2-1)
+The respective UserInfo response would be[¶](#appendix-E.1.2-1)
 
     {
       "sub": "248289761001",
@@ -2101,15 +2167,15 @@ The respective UserInfo response would be[¶](#appendix-D.1.2-1)
       }
     }
 
-[¶](#appendix-D.1.2-2)
+[¶](#appendix-E.1.2-2)
 
-### [D.2.](#appendix-D.2) [verified claims in ID Tokens](#name-verified-claims-in-id-token)
+### [E.2.](#appendix-E.2) [verified claims in ID Tokens](#name-verified-claims-in-id-token)
 
-#### [D.2.1.](#appendix-D.2.1) [Request](#name-request-2)
+#### [E.2.1.](#appendix-E.2.1) [Request](#name-request-2)
 
-In this case, the RP requests verified claims along with other claims about the end-user in the `claims` parameter and allocates the response to the ID Token (delivered from the token endpoint in case of grant type `authorization_code`).[¶](#appendix-D.2.1-1)
+In this case, the RP requests verified claims along with other claims about the end-user in the `claims` parameter and allocates the response to the ID Token (delivered from the token endpoint in case of grant type `authorization_code`).[¶](#appendix-E.2.1-1)
 
-The `claims` parameter value is[¶](#appendix-D.2.1-2)
+The `claims` parameter value is[¶](#appendix-E.2.1-2)
 
     {
       "id_token": {
@@ -2126,8 +2192,12 @@ The `claims` parameter value is[¶](#appendix-D.2.1-2)
                 "type": {
                   "value": "document"
                 },
-                "method": null,
-                "time": null,
+                "check_details": [
+                  {
+                    "check_method": null,
+                    "time": null
+                  }
+                ],
                 "document_details": {
                   "type": null,
                   "issuer": {
@@ -2150,11 +2220,11 @@ The `claims` parameter value is[¶](#appendix-D.2.1-2)
       }
     }
 
-[¶](#appendix-D.2.1-3)
+[¶](#appendix-E.2.1-3)
 
-#### [D.2.2.](#appendix-D.2.2) [Response](#name-response-2)
+#### [E.2.2.](#appendix-E.2.2) [Response](#name-response-2)
 
-The decoded body of the respective ID Token could be[¶](#appendix-D.2.2-1)
+The decoded body of the respective ID Token could be[¶](#appendix-E.2.2-1)
 
     {
       "iss": "https://server.example.com",
@@ -2176,8 +2246,12 @@ The decoded body of the respective ID Token could be[¶](#appendix-D.2.2-1)
           "evidence": [
             {
               "type": "document",
-              "method": "pipp",
-              "time": "2012-04-22T11:30Z",
+              "check_details": [
+                {
+                  "check_method": "pipp",
+                  "time": "2012-04-22T11:30Z"
+                }
+              ],
               "document_details": {
                 "type": "idcard",
                 "issuer": {
@@ -2199,21 +2273,21 @@ The decoded body of the respective ID Token could be[¶](#appendix-D.2.2-1)
       }
     }
 
-[¶](#appendix-D.2.2-2)
+[¶](#appendix-E.2.2-2)
 
-## [Appendix E.](#appendix-E) [Acknowledgements](#name-acknowledgements)
+## [Appendix F.](#appendix-F) [Acknowledgements](#name-acknowledgements)
 
-The following people at yes.com and partner companies contributed to the concept described in the initial contribution to this document: Karsten Buch, Lukas Stiebig, Sven Manz, Waldemar Zimpfer, Willi Wiedergold, Fabian Hoffmann, Daniel Keijsers, Ralf Wagner, Sebastian Ebling, Peter Eisenhofer.[¶](#appendix-E-1)
+The following people at yes.com and partner companies contributed to the concept described in the initial contribution to this document: Karsten Buch, Lukas Stiebig, Sven Manz, Waldemar Zimpfer, Willi Wiedergold, Fabian Hoffmann, Daniel Keijsers, Ralf Wagner, Sebastian Ebling, Peter Eisenhofer.[¶](#appendix-F-1)
 
-We would like to thank Julian White, Bjorn Hjelm, Stephane Mouy, Alberto Pulido, Joseph Heenan, Vladimir Dzhuvinov, Azusa Kikuchi, Naohiro Fujie, Takahiko Kawasaki, Sebastian Ebling, Marcos Sanz, Tom Jones, Mike Pegman, Michael B. Jones, Jeff Lombardo, Taylor Ongaro, Peter Bainbridge-Clayton, Adrian Field, George Fletcher, Tim Cappalli, Michael Palage, Sascha Preibisch, Giuseppe De Marco, Nick Mothershaw, Hodari McClain, Dima Postnikov and Nat Sakimura for their valuable feedback and contributions that helped to evolve this document.[¶](#appendix-E-2)
+We would like to thank Julian White, Bjorn Hjelm, Stephane Mouy, Alberto Pulido, Joseph Heenan, Vladimir Dzhuvinov, Azusa Kikuchi, Naohiro Fujie, Takahiko Kawasaki, Sebastian Ebling, Marcos Sanz, Tom Jones, Mike Pegman, Michael B. Jones, Jeff Lombardo, Taylor Ongaro, Peter Bainbridge-Clayton, Adrian Field, George Fletcher, Tim Cappalli, Michael Palage, Sascha Preibisch, Giuseppe De Marco, Nick Mothershaw, Hodari McClain, Dima Postnikov and Nat Sakimura for their valuable feedback and contributions that helped to evolve this document.[¶](#appendix-F-2)
 
-## [Appendix F.](#appendix-F) [Notices](#name-notices)
+## [Appendix G.](#appendix-G) [Notices](#name-notices)
 
-Copyright (c) 2024 The OpenID Foundation.[¶](#appendix-F-1)
+Copyright (c) 2026 The OpenID Foundation.[¶](#appendix-G-1)
 
-The OpenID Foundation (OIDF) grants to any Contributor, developer, implementer, or other interested party a non-exclusive, royalty free, worldwide copyright license to reproduce, prepare derivative works from, distribute, perform and display, this Implementers Draft or Final Specification solely for the purposes of (i) developing specifications, and (ii) implementing Implementers Drafts and Final Specifications based on such documents, provided that attribution be made to the OIDF as the source of the material, but that such attribution does not indicate an endorsement by the OIDF.[¶](#appendix-F-2)
+The OpenID Foundation (OIDF) grants to any Contributor, developer, implementer, or other interested party a non-exclusive, royalty free, worldwide copyright license to reproduce, prepare derivative works from, distribute, perform and display, this Implementers Draft, Final Specification, or Final Specification Incorporating Errata Corrections solely for the purposes of (i) developing specifications, and (ii) implementing Implementers Drafts, Final Specifications, and Final Specification Incorporating Errata Corrections based on such documents, provided that attribution be made to the OIDF as the source of the material, but that such attribution does not indicate an endorsement by the OIDF.[¶](#appendix-G-2)
 
-The technology described in this document was made available from contributions from various sources, including members of the OpenID Foundation and others. Although the OpenID Foundation has taken steps to help ensure that the technology is available for distribution, it takes no position regarding the validity or scope of any intellectual property or other rights that might be claimed to pertain to the implementation or use of the technology described in this document or the extent to which any license under such rights might or might not be available; neither does it represent that it has made any independent effort to identify any such rights. The OpenID Foundation and the contributors to this document make no (and hereby expressly disclaim any) warranties (express, implied, or otherwise), including implied warranties of merchantability, non-infringement, fitness for a particular purpose, or title, related to this document to offer a patent promise not to assert certain patent claims against other contributors and against implementers. The OpenID Foundation invites any interested party to bring to its attention any copyrights, patents, patent applications, or other proprietary rights that may cover technology that may be required to practice this document.[¶](#appendix-F-3)
+The technology described in this specification was made available from contributions from various sources, including members of the OpenID Foundation and others. Although the OpenID Foundation has taken steps to help ensure that the technology is available for distribution, it takes no position regarding the validity or scope of any intellectual property or other rights that might be claimed to pertain to the implementation or use of the technology described in this specification or the extent to which any license under such rights might or might not be available; neither does it represent that it has made any independent effort to identify any such rights. The OpenID Foundation and the contributors to this specification make no (and hereby expressly disclaim any) warranties (express, implied, or otherwise), including implied warranties of merchantability, non-infringement, fitness for a particular purpose, or title, related to this specification, and the entire risk as to implementing this specification is assumed by the implementer. The OpenID Intellectual Property Rights policy (found at openid.net) requires contributors to offer a patent promise not to assert certain patent claims against other contributors and against implementers. OpenID invites any interested party to bring to its attention any copyrights, patents, patent applications, or other proprietary rights that may cover technology that may be required to practice this specification.[¶](#appendix-G-3)
 
 ## [Authors\' Addresses](#name-authors-addresses)
 
