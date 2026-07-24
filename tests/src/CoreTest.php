@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Core;
 use SimpleSAML\OpenID\Core\Factories\ClientAssertionFactory;
 use SimpleSAML\OpenID\Core\Factories\IdTokenFactory;
+use SimpleSAML\OpenID\Core\Factories\IdTokenHintFactory;
 use SimpleSAML\OpenID\Core\Factories\LogoutTokenFactory;
 use SimpleSAML\OpenID\Core\Factories\RequestObjectFactory;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
@@ -45,6 +46,7 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(JwsSerializerManagerDecorator::class)]
 #[UsesClass(ClaimFactory::class)]
 #[UsesClass(IdTokenFactory::class)]
+#[UsesClass(IdTokenHintFactory::class)]
 #[UsesClass(LogoutTokenFactory::class)]
 final class CoreTest extends TestCase
 {
@@ -121,6 +123,11 @@ final class CoreTest extends TestCase
         $this->assertInstanceOf(
             IdTokenFactory::class,
             $sut->idTokenFactory(),
+        );
+
+        $this->assertInstanceOf(
+            IdTokenHintFactory::class,
+            $sut->idTokenHintFactory(),
         );
 
         $this->assertInstanceOf(

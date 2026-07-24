@@ -65,6 +65,18 @@ class ParsedJws
 
 
     /**
+     * Whether the Expiration Time (exp) claim should be validated against the current time. Subclasses which
+     * represent tokens that are legitimately used after expiry (like the ID Token Hint) may override this to
+     * accept expired tokens. Note that the Not Before (nbf) and Issued At (iat) checks are intentionally not
+     * covered here: a previously issued token always has those in the past, so a future value remains invalid.
+     */
+    protected function shouldValidateExpirationTime(): bool
+    {
+        return true;
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
     protected function validateByCallbacks(callable ...$calls): void
@@ -285,7 +297,10 @@ class ParsedJws
 
         $exp = $this->helpers->type()->ensureInt($exp);
 
-        if ($exp + $this->timestampValidationLeeway->getInSeconds() < time()) {
+        if (
+            $this->shouldValidateExpirationTime() &&
+            $exp + $this->timestampValidationLeeway->getInSeconds() < time()
+        ) {
             throw new JwsException(sprintf('Expiration Time claim (%d) is lesser than current time.', $exp));
         }
 
