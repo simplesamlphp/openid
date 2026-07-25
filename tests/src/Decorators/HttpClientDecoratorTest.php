@@ -131,6 +131,58 @@ final class HttpClientDecoratorTest extends TestCase
     }
 
 
+    public function testRequestHardensPartialRedirectOptions(): void
+    {
+        $this->responseInterfaceMock->method('getStatusCode')->willReturn(200);
+
+        $this->clientMock->expects($this->once())->method('request')
+            ->with(
+                'GET',
+                'https://example.com',
+                $this->callback(function (array $options): bool {
+                    $allowRedirects = $options[RequestOptions::ALLOW_REDIRECTS];
+
+                    $this->assertTrue($allowRedirects['track_redirects']);
+                    // Per request options replace the client config, so the hardening has to be re-applied.
+                    $this->assertSame(3, $allowRedirects['max']);
+                    $this->assertSame(['https'], $allowRedirects['protocols']);
+                    return true;
+                }),
+            )
+            ->willReturn($this->responseInterfaceMock);
+
+        $this->sut()->request(
+            HttpMethodsEnum::GET,
+            'https://example.com',
+            [RequestOptions::ALLOW_REDIRECTS => ['track_redirects' => true]],
+        );
+    }
+
+
+    public function testRequestKeepsEmptyRedirectArray(): void
+    {
+        $this->responseInterfaceMock->method('getStatusCode')->willReturn(200);
+
+        $this->clientMock->expects($this->once())->method('request')
+            ->with(
+                'GET',
+                'https://example.com',
+                $this->callback(function (array $options): bool {
+                    // An empty array disables redirects in Guzzle, which is stricter than the default.
+                    $this->assertSame([], $options[RequestOptions::ALLOW_REDIRECTS]);
+                    return true;
+                }),
+            )
+            ->willReturn($this->responseInterfaceMock);
+
+        $this->sut()->request(
+            HttpMethodsEnum::GET,
+            'https://example.com',
+            [RequestOptions::ALLOW_REDIRECTS => []],
+        );
+    }
+
+
     public function testRequestKeepsCallerSuppliedSink(): void
     {
         $this->responseInterfaceMock->method('getStatusCode')->willReturn(200);

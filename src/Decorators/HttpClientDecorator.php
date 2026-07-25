@@ -17,8 +17,21 @@ use Throwable;
  */
 class HttpClientDecorator
 {
+    /**
+     * Tighter than Guzzle's own redirect defaults (max 5, both http and https, strict false).
+     *
+     * Federation endpoints are https only by specification, so allowing a redirect to plain http buys nothing
+     * and lets an attacker controlled entity downgrade the connection or point it at an internal address.
+     */
+    public const DEFAULT_ALLOW_REDIRECTS_CONFIG = [
+        'max' => 3,
+        'protocols' => ['https'],
+        'strict' => true,
+        'referer' => false,
+    ];
+
     public const DEFAULT_HTTP_CLIENT_CONFIG = [
-        RequestOptions::ALLOW_REDIRECTS => true,
+        RequestOptions::ALLOW_REDIRECTS => self::DEFAULT_ALLOW_REDIRECTS_CONFIG,
         RequestOptions::CONNECT_TIMEOUT => 3,
         RequestOptions::TIMEOUT => 10,
         RequestOptions::HTTP_ERRORS => true,
@@ -43,6 +56,34 @@ class HttpClientDecorator
     public function getMaxFetchSizeBytes(): int
     {
         return $this->maxFetchSizeBytes;
+    }
+
+
+    /**
+     * Fill in the hardened redirect defaults for any key a caller left out of an "allow_redirects" array.
+     *
+     * Guzzle replaces such a nested array wholesale rather than merging it, and then backfills the missing
+     * keys from its own permissive defaults (5 hops, http allowed, strict off) instead of from ours. Without
+     * this, a caller overriding a single key silently loses the rest of the hardening. The caller's own
+     * entries still win, since this only unions in what is absent.
+     *
+     * An empty array is left untouched: Guzzle reads that as "do not follow redirects", which is stricter
+     * than the default and must not be turned into a permissive configuration.
+     *
+     * @param array<string,mixed> $options
+     * @return array<string,mixed>
+     */
+    public static function withHardenedRedirectOptions(array $options): array
+    {
+        $allowRedirects = $options[RequestOptions::ALLOW_REDIRECTS] ?? null;
+
+        if (!is_array($allowRedirects) || $allowRedirects === []) {
+            return $options;
+        }
+
+        $options[RequestOptions::ALLOW_REDIRECTS] = $allowRedirects + self::DEFAULT_ALLOW_REDIRECTS_CONFIG;
+
+        return $options;
     }
 
 
@@ -78,6 +119,10 @@ class HttpClientDecorator
         ?int $maxSizeBytes = null,
     ): ResponseInterface {
         $maxSizeBytes = is_null($maxSizeBytes) ? $this->maxFetchSizeBytes : max(1, $maxSizeBytes);
+
+        // Per request options replace the client configuration, so a partial redirect override supplied here
+        // needs the same treatment the factory gives the client level one.
+        $options = self::withHardenedRedirectOptions($options);
 
         // Bound the response body by giving the client a sink that stops accepting data once the limit is
         // crossed, which aborts the transfer instead of letting the whole body arrive first. A caller supplying

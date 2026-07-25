@@ -211,7 +211,7 @@ class Jwks
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
         if (is_null($this->httpClientDecoratorFactory)) {
-            $this->httpClientDecoratorFactory = new HttpClientDecoratorFactory();
+            $this->httpClientDecoratorFactory = new HttpClientDecoratorFactory($this->logger);
         }
 
         return $this->httpClientDecoratorFactory;

@@ -141,7 +141,7 @@ class RequestObject
 
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
-        return $this->httpClientDecoratorFactory ??= new HttpClientDecoratorFactory();
+        return $this->httpClientDecoratorFactory ??= new HttpClientDecoratorFactory($this->logger);
     }
 
 
