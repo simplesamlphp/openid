@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException;
 use SimpleSAML\OpenID\Federation\EntityStatement;
 use SimpleSAML\OpenID\Federation\EntityStatementFetcher;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
@@ -39,6 +40,10 @@ final class TrustChainResolverTest extends TestCase
 
     protected int $maxAuthorityHints;
 
+    protected int $maxTrustChainFetches;
+
+    protected int $trustChainResolveTimeout;
+
     protected MockObject $leafEntityConfigurationMock;
 
     protected MockObject $intermediateEntityConfigurationMock;
@@ -58,6 +63,8 @@ final class TrustChainResolverTest extends TestCase
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->maxTrustChainDepth = 5;
         $this->maxAuthorityHints = 3;
+        $this->maxTrustChainFetches = 100;
+        $this->trustChainResolveTimeout = 30;
 
         $this->leafEntityConfigurationMock = $this->createMock(EntityStatement::class);
         $this->intermediateEntityConfigurationMock = $this->createMock(EntityStatement::class);
@@ -80,26 +87,53 @@ final class TrustChainResolverTest extends TestCase
         ?LoggerInterface $logger = null,
         ?int $maxTrustChainDepth = null,
         ?int $maxAuthorityHints = null,
+        ?int $maxTrustChainFetches = null,
+        ?int $trustChainResolveTimeout = null,
     ): TrustChainResolver {
-        $entityStatementFetcher ??= $this->entityStatementFetcherMock;
-        $trustChainFactory ??= $this->trustChainFactoryMock;
-        $trustChainBagFactory ??= $this->trustChainBagFactoryMock;
-        $maxCacheDurationDecorator ??= $this->maxCacheDurationDecorator;
-        $cacheDecorator ??= $this->cacheDecoratorMock;
-        $logger ??= $this->loggerMock;
-        $maxTrustChainDepth ??= $this->maxTrustChainDepth;
-        $maxAuthorityHints ??= $this->maxAuthorityHints;
-
         return new TrustChainResolver(
-            $entityStatementFetcher,
-            $trustChainFactory,
-            $trustChainBagFactory,
-            $maxCacheDurationDecorator,
-            $cacheDecorator,
-            $logger,
-            $maxTrustChainDepth,
-            $maxAuthorityHints,
+            ...$this->sutConstructorArgs(
+                $entityStatementFetcher,
+                $trustChainFactory,
+                $trustChainBagFactory,
+                $maxCacheDurationDecorator,
+                $cacheDecorator,
+                $logger,
+                $maxTrustChainDepth,
+                $maxAuthorityHints,
+                $maxTrustChainFetches,
+                $trustChainResolveTimeout,
+            ),
         );
+    }
+
+
+    /**
+     * @return array<int,mixed>
+     */
+    protected function sutConstructorArgs(
+        ?EntityStatementFetcher $entityStatementFetcher = null,
+        ?TrustChainFactory $trustChainFactory = null,
+        ?TrustChainBagFactory $trustChainBagFactory = null,
+        ?DateIntervalDecorator $maxCacheDurationDecorator = null,
+        ?CacheDecorator $cacheDecorator = null,
+        ?LoggerInterface $logger = null,
+        ?int $maxTrustChainDepth = null,
+        ?int $maxAuthorityHints = null,
+        ?int $maxTrustChainFetches = null,
+        ?int $trustChainResolveTimeout = null,
+    ): array {
+        return [
+            $entityStatementFetcher ?? $this->entityStatementFetcherMock,
+            $trustChainFactory ?? $this->trustChainFactoryMock,
+            $trustChainBagFactory ?? $this->trustChainBagFactoryMock,
+            $maxCacheDurationDecorator ?? $this->maxCacheDurationDecorator,
+            $cacheDecorator ?? $this->cacheDecoratorMock,
+            $logger ?? $this->loggerMock,
+            $maxTrustChainDepth ?? $this->maxTrustChainDepth,
+            $maxAuthorityHints ?? $this->maxAuthorityHints,
+            $maxTrustChainFetches ?? $this->maxTrustChainFetches,
+            $trustChainResolveTimeout ?? $this->trustChainResolveTimeout,
+        ];
     }
 
 
@@ -400,5 +434,151 @@ final class TrustChainResolverTest extends TestCase
         $this->expectExceptionMessage('Validation error');
 
         $this->sut()->for('', []);
+    }
+
+
+    /**
+     * Let the leaf and the intermediate both point to each other's authority, so the recursion has more paths to
+     * walk than the budget allows.
+     */
+    protected function prepareFullConfigChainSample(): void
+    {
+        $this->entityStatementFetcherMock
+            ->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(fn(string $entityId): EntityStatement =>
+                $this->configChainSample[$entityId] ?? throw new \Exception('No entity.'));
+
+        $this->leafEntityConfigurationMock
+            ->method('getAuthorityHints')
+            ->willReturn(['i']);
+        $this->intermediateEntityConfigurationMock
+            ->method('getAuthorityHints')
+            ->willReturn(['t']);
+    }
+
+
+    public function testCanLimitTotalNumberOfConfigurationFetches(): void
+    {
+        // Resolving l -> i -> t needs three configuration fetches, so two is one short.
+        $sut = $this->sut(maxTrustChainFetches: 2);
+
+        $this->prepareFullConfigChainSample();
+
+        $this->loggerMock
+            ->expects($this->atLeastOnce())
+            ->method('error')
+            ->with($this->stringContains('entity statement fetches'));
+
+        $this->expectException(TrustChainResolutionBudgetException::class);
+        $this->expectExceptionMessage('maximum allowed number of 2 entity statement fetches');
+
+        $sut->getConfigurationChains('l', ['t']);
+    }
+
+
+    public function testFetchBudgetAlsoCoversSubordinateStatements(): void
+    {
+        // Three configuration fetches are affordable, the subordinate statement fetches that follow are not.
+        $sut = $this->sut(maxTrustChainFetches: 3);
+
+        $this->prepareFullConfigChainSample();
+
+        $this->entityStatementFetcherMock
+            ->expects($this->never())
+            ->method('fromCacheOrFetchEndpoint');
+
+        $this->expectException(TrustChainResolutionBudgetException::class);
+
+        $sut->for('l', ['t']);
+    }
+
+
+    public function testFetchBudgetIsResetForEachResolution(): void
+    {
+        // Exactly enough for one resolution: three configurations plus two subordinate statements.
+        $sut = $this->sut(maxTrustChainFetches: 5);
+
+        $this->prepareFullConfigChainSample();
+
+        $this->trustChainBagFactoryMock->expects($this->exactly(2))->method('build');
+
+        $sut->for('l', ['t']);
+        // Would throw if the budget spent above was carried over.
+        $sut->for('l', ['t']);
+    }
+
+
+    public function testFetchBudgetIsResetForEachConfigurationChainsCall(): void
+    {
+        $sut = $this->sut(maxTrustChainFetches: 3);
+
+        $this->prepareFullConfigChainSample();
+
+        $this->assertCount(1, $sut->getConfigurationChains('l', ['t']));
+        // Would throw if the budget spent above was carried over.
+        $this->assertCount(1, $sut->getConfigurationChains('l', ['t']));
+    }
+
+
+    public function testCanLimitTrustChainResolutionDuration(): void
+    {
+        $sut = $this->getMockBuilder(TrustChainResolver::class)
+            ->setConstructorArgs($this->sutConstructorArgs(trustChainResolveTimeout: 30))
+            ->onlyMethods(['currentTimestamp'])
+            ->getMock();
+
+        // First call sets the deadline at 0 + 30, the second one is well past it.
+        $sut->method('currentTimestamp')->willReturnOnConsecutiveCalls(0.0, 1000.0);
+
+        $this->prepareFullConfigChainSample();
+
+        $this->loggerMock
+            ->expects($this->atLeastOnce())
+            ->method('error')
+            ->with($this->stringContains('maximum allowed duration'));
+
+        $this->expectException(TrustChainResolutionBudgetException::class);
+        $this->expectExceptionMessage('maximum allowed duration of 30 seconds');
+
+        $sut->getConfigurationChains('l', ['t']);
+    }
+
+
+    public function testResolutionDeadlineIsCheckedBeforeCachedTrustChainLookup(): void
+    {
+        $sut = $this->getMockBuilder(TrustChainResolver::class)
+            ->setConstructorArgs($this->sutConstructorArgs(trustChainResolveTimeout: 30))
+            ->onlyMethods(['currentTimestamp'])
+            ->getMock();
+
+        // First call sets the deadline at 0 + 30, the second one is well past it.
+        $sut->method('currentTimestamp')->willReturnOnConsecutiveCalls(0.0, 1000.0);
+
+        // The deadline has to be enforced before any per trust anchor work, cache lookups included.
+        $this->cacheDecoratorMock->expects($this->never())->method('get');
+        $this->entityStatementFetcherMock->expects($this->never())->method('fromCacheOrWellKnownEndpoint');
+
+        $this->expectException(TrustChainResolutionBudgetException::class);
+        $this->expectExceptionMessage('maximum allowed duration of 30 seconds');
+
+        $sut->for('l', ['t']);
+    }
+
+
+    public function testResolutionBudgetValuesAreClamped(): void
+    {
+        $sut = $this->sut(maxTrustChainFetches: 0, trustChainResolveTimeout: 0);
+        $this->assertSame(1, $sut->getMaxTrustChainFetches());
+        $this->assertSame(1, $sut->getTrustChainResolveTimeout());
+
+        $sut = $this->sut(maxTrustChainFetches: 100000, trustChainResolveTimeout: 100000);
+        $this->assertSame(1000, $sut->getMaxTrustChainFetches());
+        $this->assertSame(300, $sut->getTrustChainResolveTimeout());
+    }
+
+
+    public function testCanGetMaxAuthorityHints(): void
+    {
+        $this->assertSame($this->maxAuthorityHints, $this->sut()->getMaxAuthorityHints());
     }
 }

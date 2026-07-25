@@ -113,6 +113,12 @@ final class FederationTest extends TestCase
 
     protected int $maxTrustChainDepth;
 
+    protected int $maxAuthorityHints;
+
+    protected int $maxTrustChainFetches;
+
+    protected int $trustChainResolveTimeout;
+
     /**
      * @var \PHPUnit\Framework\MockObject\Stub&\Psr\SimpleCache\CacheInterface
      */
@@ -136,6 +142,9 @@ final class FederationTest extends TestCase
         $this->maxCacheDuration = new DateInterval('PT6H');
         $this->timestampValidationLeeway = new DateInterval('PT1M');
         $this->maxTrustChainDepth = 9;
+        $this->maxAuthorityHints = 6;
+        $this->maxTrustChainFetches = 100;
+        $this->trustChainResolveTimeout = 30;
         $this->cacheMock = $this->createStub(CacheInterface::class);
         $this->loggerMock = $this->createStub(LoggerInterface::class);
         $this->clientMock = $this->createStub(Client::class);
@@ -151,6 +160,9 @@ final class FederationTest extends TestCase
         ?CacheInterface $cache = null,
         ?LoggerInterface $logger = null,
         ?Client $client = null,
+        ?int $maxAuthorityHints = null,
+        ?int $maxTrustChainFetches = null,
+        ?int $trustChainResolveTimeout = null,
     ): Federation {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
         $supportedSerializers ??= $this->supportedSerializersMock;
@@ -160,6 +172,9 @@ final class FederationTest extends TestCase
         $cache ??= $this->cacheMock;
         $logger ??= $this->loggerMock;
         $client ??= $this->clientMock;
+        $maxAuthorityHints ??= $this->maxAuthorityHints;
+        $maxTrustChainFetches ??= $this->maxTrustChainFetches;
+        $trustChainResolveTimeout ??= $this->trustChainResolveTimeout;
 
         return new Federation(
             $supportedAlgorithms,
@@ -170,6 +185,9 @@ final class FederationTest extends TestCase
             $cache,
             $logger,
             $client,
+            maxAuthorityHints: $maxAuthorityHints,
+            maxTrustChainFetches: $maxTrustChainFetches,
+            trustChainResolveTimeout: $trustChainResolveTimeout,
         );
     }
 
@@ -177,6 +195,32 @@ final class FederationTest extends TestCase
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(Federation::class, $this->sut());
+    }
+
+
+    public function testPassesTrustChainResolverLimits(): void
+    {
+        $trustChainResolver = $this->sut(
+            maxTrustChainDepth: 4,
+            maxAuthorityHints: 2,
+            maxTrustChainFetches: 25,
+            trustChainResolveTimeout: 15,
+        )->trustChainResolver();
+
+        $this->assertSame(4, $trustChainResolver->getMaxTrustChainDepth());
+        $this->assertSame(2, $trustChainResolver->getMaxAuthorityHints());
+        $this->assertSame(25, $trustChainResolver->getMaxTrustChainFetches());
+        $this->assertSame(15, $trustChainResolver->getTrustChainResolveTimeout());
+    }
+
+
+    public function testClampsTrustChainResolverLimits(): void
+    {
+        $sut = $this->sut(maxAuthorityHints: 100, maxTrustChainFetches: 100000, trustChainResolveTimeout: 100000);
+
+        $this->assertSame(12, $sut->maxAuthorityHints());
+        $this->assertSame(1000, $sut->maxTrustChainFetches());
+        $this->assertSame(300, $sut->trustChainResolveTimeout());
     }
 
 
@@ -195,6 +239,9 @@ final class FederationTest extends TestCase
         $this->assertInstanceOf(SupportedAlgorithms::class, $sut->supportedAlgorithms());
         $this->assertInstanceOf(SupportedSerializers::class, $sut->supportedSerializers());
         $this->assertNotEmpty($sut->maxTrustChainDepth());
+        $this->assertNotEmpty($sut->maxAuthorityHints());
+        $this->assertNotEmpty($sut->maxTrustChainFetches());
+        $this->assertNotEmpty($sut->trustChainResolveTimeout());
         $this->assertInstanceOf(TrustMarkDelegationFactory::class, $sut->trustMarkDelegationFactory());
         $this->assertInstanceOf(TrustMarkValidator::class, $sut->trustMarkValidator());
         $this->assertInstanceOf(TrustMarkFetcher::class, $sut->trustMarkFetcher());

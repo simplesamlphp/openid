@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
+use SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainBagFactory;
 use SimpleSAML\OpenID\Federation\Factories\TrustChainFactory;
 use Throwable;
@@ -21,6 +22,22 @@ class TrustChainResolver
 
     protected int $maxAuthorityHints;
 
+    protected int $maxTrustChainFetches;
+
+    protected int $trustChainResolveTimeout;
+
+    /**
+     * Number of entity statement fetches still allowed for the resolution currently in progress, or null if no
+     * resolution is in progress.
+     */
+    protected ?int $remainingTrustChainFetches = null;
+
+    /**
+     * Timestamp (seconds, with microsecond fraction) after which the resolution currently in progress must abort,
+     * or null if no resolution is in progress.
+     */
+    protected ?float $trustChainResolveDeadline = null;
+
 
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
@@ -31,9 +48,104 @@ class TrustChainResolver
         protected readonly ?LoggerInterface $logger = null,
         int $maxTrustChainDepth = 10,
         int $maxAuthorityHints = 6,
+        int $maxTrustChainFetches = 100,
+        int $trustChainResolveTimeout = 30,
     ) {
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
         $this->maxAuthorityHints = min(12, max(1, $maxAuthorityHints));
+        $this->maxTrustChainFetches = min(1000, max(1, $maxTrustChainFetches));
+        $this->trustChainResolveTimeout = min(300, max(1, $trustChainResolveTimeout));
+    }
+
+
+    /**
+     * Current timestamp, in seconds with microsecond fraction. Extracted so it can be controlled in tests.
+     */
+    protected function currentTimestamp(): float
+    {
+        return microtime(true);
+    }
+
+
+    /**
+     * Open a budget window for a single resolution. Depth and authority hints are per-node limits, so on their own
+     * they still allow a node count that is exponential in the depth. These two are the resolution-wide limits.
+     */
+    protected function startResolutionBudget(): void
+    {
+        $this->remainingTrustChainFetches = $this->maxTrustChainFetches;
+        $this->trustChainResolveDeadline = $this->currentTimestamp() + $this->trustChainResolveTimeout;
+    }
+
+
+    protected function clearResolutionBudget(): void
+    {
+        $this->remainingTrustChainFetches = null;
+        $this->trustChainResolveDeadline = null;
+    }
+
+
+    protected function isResolutionBudgetActive(): bool
+    {
+        return !is_null($this->remainingTrustChainFetches);
+    }
+
+
+    /**
+     * Check the wall clock deadline of the resolution in progress, without charging a fetch against the budget.
+     * Use before work that is potentially slow but is not an entity statement fetch.
+     *
+     * @param array<string,mixed> $debugInfo
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException
+     */
+    protected function checkResolutionDeadline(array $debugInfo = []): void
+    {
+        $deadline = $this->trustChainResolveDeadline;
+
+        // No resolution in progress, or still within the deadline.
+        if (is_null($deadline) || ($this->currentTimestamp() <= $deadline)) {
+            return;
+        }
+
+        $message = sprintf(
+            'Trust chain resolution exceeded the maximum allowed duration of %s seconds.',
+            $this->trustChainResolveTimeout,
+        );
+        $this->logger?->error($message, $debugInfo);
+        throw new TrustChainResolutionBudgetException($message);
+    }
+
+
+    /**
+     * Account for a single entity statement fetch against the budget of the resolution in progress.
+     *
+     * Cache hits are charged as well as network fetches. A warm cache removes the network cost, but the recursion
+     * itself (a JWS parse and claim validation per node, plus a chain accumulated per path) is what needs bounding.
+     *
+     * @param array<string,mixed> $debugInfo
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException
+     */
+    protected function consumeResolutionBudget(array $debugInfo = []): void
+    {
+        $this->checkResolutionDeadline($debugInfo);
+
+        $remainingFetches = $this->remainingTrustChainFetches;
+
+        if (is_null($remainingFetches)) {
+            // No resolution in progress, so there is no budget to account against.
+            return;
+        }
+
+        if ($remainingFetches < 1) {
+            $message = sprintf(
+                'Trust chain resolution exceeded the maximum allowed number of %s entity statement fetches.',
+                $this->maxTrustChainFetches,
+            );
+            $this->logger?->error($message, $debugInfo);
+            throw new TrustChainResolutionBudgetException($message);
+        }
+
+        $this->remainingTrustChainFetches = $remainingFetches - 1;
     }
 
 
@@ -46,8 +158,43 @@ class TrustChainResolver
      * entity statements for one chain path.
      * @param int $depth Recursively defined chain depth.
      * @return array<array<non-empty-string,\SimpleSAML\OpenID\Federation\EntityStatement>>
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException
      */
     public function getConfigurationChains(
+        string $entityId,
+        array $trustAnchorIds,
+        array $populatedChain = [],
+        int $depth = 1,
+    ): array {
+        // Only the outermost call opens (and closes) the budget window, so that a call made from within for()
+        // shares the budget already opened there instead of starting a fresh one.
+        $ownsResolutionBudget = !$this->isResolutionBudgetActive();
+
+        if ($ownsResolutionBudget) {
+            $this->startResolutionBudget();
+        }
+
+        try {
+            return $this->populateConfigurationChains($entityId, $trustAnchorIds, $populatedChain, $depth);
+        } finally {
+            if ($ownsResolutionBudget) {
+                $this->clearResolutionBudget();
+            }
+        }
+    }
+
+
+    /**
+     * Recursive worker behind getConfigurationChains(). Expects a resolution budget to be open.
+     *
+     * @param non-empty-string $entityId
+     * @param non-empty-array<non-empty-string> $trustAnchorIds
+     * @param \SimpleSAML\OpenID\Federation\EntityStatement[] $populatedChain
+     * @param int $depth
+     * @return array<array<non-empty-string,\SimpleSAML\OpenID\Federation\EntityStatement>>
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException
+     */
+    protected function populateConfigurationChains(
         string $entityId,
         array $trustAnchorIds,
         array $populatedChain = [],
@@ -91,6 +238,10 @@ class TrustChainResolver
             );
             return $configurationChains;
         }
+
+        // Deliberately outside the try below, so that budget exhaustion aborts the resolution instead of being
+        // handled as a fetch error for this path.
+        $this->consumeResolutionBudget($debugStartInfo);
 
         try {
             $this->logger?->debug('Fetching entity configuration statement.', $debugStartInfo);
@@ -154,9 +305,12 @@ class TrustChainResolver
                 $currentPath = array_merge($populatedChain, [$entityId => $entityConfig]);
                 $configurationChains = array_merge(
                     $configurationChains,
-                    $this->getConfigurationChains($authorityHint, $trustAnchorIds, $currentPath, $depth + 1),
+                    $this->populateConfigurationChains($authorityHint, $trustAnchorIds, $currentPath, $depth + 1),
                 );
             }
+        } catch (TrustChainResolutionBudgetException $trustChainResolutionBudgetException) {
+            // The resolution-wide budget is spent, so the whole resolution has to stop, not only this path.
+            throw $trustChainResolutionBudgetException;
         } catch (Throwable $throwable) {
             $this->logger?->error(
                 'Unable to handle entity authority hints, error was: ' . $throwable->getMessage(),
@@ -178,6 +332,27 @@ class TrustChainResolver
      */
     public function for(string $entityId, array $validTrustAnchorIds): TrustChainBag
     {
+        // Every call gets its own budget window, so a long lived resolver instance (a worker reused across
+        // requests) is not left with the budget spent by an earlier resolution.
+        $this->startResolutionBudget();
+
+        try {
+            return $this->resolveTrustChainBag($entityId, $validTrustAnchorIds);
+        } finally {
+            $this->clearResolutionBudget();
+        }
+    }
+
+
+    /**
+     * Worker behind for(). Expects a resolution budget to be open.
+     *
+     * @param non-empty-string $entityId
+     * @param non-empty-array<non-empty-string> $validTrustAnchorIds
+     * @throws \SimpleSAML\OpenID\Exceptions\TrustChainException
+     */
+    protected function resolveTrustChainBag(string $entityId, array $validTrustAnchorIds): TrustChainBag
+    {
         $this->validateStart($entityId, $validTrustAnchorIds);
         $debugStartInfo = ['entityId' => $entityId, 'validTrustAnchorIds' => $validTrustAnchorIds];
         $this->logger?->debug('Trust chain resolving started.', $debugStartInfo);
@@ -186,6 +361,10 @@ class TrustChainResolver
 
         foreach ($validTrustAnchorIds as $index => $validTrustAnchorId) {
             $debugCacheQueryInfo = ['entityId' => $entityId, 'validTrustAnchorId' => $validTrustAnchorId];
+            // A cache lookup does not fetch anything, but it is not free either: a slow cache backend and a JWS
+            // parse per cached trust chain still have to stay inside the deadline. Checked outside the try below
+            // so that budget exhaustion is not handled as a cache error.
+            $this->checkResolutionDeadline($debugCacheQueryInfo);
             $this->logger?->debug('Checking if the trust chain exists in cache.', $debugCacheQueryInfo);
             try {
                 /** @var ?string[] $tokens */
@@ -253,6 +432,7 @@ class TrustChainResolver
                             } elseif (!is_null($previousEntity)) {
                                 // We have moved on from the first configuration entity in the chain, so we need to
                                 // start populating subordinate statements.
+                                $this->consumeResolutionBudget($debugConfigChainResolveInfo);
                                 array_unshift(
                                     $currenChainElements,
                                     $this->entityStatementFetcher->fromCacheOrFetchEndpoint($id, $previousEntity),
@@ -269,6 +449,9 @@ class TrustChainResolver
 
                         $resolvedChains[] = $this->trustChainFactory->fromStatements(...$currenChainElements);
                     }
+                } catch (TrustChainResolutionBudgetException $trustChainResolutionBudgetException) {
+                    // The resolution-wide budget is spent, so stop instead of moving on to the next chain.
+                    throw $trustChainResolutionBudgetException;
                 } catch (Throwable $exception) {
                     $this->logger?->error(
                         sprintf(
@@ -335,6 +518,24 @@ class TrustChainResolver
     public function getMaxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
+    }
+
+
+    public function getMaxAuthorityHints(): int
+    {
+        return $this->maxAuthorityHints;
+    }
+
+
+    public function getMaxTrustChainFetches(): int
+    {
+        return $this->maxTrustChainFetches;
+    }
+
+
+    public function getTrustChainResolveTimeout(): int
+    {
+        return $this->trustChainResolveTimeout;
     }
 
 

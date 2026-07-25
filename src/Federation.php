@@ -62,6 +62,12 @@ class Federation
 
     protected int $maxTrustChainDepth;
 
+    protected int $maxAuthorityHints;
+
+    protected int $maxTrustChainFetches;
+
+    protected int $trustChainResolveTimeout;
+
     protected int $maxDiscoveryDepth;
 
     protected ?CacheDecorator $cacheDecorator;
@@ -143,6 +149,11 @@ class Federation
 
     /**
      * @param array<string,mixed> $httpClientConfig
+     * @param int $maxAuthorityHints Maximum number of authority hints allowed on a single entity configuration.
+     * @param int $maxTrustChainFetches Maximum number of entity statement fetches allowed for a single Trust Chain
+     * resolution. Together with $trustChainResolveTimeout this bounds one resolution as a whole, which the per-node
+     * depth and authority hints limits can not do on their own.
+     * @param int $trustChainResolveTimeout Wall clock deadline, in seconds, for a single Trust Chain resolution.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -158,11 +169,17 @@ class Federation
         int $maxDiscoveryDepth = 10,
         protected ?EntityCollectionStoreInterface $entityCollectionStore = null,
         array $httpClientConfig = [],
+        int $maxAuthorityHints = 6,
+        int $maxTrustChainFetches = 100,
+        int $trustChainResolveTimeout = 30,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
         $this->maxTrustChainDepth = min(20, max(1, $maxTrustChainDepth));
+        $this->maxAuthorityHints = min(12, max(1, $maxAuthorityHints));
+        $this->maxTrustChainFetches = min(1000, max(1, $maxTrustChainFetches));
+        $this->trustChainResolveTimeout = min(300, max(1, $trustChainResolveTimeout));
         $this->maxDiscoveryDepth = max(1, $maxDiscoveryDepth);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client, $httpClientConfig);
@@ -240,7 +257,9 @@ class Federation
             $this->cacheDecorator,
             $this->logger,
             $this->maxTrustChainDepth,
-            // TODO mivanci Enable defining maxAuthorityHints
+            $this->maxAuthorityHints,
+            $this->maxTrustChainFetches,
+            $this->trustChainResolveTimeout,
         );
     }
 
@@ -532,6 +551,24 @@ class Federation
     public function maxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
+    }
+
+
+    public function maxAuthorityHints(): int
+    {
+        return $this->maxAuthorityHints;
+    }
+
+
+    public function maxTrustChainFetches(): int
+    {
+        return $this->maxTrustChainFetches;
+    }
+
+
+    public function trustChainResolveTimeout(): int
+    {
+        return $this->trustChainResolveTimeout;
     }
 
 
