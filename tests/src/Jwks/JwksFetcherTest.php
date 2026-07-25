@@ -48,8 +48,6 @@ final class JwksFetcherTest extends TestCase
 
     protected MockObject $responseMock;
 
-    protected MockObject $responseBodyMock;
-
     protected MockObject $signedJwksMock;
 
     protected MockObject $jwksClaimMock;
@@ -85,8 +83,7 @@ final class JwksFetcherTest extends TestCase
         $this->helpersMock->method('type')->willReturn($this->createStub(Helpers\Type::class));
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
-        $this->responseBodyMock = $this->createMock(StreamInterface::class);
-        $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
+        $this->responseMock->method('getBody')->willReturn($this->createStub(StreamInterface::class));
 
         $this->signedJwksMock = $this->createMock(SignedJwks::class);
 
@@ -203,7 +200,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('jwks-json');
 
         $this->jsonHelperMock->expects($this->once())->method('decode')
@@ -247,7 +244,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('jwks-json');
 
         $this->jsonHelperMock->expects($this->once())->method('decode')
@@ -267,7 +264,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('jwks-json');
 
         $this->jsonHelperMock->expects($this->once())->method('decode')
@@ -308,7 +305,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('jwks-json');
 
         $this->jsonHelperMock->expects($this->once())->method('decode')
@@ -336,7 +333,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('token');
 
         $this->signedJwksMock->expects($this->once())->method('verifyWithKeySet');
@@ -366,7 +363,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('token');
 
         $expirationTime = time() + 60;
@@ -417,7 +414,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('token');
 
         $this->signedJwksMock->method('jsonSerialize')->willReturn($this->jwksArraySample);
@@ -454,7 +451,7 @@ final class JwksFetcherTest extends TestCase
             ->with(HttpMethodsEnum::GET, 'uri')
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())->method('getContents')
+        $this->httpClientDecoratorMock->expects($this->once())->method('readResponseBodyAsString')
             ->willReturn('token');
 
         $this->signedJwksMock->method('jsonSerialize')->willReturn($this->jwksArraySample);

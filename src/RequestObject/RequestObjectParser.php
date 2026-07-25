@@ -44,8 +44,15 @@ class RequestObjectParser
     }
 
 
-    public function fromRequestUri(string $requestUri, int $timeout = 5, int $maxSizeBytes = 102400): RequestObjectBag
-    {
+    /**
+     * @param ?int $maxSizeBytes Maximum response body size to read. Defaults to the size configured on the
+     * HTTP client decorator, so that passing nothing here does not silently override it.
+     */
+    public function fromRequestUri(
+        string $requestUri,
+        int $timeout = 5,
+        ?int $maxSizeBytes = null,
+    ): RequestObjectBag {
         return $this->fromToken(
             $this->requestUriFetcher->fetch(
                 $requestUri,

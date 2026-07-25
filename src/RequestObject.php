@@ -102,10 +102,15 @@ class RequestObject
         ?Client $client = null,
         ?CacheInterface $cache = null,
         array $httpClientConfig = [],
+        int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
-        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client, $httpClientConfig);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
+            $client,
+            $httpClientConfig,
+            $maxFetchSizeBytes,
+        );
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
     }
 

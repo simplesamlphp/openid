@@ -154,6 +154,8 @@ class Federation
      * resolution. Together with $trustChainResolveTimeout this bounds one resolution as a whole, which the per-node
      * depth and authority hints limits can not do on their own.
      * @param int $trustChainResolveTimeout Wall clock deadline, in seconds, for a single Trust Chain resolution.
+     * @param int $maxFetchSizeBytes Maximum response body size to read for any single fetch (entity statements,
+     * subordinate listings, JWKS documents).
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -172,6 +174,7 @@ class Federation
         int $maxAuthorityHints = 6,
         int $maxTrustChainFetches = 100,
         int $trustChainResolveTimeout = 30,
+        int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
@@ -182,7 +185,11 @@ class Federation
         $this->trustChainResolveTimeout = min(300, max(1, $trustChainResolveTimeout));
         $this->maxDiscoveryDepth = max(1, $maxDiscoveryDepth);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
-        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($client, $httpClientConfig);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
+            $client,
+            $httpClientConfig,
+            $maxFetchSizeBytes,
+        );
     }
 
 

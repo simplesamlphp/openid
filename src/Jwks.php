@@ -85,12 +85,17 @@ class Jwks
         protected readonly ?LoggerInterface $logger = null,
         ?Client $httpClient = null,
         array $httpClientConfig = [],
+        int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
-        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build($httpClient, $httpClientConfig);
+        $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
+            $httpClient,
+            $httpClientConfig,
+            $maxFetchSizeBytes,
+        );
     }
 
 

@@ -21,15 +21,12 @@ final class RequestUriFetcherTest extends TestCase
 
     protected MockObject $responseMock;
 
-    protected MockObject $responseBodyMock;
-
 
     protected function setUp(): void
     {
         $this->artifactFetcherMock = $this->createMock(ArtifactFetcher::class);
         $this->responseMock = $this->createMock(ResponseInterface::class);
-        $this->responseBodyMock = $this->createMock(StreamInterface::class);
-        $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
+        $this->responseMock->method('getBody')->willReturn($this->createStub(StreamInterface::class));
     }
 
 
@@ -52,19 +49,12 @@ final class RequestUriFetcherTest extends TestCase
     {
         $this->artifactFetcherMock->expects($this->once())
             ->method('fromNetwork')
-            ->with('https://example.com/request.jwt', HttpMethodsEnum::GET, [
-                'timeout' => 5,
-                'stream' => true,
-            ])
+            ->with('https://example.com/request.jwt', HttpMethodsEnum::GET, ['timeout' => 5], null)
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->exactly(2))
-            ->method('eof')
-            ->willReturnOnConsecutiveCalls(false, true);
-
-        $this->responseBodyMock->expects($this->once())
-            ->method('read')
-            ->with(8192)
+        $this->artifactFetcherMock->expects($this->once())
+            ->method('readResponseBodyAsString')
+            ->with($this->responseMock, null)
             ->willReturn('jwt-token-content');
 
         $result = $this->sut()->fetch('https://example.com/request.jwt');
@@ -72,20 +62,18 @@ final class RequestUriFetcherTest extends TestCase
     }
 
 
-    public function testThrowsIfContentExceedsMaxSize(): void
+    public function testPassesMaxSizeToTransferAndBodyRead(): void
     {
+        // The limit has to reach the transfer itself, not only the read that follows it.
         $this->artifactFetcherMock->expects($this->once())
             ->method('fromNetwork')
+            ->with('https://example.com/request.jwt', HttpMethodsEnum::GET, ['timeout' => 5], 10)
             ->willReturn($this->responseMock);
 
-        $this->responseBodyMock->expects($this->once())
-            ->method('eof')
-            ->willReturn(false);
-
-        $this->responseBodyMock->expects($this->once())
-            ->method('read')
-            ->with(8192)
-            ->willReturn(str_repeat('a', 11)); // larger than max size 10
+        $this->artifactFetcherMock->expects($this->once())
+            ->method('readResponseBodyAsString')
+            ->with($this->responseMock, 10)
+            ->willThrowException(new FetchException('Response body size exceeded the limit of 10 bytes.'));
 
         $this->expectException(FetchException::class);
         $this->expectExceptionMessage('exceeded the limit');

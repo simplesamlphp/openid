@@ -117,6 +117,7 @@ class JwksFetcher
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
+            $jwksJson = $this->httpClientDecorator->readResponseBodyAsString($response);
         } catch (HttpException $httpException) {
             $this->logger?->error(
                 'Error trying to get JWKS from URI: ' . $httpException->getMessage(),
@@ -125,7 +126,6 @@ class JwksFetcher
             return null;
         }
 
-        $jwksJson = $response->getBody()->getContents();
         $this->logger?->info(
             'Successful HTTP response for JWKS URI fetch, trying to decode it.',
             ['uri' => $uri, 'jwksJson' => $jwksJson],
@@ -185,6 +185,7 @@ class JwksFetcher
 
         try {
             $response = $this->httpClientDecorator->request(HttpMethodsEnum::GET, $uri);
+            $token = $this->httpClientDecorator->readResponseBodyAsString($response);
         } catch (HttpException $httpException) {
             $this->logger?->error(
                 'Error trying to get Signed JWKS from URI: ' . $httpException->getMessage(),
@@ -193,7 +194,6 @@ class JwksFetcher
             return null;
         }
 
-        $token = $response->getBody()->getContents();
         $this->logger?->info('Successful HTTP response for Signed JWKS fetch.', ['uri' => $uri, 'token' => $token]);
         $this->logger?->debug('Proceeding to Signed JWKS instance building.');
 

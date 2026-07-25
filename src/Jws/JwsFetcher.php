@@ -133,7 +133,7 @@ class JwsFetcher extends AbstractJwsFetcher
             throw new FetchException($message);
         }
 
-        $token = $response->getBody()->getContents();
+        $token = $this->artifactFetcher->readResponseBodyAsString($response);
         $this->logger?->debug('Successful HTTP response for JWS fetch.', ['uri' => $uri, 'token' => $token]);
         $this->logger?->debug('Proceeding to JWS instance building.');
 

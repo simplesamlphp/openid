@@ -26,33 +26,22 @@ class RequestUriFetcher
      *
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fetch(string $uri, int $timeout = 5, int $maxSizeBytes = 102400): string
+    public function fetch(string $uri, int $timeout = 5, ?int $maxSizeBytes = null): string
     {
         if (!str_starts_with(strtolower($uri), 'https://')) {
             throw new FetchException('The request_uri MUST use the https scheme.');
         }
 
         try {
-            $response = $this->artifactFetcher->fromNetwork($uri, HttpMethodsEnum::GET, [
-                'timeout' => $timeout,
-                'stream' => true,
-            ]);
+            // The size limit is applied to the transfer itself, not only to the read that follows.
+            $response = $this->artifactFetcher->fromNetwork(
+                $uri,
+                HttpMethodsEnum::GET,
+                ['timeout' => $timeout],
+                $maxSizeBytes,
+            );
 
-            $body = $response->getBody();
-            $content = '';
-
-            while (!$body->eof()) {
-                $chunk = $body->read(8192);
-                $content .= $chunk;
-
-                if (strlen($content) > $maxSizeBytes) {
-                    throw new FetchException(
-                        'The request_uri response body size exceeded the limit of ' . $maxSizeBytes . ' bytes.',
-                    );
-                }
-            }
-
-            return $content;
+            return $this->artifactFetcher->readResponseBodyAsString($response, $maxSizeBytes);
         } catch (\Throwable $throwable) {
             if ($throwable instanceof FetchException) {
                 throw $throwable;

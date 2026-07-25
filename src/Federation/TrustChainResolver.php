@@ -190,7 +190,6 @@ class TrustChainResolver
      * @param non-empty-string $entityId
      * @param non-empty-array<non-empty-string> $trustAnchorIds
      * @param \SimpleSAML\OpenID\Federation\EntityStatement[] $populatedChain
-     * @param int $depth
      * @return array<array<non-empty-string,\SimpleSAML\OpenID\Federation\EntityStatement>>
      * @throws \SimpleSAML\OpenID\Exceptions\TrustChainResolutionBudgetException
      */

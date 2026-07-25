@@ -73,16 +73,18 @@ class ArtifactFetcher
 
     /**
      * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
+     * @param ?int $maxSizeBytes Overrides the configured maximum response body size for this single request.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
     public function fromNetwork(
         string $uri,
         HttpMethodsEnum $httpMethodsEnum = HttpMethodsEnum::GET,
         array $options = [],
+        ?int $maxSizeBytes = null,
     ): ResponseInterface {
         $this->logger?->debug('Fetching artifact on network from URI.', ['uri' => $uri]);
         try {
-            $response = $this->httpClientDecorator->request($httpMethodsEnum, $uri, $options);
+            $response = $this->httpClientDecorator->request($httpMethodsEnum, $uri, $options, $maxSizeBytes);
         } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',
@@ -100,13 +102,31 @@ class ArtifactFetcher
 
 
     /**
+     * Read a response body into a string, up to the maximum size allowed by the HTTP client decorator.
+     *
+     * @param ?int $maxSizeBytes Overrides the configured maximum for this single read.
+     * @throws \SimpleSAML\OpenID\Exceptions\FetchException
+     */
+    public function readResponseBodyAsString(ResponseInterface $response, ?int $maxSizeBytes = null): string
+    {
+        try {
+            return $this->httpClientDecorator->readResponseBodyAsString($response, $maxSizeBytes);
+        } catch (Throwable $throwable) {
+            $message = 'Error reading HTTP response body. Error was: ' . $throwable->getMessage();
+            $this->logger?->error($message);
+            throw new FetchException($message, (int)$throwable->getCode(), $throwable);
+        }
+    }
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
     public function fromNetworkAsString(string $uri): string
     {
         $this->logger?->debug('Fetching artifact on network from URI (as string).', ['uri' => $uri]);
 
-        $artifact = $this->fromNetwork($uri)->getBody()->getContents();
+        $artifact = $this->readResponseBodyAsString($this->fromNetwork($uri));
 
         $this->logger?->debug(
             'Fetched artifact on network from URI as string.',

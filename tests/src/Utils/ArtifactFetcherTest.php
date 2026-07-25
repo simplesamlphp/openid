@@ -14,6 +14,7 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
 use SimpleSAML\OpenID\Exceptions\FetchException;
+use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 
 #[CoversClass(ArtifactFetcher::class)]
@@ -27,8 +28,6 @@ final class ArtifactFetcherTest extends TestCase
 
     protected MockObject $responseMock;
 
-    protected MockObject $responseBodyMock;
-
 
     protected function setUp(): void
     {
@@ -37,8 +36,7 @@ final class ArtifactFetcherTest extends TestCase
         $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->responseMock = $this->createMock(ResponseInterface::class);
-        $this->responseBodyMock = $this->createMock(StreamInterface::class);
-        $this->responseMock->method('getBody')->willReturn($this->responseBodyMock);
+        $this->responseMock->method('getBody')->willReturn($this->createStub(StreamInterface::class));
     }
 
 
@@ -146,11 +144,38 @@ final class ArtifactFetcherTest extends TestCase
     }
 
 
+    public function testCanReadResponseBodyAsString(): void
+    {
+        $this->httpClientDecoratorMock->expects($this->once())
+            ->method('readResponseBodyAsString')
+            ->with($this->responseMock, 512)
+            ->willReturn('artifact');
+
+        $this->assertSame('artifact', $this->sut()->readResponseBodyAsString($this->responseMock, 512));
+    }
+
+
+    public function testWrapsErrorWhileReadingResponseBody(): void
+    {
+        $this->httpClientDecoratorMock->method('readResponseBodyAsString')
+            ->willThrowException(new HttpException('Response body size exceeded the limit of 10 bytes.'));
+
+        $this->loggerMock->expects($this->atLeastOnce())
+            ->method('error')
+            ->with($this->stringContains('exceeded the limit'));
+
+        $this->expectException(FetchException::class);
+        $this->expectExceptionMessage('exceeded the limit');
+
+        $this->sut()->readResponseBodyAsString($this->responseMock);
+    }
+
+
     public function testCanFetchFromNetworkAsString(): void
     {
         $this->httpClientDecoratorMock->expects($this->once())->method('request')
             ->willReturn($this->responseMock);
-        $this->responseBodyMock->method('getContents')->willReturn('artifact');
+        $this->httpClientDecoratorMock->method('readResponseBodyAsString')->willReturn('artifact');
 
         $this->assertSame('artifact', $this->sut()->fromNetworkAsString('uri'));
     }
