@@ -396,6 +396,93 @@ final class HttpClientDecoratorTest extends TestCase
     }
 
 
+    public function testTimeoutCeilingUsesKnownClientTimeoutWhenSmaller(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400, 10.0);
+
+        $this->assertEqualsWithDelta(10.0, $sut->timeoutCeilingOptions(microtime(true) + 28.0)[RequestOptions::TIMEOUT], PHP_FLOAT_EPSILON);
+    }
+
+
+    public function testTimeoutCeilingUsesCeilingWhenSmaller(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400, 10.0);
+
+        $this->assertEqualsWithDelta(
+            3.5,
+            $sut->timeoutCeilingOptions(microtime(true) + 3.5)[RequestOptions::TIMEOUT],
+            0.5,
+        );
+    }
+
+
+    public function testTimeoutCeilingAppliesWhenClientTimeoutIsUnknown(): void
+    {
+        // A pre-built client may carry no timeout at all, so the ceiling is the only bound available.
+        $sut = new HttpClientDecorator($this->clientMock, 102400);
+
+        $this->assertNull($sut->getRequestTimeout());
+        $this->assertEqualsWithDelta(
+            28.0,
+            $sut->timeoutCeilingOptions(microtime(true) + 28.0)[RequestOptions::TIMEOUT],
+            0.5,
+        );
+    }
+
+
+    public function testTimeoutCeilingCutsAnOverrunningRedirectChain(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400);
+
+        // "timeout" only bounds a single hop, so the chain is cut here once the ceiling has really passed.
+        $deadlineCallback = $sut->timeoutCeilingOptions(microtime(true) + 0.01)[RequestOptions::PROGRESS];
+
+        usleep(20000);
+
+        $this->expectException(HttpException::class);
+        $this->expectExceptionMessage('exceeded the maximum allowed duration');
+
+        $deadlineCallback($this->responseInterfaceMock);
+    }
+
+
+    public function testTimeoutCeilingLetsATimelyRedirectChainThrough(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400);
+
+        $deadlineCallback = $sut->timeoutCeilingOptions(microtime(true) + 30.0)[RequestOptions::PROGRESS];
+        $deadlineCallback($this->responseInterfaceMock);
+
+        $this->expectNotToPerformAssertions();
+    }
+
+
+    public function testTimeoutCeilingNeverBecomesUnbounded(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400);
+
+        // Guzzle reads 0 as "no timeout", so a spent budget must not turn into an unbounded request.
+        $timeout = $sut->timeoutCeilingOptions(microtime(true))[RequestOptions::TIMEOUT];
+        $this->assertGreaterThan(0, $timeout);
+
+        $timeout = $sut->timeoutCeilingOptions(microtime(true) - 5.0)[RequestOptions::TIMEOUT];
+        $this->assertGreaterThan(0, $timeout);
+    }
+
+
+    public function testDisabledClientTimeoutIsTreatedAsUnknown(): void
+    {
+        $sut = new HttpClientDecorator($this->clientMock, 102400, 0.0);
+
+        $this->assertNull($sut->getRequestTimeout());
+        $this->assertEqualsWithDelta(
+            28.0,
+            $sut->timeoutCeilingOptions(microtime(true) + 28.0)[RequestOptions::TIMEOUT],
+            0.5,
+        );
+    }
+
+
     public function testMaxFetchSizeBytesIsClamped(): void
     {
         $this->assertSame(1, $this->sut(maxFetchSizeBytes: 0)->getMaxFetchSizeBytes());

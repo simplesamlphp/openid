@@ -102,6 +102,18 @@ class ArtifactFetcher
 
 
     /**
+     * Request options that stop a single request from running longer than the given number of seconds.
+     *
+     * @see \SimpleSAML\OpenID\Decorators\HttpClientDecorator::timeoutCeilingOptions()
+     * @return array<string,mixed>
+     */
+    public function timeoutCeilingOptions(float $deadlineTimestamp): array
+    {
+        return $this->httpClientDecorator->timeoutCeilingOptions($deadlineTimestamp);
+    }
+
+
+    /**
      * Read a response body into a string, up to the maximum size allowed by the HTTP client decorator.
      *
      * @param ?int $maxSizeBytes Overrides the configured maximum for this single read.

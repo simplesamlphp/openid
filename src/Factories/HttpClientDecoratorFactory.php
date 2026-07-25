@@ -40,6 +40,8 @@ class HttpClientDecoratorFactory
      *        pre-built $client) does not apply to requests made through the decorator. Pass them per request
      *        instead, which for "sink" also opts that request out of the size cap. Guzzle features that swap
      *        the sink out mid transfer, notably digest "auth", likewise bypass the cap during their retries.
+     *        The same applies to "progress", which fetches made under a duration ceiling use to hold that
+     *        ceiling across a redirect chain.
      */
     public function build(
         ?Client $client = null,
@@ -52,6 +54,8 @@ class HttpClientDecoratorFactory
                 'handling do not apply. The supplied client is expected to set equivalent options itself.',
             );
 
+            // The decorator reads the timeout off the client itself, so a duration ceiling imposed later can
+            // only ever shorten what this client was already configured with.
             return new HttpClientDecorator($client, $maxFetchSizeBytes);
         }
 

@@ -577,6 +577,83 @@ final class TrustChainResolverTest extends TestCase
     }
 
 
+    public function testPassesResolutionDeadlineDownToEachFetch(): void
+    {
+        $sut = $this->sut(trustChainResolveTimeout: 30);
+        $observedDeadlines = [];
+        $startedAt = microtime(true);
+
+        $this->entityStatementFetcherMock
+            ->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(function (
+                string $entityId,
+                mixed $wellKnownEnum = null,
+                ?float $deadlineTimestamp = null,
+            ) use (&$observedDeadlines): EntityStatement {
+                $observedDeadlines[] = $deadlineTimestamp;
+
+                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
+            });
+
+        $this->leafEntityConfigurationMock->method('getAuthorityHints')->willReturn(['i']);
+        $this->intermediateEntityConfigurationMock->method('getAuthorityHints')->willReturn(['t']);
+
+        $sut->getConfigurationChains('l', ['t']);
+
+        $this->assertCount(3, $observedDeadlines);
+
+        foreach ($observedDeadlines as $deadline) {
+            $this->assertNotNull($deadline, 'Every fetch has to be bounded by the resolution deadline.');
+            $this->assertGreaterThan($startedAt, $deadline);
+            // The budget opens once the call is under way, a moment after the time captured above.
+            $this->assertLessThanOrEqual($startedAt + 31, $deadline);
+        }
+    }
+
+
+    public function testFetchDeadlineDoesNotRestartAsBudgetIsSpent(): void
+    {
+        $sut = $this->getMockBuilder(TrustChainResolver::class)
+            ->setConstructorArgs($this->sutConstructorArgs(trustChainResolveTimeout: 30))
+            ->onlyMethods(['currentTimestamp'])
+            ->getMock();
+
+        // Budget opens at 0, so the deadline is at 30. Each fetch then takes 10 seconds of it.
+        $now = 0.0;
+        // Bound by reference: an arrow function would capture the starting value and never see it move.
+        $sut->method('currentTimestamp')->willReturnCallback(function () use (&$now): float {
+            return $now;
+        });
+
+        $observedDeadlines = [];
+
+        $this->entityStatementFetcherMock
+            ->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(function (
+                string $entityId,
+                mixed $wellKnownEnum = null,
+                ?float $deadlineTimestamp = null,
+            ) use (
+                &$observedDeadlines,
+                &$now,
+            ): EntityStatement {
+                $observedDeadlines[] = $deadlineTimestamp;
+                $now += 10.0;
+
+                return $this->configChainSample[$entityId] ?? throw new \Exception('No entity.');
+            });
+
+        $this->leafEntityConfigurationMock->method('getAuthorityHints')->willReturn(['i']);
+        $this->intermediateEntityConfigurationMock->method('getAuthorityHints')->willReturn(['t']);
+
+        $sut->getConfigurationChains('l', ['t']);
+
+        // One fixed point in time for the whole resolution, so each fetch inherits what is genuinely left of
+        // it rather than a fresh allowance worked out before the previous fetch had spent its share.
+        $this->assertSame([30.0, 30.0, 30.0], $observedDeadlines);
+    }
+
+
     public function testCanGetMaxAuthorityHints(): void
     {
         $this->assertSame($this->maxAuthorityHints, $this->sut()->getMaxAuthorityHints());

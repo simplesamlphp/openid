@@ -56,6 +56,7 @@ class EntityStatementFetcher extends JwsFetcher
     public function fromCacheOrWellKnownEndpoint(
         string $entityId,
         WellKnownEnum $wellKnownEnum = WellKnownEnum::OpenIdFederation,
+        ?float $deadlineTimestamp = null,
     ): EntityStatement {
         $wellKnownUri = $wellKnownEnum->uriFor($entityId);
         $this->logger?->debug(
@@ -63,7 +64,7 @@ class EntityStatementFetcher extends JwsFetcher
             ['entityId' => $entityId, 'wellKnownUri' => $wellKnownUri, 'wellKnownEnum' => $wellKnownEnum],
         );
 
-        return $this->fromCacheOrNetwork($wellKnownUri);
+        return $this->fromCacheOrNetwork($wellKnownUri, $deadlineTimestamp);
     }
 
 
@@ -76,6 +77,7 @@ class EntityStatementFetcher extends JwsFetcher
     public function fromCacheOrFetchEndpoint(
         string $subjectId,
         EntityStatement $entityConfiguration,
+        ?float $deadlineTimestamp = null,
     ): EntityStatement {
         $fetchEndpointUri = $entityConfiguration->getFederationFetchEndpoint() ??
         throw new EntityStatementException('No fetch endpoint found in entity configuration.');
@@ -92,17 +94,23 @@ class EntityStatementFetcher extends JwsFetcher
                     ClaimsEnum::Sub->value => $subjectId,
                 ],
             ),
+            $deadlineTimestamp,
         );
     }
 
 
     /**
+     * @param ?float $deadlineTimestamp Point in time the network fetch must not run past, if one is reached for.
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromCacheOrNetwork(string $uri): EntityStatement
+    public function fromCacheOrNetwork(string $uri, ?float $deadlineTimestamp = null): EntityStatement
     {
-        return $this->fromCache($uri) ?? $this->fromNetwork($uri);
+        return $this->fromCache($uri) ?? $this->fromNetwork(
+            $uri,
+            HttpMethodsEnum::GET,
+            $this->timeoutCeilingOptions($deadlineTimestamp),
+        );
     }
 
 

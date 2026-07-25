@@ -80,9 +80,13 @@ class TrustMarkFetcher extends JwsFetcher
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromCacheOrNetwork(string $uri): TrustMark
+    public function fromCacheOrNetwork(string $uri, ?float $deadlineTimestamp = null): TrustMark
     {
-        return $this->fromCache($uri) ?? $this->fromNetwork($uri);
+        return $this->fromCache($uri) ?? $this->fromNetwork(
+            $uri,
+            HttpMethodsEnum::GET,
+            $this->timeoutCeilingOptions($deadlineTimestamp),
+        );
     }
 
 

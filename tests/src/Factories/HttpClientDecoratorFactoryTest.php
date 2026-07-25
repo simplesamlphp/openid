@@ -211,6 +211,32 @@ final class HttpClientDecoratorFactoryTest extends TestCase
     }
 
 
+    public function testKnowsRequestTimeoutFromDefaults(): void
+    {
+        $this->assertEqualsWithDelta(10.0, $this->sut()->build()->getRequestTimeout(), PHP_FLOAT_EPSILON);
+    }
+
+
+    public function testKnowsRequestTimeoutFromConfig(): void
+    {
+        $this->assertEqualsWithDelta(30.0, $this->sut()->build(null, ['timeout' => 30])->getRequestTimeout(), PHP_FLOAT_EPSILON);
+    }
+
+
+    public function testRequestTimeoutIsUnknownForPreBuiltClient(): void
+    {
+        // Its configuration belongs to whoever built it, so it is not assumed here.
+        $this->assertNull($this->sut()->build(new \GuzzleHttp\Client())->getRequestTimeout());
+    }
+
+
+    public function testDisabledTimeoutIsReportedAsUnknown(): void
+    {
+        // Otherwise it would act as a ceiling of zero and reject every request.
+        $this->assertNull($this->sut()->build(null, ['timeout' => 0])->getRequestTimeout());
+    }
+
+
     public function testReportsThatPreBuiltClientSkipsDefaults(): void
     {
         $this->loggerMock->expects($this->once())

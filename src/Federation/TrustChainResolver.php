@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Federation;
 
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Codebooks\WellKnownEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\TrustChainException;
@@ -113,6 +114,22 @@ class TrustChainResolver
         );
         $this->logger?->error($message, $debugInfo);
         throw new TrustChainResolutionBudgetException($message);
+    }
+
+
+    /**
+     * The deadline of the resolution in progress, or null when none is in progress.
+     *
+     * Handed down as a ceiling for individual fetches. The deadline can only be checked between fetches, so
+     * without this a single fetch that never returns would keep a worker for as long as its own timeout
+     * allows, which is unbounded for a client the consumer built and configured without one.
+     *
+     * An absolute point in time rather than a remaining duration, so that time spent on the way to the
+     * request counts against it instead of the request starting a fresh allowance.
+     */
+    protected function resolutionDeadline(): ?float
+    {
+        return $this->trustChainResolveDeadline;
     }
 
 
@@ -244,7 +261,13 @@ class TrustChainResolver
 
         try {
             $this->logger?->debug('Fetching entity configuration statement.', $debugStartInfo);
-            $entityConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($entityId);
+            // Positional on purpose: a subclass of the fetcher may name its parameters differently, and a
+            // named argument would then fail against that override.
+            $entityConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint(
+                $entityId,
+                WellKnownEnum::OpenIdFederation,
+                $this->resolutionDeadline(),
+            );
             $this->logger?->debug(
                 'Fetched entity configuration statement.',
                 [...$debugStartInfo, 'entityConfigPayload' => $entityConfig->getPayload(),],
@@ -254,6 +277,11 @@ class TrustChainResolver
                 'Unable to fetch entity configuration statement, error was: ' . $throwable->getMessage(),
                 $debugStartInfo,
             );
+
+            // The fetch is bounded by what is left of the budget, so it may well have failed because that ran
+            // out. Report the real cause instead of letting it look like an ordinary problem with this path.
+            $this->checkResolutionDeadline($debugStartInfo);
+
             return $configurationChains;
         }
 
@@ -434,7 +462,11 @@ class TrustChainResolver
                                 $this->consumeResolutionBudget($debugConfigChainResolveInfo);
                                 array_unshift(
                                     $currenChainElements,
-                                    $this->entityStatementFetcher->fromCacheOrFetchEndpoint($id, $previousEntity),
+                                    $this->entityStatementFetcher->fromCacheOrFetchEndpoint(
+                                        $id,
+                                        $previousEntity,
+                                        $this->resolutionDeadline(),
+                                    ),
                                 );
                             }
 
@@ -459,6 +491,11 @@ class TrustChainResolver
                         ),
                         $debugConfigChainResolveInfo,
                     );
+
+                    // As above: a subordinate statement fetch is bounded by the remaining budget, so check
+                    // whether running out of it is what actually went wrong here.
+                    $this->checkResolutionDeadline($debugConfigChainResolveInfo);
+
                     continue;
                 }
             }

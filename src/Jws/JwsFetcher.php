@@ -45,12 +45,29 @@ class JwsFetcher extends AbstractJwsFetcher
 
 
     /**
+     * @param ?float $deadlineTimestamp Point in time the network fetch must not run past, if one is reached for.
+     * Lets a caller holding a budget for a whole operation bound each request it is made of.
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromCacheOrNetwork(string $uri): ParsedJws
+    public function fromCacheOrNetwork(string $uri, ?float $deadlineTimestamp = null): ParsedJws
     {
-        return $this->fromCache($uri) ?? $this->fromNetwork($uri);
+        return $this->fromCache($uri) ?? $this->fromNetwork(
+            $uri,
+            HttpMethodsEnum::GET,
+            $this->timeoutCeilingOptions($deadlineTimestamp),
+        );
+    }
+
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected function timeoutCeilingOptions(?float $deadlineTimestamp): array
+    {
+        return is_null($deadlineTimestamp) ?
+        [] :
+        $this->artifactFetcher->timeoutCeilingOptions($deadlineTimestamp);
     }
 
 

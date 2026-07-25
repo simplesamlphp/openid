@@ -41,21 +41,127 @@ class HttpClientDecorator
 
     protected const BODY_READ_CHUNK_SIZE_BYTES = 8192;
 
+    /**
+     * Floor for a computed timeout ceiling. Guzzle reads 0 as "no timeout", so a budget that has run down to
+     * nothing must not be allowed to turn into an unbounded request.
+     */
+    protected const MIN_REQUEST_TIMEOUT_SECONDS = 0.001;
+
 
     protected int $maxFetchSizeBytes;
+
+    /**
+     * The request timeout the client is known to be configured with, or null when it can not be known (a
+     * pre-built client, whose configuration belongs to whoever built it).
+     */
+    protected ?float $requestTimeout;
 
 
     public function __construct(
         public readonly Client $client = new Client(self::DEFAULT_HTTP_CLIENT_CONFIG),
         int $maxFetchSizeBytes = self::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?float $requestTimeout = null,
     ) {
         $this->maxFetchSizeBytes = max(1, $maxFetchSizeBytes);
+        $this->requestTimeout = $this->resolveRequestTimeout($requestTimeout);
+    }
+
+
+    /**
+     * Falls back to reading the timeout off the client, so that a duration ceiling imposed later can only ever
+     * shorten what the client was already configured with, never lengthen it.
+     *
+     * Reading configuration back off a client is deprecated in Guzzle, but it is the only way to see a timeout
+     * belonging to a client built elsewhere. A timeout that cannot be established, or one that is disabled, is
+     * reported as unknown so that it can never act as a ceiling of zero.
+     */
+    protected function resolveRequestTimeout(?float $requestTimeout): ?float
+    {
+        $configuredTimeout = $requestTimeout ?? $this->client->getConfig(RequestOptions::TIMEOUT);
+
+        return (is_numeric($configuredTimeout) && $configuredTimeout > 0) ? (float)$configuredTimeout : null;
     }
 
 
     public function getMaxFetchSizeBytes(): int
     {
         return $this->maxFetchSizeBytes;
+    }
+
+
+    public function getRequestTimeout(): ?float
+    {
+        return $this->requestTimeout;
+    }
+
+
+    /**
+     * Request options that stop a single request from running longer than the given number of seconds.
+     *
+     * Meant for callers that hold a budget for a whole operation: a per-request timeout on the client cannot
+     * bound an operation made of many requests, and a client supplied by the consumer may carry no timeout at
+     * all. Per-request options take precedence over client configuration for every client, so this bounds the
+     * request whatever the client was built with.
+     *
+     * The known client timeout still wins when it is the smaller of the two, so this only ever tightens.
+     *
+     * Note on redirects: Guzzle applies "timeout" to each hop separately, so the two callbacks below are what
+     * hold the ceiling over a chain as a whole. The progress callback covers a hop that stalls without ever
+     * sending headers, but only where the handler reports progress, as cURL does. Behind a handler that
+     * reports none, a chain can still outlast the ceiling by up to one hop's timeout. Configure
+     * "allow_redirects" more tightly (or off) where that matters.
+     *
+     * @return array<string,mixed>
+     */
+    public function timeoutCeilingOptions(float $deadlineTimestamp): array
+    {
+        // Taken as an absolute point in time rather than a duration, so that whatever happened between the
+        // caller working out its budget and the request going out (a cache lookup, say) is already accounted
+        // for, instead of the request starting a fresh allowance of a duration decided earlier.
+        $maxDurationSeconds = max(self::MIN_REQUEST_TIMEOUT_SECONDS, $deadlineTimestamp - microtime(true));
+
+        return [
+            RequestOptions::TIMEOUT => $this->perHopTimeout($maxDurationSeconds),
+            // Fires once per response, so it cuts a redirect chain that has outlived the ceiling even where
+            // the handler in use gives no progress notifications.
+            RequestOptions::ON_HEADERS => $this->buildDeadlineCallback($deadlineTimestamp, $maxDurationSeconds),
+            // "timeout" is applied to each redirect hop separately, so on a redirect chain it bounds a single
+            // hop rather than the fetch as a whole: every hop would otherwise be handed the full ceiling
+            // again. This callback runs throughout the transfer, including on a hop that never sends headers,
+            // and holds the ceiling across the chain as a whole.
+            RequestOptions::PROGRESS => $this->buildDeadlineCallback($deadlineTimestamp, $maxDurationSeconds),
+        ];
+    }
+
+
+    /**
+     * The timeout to give a single hop, given how long the request as a whole still has.
+     */
+    protected function perHopTimeout(float $maxDurationSeconds): float
+    {
+        return is_null($this->requestTimeout) ?
+        $maxDurationSeconds :
+        min($this->requestTimeout, $maxDurationSeconds);
+    }
+
+
+    /**
+     * Aborts a request that has outlived the ceiling, however many redirect hops it took to get there.
+     */
+    protected function buildDeadlineCallback(float $deadlineTimestamp, float $maxDurationSeconds): callable
+    {
+        return function () use ($deadlineTimestamp, $maxDurationSeconds): void {
+            if (microtime(true) <= $deadlineTimestamp) {
+                return;
+            }
+
+            throw new HttpException(
+                sprintf(
+                    'Request exceeded the maximum allowed duration of %s seconds.',
+                    $maxDurationSeconds,
+                ),
+            );
+        };
     }
 
 
