@@ -400,7 +400,11 @@ final class HttpClientDecoratorTest extends TestCase
     {
         $sut = new HttpClientDecorator($this->clientMock, 102400, 10.0);
 
-        $this->assertEqualsWithDelta(10.0, $sut->timeoutCeilingOptions(microtime(true) + 28.0)[RequestOptions::TIMEOUT], PHP_FLOAT_EPSILON);
+        $this->assertEqualsWithDelta(
+            10.0,
+            $sut->timeoutCeilingOptions(microtime(true) + 28.0)[RequestOptions::TIMEOUT],
+            PHP_FLOAT_EPSILON,
+        );
     }
 
 

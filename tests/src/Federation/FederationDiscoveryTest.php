@@ -557,7 +557,7 @@ final class FederationDiscoveryTest extends TestCase
         $wellKnownFetches = [];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) use ($configs, &$wellKnownFetches) {
+            ->willReturnCallback(function (string $entityId) use ($configs, &$wellKnownFetches): \PHPUnit\Framework\MockObject\MockObject {
                 $wellKnownFetches[] = $entityId;
 
                 return $configs[$entityId] ?? throw new \Exception('No entity.');
@@ -588,7 +588,7 @@ final class FederationDiscoveryTest extends TestCase
         ];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+            ->willReturnCallback(fn(string $entityId): \PHPUnit\Framework\MockObject\MockObject => $configs[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->subordinateListingFetcherMock->method('fetch')->willReturn(['a', 'b', 'c']);
 
@@ -628,7 +628,7 @@ final class FederationDiscoveryTest extends TestCase
         $fetched = [];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched) {
+            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched): \PHPUnit\Framework\MockObject\MockObject {
                 $fetched[] = $entityId;
 
                 return $configs[$entityId] ?? throw new \Exception('No entity.');
@@ -657,7 +657,7 @@ final class FederationDiscoveryTest extends TestCase
         ];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+            ->willReturnCallback(fn(string $entityId): \PHPUnit\Framework\MockObject\MockObject => $configs[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->subordinateListingFetcherMock->method('fetch')
             ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
@@ -692,7 +692,7 @@ final class FederationDiscoveryTest extends TestCase
         $fetched = [];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched) {
+            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched): \PHPUnit\Framework\MockObject\MockObject {
                 $fetched[] = $entityId;
 
                 return $configs[$entityId] ?? throw new \Exception('No entity.');
@@ -724,7 +724,7 @@ final class FederationDiscoveryTest extends TestCase
         ];
 
         $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
-            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+            ->willReturnCallback(fn(string $entityId): \PHPUnit\Framework\MockObject\MockObject => $configs[$entityId] ?? throw new \Exception('No entity.'));
 
         $this->subordinateListingFetcherMock->method('fetch')
             ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
@@ -743,6 +743,7 @@ final class FederationDiscoveryTest extends TestCase
                 foreach ([$taId, 'deep', 'x', 'leaf'] as $expectedId) {
                     $this->assertArrayHasKey($expectedId, $entities);
                 }
+
                 return true;
             }), $this->anything());
 

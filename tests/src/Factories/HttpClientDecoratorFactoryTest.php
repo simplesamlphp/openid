@@ -219,7 +219,11 @@ final class HttpClientDecoratorFactoryTest extends TestCase
 
     public function testKnowsRequestTimeoutFromConfig(): void
     {
-        $this->assertEqualsWithDelta(30.0, $this->sut()->build(null, ['timeout' => 30])->getRequestTimeout(), PHP_FLOAT_EPSILON);
+        $this->assertEqualsWithDelta(
+            30.0,
+            $this->sut()->build(null, ['timeout' => 30])->getRequestTimeout(),
+            PHP_FLOAT_EPSILON,
+        );
     }
 
 
