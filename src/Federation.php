@@ -70,6 +70,12 @@ class Federation
 
     protected int $maxDiscoveryDepth;
 
+    protected int $maxDiscoveredEntities;
+
+    protected int $maxSubordinatesPerListing;
+
+    protected int $maxListingFetchSizeBytes;
+
     protected ?CacheDecorator $cacheDecorator;
 
     protected HttpClientDecorator $httpClientDecorator;
@@ -155,7 +161,12 @@ class Federation
      * depth and authority hints limits can not do on their own.
      * @param int $trustChainResolveTimeout Wall clock deadline, in seconds, for a single Trust Chain resolution.
      * @param int $maxFetchSizeBytes Maximum response body size to read for any single fetch (entity statements,
-     * subordinate listings, JWKS documents).
+     * JWKS documents). Subordinate listings and entity collections have their own, larger allowance.
+     * @param int $maxDiscoveredEntities Total number of entities a single federation discovery may collect.
+     * @param int $maxSubordinatesPerListing Maximum number of entity IDs taken from a single listing.
+     * @param int $maxListingFetchSizeBytes Maximum response body size to read for a subordinate listing or an
+     * entity collection. Larger than $maxFetchSizeBytes by default, since these responses grow with the size
+     * of the federation rather than being one statement each.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -175,6 +186,9 @@ class Federation
         int $maxTrustChainFetches = 100,
         int $trustChainResolveTimeout = 30,
         int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        int $maxDiscoveredEntities = FederationDiscovery::DEFAULT_MAX_DISCOVERED_ENTITIES,
+        int $maxSubordinatesPerListing = SubordinateListingFetcher::DEFAULT_MAX_SUBORDINATES,
+        int $maxListingFetchSizeBytes = SubordinateListingFetcher::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
@@ -183,7 +197,12 @@ class Federation
         $this->maxAuthorityHints = min(12, max(1, $maxAuthorityHints));
         $this->maxTrustChainFetches = min(1000, max(1, $maxTrustChainFetches));
         $this->trustChainResolveTimeout = min(300, max(1, $trustChainResolveTimeout));
-        $this->maxDiscoveryDepth = max(1, $maxDiscoveryDepth);
+        // Clamped at both ends, as maxTrustChainDepth is. Left open ended, the traversal could be told to go
+        // arbitrarily deep.
+        $this->maxDiscoveryDepth = min(20, max(1, $maxDiscoveryDepth));
+        $this->maxDiscoveredEntities = min(100000, max(1, $maxDiscoveredEntities));
+        $this->maxSubordinatesPerListing = min(10000, max(1, $maxSubordinatesPerListing));
+        $this->maxListingFetchSizeBytes = max(1, $maxListingFetchSizeBytes);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
             $client,
@@ -387,6 +406,8 @@ class Federation
             $this->helpers(),
             $this->maxCacheDurationDecorator(),
             $this->logger,
+            $this->maxSubordinatesPerListing,
+            $this->maxListingFetchSizeBytes,
         );
     }
 
@@ -431,6 +452,8 @@ class Federation
                 $this->helpers(),
                 $this->logger,
                 $this->maxDiscoveryDepth,
+                $this->maxDiscoveredEntities,
+                $this->maxListingFetchSizeBytes,
             );
         }
 
@@ -558,6 +581,30 @@ class Federation
     public function maxTrustChainDepth(): int
     {
         return $this->maxTrustChainDepth;
+    }
+
+
+    public function maxDiscoveryDepth(): int
+    {
+        return $this->maxDiscoveryDepth;
+    }
+
+
+    public function maxDiscoveredEntities(): int
+    {
+        return $this->maxDiscoveredEntities;
+    }
+
+
+    public function maxSubordinatesPerListing(): int
+    {
+        return $this->maxSubordinatesPerListing;
+    }
+
+
+    public function maxListingFetchSizeBytes(): int
+    {
+        return $this->maxListingFetchSizeBytes;
     }
 
 

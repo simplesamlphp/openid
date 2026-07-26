@@ -44,13 +44,18 @@ final class SubordinateListingFetcherTest extends TestCase
     }
 
 
-    protected function sut(): SubordinateListingFetcher
-    {
+    protected function sut(
+        int $maxSubordinates = SubordinateListingFetcher::DEFAULT_MAX_SUBORDINATES,
+        int $maxFetchSizeBytes = SubordinateListingFetcher::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?\Psr\Log\LoggerInterface $logger = null,
+    ): SubordinateListingFetcher {
         return new SubordinateListingFetcher(
             $this->artifactFetcherMock,
             $this->helpersMock,
             $this->maxCacheDurationMock,
-            $this->createStub(\Psr\Log\LoggerInterface::class),
+            $logger ?? $this->createStub(\Psr\Log\LoggerInterface::class),
+            $maxSubordinates,
+            $maxFetchSizeBytes,
         );
     }
 
@@ -157,5 +162,70 @@ final class SubordinateListingFetcherTest extends TestCase
         $this->expectExceptionMessage('JSON array');
 
         $this->sut()->fetch($uri);
+    }
+
+
+    public function testTruncatesAnOversizedListing(): void
+    {
+        $subordinateIds = ['sub1', 'sub2', 'sub3', 'sub4'];
+        $loggerMock = $this->createMock(\Psr\Log\LoggerInterface::class);
+
+        $this->artifactFetcherMock->method('fromCacheAsString')->willReturn('["sub1","sub2","sub3","sub4"]');
+        $this->jsonHelperMock->method('decode')->willReturn($subordinateIds);
+        $this->typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturn($subordinateIds);
+
+        $loggerMock->expects($this->once())
+            ->method('warning')
+            ->with($this->stringContains('returned 4 entity IDs, while max 2 is allowed'));
+
+        $this->assertSame(
+            ['sub1', 'sub2'],
+            $this->sut(maxSubordinates: 2, logger: $loggerMock)->fetch('http://example.com/list'),
+        );
+    }
+
+
+    public function testLeavesAListingWithinTheCapAlone(): void
+    {
+        $subordinateIds = ['sub1', 'sub2'];
+        $loggerMock = $this->createMock(\Psr\Log\LoggerInterface::class);
+
+        $this->artifactFetcherMock->method('fromCacheAsString')->willReturn('["sub1","sub2"]');
+        $this->jsonHelperMock->method('decode')->willReturn($subordinateIds);
+        $this->typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturn($subordinateIds);
+
+        $loggerMock->expects($this->never())->method('warning');
+
+        $this->assertSame(
+            $subordinateIds,
+            $this->sut(maxSubordinates: 2, logger: $loggerMock)->fetch('http://example.com/list'),
+        );
+    }
+
+
+    public function testUsesItsOwnLargerFetchSizeAllowance(): void
+    {
+        $subordinateIds = ['sub1'];
+
+        $this->artifactFetcherMock->method('fromCacheAsString')->willReturn(null);
+        $this->jsonHelperMock->method('decode')->willReturn($subordinateIds);
+        $this->typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturn($subordinateIds);
+
+        // A listing grows with the federation, so it is not held to the entity statement sized limit.
+        $this->artifactFetcherMock->expects($this->once())
+            ->method('fromNetworkAsString')
+            ->with('http://example.com/list', SubordinateListingFetcher::DEFAULT_MAX_FETCH_SIZE_BYTES)
+            ->willReturn('["sub1"]');
+
+        $this->sut()->fetch('http://example.com/list');
+    }
+
+
+    public function testLimitsAreClamped(): void
+    {
+        $sut = $this->sut(maxSubordinates: 0, maxFetchSizeBytes: 0);
+
+        $this->assertSame(1, $sut->getMaxSubordinates());
+        $this->assertSame(1, $sut->getMaxFetchSizeBytes());
     }
 }

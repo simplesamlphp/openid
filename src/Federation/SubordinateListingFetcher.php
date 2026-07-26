@@ -16,12 +16,48 @@ use Throwable;
  */
 class SubordinateListingFetcher
 {
+    /**
+     * A listing is a flat JSON array of entity IDs, so it is larger than the entity statements and JWKS
+     * documents the general fetch size limit is sized for: a big federation can list many thousands of them.
+     */
+    public const DEFAULT_MAX_FETCH_SIZE_BYTES = 1048576;
+
+    public const DEFAULT_MAX_SUBORDINATES = 1000;
+
+
+    protected int $maxSubordinates;
+
+    protected int $maxFetchSizeBytes;
+
+
+    /**
+     * @param int $maxSubordinates Maximum number of entity IDs to take from a single listing. A listing
+     * endpoint is free to return as many as it likes, and every one of them costs a well-known fetch during
+     * discovery, so what is returned beyond this is dropped rather than walked.
+     * @param int $maxFetchSizeBytes Maximum response body size to read for a listing.
+     */
     public function __construct(
         protected readonly ArtifactFetcher $artifactFetcher,
         protected readonly Helpers $helpers,
         protected readonly DateIntervalDecorator $maxCacheDurationDecorator,
         protected readonly ?LoggerInterface $logger = null,
+        int $maxSubordinates = self::DEFAULT_MAX_SUBORDINATES,
+        int $maxFetchSizeBytes = self::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
+        $this->maxSubordinates = max(1, $maxSubordinates);
+        $this->maxFetchSizeBytes = max(1, $maxFetchSizeBytes);
+    }
+
+
+    public function getMaxSubordinates(): int
+    {
+        return $this->maxSubordinates;
+    }
+
+
+    public function getMaxFetchSizeBytes(): int
+    {
+        return $this->maxFetchSizeBytes;
     }
 
 
@@ -53,7 +89,7 @@ class SubordinateListingFetcher
         $this->logger?->debug('Fetching subordinate listing from network.', ['uri' => $uri, 'filters' => $filters]);
 
         try {
-            $responseBody = $this->artifactFetcher->fromNetworkAsString($uri);
+            $responseBody = $this->artifactFetcher->fromNetworkAsString($uri, $this->maxFetchSizeBytes);
             $this->logger?->debug('Fetched subordinate listing from network.', ['uri' => $uri]);
 
             $result = $this->decodeAndEnsureType($responseBody);
@@ -89,6 +125,39 @@ class SubordinateListingFetcher
             throw new EntityDiscoveryException('Subordinate listing response is not a JSON array.');
         }
 
-        return $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings($decoded, 'Subordinate Listing');
+        $subordinateIds = $this->helpers->type()->ensureArrayWithValuesAsNonEmptyStrings(
+            $decoded,
+            'Subordinate Listing',
+        );
+
+        return $this->capSubordinates($subordinateIds);
+    }
+
+
+    /**
+     * Take at most the allowed number of entity IDs from a listing.
+     *
+     * Dropping the rest rather than failing keeps an oversized listing from taking the whole discovery down
+     * with it, at the cost of an incomplete view, which is why it is reported.
+     *
+     * @param non-empty-string[] $subordinateIds
+     * @return non-empty-string[]
+     */
+    protected function capSubordinates(array $subordinateIds): array
+    {
+        if (($subordinateCount = count($subordinateIds)) <= $this->maxSubordinates) {
+            return $subordinateIds;
+        }
+
+        $this->logger?->warning(
+            sprintf(
+                'Subordinate listing returned %s entity IDs, while max %s is allowed. The listing is ' .
+                'truncated, so any discovery based on it is incomplete.',
+                $subordinateCount,
+                $this->maxSubordinates,
+            ),
+        );
+
+        return array_slice($subordinateIds, 0, $this->maxSubordinates);
     }
 }

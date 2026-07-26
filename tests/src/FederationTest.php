@@ -163,6 +163,7 @@ final class FederationTest extends TestCase
         ?int $maxAuthorityHints = null,
         ?int $maxTrustChainFetches = null,
         ?int $trustChainResolveTimeout = null,
+        ?int $maxDiscoveryDepth = null,
     ): Federation {
         $supportedAlgorithms ??= $this->supportedAlgorithmsMock;
         $supportedSerializers ??= $this->supportedSerializersMock;
@@ -175,6 +176,7 @@ final class FederationTest extends TestCase
         $maxAuthorityHints ??= $this->maxAuthorityHints;
         $maxTrustChainFetches ??= $this->maxTrustChainFetches;
         $trustChainResolveTimeout ??= $this->trustChainResolveTimeout;
+        $maxDiscoveryDepth ??= 10;
 
         return new Federation(
             $supportedAlgorithms,
@@ -185,6 +187,7 @@ final class FederationTest extends TestCase
             $cache,
             $logger,
             $client,
+            maxDiscoveryDepth: $maxDiscoveryDepth,
             maxAuthorityHints: $maxAuthorityHints,
             maxTrustChainFetches: $maxTrustChainFetches,
             trustChainResolveTimeout: $trustChainResolveTimeout,
@@ -211,6 +214,51 @@ final class FederationTest extends TestCase
         $this->assertSame(2, $trustChainResolver->getMaxAuthorityHints());
         $this->assertSame(25, $trustChainResolver->getMaxTrustChainFetches());
         $this->assertSame(15, $trustChainResolver->getTrustChainResolveTimeout());
+    }
+
+
+    public function testPassesDiscoveryLimits(): void
+    {
+        $sut = $this->sut();
+
+        $this->assertSame(
+            $sut->maxDiscoveredEntities(),
+            $sut->federationDiscovery()->getMaxDiscoveredEntities(),
+        );
+        $this->assertSame(
+            $sut->maxListingFetchSizeBytes(),
+            $sut->federationDiscovery()->getMaxFetchSizeBytes(),
+        );
+        $this->assertSame(
+            $sut->maxSubordinatesPerListing(),
+            $sut->subordinateListingFetcher()->getMaxSubordinates(),
+        );
+        $this->assertSame(
+            $sut->maxListingFetchSizeBytes(),
+            $sut->subordinateListingFetcher()->getMaxFetchSizeBytes(),
+        );
+    }
+
+
+    public function testListingsGetALargerFetchSizeAllowanceThanStatements(): void
+    {
+        $sut = $this->sut();
+
+        // A listing or collection grows with the federation, an entity statement does not.
+        $this->assertGreaterThan(
+            HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
+            $sut->maxListingFetchSizeBytes(),
+        );
+    }
+
+
+    public function testClampsDiscoveryLimits(): void
+    {
+        $sut = $this->sut(maxDiscoveryDepth: 500);
+        $this->assertSame(20, $sut->maxDiscoveryDepth());
+
+        $sut = $this->sut(maxDiscoveryDepth: 0);
+        $this->assertSame(1, $sut->maxDiscoveryDepth());
     }
 
 

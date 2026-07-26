@@ -52,8 +52,11 @@ final class FederationDiscoveryTest extends TestCase
     }
 
 
-    protected function sut(int $maxDepth = 10): FederationDiscovery
-    {
+    protected function sut(
+        int $maxDepth = 10,
+        int $maxDiscoveredEntities = FederationDiscovery::DEFAULT_MAX_DISCOVERED_ENTITIES,
+        int $maxFetchSizeBytes = FederationDiscovery::DEFAULT_MAX_FETCH_SIZE_BYTES,
+    ): FederationDiscovery {
         return new FederationDiscovery(
             $this->entityStatementFetcherMock,
             $this->subordinateListingFetcherMock,
@@ -64,7 +67,26 @@ final class FederationDiscoveryTest extends TestCase
             $this->helpersMock,
             $this->loggerMock,
             $maxDepth,
+            $maxDiscoveredEntities,
+            $maxFetchSizeBytes,
         );
+    }
+
+
+    /**
+     * Entity configuration stub that lists the given subordinates.
+     *
+     * @param string[] $subordinateIds
+     */
+    protected function entityConfigMock(string $entityId, array $subordinateIds = []): MockObject
+    {
+        $config = $this->createMock(\SimpleSAML\OpenID\Federation\EntityStatement::class);
+        $config->method('getExpirationTime')->willReturn(time() + 3600);
+        $config->method('getPayload')->willReturn(['sub' => $entityId]);
+        $config->method('getFederationListEndpoint')
+            ->willReturn($subordinateIds === [] ? null : $entityId . '/list');
+
+        return $config;
     }
 
 
@@ -518,5 +540,212 @@ final class FederationDiscoveryTest extends TestCase
             ->with('Failed to fetch subordinate listing during discovery.', $this->anything());
 
         $this->sut()->discover($taId);
+    }
+
+
+    public function testExpandsAnEntityOnceEvenWhenSeveralAuthoritiesListIt(): void
+    {
+        // A diamond: the trust anchor lists two intermediates, and both list the same leaf.
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['a', 'b']),
+            'a' => $this->entityConfigMock('a', ['leaf']),
+            'b' => $this->entityConfigMock('b', ['leaf']),
+            'leaf' => $this->entityConfigMock('leaf'),
+        ];
+
+        $wellKnownFetches = [];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(function (string $entityId) use ($configs, &$wellKnownFetches) {
+                $wellKnownFetches[] = $entityId;
+
+                return $configs[$entityId] ?? throw new \Exception('No entity.');
+            });
+
+        $this->subordinateListingFetcherMock->method('fetch')
+            ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
+                $taId . '/list' => ['a', 'b'],
+                'a/list', 'b/list' => ['leaf'],
+                default => [],
+            });
+
+        $this->sut()->discover($taId);
+
+        // Without a traversal wide visited set, the leaf would be fetched once per authority listing it.
+        $this->assertCount(1, array_keys($wellKnownFetches, 'leaf', true));
+    }
+
+
+    public function testStopsTraversingAtMaximumDiscoveredEntities(): void
+    {
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['a', 'b', 'c']),
+            'a' => $this->entityConfigMock('a'),
+            'b' => $this->entityConfigMock('b'),
+            'c' => $this->entityConfigMock('c'),
+        ];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+
+        $this->subordinateListingFetcherMock->method('fetch')->willReturn(['a', 'b', 'c']);
+
+        $this->loggerMock->expects($this->atLeastOnce())
+            ->method('warning')
+            ->with($this->stringContains('maximum of 2 entities'), $this->anything());
+
+        $this->entityCollectionStoreMock->expects($this->once())
+            ->method('store')
+            ->with($taId, $this->callback(function (array $entities): bool {
+                // The trust anchor plus one subordinate, the rest is beyond the budget.
+                $this->assertCount(2, $entities);
+                return true;
+            }), $this->anything());
+
+        $this->sut(maxDiscoveredEntities: 2)->discover($taId);
+    }
+
+
+    public function testMaxDiscoveredEntitiesIsClamped(): void
+    {
+        $this->assertSame(1, $this->sut(maxDiscoveredEntities: 0)->getMaxDiscoveredEntities());
+        $this->assertSame(1, $this->sut(maxFetchSizeBytes: 0)->getMaxFetchSizeBytes());
+    }
+
+
+    public function testDoesNotFetchSubordinatesBeyondTheEntityBudget(): void
+    {
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['a', 'b', 'c', 'd']),
+            'a' => $this->entityConfigMock('a'),
+            'b' => $this->entityConfigMock('b'),
+            'c' => $this->entityConfigMock('c'),
+            'd' => $this->entityConfigMock('d'),
+        ];
+        $fetched = [];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched) {
+                $fetched[] = $entityId;
+
+                return $configs[$entityId] ?? throw new \Exception('No entity.');
+            });
+
+        $this->subordinateListingFetcherMock->method('fetch')->willReturn(['a', 'b', 'c', 'd']);
+
+        $this->sut(maxDiscoveredEntities: 3)->discover($taId);
+
+        // The trust anchor plus two subordinates. The remaining listed IDs must not be fetched at all:
+        // the fetch is the cost, so checking the budget only after fetching would bound nothing.
+        $this->assertSame([$taId, 'a', 'b'], $fetched);
+    }
+
+
+    public function testExpandsAgainWhenReachedByAShallowerPath(): void
+    {
+        // 'x' sits at the depth limit under 'deep', and directly under the trust anchor as well. Reached the
+        // deep way first, its own subordinate is out of range; the shallow path has room for it.
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['deep', 'x']),
+            'deep' => $this->entityConfigMock('deep', ['x']),
+            'x' => $this->entityConfigMock('x', ['leaf']),
+            'leaf' => $this->entityConfigMock('leaf'),
+        ];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+
+        $this->subordinateListingFetcherMock->method('fetch')
+            ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
+                $taId . '/list' => ['deep', 'x'],
+                'deep/list' => ['x'],
+                'x/list' => ['leaf'],
+                default => [],
+            });
+
+        $this->entityCollectionStoreMock->expects($this->once())
+            ->method('store')
+            ->with($taId, $this->callback(function (array $entities): bool {
+                // Reachable within the depth limit through the trust anchor, so it has to be discovered.
+                $this->assertArrayHasKey('leaf', $entities);
+                return true;
+            }), $this->anything());
+
+        $this->sut(maxDepth: 2)->discover($taId);
+    }
+
+
+    public function testDoesNotSpendBudgetBelowTheDepthLimit(): void
+    {
+        // 'deep' sits at the depth limit, so its own subordinates are out of range. Fetching them anyway
+        // would spend budget that 'sibling', which is within range, has a claim on.
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['deep', 'sibling']),
+            'deep' => $this->entityConfigMock('deep', ['tooDeep1', 'tooDeep2']),
+            'sibling' => $this->entityConfigMock('sibling'),
+        ];
+        $fetched = [];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(function (string $entityId) use ($configs, &$fetched) {
+                $fetched[] = $entityId;
+
+                return $configs[$entityId] ?? throw new \Exception('No entity.');
+            });
+
+        $this->subordinateListingFetcherMock->method('fetch')
+            ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
+                $taId . '/list' => ['deep', 'sibling'],
+                'deep/list' => ['tooDeep1', 'tooDeep2'],
+                default => [],
+            });
+
+        $this->sut(maxDepth: 1)->discover($taId);
+
+        $this->assertSame([$taId, 'deep', 'sibling'], $fetched);
+    }
+
+
+    public function testCountsAnEntityOnceWhenReachableByTwoPaths(): void
+    {
+        // TA -> deep -> x, TA -> x, x -> leaf. Four unique entities, so a limit of four must fit them all
+        // even though 'x' is named by two different authorities.
+        $taId = 'https://ta.example.org';
+        $configs = [
+            $taId => $this->entityConfigMock($taId, ['deep', 'x']),
+            'deep' => $this->entityConfigMock('deep', ['x']),
+            'x' => $this->entityConfigMock('x', ['leaf']),
+            'leaf' => $this->entityConfigMock('leaf'),
+        ];
+
+        $this->entityStatementFetcherMock->method('fromCacheOrWellKnownEndpoint')
+            ->willReturnCallback(fn(string $entityId) => $configs[$entityId] ?? throw new \Exception('No entity.'));
+
+        $this->subordinateListingFetcherMock->method('fetch')
+            ->willReturnCallback(fn(string $endpoint): array => match ($endpoint) {
+                $taId . '/list' => ['deep', 'x'],
+                'deep/list' => ['x'],
+                'x/list' => ['leaf'],
+                default => [],
+            });
+
+        $this->loggerMock->expects($this->never())->method('warning');
+
+        $this->entityCollectionStoreMock->expects($this->once())
+            ->method('store')
+            ->with($taId, $this->callback(function (array $entities) use ($taId): bool {
+                $this->assertCount(4, $entities);
+                foreach ([$taId, 'deep', 'x', 'leaf'] as $expectedId) {
+                    $this->assertArrayHasKey($expectedId, $entities);
+                }
+                return true;
+            }), $this->anything());
+
+        $this->sut(maxDiscoveredEntities: 4)->discover($taId);
     }
 }

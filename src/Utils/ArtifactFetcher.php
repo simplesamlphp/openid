@@ -132,13 +132,17 @@ class ArtifactFetcher
 
 
     /**
+     * @param ?int $maxSizeBytes Overrides the configured maximum response body size for this single fetch.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
-    public function fromNetworkAsString(string $uri): string
+    public function fromNetworkAsString(string $uri, ?int $maxSizeBytes = null): string
     {
         $this->logger?->debug('Fetching artifact on network from URI (as string).', ['uri' => $uri]);
 
-        $artifact = $this->readResponseBodyAsString($this->fromNetwork($uri));
+        $artifact = $this->readResponseBodyAsString(
+            $this->fromNetwork($uri, HttpMethodsEnum::GET, [], $maxSizeBytes),
+            $maxSizeBytes,
+        );
 
         $this->logger?->debug(
             'Fetched artifact on network from URI as string.',

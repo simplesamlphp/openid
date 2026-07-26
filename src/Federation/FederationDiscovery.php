@@ -19,6 +19,24 @@ use Throwable;
  */
 class FederationDiscovery
 {
+    /**
+     * An entity collection response carries metadata per entity, so it runs larger than a bare listing.
+     */
+    public const DEFAULT_MAX_FETCH_SIZE_BYTES = 1048576;
+
+    public const DEFAULT_MAX_DISCOVERED_ENTITIES = 10000;
+
+
+    protected int $maxDiscoveredEntities;
+
+    protected int $maxFetchSizeBytes;
+
+
+    /**
+     * @param int $maxDiscoveredEntities Total number of entities a single discovery may collect. Depth alone
+     * does not bound the traversal, since one listing endpoint can name any number of subordinates.
+     * @param int $maxFetchSizeBytes Maximum response body size to read for an entity collection.
+     */
     public function __construct(
         protected readonly EntityStatementFetcher $entityStatementFetcher,
         protected readonly SubordinateListingFetcher $subordinateListingFetcher,
@@ -29,7 +47,23 @@ class FederationDiscovery
         protected readonly Helpers $helpers,
         protected readonly ?LoggerInterface $logger = null,
         protected readonly int $maxDepth = 10,
+        int $maxDiscoveredEntities = self::DEFAULT_MAX_DISCOVERED_ENTITIES,
+        int $maxFetchSizeBytes = self::DEFAULT_MAX_FETCH_SIZE_BYTES,
     ) {
+        $this->maxDiscoveredEntities = max(1, $maxDiscoveredEntities);
+        $this->maxFetchSizeBytes = max(1, $maxFetchSizeBytes);
+    }
+
+
+    public function getMaxDiscoveredEntities(): int
+    {
+        return $this->maxDiscoveredEntities;
+    }
+
+
+    public function getMaxFetchSizeBytes(): int
+    {
+        return $this->maxFetchSizeBytes;
     }
 
 
@@ -73,8 +107,7 @@ class FederationDiscovery
             // Step 1: Fetch TA config
             $taConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($trustAnchorId);
 
-            // Recursive traversal
-            $discoveredEntities = $this->traverse($trustAnchorId, $taConfig, $filters, 0, [], $forceRefresh);
+            $discoveredEntities = $this->traverse($trustAnchorId, $taConfig, $filters, $forceRefresh);
 
             // Compute TTL: lowest of maxCacheDuration and TA expiry
             $ttl = $this->maxCacheDurationDecorator->lowestInSecondsComparedToExpirationTime(
@@ -139,7 +172,7 @@ class FederationDiscovery
         $this->logger?->debug('Fetching entity collection.', ['uri' => $uri, 'filters' => $filters]);
 
         try {
-            $responseBody = $this->artifactFetcher->fromNetworkAsString($uri);
+            $responseBody = $this->artifactFetcher->fromNetworkAsString($uri, $this->maxFetchSizeBytes);
 
             $collection = $this->buildEntityCollectionFromResponse($responseBody);
 
@@ -235,46 +268,81 @@ class FederationDiscovery
 
 
     /**
-     * @param non-empty-string $entityId
+     * Walk the federation from the given entity, breadth first.
+     *
+     * Breadth first rather than depth first so that every entity is reached by its shortest path. Depth
+     * first would reach some of them the long way round first, and whether their own subordinates then fell
+     * inside the depth limit would come down to the order authorities happen to list them in.
+     *
+     * @param non-empty-string $rootId
      * @param array<string, string|string[]> $filters
-     * @param string[] $visited
      * @return array<string, array<string, mixed>>
      */
     protected function traverse(
-        string $entityId,
-        EntityStatement $entityConfig,
+        string $rootId,
+        EntityStatement $rootConfig,
         array $filters,
-        int $depth = 0,
-        array $visited = [],
         bool $forceRefresh = false,
     ): array {
-        if ($depth > $this->maxDepth || in_array($entityId, $visited, true)) {
-            return [];
-        }
+        $allCollectedEntities = [$rootId => $rootConfig->getPayload()];
+        // Doubles as the entity budget: every entry costs exactly one fetch, so its size bounds both the
+        // work done and the result returned.
+        $visited = [$rootId => true];
+        $queue = [[$rootId, $rootConfig, 0]];
 
-        $visited[] = $entityId;
-        $allCollectedEntities = [$entityId => $entityConfig->getPayload()];
+        while ($queue !== []) {
+            /** @var array{0:non-empty-string,1:\SimpleSAML\OpenID\Federation\EntityStatement,2:int} $entry */
+            $entry = array_shift($queue);
+            [$entityId, $entityConfig, $depth] = $entry;
 
-        $listEndpoint = $entityConfig->getFederationListEndpoint();
-        if (is_null($listEndpoint)) {
-            return $allCollectedEntities;
-        }
+            // Anything below this node sits past the depth limit, so neither the listing nor the
+            // configurations it names are worth fetching.
+            if ($depth >= $this->maxDepth) {
+                continue;
+            }
 
-        try {
-            $subordinateIds = $this->subordinateListingFetcher->fetch($listEndpoint, $filters, $forceRefresh);
+            $listEndpoint = $entityConfig->getFederationListEndpoint();
+            if (is_null($listEndpoint)) {
+                continue;
+            }
+
+            try {
+                $subordinateIds = $this->subordinateListingFetcher->fetch($listEndpoint, $filters, $forceRefresh);
+            } catch (Throwable $throwable) {
+                $this->logger?->error('Failed to fetch subordinate listing during discovery.', [
+                    'entityId' => $entityId,
+                    'error' => $throwable->getMessage(),
+                ]);
+                continue;
+            }
 
             foreach ($subordinateIds as $subId) {
-                // If we've already visited this subId (loop), skip to avoid infinite recursion
-                if (in_array($subId, $visited, true)) {
+                // Already reached, by a path no longer than this one. Also what stops a cycle.
+                if (isset($visited[$subId])) {
                     continue;
                 }
 
+                // Checked before the fetch below, not after: the fetch is the cost being bounded, and every
+                // listed ID would otherwise be fetched even once there is no room left to keep it.
+                if (count($visited) >= $this->maxDiscoveredEntities) {
+                    $this->logger?->warning(
+                        sprintf(
+                            'Discovery reached the maximum of %s entities, so the traversal stops here and ' .
+                            'the result is incomplete.',
+                            $this->maxDiscoveredEntities,
+                        ),
+                        ['entityId' => $entityId],
+                    );
+
+                    break 2;
+                }
+
+                $visited[$subId] = true;
+
                 try {
                     $subConfig = $this->entityStatementFetcher->fromCacheOrWellKnownEndpoint($subId);
-                    $allCollectedEntities = array_merge(
-                        $allCollectedEntities,
-                        $this->traverse($subId, $subConfig, $filters, $depth + 1, $visited, $forceRefresh),
-                    );
+                    $allCollectedEntities[$subId] = $subConfig->getPayload();
+                    $queue[] = [$subId, $subConfig, $depth + 1];
                 } catch (Throwable $e) {
                     $this->logger?->warning('Failed to fetch subordinate configuration during discovery.', [
                         'entityId' => $entityId,
@@ -282,16 +350,9 @@ class FederationDiscovery
                         'error' => $e->getMessage(),
                     ]);
                     // Still include the ID if we discovered it from the list, but with an empty payload
-                    if (!isset($allCollectedEntities[$subId])) {
-                        $allCollectedEntities[$subId] = [];
-                    }
+                    $allCollectedEntities[$subId] = [];
                 }
             }
-        } catch (Throwable $throwable) {
-            $this->logger?->error('Failed to fetch subordinate listing during discovery.', [
-                'entityId' => $entityId,
-                'error' => $throwable->getMessage(),
-            ]);
         }
 
         return $allCollectedEntities;
