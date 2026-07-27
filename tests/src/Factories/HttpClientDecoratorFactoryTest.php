@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\Factories;
 
+use GuzzleHttp\RequestOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -213,7 +214,11 @@ final class HttpClientDecoratorFactoryTest extends TestCase
 
     public function testKnowsRequestTimeoutFromDefaults(): void
     {
-        $this->assertEqualsWithDelta(10.0, $this->sut()->build()->getRequestTimeout(), PHP_FLOAT_EPSILON);
+        $this->assertEqualsWithDelta(
+            (float)HttpClientDecorator::DEFAULT_HTTP_CLIENT_CONFIG[RequestOptions::TIMEOUT],
+            $this->sut()->build()->getRequestTimeout(),
+            PHP_FLOAT_EPSILON,
+        );
     }
 
 

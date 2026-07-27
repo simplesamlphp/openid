@@ -6,6 +6,7 @@ namespace SimpleSAML\Test\OpenID;
 
 use DateInterval;
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
@@ -248,6 +249,22 @@ final class FederationTest extends TestCase
         $this->assertGreaterThan(
             HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
             $sut->maxListingFetchSizeBytes(),
+        );
+    }
+
+
+    public function testResolutionDeadlineFitsAChainOfSlowFetches(): void
+    {
+        $fetchTimeout = HttpClientDecorator::DEFAULT_HTTP_CLIENT_CONFIG[RequestOptions::TIMEOUT];
+
+        // Each fetch is capped at the smaller of the client timeout and what is left of the resolution
+        // deadline, redirects included, so the deadline divided by the timeout is how many slow fetches a
+        // resolution survives. One
+        // chain costs about five fetches (three entity configurations, two subordinate statements), and a
+        // federation that is merely sluggish should still resolve rather than run out of deadline part way.
+        $this->assertGreaterThanOrEqual(
+            5,
+            intdiv($this->sut()->trustChainResolveTimeout(), $fetchTimeout),
         );
     }
 

@@ -30,10 +30,20 @@ class HttpClientDecorator
         'referer' => false,
     ];
 
+    /**
+     * The request timeout is chosen against the Trust Chain resolution deadline rather than on its own: a
+     * resolution is many fetches, and only as many slow ones fit as the deadline divided by this. One chain
+     * costs about five fetches (three entity configurations and two subordinate statements), so a timeout
+     * near a third of the deadline would fail a merely sluggish federation before a single chain resolved.
+     *
+     * Federation artifacts are small signed documents that a healthy endpoint serves well inside a second,
+     * so this stays generous by an order of magnitude either way. An endpoint that is simply dark is dealt
+     * with by the connect timeout instead, without the request timeout having to be short.
+     */
     public const DEFAULT_HTTP_CLIENT_CONFIG = [
         RequestOptions::ALLOW_REDIRECTS => self::DEFAULT_ALLOW_REDIRECTS_CONFIG,
         RequestOptions::CONNECT_TIMEOUT => 3,
-        RequestOptions::TIMEOUT => 10,
+        RequestOptions::TIMEOUT => 5,
         RequestOptions::HTTP_ERRORS => true,
     ];
 
@@ -105,11 +115,12 @@ class HttpClientDecorator
      *
      * The known client timeout still wins when it is the smaller of the two, so this only ever tightens.
      *
-     * Note on redirects: Guzzle applies "timeout" to each hop separately, so the two callbacks below are what
-     * hold the ceiling over a chain as a whole. The progress callback covers a hop that stalls without ever
-     * sending headers, but only where the handler reports progress, as cURL does. Behind a handler that
-     * reports none, a chain can still outlast the ceiling by up to one hop's timeout. Configure
-     * "allow_redirects" more tightly (or off) where that matters.
+     * Note on redirects: Guzzle applies "timeout" to each hop separately, so on a chain it would bound one
+     * hop rather than the fetch, handing every further hop a fresh allowance. The callbacks below close that
+     * by cutting the fetch as a whole once the allowance is spent, redirects included. The progress callback
+     * also covers a hop that stalls without ever sending headers, though only where the handler reports
+     * progress, as cURL does. Behind a handler that reports none, a chain can still outlast the allowance by
+     * up to one hop. Configure "allow_redirects" more tightly (or off) where that matters.
      *
      * @return array<string,mixed>
      */
@@ -118,18 +129,19 @@ class HttpClientDecorator
         // Taken as an absolute point in time rather than a duration, so that whatever happened between the
         // caller working out its budget and the request going out (a cache lookup, say) is already accounted
         // for, instead of the request starting a fresh allowance of a duration decided earlier.
-        $maxDurationSeconds = max(self::MIN_REQUEST_TIMEOUT_SECONDS, $deadlineTimestamp - microtime(true));
+        // One reading, used for both the allowance and the deadline built from it. Reading the clock twice
+        // would add whatever passed in between back onto the allowance.
+        $now = microtime(true);
+        $maxDurationSeconds = max(self::MIN_REQUEST_TIMEOUT_SECONDS, $deadlineTimestamp - $now);
+        $timeout = $this->perHopTimeout($maxDurationSeconds);
+
+        // What one fetch may take in total, redirects included, and never past the caller's own deadline.
+        $fetchDeadlineTimestamp = min($deadlineTimestamp, $now + $timeout);
 
         return [
-            RequestOptions::TIMEOUT => $this->perHopTimeout($maxDurationSeconds),
-            // Fires once per response, so it cuts a redirect chain that has outlived the ceiling even where
-            // the handler in use gives no progress notifications.
-            RequestOptions::ON_HEADERS => $this->buildDeadlineCallback($deadlineTimestamp, $maxDurationSeconds),
-            // "timeout" is applied to each redirect hop separately, so on a redirect chain it bounds a single
-            // hop rather than the fetch as a whole: every hop would otherwise be handed the full ceiling
-            // again. This callback runs throughout the transfer, including on a hop that never sends headers,
-            // and holds the ceiling across the chain as a whole.
-            RequestOptions::PROGRESS => $this->buildDeadlineCallback($deadlineTimestamp, $maxDurationSeconds),
+            RequestOptions::TIMEOUT => $timeout,
+            RequestOptions::ON_HEADERS => $this->buildDeadlineCallback($fetchDeadlineTimestamp, $timeout),
+            RequestOptions::PROGRESS => $this->buildDeadlineCallback($fetchDeadlineTimestamp, $timeout),
         ];
     }
 

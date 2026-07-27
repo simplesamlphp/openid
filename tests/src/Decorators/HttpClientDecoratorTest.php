@@ -450,6 +450,22 @@ final class HttpClientDecoratorTest extends TestCase
     }
 
 
+    public function testTimeoutCeilingBoundsTheFetchNotEachRedirectHop(): void
+    {
+        // Client timeout well below what is left of the caller's budget, so the client timeout is the
+        // allowance. A redirect chain must not be able to spend that allowance once per hop.
+        $sut = new HttpClientDecorator($this->clientMock, 102400, 0.05);
+        $deadlineCallback = $sut->timeoutCeilingOptions(microtime(true) + 3600.0)[RequestOptions::PROGRESS];
+
+        usleep(100000);
+
+        $this->expectException(HttpException::class);
+        $this->expectExceptionMessage('exceeded the maximum allowed duration');
+
+        $deadlineCallback($this->responseInterfaceMock);
+    }
+
+
     public function testTimeoutCeilingLetsATimelyRedirectChainThrough(): void
     {
         $sut = new HttpClientDecorator($this->clientMock, 102400);
