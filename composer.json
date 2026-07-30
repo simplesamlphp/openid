@@ -26,6 +26,7 @@
         "ext-filter": "*",
         "ext-mbstring": "*",
         "ext-hash": "*",
+        "ext-zlib": "*",
 
         "guzzlehttp/guzzle": "^7.8 || ^8.0",
         "psr/http-client": "^1",

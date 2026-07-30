@@ -12,6 +12,8 @@ enum ContentTypesEnum: string
 
     case ApplicationJwt = 'application/jwt';
 
+    case ApplicationStatusListJwt = 'application/statuslist+jwt';
+
     case ApplicationTrustMarkJwt = 'application/trust-mark+jwt';
 
     case ApplicationTrustMarkStatusResponseJwt = 'application/trust-mark-status-response+jwt';

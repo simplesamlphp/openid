@@ -61,6 +61,22 @@ class JwsFetcher extends AbstractJwsFetcher
 
 
     /**
+     * Whether a Content-Type response header conveys the media type this fetcher expects.
+     *
+     * Only the media type itself is compared, since parameters such as charset may legitimately follow it, and
+     * the comparison ignores case because RFC 9110 defines type and subtype as case-insensitive. Matching on the
+     * media type as a whole rather than as a substring also keeps a lookalike such as
+     * `application/entity-statement+jwtfoo` from passing for the type it merely starts with.
+     */
+    protected function hasExpectedContentType(string $contentTypeHeaderLine, string $expectedContentType): bool
+    {
+        $mediaType = trim(explode(';', $contentTypeHeaderLine, 2)[0]);
+
+        return strcasecmp($mediaType, $expectedContentType) === 0;
+    }
+
+
+    /**
      * @return array<string,mixed>
      */
     protected function timeoutCeilingOptions(?float $deadlineTimestamp): array
@@ -135,7 +151,7 @@ class JwsFetcher extends AbstractJwsFetcher
 
         if (
             is_string($expectedContentTypeHttpHeader = $this->getExpectedContentTypeHttpHeader()) &&
-            (!str_contains(
+            (!$this->hasExpectedContentType(
                 $response->getHeaderLine(HttpHeadersEnum::ContentType->value),
                 $expectedContentTypeHttpHeader,
             ))

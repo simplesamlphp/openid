@@ -38,6 +38,9 @@ enum ClaimsEnum: string
     // AlternativeText
     case AltText = 'alt_text';
 
+    // Status List Aggregation URI
+    case AggregationUri = 'aggregation_uri';
+
     // Authentication Methods References
     case Amr = 'amr';
 
@@ -77,6 +80,9 @@ enum ClaimsEnum: string
     case BackgroundImage = 'background_image';
 
     case BatchSize = 'batch_size';
+
+    // Number of bits per Referenced Token in a Status List
+    case Bits = 'bits';
 
     // Code hash
     case CHash = 'c_hash';
@@ -142,6 +148,9 @@ enum ClaimsEnum: string
     case Credential_Status = 'credentialStatus';
 
     case Credential_Subject = 'credentialSubject';
+
+    // Critical (JOSE header parameter, RFC 7515).
+    case Crit = 'crit';
 
     case CryptographicBindingMethodsSupported = 'cryptographic_binding_methods_supported';
 
@@ -213,6 +222,9 @@ enum ClaimsEnum: string
     // Identifier
     case Id = 'id';
 
+    // Index of a Referenced Token in a Status List
+    case Idx = 'idx';
+
     case InputMode = 'input_mode';
 
     case IdTokenEncryptionAlgValuesSupported = 'id_token_encryption_alg_values_supported';
@@ -278,6 +290,9 @@ enum ClaimsEnum: string
     case Logo = 'logo';
 
     case LogoUri = 'logo_uri';
+
+    // Base64url-encoded compressed byte array of a Status List
+    case Lst = 'lst';
 
     case Mandatory = 'mandatory';
 
@@ -417,6 +432,9 @@ enum ClaimsEnum: string
 
     case Status = 'status';
 
+    // Token Status List. Note: not to be confused with Credential_Status ('credentialStatus'), which is W3C VCDM.
+    case StatusList = 'status_list';
+
     // Subject
     case Sub = 'sub';
 
@@ -442,6 +460,9 @@ enum ClaimsEnum: string
     case TokenEndpointAuthSigningAlgValuesSupported = 'token_endpoint_auth_signing_alg_values_supported';
 
     case TosUri = 'tos_uri';
+
+    // Time To Live
+    case Ttl = 'ttl';
 
     // Type
     case Typ = 'typ';
