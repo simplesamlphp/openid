@@ -233,6 +233,34 @@ class Type
 
 
     /**
+     * Ensures the value is a JSON number, meaning an integer or a float, and not a string which merely looks like
+     * one. Use this instead of ensureInt() wherever a specification calls for a JSON number: RFC 7519 NumericDate
+     * claims such as `iat` and `exp`, and the Status List Token `ttl` claim, all of which a numeric string does
+     * not satisfy.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function ensureNumber(mixed $value, ?string $context = null): int|float
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_float($value) && is_finite($value)) {
+            return $value;
+        }
+
+        $error = $this->prepareErrorMessage(
+            'Value is not a number, aborting.',
+            $value,
+            $context,
+        );
+
+        throw new InvalidValueException($error);
+    }
+
+
+    /**
      * @return non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */

@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID\Helpers;
 use ArrayObject;
 use JsonSerializable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Helpers\Type;
@@ -242,6 +243,43 @@ final class TypeTest extends TestCase
         $this->expectExceptionMessage('Unsafe');
 
         $this->sut()->ensureInt(null);
+    }
+
+
+    public function testCanEnsureNumber(): void
+    {
+        $this->assertSame(1, $this->sut()->ensureNumber(1));
+        $this->assertSame(-1, $this->sut()->ensureNumber(-1));
+        $this->assertEqualsWithDelta(1.5, $this->sut()->ensureNumber(1.5), PHP_FLOAT_EPSILON);
+    }
+
+
+    /**
+     * Unlike ensureInt(), a numeric string is not a number, which is what makes this usable for the JSON number
+     * a specification asks for.
+     */
+    #[DataProvider('nonNumberProvider')]
+    public function testEnsureNumberThrowsForNonNumber(mixed $value): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('not a number');
+
+        $this->sut()->ensureNumber($value);
+    }
+
+
+    /**
+     * @return \Iterator<string, array{mixed}>
+     */
+    public static function nonNumberProvider(): \Iterator
+    {
+        yield 'numeric string' => ['1'];
+        yield 'string' => ['a'];
+        yield 'null' => [null];
+        yield 'boolean' => [true];
+        yield 'array' => [[1]];
+        yield 'not a number' => [NAN];
+        yield 'infinite' => [INF];
     }
 
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Jws;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -156,6 +157,73 @@ final class JwsFetcherTest extends TestCase
         $this->expectExceptionMessage('application/jwt');
 
         $sut->fromNetwork('uri');
+    }
+
+
+    /**
+     * @return \Iterator<string, array{string}>
+     */
+    public static function acceptableContentTypeProvider(): \Iterator
+    {
+        yield 'exact' => ['application/jwt'];
+        // RFC 9110 defines type and subtype as case-insensitive.
+        yield 'different case' => ['Application/JWT'];
+        yield 'with a parameter' => ['application/jwt; charset=UTF-8'];
+        yield 'with surrounding whitespace' => [' application/jwt '];
+    }
+
+
+    #[DataProvider('acceptableContentTypeProvider')]
+    public function testAcceptsExpectedContentTypeHttpHeader(string $contentType): void
+    {
+        $this->responseMock->method('getStatusCode')->willReturn(200);
+        $this->responseMock->method('getHeaderLine')->willReturn($contentType);
+        $this->parsedJwsFactoryMock->method('fromToken')->willReturn($this->parsedJwsMock);
+
+        $this->assertSame($this->parsedJwsMock, $this->sutExpectingJwtContentType()->fromNetwork('uri'));
+    }
+
+
+    /**
+     * @return \Iterator<string, array{string}>
+     */
+    public static function unacceptableContentTypeProvider(): \Iterator
+    {
+        yield 'empty' => [''];
+        yield 'unrelated' => ['application/json'];
+        // Matching on a substring would let a lookalike through.
+        yield 'lookalike suffix' => ['application/jwtfoo'];
+        yield 'lookalike prefix' => ['xapplication/jwt'];
+    }
+
+
+    #[DataProvider('unacceptableContentTypeProvider')]
+    public function testRejectsUnexpectedContentTypeHttpHeader(string $contentType): void
+    {
+        $this->responseMock->method('getStatusCode')->willReturn(200);
+        $this->responseMock->method('getHeaderLine')->willReturn($contentType);
+
+        $this->expectException(FetchException::class);
+        $this->expectExceptionMessage('application/jwt');
+
+        $this->sutExpectingJwtContentType()->fromNetwork('uri');
+    }
+
+
+    protected function sutExpectingJwtContentType(): JwsFetcher
+    {
+        return new class (
+            $this->parsedJwsFactoryMock,
+            $this->artifactFetcherMock,
+            $this->maxCacheDurationMock,
+            $this->helpersMock,
+            $this->loggerMock,
+        ) extends JwsFetcher {
+            public function getExpectedContentTypeHttpHeader(): string
+            {
+                return 'application/jwt';
+            }
+        };
     }
 
 
