@@ -1,0 +1,35 @@
+# Line-ending normalisation.
+#
+# Development and CI target Linux, so every text file is stored in the
+# repository and checked out with LF. Git does no normalisation of its own by
+# default (core.autocrlf is unset), which means a CRLF file written on any
+# platform is committed byte for byte and shows up as a whole-file diff later.
+#
+# `text=auto` lets git detect which files are text; `eol=lf` pins those to LF
+# in the working tree on every platform, including Windows checkouts.
+* text=auto eol=lf
+
+# Explicit rules for the types this repository actually contains, so the
+# outcome does not depend on git's content heuristic.
+*.php   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.xml   text eol=lf
+*.neon  text eol=lf
+*.dist  text eol=lf
+*.txt   text eol=lf
+*.sh    text eol=lf
+
+# Binary assets: never rewrite the bytes and never diff them as text.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.svg   text eol=lf
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.phar  binary
