@@ -33,7 +33,12 @@ jobs:
           path: '**/*.md'
           check_filenames: true
           ignore_words_list: tekst
-          skip: ./.git,./vendor,./specifications
+          # Two forms are needed. The `./dir` patterns prune directories when
+          # codespell walks a tree; the `dir/*` patterns match the explicit file
+          # paths produced by the `path` glob above, which is the mode this job
+          # actually runs in. specifications/ holds verbatim copies of external
+          # documents (IETF/W3C/OpenID) whose typos are not ours to correct.
+          skip: ./.git,./vendor,./specifications,specifications/*,vendor/*
 
   build:
     name: Build documentation
