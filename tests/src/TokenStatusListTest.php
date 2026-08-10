@@ -34,6 +34,11 @@ use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
 use SimpleSAML\OpenID\Jws\ParsedJws;
+use SimpleSAML\OpenID\Network\AddressPinner;
+use SimpleSAML\OpenID\Network\AddressResolver;
+use SimpleSAML\OpenID\Network\AddressValidator;
+use SimpleSAML\OpenID\Network\DestinationGuardMiddleware;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -57,6 +62,11 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(DateIntervalDecoratorFactory::class)]
 #[UsesClass(CacheDecoratorFactory::class)]
 #[UsesClass(HttpClientDecoratorFactory::class)]
+#[UsesClass(DestinationPolicy::class)]
+#[UsesClass(AddressResolver::class)]
+#[UsesClass(DestinationGuardMiddleware::class)]
+#[UsesClass(AddressPinner::class)]
+#[UsesClass(AddressValidator::class)]
 #[UsesClass(HttpClientDecorator::class)]
 #[UsesClass(Helpers::class)]
 #[UsesClass(Helpers\Base64Url::class)]

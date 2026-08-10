@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\RequestObject\RequestUriFetcher;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
@@ -90,6 +91,23 @@ final class RequestUriFetcherTest extends TestCase
 
         $this->expectException(FetchException::class);
         $this->expectExceptionMessage('Failed to fetch request_uri');
+
+        $this->sut()->fetch('https://example.com/request.jwt');
+    }
+
+
+    /**
+     * A request_uri pointing at an address the deployment does not permit is a problem with what the client
+     * asked for, so it stays apart from the endpoint simply being unreachable.
+     */
+    public function testKeepsARefusedDestinationRecognizable(): void
+    {
+        $this->artifactFetcherMock->expects($this->once())
+            ->method('fromNetwork')
+            ->willThrowException(new DestinationPolicyException('destination refused'));
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('destination refused');
 
         $this->sut()->fetch('https://example.com/request.jwt');
     }

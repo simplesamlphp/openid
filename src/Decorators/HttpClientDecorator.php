@@ -8,12 +8,18 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Utils\SizeLimitedStream;
 use Throwable;
 
 /**
+ * Note that where outbound requests are allowed to go is decided by the client, not by this decorator: the
+ * destination policy is middleware on the handler stack. A decorator built around a client that this library
+ * did not build (including the default one this class constructs) carries no such policy.
+ *
  * @see \SimpleSAML\Test\OpenID\Decorators\HttpClientDecoratorTest
+ * @see \SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory
  */
 class HttpClientDecorator
 {
@@ -56,6 +62,12 @@ class HttpClientDecorator
      * nothing must not be allowed to turn into an unbounded request.
      */
     protected const MIN_REQUEST_TIMEOUT_SECONDS = 0.001;
+
+    /**
+     * How far to follow an exception chain when looking for the cause underneath. Bounded so that a chain
+     * that loops back on itself can not hang the search.
+     */
+    protected const MAX_EXCEPTION_CHAIN_DEPTH = 10;
 
 
     protected int $maxFetchSizeBytes;
@@ -228,6 +240,9 @@ class HttpClientDecorator
     /**
      * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @param ?int $maxSizeBytes Overrides the configured maximum response body size for this single request.
+     * @throws \SimpleSAML\OpenID\Exceptions\DestinationPolicyException When the client carries a destination
+     *         policy and the destination, or one of the redirect hops taken towards it, is not one the
+     *         deployment permits. A subclass of HttpException, so catching that alone still works.
      * @throws \SimpleSAML\OpenID\Exceptions\HttpException
      */
     public function request(
@@ -266,6 +281,15 @@ class HttpClientDecorator
             /** @phpstan-ignore argument.type */
             $response = $this->client->request($httpMethodsEnum->value, $uri, $options);
         } catch (Throwable $throwable) {
+            // A refused destination is a policy decision rather than a transport failure, and a caller has to
+            // be able to tell the two apart, so it keeps its own type instead of being folded into a generic
+            // HTTP error like everything else caught here.
+            $destinationPolicyException = $this->findDestinationPolicyException($throwable);
+
+            if ($destinationPolicyException instanceof DestinationPolicyException) {
+                throw $destinationPolicyException;
+            }
+
             // The handlers report an aborted transfer as a generic failure, so name the actual cause.
             if ($sizeLimitedSink instanceof SizeLimitedStream && $sizeLimitedSink->hasExceededLimit()) {
                 throw new HttpException(
@@ -298,6 +322,34 @@ class HttpClientDecorator
         }
 
         return $response;
+    }
+
+
+    /**
+     * The destination policy rejection behind a failure, where that is what it was.
+     *
+     * The chain is walked rather than only the exception itself examined, since a handler or a middleware
+     * further out may have caught the rejection and wrapped it in a failure of its own.
+     */
+    protected function findDestinationPolicyException(Throwable $throwable): ?DestinationPolicyException
+    {
+        $candidate = $throwable;
+
+        for ($depth = 0; $depth < self::MAX_EXCEPTION_CHAIN_DEPTH; ++$depth) {
+            if ($candidate instanceof DestinationPolicyException) {
+                return $candidate;
+            }
+
+            $previous = $candidate->getPrevious();
+
+            if (is_null($previous)) {
+                break;
+            }
+
+            $candidate = $previous;
+        }
+
+        return null;
     }
 
 

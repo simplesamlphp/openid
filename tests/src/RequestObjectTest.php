@@ -32,6 +32,11 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Network\AddressPinner;
+use SimpleSAML\OpenID\Network\AddressResolver;
+use SimpleSAML\OpenID\Network\AddressValidator;
+use SimpleSAML\OpenID\Network\DestinationGuardMiddleware;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\RequestObject;
 use SimpleSAML\OpenID\RequestObject\RequestObjectFactories;
 use SimpleSAML\OpenID\RequestObject\RequestObjectParser;
@@ -48,6 +53,11 @@ use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 #[UsesClass(DateIntervalDecoratorFactory::class)]
 #[UsesClass(HttpClientDecorator::class)]
 #[UsesClass(HttpClientDecoratorFactory::class)]
+#[UsesClass(DestinationPolicy::class)]
+#[UsesClass(AddressResolver::class)]
+#[UsesClass(DestinationGuardMiddleware::class)]
+#[UsesClass(AddressPinner::class)]
+#[UsesClass(AddressValidator::class)]
 #[UsesClass(CacheDecorator::class)]
 #[UsesClass(CacheDecoratorFactory::class)]
 #[UsesClass(ArtifactFetcher::class)]

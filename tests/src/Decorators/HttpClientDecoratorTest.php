@@ -16,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Utils\SizeLimitedStream;
 
@@ -511,5 +512,38 @@ final class HttpClientDecoratorTest extends TestCase
             HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
             $this->sut()->getMaxFetchSizeBytes(),
         );
+    }
+
+
+    /**
+     * A refused destination has to stay recognizable rather than be folded into the generic HTTP failure
+     * everything else caught here becomes.
+     */
+    public function testKeepsARefusedDestinationRecognizable(): void
+    {
+        $this->clientMock->method('request')
+            ->willThrowException(new DestinationPolicyException('destination refused'));
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('destination refused');
+
+        $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+    }
+
+
+    public function testFindsARefusedDestinationInsideAWrappedFailure(): void
+    {
+        $this->clientMock->method('request')->willThrowException(
+            new \RuntimeException(
+                'Error completing request',
+                0,
+                new DestinationPolicyException('destination refused'),
+            ),
+        );
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('destination refused');
+
+        $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
     }
 }

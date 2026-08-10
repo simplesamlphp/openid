@@ -4,17 +4,37 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\Factories;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Factories\HttpClientDecoratorFactory;
+use SimpleSAML\OpenID\Network\AddressPinner;
+use SimpleSAML\OpenID\Network\AddressResolver;
+use SimpleSAML\OpenID\Network\AddressValidator;
+use SimpleSAML\OpenID\Network\DestinationGuardMiddleware;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
+use SimpleSAML\OpenID\Network\ValidatedDestination;
+use SimpleSAML\OpenID\Utils\SizeLimitedStream;
 
 #[CoversClass(HttpClientDecoratorFactory::class)]
 #[UsesClass(HttpClientDecorator::class)]
+#[UsesClass(DestinationPolicy::class)]
+#[UsesClass(DestinationGuardMiddleware::class)]
+#[UsesClass(AddressValidator::class)]
+#[UsesClass(AddressResolver::class)]
+#[UsesClass(AddressPinner::class)]
+#[UsesClass(ValidatedDestination::class)]
+#[UsesClass(SizeLimitedStream::class)]
 final class HttpClientDecoratorFactoryTest extends TestCase
 {
     /**
@@ -251,6 +271,155 @@ final class HttpClientDecoratorFactoryTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($this->stringContains('pre-built HTTP client'));
+
+        $this->sutWithLogger()->build(new \GuzzleHttp\Client());
+    }
+
+
+    /**
+     * An empty configuration is what a deployment that sets no HTTP options produces, which makes it exactly
+     * the case that must not end up with an unguarded client.
+     */
+    public function testGuardsClientBuiltWithoutAnyConfig(): void
+    {
+        $decorator = $this->sut()->build();
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('host 127.0.0.1 is not a public address');
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+    }
+
+
+    public function testGuardsClientBuiltWithConfig(): void
+    {
+        $decorator = $this->sut()->build(null, ['timeout' => 10]);
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('is not a public address');
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://[::1]/jwks');
+    }
+
+
+    /**
+     * Guzzle derives its handler from client options it refuses to combine with a handler given to it, so
+     * the guard has to go onto the stack it built rather than be handed to it as one.
+     */
+    public function testLeavesGuzzleToDeriveItsOwnHandler(): void
+    {
+        if (ClientInterface::MAJOR_VERSION < 8) {
+            $this->markTestSkipped('Connection cap client options arrived in Guzzle 8.');
+        }
+
+        $decorator = $this->sut()->build(null, ['max_host_connections' => 4]);
+
+        $this->expectException(DestinationPolicyException::class);
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+    }
+
+
+    public function testGuardsACallerSuppliedHandlerStack(): void
+    {
+        $handlerStack = HandlerStack::create(new MockHandler([new Response(200, [], 'ok')]));
+        $decorator = $this->sut()->build(null, ['handler' => $handlerStack]);
+
+        $this->expectException(DestinationPolicyException::class);
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+    }
+
+
+    /**
+     * A bare callable is the whole stack as far as Guzzle is concerned, so the guard has to wrap it rather
+     * than be pushed onto something that is not there.
+     */
+    public function testGuardsACallerSuppliedBareHandler(): void
+    {
+        $decorator = $this->sut()->build(null, ['handler' => new MockHandler([new Response(200, [], 'ok')])]);
+
+        $this->expectException(DestinationPolicyException::class);
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+    }
+
+
+    public function testAppliesASuppliedDestinationPolicy(): void
+    {
+        $decorator = $this->sut()->build(
+            null,
+            ['handler' => new MockHandler([new Response(200, [], 'ok')])],
+            destinationPolicy: new DestinationPolicy(allowedCidrs: ['127.0.0.0/8']),
+        );
+
+        $response = $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+
+    /**
+     * Building twice from one handler stack has to leave one guard on it, otherwise every destination would
+     * be checked, and every host resolved, once per build.
+     */
+    public function testBuildingTwiceLeavesOneGuardOnAHandlerStack(): void
+    {
+        $addressResolverMock = $this->createMock(AddressResolver::class);
+        $addressResolverMock->expects($this->once())
+            ->method('resolve')
+            ->willReturn(['93.184.216.34']);
+
+        $destinationPolicy = new DestinationPolicy(addressResolver: $addressResolverMock);
+        $handlerStack = HandlerStack::create(new MockHandler([new Response(200, [], 'ok')]));
+
+        $this->sut()->build(null, ['handler' => $handlerStack], destinationPolicy: $destinationPolicy);
+        $decorator = $this->sut()->build(
+            null,
+            ['handler' => $handlerStack],
+            destinationPolicy: $destinationPolicy,
+        );
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://example.org/jwks');
+    }
+
+
+    /**
+     * A stack shared between policies has to keep a guard for each of them: replacing one with the other
+     * would quietly hand the first client the second policy's, possibly wider, permissions.
+     */
+    public function testTwoPoliciesOnOneHandlerStackBothApply(): void
+    {
+        $handlerStack = HandlerStack::create(new MockHandler([new Response(200, [], 'ok')]));
+        $permissivePolicy = new DestinationPolicy(allowedCidrs: ['127.0.0.0/8']);
+
+        $this->sut()->build(null, ['handler' => $handlerStack], destinationPolicy: $permissivePolicy);
+        $decorator = $this->sut()->build(null, ['handler' => $handlerStack]);
+
+        // Allowed by the first policy, refused by the second, and the second was not able to displace it.
+        $this->expectException(DestinationPolicyException::class);
+
+        $decorator->request(HttpMethodsEnum::GET, 'https://127.0.0.1/jwks');
+    }
+
+
+    /**
+     * A handler that is not usable is a configuration error, and it has to keep surfacing as one rather than
+     * be quietly swapped for the default transport, which would put real requests on the network.
+     */
+    public function testDoesNotReplaceAnUnusableHandlerWithTheDefaultOne(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->sut()->build(null, ['handler' => 'not-a-handler']);
+    }
+
+
+    public function testWarnsThatPreBuiltClientIsNotGuarded(): void
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with($this->stringContains('destination policy is not applied to a pre-built HTTP client'));
 
         $this->sutWithLogger()->build(new \GuzzleHttp\Client());
     }

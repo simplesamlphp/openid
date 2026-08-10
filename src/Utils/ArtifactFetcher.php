@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use Throwable;
 
@@ -74,6 +75,8 @@ class ArtifactFetcher
     /**
      * @param array<string, mixed> $options See https://docs.guzzlephp.org/en/stable/request-options.html
      * @param ?int $maxSizeBytes Overrides the configured maximum response body size for this single request.
+     * @throws \SimpleSAML\OpenID\Exceptions\DestinationPolicyException When the destination, or one of the
+     *         redirect hops taken towards it, is not one the deployment permits.
      * @throws \SimpleSAML\OpenID\Exceptions\FetchException
      */
     public function fromNetwork(
@@ -85,6 +88,12 @@ class ArtifactFetcher
         $this->logger?->debug('Fetching artifact on network from URI.', ['uri' => $uri]);
         try {
             $response = $this->httpClientDecorator->request($httpMethodsEnum, $uri, $options, $maxSizeBytes);
+        } catch (DestinationPolicyException $destinationPolicyException) {
+            // A refused destination is a policy decision rather than a transport failure, and a caller that
+            // reports the two differently needs it to stay recognizable instead of becoming a fetch error.
+            $this->logger?->error($destinationPolicyException->getMessage(), ['uri' => $uri]);
+
+            throw $destinationPolicyException;
         } catch (Throwable $throwable) {
             $message = sprintf(
                 'Error sending HTTP request to %s. Error was: %s',

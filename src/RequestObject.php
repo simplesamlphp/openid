@@ -28,6 +28,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\RequestObject\RequestObjectFactories;
 use SimpleSAML\OpenID\RequestObject\RequestObjectParser;
 use SimpleSAML\OpenID\RequestObject\RequestUriFetcher;
@@ -83,9 +84,14 @@ class RequestObject
 
     protected ?Helpers $helpers = null;
 
+    protected DestinationPolicy $destinationPolicy;
+
 
     /**
      * @param array<string,mixed> $httpClientConfig
+     * @param ?\SimpleSAML\OpenID\Network\DestinationPolicy $destinationPolicy Where a `request_uri` fetch may
+     * be sent. Defaults to refusing every non-public destination, since the URI comes from the client rather
+     * than from the deployment.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(
@@ -103,15 +109,28 @@ class RequestObject
         ?CacheInterface $cache = null,
         array $httpClientConfig = [],
         int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?DestinationPolicy $destinationPolicy = null,
     ) {
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
+        $this->destinationPolicy = $destinationPolicy ?? new DestinationPolicy(logger: $this->logger);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
             $client,
             $httpClientConfig,
             $maxFetchSizeBytes,
+            $this->destinationPolicy,
         );
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
+    }
+
+
+    /**
+     * The policy deciding where outbound requests may be sent, so that the same rules can be applied before a
+     * destination is ever fetched, such as when it is registered.
+     */
+    public function destinationPolicy(): DestinationPolicy
+    {
+        return $this->destinationPolicy;
     }
 
 

@@ -23,6 +23,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\TokenStatusList\Factories\StatusListFactory;
 use SimpleSAML\OpenID\TokenStatusList\Factories\StatusListTokenFactory;
@@ -88,11 +89,16 @@ class TokenStatusList
 
     protected ?StatusResolver $statusResolver = null;
 
+    protected DestinationPolicy $destinationPolicy;
+
 
     /**
      * @param \DateInterval $maxCacheDuration Ceiling for how long a fetched Status List Token is cached. The
      * token's own `ttl` and expiration time shorten it further, never lengthen it.
      * @param array<string,mixed> $httpClientConfig
+     * @param ?\SimpleSAML\OpenID\Network\DestinationPolicy $destinationPolicy Where Status List Token fetches
+     * may be sent. Defaults to refusing every non-public destination, since the status list URI is named by
+     * the issuer of the credential being checked.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -104,16 +110,29 @@ class TokenStatusList
         ?Client $client = null,
         array $httpClientConfig = [],
         int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?DestinationPolicy $destinationPolicy = null,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
+        $this->destinationPolicy = $destinationPolicy ?? new DestinationPolicy(logger: $this->logger);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
             $client,
             $httpClientConfig,
             $maxFetchSizeBytes,
+            $this->destinationPolicy,
         );
+    }
+
+
+    /**
+     * The policy deciding where outbound requests may be sent, so that the same rules can be applied before a
+     * destination is ever fetched, such as when it is registered.
+     */
+    public function destinationPolicy(): DestinationPolicy
+    {
+        return $this->destinationPolicy;
     }
 
 

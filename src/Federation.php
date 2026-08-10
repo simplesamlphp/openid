@@ -47,6 +47,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
 use SimpleSAML\OpenID\Utils\KeyPairResolver;
@@ -152,6 +153,8 @@ class Federation
 
     protected ?EntityCollectionFactory $entityCollectionFactory = null;
 
+    protected DestinationPolicy $destinationPolicy;
+
 
     /**
      * @param array<string,mixed> $httpClientConfig
@@ -167,6 +170,9 @@ class Federation
      * @param int $maxListingFetchSizeBytes Maximum response body size to read for a subordinate listing or an
      * entity collection. Larger than $maxFetchSizeBytes by default, since these responses grow with the size
      * of the federation rather than being one statement each.
+     * @param ?\SimpleSAML\OpenID\Network\DestinationPolicy $destinationPolicy Where federation fetches may be
+     * sent. Defaults to refusing every non-public destination: an entity statement names the endpoints that
+     * are fetched next, so a hostile or misconfigured entity otherwise decides where requests go.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -189,6 +195,7 @@ class Federation
         int $maxDiscoveredEntities = FederationDiscovery::DEFAULT_MAX_DISCOVERED_ENTITIES,
         int $maxSubordinatesPerListing = SubordinateListingFetcher::DEFAULT_MAX_SUBORDINATES,
         int $maxListingFetchSizeBytes = SubordinateListingFetcher::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?DestinationPolicy $destinationPolicy = null,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
@@ -204,11 +211,23 @@ class Federation
         $this->maxSubordinatesPerListing = min(10000, max(1, $maxSubordinatesPerListing));
         $this->maxListingFetchSizeBytes = max(1, $maxListingFetchSizeBytes);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
+        $this->destinationPolicy = $destinationPolicy ?? new DestinationPolicy(logger: $this->logger);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
             $client,
             $httpClientConfig,
             $maxFetchSizeBytes,
+            $this->destinationPolicy,
         );
+    }
+
+
+    /**
+     * The policy deciding where outbound requests may be sent, so that the same rules can be applied before a
+     * destination is ever fetched, such as when it is registered.
+     */
+    public function destinationPolicy(): DestinationPolicy
+    {
+        return $this->destinationPolicy;
     }
 
 

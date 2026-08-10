@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Exceptions\DestinationPolicyException;
 use SimpleSAML\OpenID\Exceptions\FetchException;
 use SimpleSAML\OpenID\Exceptions\HttpException;
 use SimpleSAML\OpenID\Utils\ArtifactFetcher;
@@ -139,6 +140,25 @@ final class ArtifactFetcherTest extends TestCase
 
         $this->loggerMock->expects($this->once())->method('error')
             ->with($this->stringContains('error'));
+
+        $this->sut()->fromNetwork('uri');
+    }
+
+
+    /**
+     * A refused destination is a policy decision rather than a transport failure, so it keeps its own type
+     * instead of becoming the fetch error every other failure here becomes.
+     */
+    public function testFromNetworkKeepsARefusedDestinationRecognizable(): void
+    {
+        $this->httpClientDecoratorMock->expects($this->once())->method('request')
+            ->willThrowException(new DestinationPolicyException('destination refused'));
+
+        $this->loggerMock->expects($this->once())->method('error')
+            ->with($this->stringContains('destination refused'));
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('destination refused');
 
         $this->sut()->fromNetwork('uri');
     }

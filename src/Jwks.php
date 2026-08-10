@@ -25,6 +25,7 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Network\DestinationPolicy;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 /**
@@ -72,9 +73,14 @@ class Jwks
 
     protected ?AlgorithmManagerDecorator $algorithmManagerDecorator = null;
 
+    protected DestinationPolicy $destinationPolicy;
+
 
     /**
      * @param array<string,mixed> $httpClientConfig
+     * @param ?\SimpleSAML\OpenID\Network\DestinationPolicy $destinationPolicy Where JWKS fetches may be sent.
+     * Defaults to refusing every non-public destination, since a `jwks_uri` is commonly supplied by the party
+     * being validated rather than by the deployment.
      */
     public function __construct(
         protected readonly SupportedAlgorithms $supportedAlgorithms = new SupportedAlgorithms(),
@@ -86,16 +92,29 @@ class Jwks
         ?Client $httpClient = null,
         array $httpClientConfig = [],
         int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
+        ?DestinationPolicy $destinationPolicy = null,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->timestampValidationLeewayDecorator = $this->dateIntervalDecoratorFactory()
             ->build($timestampValidationLeeway);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
+        $this->destinationPolicy = $destinationPolicy ?? new DestinationPolicy(logger: $this->logger);
         $this->httpClientDecorator = $this->httpClientDecoratorFactory()->build(
             $httpClient,
             $httpClientConfig,
             $maxFetchSizeBytes,
+            $this->destinationPolicy,
         );
+    }
+
+
+    /**
+     * The policy deciding where outbound requests may be sent, so that the same rules can be applied before a
+     * destination is ever fetched, such as when it is registered.
+     */
+    public function destinationPolicy(): DestinationPolicy
+    {
+        return $this->destinationPolicy;
     }
 
 
