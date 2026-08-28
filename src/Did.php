@@ -6,7 +6,9 @@ namespace SimpleSAML\OpenID;
 
 use SimpleSAML\OpenID\Did\DidJwkResolver;
 use SimpleSAML\OpenID\Did\DidKeyJwkResolver;
+use SimpleSAML\OpenID\Did\Factories\DidDocumentFactory;
 use SimpleSAML\OpenID\Did\MultibaseKeyDecoder;
+use SimpleSAML\OpenID\Did\PublicJwkValidator;
 
 /**
  * @see \SimpleSAML\Test\OpenID\DidTest
@@ -18,6 +20,10 @@ class Did
     protected ?DidJwkResolver $didJwkResolver = null;
 
     protected ?MultibaseKeyDecoder $multibaseKeyDecoder = null;
+
+    protected ?PublicJwkValidator $publicJwkValidator = null;
+
+    protected ?DidDocumentFactory $didDocumentFactory = null;
 
     protected ?Helpers $helpers = null;
 
@@ -43,6 +49,22 @@ class Did
     {
         return $this->multibaseKeyDecoder ??= new MultibaseKeyDecoder(
             $this->helpers(),
+        );
+    }
+
+
+    public function publicJwkValidator(): PublicJwkValidator
+    {
+        return $this->publicJwkValidator ??= new PublicJwkValidator();
+    }
+
+
+    public function didDocumentFactory(): DidDocumentFactory
+    {
+        return $this->didDocumentFactory ??= new DidDocumentFactory(
+            $this->multibaseKeyDecoder(),
+            $this->didJwkResolver(),
+            $this->publicJwkValidator(),
         );
     }
 

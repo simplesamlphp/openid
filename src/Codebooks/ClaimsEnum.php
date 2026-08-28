@@ -120,6 +120,8 @@ enum ClaimsEnum: string
 
     case Contacts = 'contacts';
 
+    case Controller = 'controller';
+
     case CredentialConfigurationId = 'credential_configuration_id';
 
     case CredentialConfigurationIds = 'credential_configuration_ids';
@@ -352,6 +354,10 @@ enum ClaimsEnum: string
 
     case ProofTypesSupported = 'proof_types_supported';
 
+    case PublicKeyJwk = 'publicKeyJwk';
+
+    case PublicKeyMultibase = 'publicKeyMultibase';
+
     case PushedAuthorizationRequestEndpoint = 'pushed_authorization_request_endpoint';
 
     case RedirectUris = 'redirect_uris';
@@ -521,6 +527,8 @@ enum ClaimsEnum: string
 
     // VerifiableCredentialType
     case Vct = 'vct';
+
+    case VerificationMethod = 'verificationMethod';
 
     // X509certificateChain
     case X5c = 'x5c';

@@ -12,7 +12,9 @@ use SimpleSAML\OpenID\Helpers;
  * Based on the W3C DID Key specification: https://w3c-ccg.github.io/did-key-spec/
  *
  * The multibase / multicodec decoding itself lives in \SimpleSAML\OpenID\Did\MultibaseKeyDecoder. The methods
- * exposing it here remain as delegating wrappers for backward compatibility.
+ * exposing it here remain as delegating wrappers for backward compatibility, and extractJwkFromDidKey()
+ * keeps its own multicodec dispatch so that those wrappers stay interceptable. New callers should reach
+ * for \SimpleSAML\OpenID\Did\MultibaseKeyDecoder::decodeToJwk() instead.
  *
  * @see \SimpleSAML\Test\OpenID\Did\DidKeyJwkResolverTest
  */
@@ -66,6 +68,10 @@ class DidKeyJwkResolver
             // Extract the actual key bytes (skip the multicodec bytes)
             $keyBytes = substr($decodedKey, $prefixLength);
 
+            if ($keyBytes === '') {
+                throw new DidException('The did:key value carries no key material after its multicodec prefix.');
+            }
+
             // Determine the key type based on the multicodec identifier
             // See: https://github.com/multiformats/multicodec/blob/master/table.csv
             return match ($multicodecIdentifier) {
@@ -79,13 +85,12 @@ class DidKeyJwkResolver
                 // its varint encoding would be different (e.g., \xDF\x03).
                 // Assuming the multicodec code itself is 0xe7 (231).
                 0xe7 => $this->createSecp256k1Jwk($keyBytes),
-                // P-256 (NIST) public key (multicodec 0x1200 for uncompressed, 0x1201 for compressed - typically
-                // 0x1200 used with JWK). Also adding 0x1102 as another possible identifier for P-256 keys
-                0x1200, 0x1201, 0x1102 => $this->createP256Jwk($keyBytes),
-                // P-384 (NIST) public key (multicodec 0x1202)
-                0x1202 => $this->createP384Jwk($keyBytes),
-                // P-521 (NIST) public key (multicodec 0x1203)
-                0x1203 => $this->createP521Jwk($keyBytes),
+                // p256-pub
+                0x1200 => $this->createP256Jwk($keyBytes),
+                // p384-pub
+                0x1201 => $this->createP384Jwk($keyBytes),
+                // p521-pub
+                0x1202 => $this->createP521Jwk($keyBytes),
                 // JSON JWK public key (0xeb51 in multicodec table)
                 0xeb51 => $this->createJwkFromRawJson($keyBytes),
                 default => throw new DidException(

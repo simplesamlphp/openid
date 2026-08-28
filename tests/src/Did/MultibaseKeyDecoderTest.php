@@ -439,4 +439,166 @@ final class MultibaseKeyDecoderTest extends TestCase
             'Invalid RSA JWK format: missing required properties',
         ];
     }
+
+
+    public function testDecodeToJwkDecodesRealEd25519MultibaseKey(): void
+    {
+        $jwk = $this->sut(new Helpers())->decodeToJwk('z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK');
+
+        $this->assertSame('OKP', $jwk['kty']);
+        $this->assertSame('Ed25519', $jwk['crv']);
+        $this->assertSame('sig', $jwk['use']);
+    }
+
+
+    public function testDecodeToJwkRejectsUnsupportedMultibaseEncoding(): void
+    {
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('Unsupported multibase encoding');
+
+        // Only base58btc, which multibase prefixes with "z", is supported.
+        $this->sut()->decodeToJwk('a123');
+    }
+
+
+    public function testDecodeToJwkRejectsMissingKeyMaterial(): void
+    {
+        $decoderMock = $this->getMockBuilder(MultibaseKeyDecoder::class)
+            ->setConstructorArgs([$this->helpersMock])
+            ->onlyMethods(['base58BtcDecode'])
+            ->getMock();
+
+        // A multicodec prefix with nothing following it.
+        $decoderMock->method('base58BtcDecode')
+            ->willReturn("\xED\x01");
+
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('Multibase key carries no key material after its multicodec prefix.');
+
+        $decoderMock->decodeToJwk('z123');
+    }
+
+
+    public function testDecodeToJwkWrapsDecodingFailures(): void
+    {
+        $decoderMock = $this->getMockBuilder(MultibaseKeyDecoder::class)
+            ->setConstructorArgs([$this->helpersMock])
+            ->onlyMethods(['base58BtcDecode'])
+            ->getMock();
+
+        $decoderMock->method('base58BtcDecode')
+            ->willThrowException(new \InvalidArgumentException('Test exception'));
+
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('Error processing multibase key: Test exception');
+
+        $decoderMock->decodeToJwk('z123');
+    }
+
+
+    #[DataProvider('multicodecDataProvider')]
+    public function testCreateJwkFromMulticodec(
+        int $multicodecIdentifier,
+        string $keyBytes,
+        string $expectedKeyType,
+        string $expectedCurve,
+    ): void {
+        $jwk = $this->sut()->createJwkFromMulticodec($multicodecIdentifier, $keyBytes);
+
+        $this->assertSame($expectedKeyType, $jwk['kty']);
+        $this->assertSame($expectedCurve, $jwk['crv']);
+    }
+
+
+    public static function multicodecDataProvider(): \Iterator
+    {
+        // Uncompressed point format (0x04 || x || y).
+        $uncompressedPoint = static fn(int $size): string =>
+        "\x04" . str_repeat('x', $size) . str_repeat('y', $size);
+
+        // Codes are those the multiformats registry assigns, not the ones an implementation might guess.
+        yield 'ed25519-pub (0xed)' => [0xed, str_repeat('x', 32), 'OKP', 'Ed25519'];
+        yield 'x25519-pub (0xec)' => [0xec, str_repeat('x', 32), 'OKP', 'X25519'];
+        yield 'secp256k1-pub (0xe7)' => [0xe7, $uncompressedPoint(32), 'EC', 'secp256k1'];
+        yield 'p256-pub (0x1200)' => [0x1200, $uncompressedPoint(32), 'EC', 'P-256'];
+        yield 'p384-pub (0x1201)' => [0x1201, $uncompressedPoint(48), 'EC', 'P-384'];
+        yield 'p521-pub (0x1202)' => [0x1202, $uncompressedPoint(66), 'EC', 'P-521'];
+    }
+
+
+    public function testCreateJwkFromMulticodecHandlesRawJson(): void
+    {
+        $jwk = $this->sut(new Helpers())->createJwkFromMulticodec(
+            0xeb51,
+            '{"kty":"OKP","crv":"Ed25519","x":"dDfIibQM"}',
+        );
+
+        $this->assertSame('Ed25519', $jwk['crv']);
+        $this->assertSame('sig', $jwk['use']);
+    }
+
+
+    public function testCreateJwkFromMulticodecDoesNotCallAKeyAgreementCurveASigningKey(): void
+    {
+        $jwk = $this->sut(new Helpers())->createJwkFromMulticodec(
+            0xeb51,
+            '{"kty":"OKP","crv":"X25519","x":"dDfIibQM"}',
+        );
+
+        $this->assertSame('enc', $jwk['use']);
+    }
+
+
+    #[DataProvider('unsupportedMulticodecDataProvider')]
+    public function testCreateJwkFromMulticodecRejectsUnsupportedIdentifier(int $multicodecIdentifier): void
+    {
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('Unsupported key type with multicodec identifier');
+
+        $this->sut()->createJwkFromMulticodec($multicodecIdentifier, str_repeat('x', 32));
+    }
+
+
+    public static function unsupportedMulticodecDataProvider(): \Iterator
+    {
+        // Registered, but this decoder does not build JWKs for them.
+        yield 'ed448-pub (0x1203)' => [0x1203];
+        yield 'x448-pub (0x1204)' => [0x1204];
+        // Not assigned by the registry at all, despite once being treated here as a P-256 key.
+        yield 'unassigned (0x1102)' => [0x1102];
+        yield 'nonsense (0xffff)' => [0xffff];
+    }
+
+
+    #[DataProvider('wrongLengthOkpKeyDataProvider')]
+    public function testCreateJwkFromMulticodecRejectsWrongLengthOkpKey(
+        int $multicodecIdentifier,
+        string $keyBytes,
+        string $expectedExceptionMessage,
+    ): void {
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage($expectedExceptionMessage);
+
+        $this->sut()->createJwkFromMulticodec($multicodecIdentifier, $keyBytes);
+    }
+
+
+    public static function wrongLengthOkpKeyDataProvider(): \Iterator
+    {
+        yield 'Ed25519 truncated to one byte' => [
+            0xed,
+            'x',
+            'An Ed25519 public key must be exactly 32 bytes, but 1 were given.',
+        ];
+        yield 'Ed25519 one byte too long' => [
+            0xed,
+            str_repeat('x', 33),
+            'An Ed25519 public key must be exactly 32 bytes, but 33 were given.',
+        ];
+        yield 'X25519 one byte too short' => [
+            0xec,
+            str_repeat('x', 31),
+            'An X25519 public key must be exactly 32 bytes, but 31 were given.',
+        ];
+    }
 }

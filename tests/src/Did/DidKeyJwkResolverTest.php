@@ -725,4 +725,22 @@ final class DidKeyJwkResolverTest extends TestCase
         yield 'invalid char with newline "ab\nc"' => ["ab\nc"];
         yield 'invalid char with tab "ab\tc"' => ["ab\tc"];
     }
+
+
+    public function testExtractJwkFromDidKeyWithoutKeyMaterialThrows(): void
+    {
+        $resolverMock = $this->getMockBuilder(DidKeyJwkResolver::class)
+            ->setConstructorArgs([$this->helpersMock])
+            ->onlyMethods(['base58BtcDecode'])
+            ->getMock();
+
+        // A multicodec prefix with nothing following it.
+        $resolverMock->method('base58BtcDecode')
+            ->willReturn("\xED\x01");
+
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('The did:key value carries no key material after its multicodec prefix.');
+
+        $resolverMock->extractJwkFromDidKey('did:key:z123');
+    }
 }

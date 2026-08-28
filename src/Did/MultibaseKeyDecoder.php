@@ -18,6 +18,16 @@ use SimpleSAML\OpenID\Helpers;
  */
 class MultibaseKeyDecoder
 {
+    /** Both Ed25519 and X25519 public keys are 32 bytes. */
+    protected const OKP_PUBLIC_KEY_LENGTH = 32;
+
+    /** Curves that exist to agree keys, never to sign with. */
+    protected const KEY_AGREEMENT_CURVES = [
+        'X25519',
+        'X448',
+    ];
+
+
     public function __construct(
         protected readonly Helpers $helpers,
     ) {
@@ -327,7 +337,9 @@ class MultibaseKeyDecoder
                 }
             }
 
-            $jwk['use'] ??= 'sig';
+            // Assuming 'sig' unconditionally would label a key agreement curve as a signing key, and it
+            // would then be published under signing relationships.
+            $jwk['use'] ??= in_array($jwk['crv'] ?? null, self::KEY_AGREEMENT_CURVES, true) ? 'enc' : 'sig';
 
             return $jwk;
         } catch (\JsonException $jsonException) {
@@ -337,5 +349,102 @@ class MultibaseKeyDecoder
                 $jsonException,
             );
         }
+    }
+
+
+    /**
+     * Decode a multibase encoded, multicodec prefixed public key into a JWK.
+     *
+     * This is the canonical entry point. \SimpleSAML\OpenID\Did\DidKeyJwkResolver::extractJwkFromDidKey() keeps
+     * its own copy of the multicodec dispatch below, because its per-method delegating wrappers have to stay
+     * interceptable for backward compatibility. That copy is frozen; this one is the one that evolves.
+     *
+     * @param string $multibaseKey The multibase value, for example the method specific id of a did:key, or the
+     * publicKeyMultibase property of a verification method.
+     * @return mixed[] The JWK representation of the key
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public function decodeToJwk(string $multibaseKey): array
+    {
+        if (!str_starts_with($multibaseKey, 'z')) {
+            throw new DidException(
+                'Unsupported multibase encoding. Only base58btc (z-prefixed) is currently supported.',
+            );
+        }
+
+        try {
+            $decodedKey = $this->base58BtcDecode(substr($multibaseKey, 1));
+            [$multicodecIdentifier, $prefixLength] = $this->varintDecode($decodedKey);
+            $keyBytes = substr($decodedKey, $prefixLength);
+
+            if ($keyBytes === '') {
+                throw new DidException('Multibase key carries no key material after its multicodec prefix.');
+            }
+
+            return $this->createJwkFromMulticodec($multicodecIdentifier, $keyBytes);
+        } catch (DidException $didException) {
+            throw $didException;
+        } catch (\Exception $exception) {
+            throw new DidException('Error processing multibase key: ' . $exception->getMessage(), 0, $exception);
+        }
+    }
+
+
+    /**
+     * Assert that raw OKP key material is exactly as long as its curve requires.
+     *
+     * The EC constructors already check their own point lengths, but the OKP ones cannot: they are also
+     * called directly with caller supplied bytes. Here the multicodec identifier has declared the curve, so
+     * the length is known and a truncated key can be refused before it reaches a JWK.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    protected function requireOkpKeyLength(string $keyBytes, string $curve): string
+    {
+        if (strlen($keyBytes) !== self::OKP_PUBLIC_KEY_LENGTH) {
+            throw new DidException(
+                sprintf(
+                    'An %s public key must be exactly %d bytes, but %d were given.',
+                    $curve,
+                    self::OKP_PUBLIC_KEY_LENGTH,
+                    strlen($keyBytes),
+                ),
+            );
+        }
+
+        return $keyBytes;
+    }
+
+
+    /**
+     * Create a JWK from raw key bytes, based on the multicodec identifier that preceded them.
+     *
+     * @see https://github.com/multiformats/multicodec/blob/master/table.csv
+     *
+     * @param string $keyBytes The key bytes, with the multicodec prefix already removed.
+     * @return mixed[] The JWK representation of the key
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public function createJwkFromMulticodec(int $multicodecIdentifier, string $keyBytes): array
+    {
+        return match ($multicodecIdentifier) {
+            // ed25519-pub
+            0xed => $this->createEd25519Jwk($this->requireOkpKeyLength($keyBytes, 'Ed25519')),
+            // x25519-pub
+            0xec => $this->createX25519Jwk($this->requireOkpKeyLength($keyBytes, 'X25519')),
+            // Secp256k1 public key (multicodec 0xe7)
+            0xe7 => $this->createSecp256k1Jwk($keyBytes),
+            // p256-pub
+            0x1200 => $this->createP256Jwk($keyBytes),
+            // p384-pub
+            0x1201 => $this->createP384Jwk($keyBytes),
+            // p521-pub
+            0x1202 => $this->createP521Jwk($keyBytes),
+            // JSON JWK public key (0xeb51 in multicodec table)
+            0xeb51 => $this->createJwkFromRawJson($keyBytes),
+            default => throw new DidException(
+                sprintf('Unsupported key type with multicodec identifier: 0x%04x', $multicodecIdentifier),
+            ),
+        };
     }
 }

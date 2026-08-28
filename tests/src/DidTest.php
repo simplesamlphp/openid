@@ -14,6 +14,8 @@ use SimpleSAML\OpenID\Helpers;
 #[\PHPUnit\Framework\Attributes\CoversClass(Did::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Did\DidKeyJwkResolver::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Did\MultibaseKeyDecoder::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Did\PublicJwkValidator::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Did\Factories\DidDocumentFactory::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Did\DidJwkResolver::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Helpers::class)]
 final class DidTest extends TestCase
@@ -45,6 +47,16 @@ final class DidTest extends TestCase
         $this->assertInstanceOf(
             MultibaseKeyDecoder::class,
             $this->sut()->multibaseKeyDecoder(),
+        );
+
+        $this->assertInstanceOf(
+            Did\PublicJwkValidator::class,
+            $this->sut()->publicJwkValidator(),
+        );
+
+        $this->assertInstanceOf(
+            Did\Factories\DidDocumentFactory::class,
+            $this->sut()->didDocumentFactory(),
         );
 
         $this->assertInstanceOf(
