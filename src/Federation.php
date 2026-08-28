@@ -545,9 +545,7 @@ class Federation
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
-        if (is_null($this->dateIntervalDecoratorFactory)) {
-            $this->dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory();
-        }
+        $this->dateIntervalDecoratorFactory ??= new DateIntervalDecoratorFactory();
 
         return $this->dateIntervalDecoratorFactory;
     }
@@ -561,9 +559,7 @@ class Federation
 
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
-        if (is_null($this->httpClientDecoratorFactory)) {
-            $this->httpClientDecoratorFactory = new HttpClientDecoratorFactory($this->logger);
-        }
+        $this->httpClientDecoratorFactory ??= new HttpClientDecoratorFactory($this->logger);
 
         return $this->httpClientDecoratorFactory;
     }
@@ -571,9 +567,7 @@ class Federation
 
     public function cacheDecoratorFactory(): CacheDecoratorFactory
     {
-        if (is_null($this->cacheDecoratorFactory)) {
-            $this->cacheDecoratorFactory = new CacheDecoratorFactory();
-        }
+        $this->cacheDecoratorFactory ??= new CacheDecoratorFactory();
 
         return $this->cacheDecoratorFactory;
     }

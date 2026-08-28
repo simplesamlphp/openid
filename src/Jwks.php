@@ -161,9 +161,7 @@ class Jwks
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
-        if (is_null($this->algorithmManagerDecoratorFactory)) {
-            $this->algorithmManagerDecoratorFactory = new AlgorithmManagerDecoratorFactory();
-        }
+        $this->algorithmManagerDecoratorFactory ??= new AlgorithmManagerDecoratorFactory();
 
         return $this->algorithmManagerDecoratorFactory;
     }
@@ -179,9 +177,7 @@ class Jwks
 
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
-        if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
-            $this->jwsSerializerManagerDecoratorFactory = new JwsSerializerManagerDecoratorFactory();
-        }
+        $this->jwsSerializerManagerDecoratorFactory ??= new JwsSerializerManagerDecoratorFactory();
 
         return $this->jwsSerializerManagerDecoratorFactory;
     }
@@ -189,9 +185,7 @@ class Jwks
 
     public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
-        if (is_null($this->jwsDecoratorBuilderFactory)) {
-            $this->jwsDecoratorBuilderFactory = new JwsDecoratorBuilderFactory();
-        }
+        $this->jwsDecoratorBuilderFactory ??= new JwsDecoratorBuilderFactory();
 
         return $this->jwsDecoratorBuilderFactory;
     }
@@ -199,9 +193,7 @@ class Jwks
 
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
-        if (is_null($this->jwsVerifierDecoratorFactory)) {
-            $this->jwsVerifierDecoratorFactory = new JwsVerifierDecoratorFactory();
-        }
+        $this->jwsVerifierDecoratorFactory ??= new JwsVerifierDecoratorFactory();
 
         return $this->jwsVerifierDecoratorFactory;
     }
@@ -209,9 +201,7 @@ class Jwks
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
-        if (is_null($this->dateIntervalDecoratorFactory)) {
-            $this->dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory();
-        }
+        $this->dateIntervalDecoratorFactory ??= new DateIntervalDecoratorFactory();
 
         return $this->dateIntervalDecoratorFactory;
     }
@@ -219,9 +209,7 @@ class Jwks
 
     public function cacheDecoratorFactory(): CacheDecoratorFactory
     {
-        if (is_null($this->cacheDecoratorFactory)) {
-            $this->cacheDecoratorFactory = new CacheDecoratorFactory();
-        }
+        $this->cacheDecoratorFactory ??= new CacheDecoratorFactory();
 
         return $this->cacheDecoratorFactory;
     }
@@ -229,9 +217,7 @@ class Jwks
 
     public function httpClientDecoratorFactory(): HttpClientDecoratorFactory
     {
-        if (is_null($this->httpClientDecoratorFactory)) {
-            $this->httpClientDecoratorFactory = new HttpClientDecoratorFactory($this->logger);
-        }
+        $this->httpClientDecoratorFactory ??= new HttpClientDecoratorFactory($this->logger);
 
         return $this->httpClientDecoratorFactory;
     }

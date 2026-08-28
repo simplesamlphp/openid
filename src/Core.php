@@ -148,9 +148,7 @@ class Core
 
     public function algorithmManagerDecoratorFactory(): AlgorithmManagerDecoratorFactory
     {
-        if (is_null($this->algorithmManagerDecoratorFactory)) {
-            $this->algorithmManagerDecoratorFactory = new AlgorithmManagerDecoratorFactory();
-        }
+        $this->algorithmManagerDecoratorFactory ??= new AlgorithmManagerDecoratorFactory();
 
         return $this->algorithmManagerDecoratorFactory;
     }
@@ -165,9 +163,7 @@ class Core
 
     public function jwsSerializerManagerDecoratorFactory(): JwsSerializerManagerDecoratorFactory
     {
-        if (is_null($this->jwsSerializerManagerDecoratorFactory)) {
-            $this->jwsSerializerManagerDecoratorFactory = new JwsSerializerManagerDecoratorFactory();
-        }
+        $this->jwsSerializerManagerDecoratorFactory ??= new JwsSerializerManagerDecoratorFactory();
 
         return $this->jwsSerializerManagerDecoratorFactory;
     }
@@ -175,9 +171,7 @@ class Core
 
     public function jwsDecoratorBuilderFactory(): JwsDecoratorBuilderFactory
     {
-        if (is_null($this->jwsDecoratorBuilderFactory)) {
-            $this->jwsDecoratorBuilderFactory = new JwsDecoratorBuilderFactory();
-        }
+        $this->jwsDecoratorBuilderFactory ??= new JwsDecoratorBuilderFactory();
 
         return $this->jwsDecoratorBuilderFactory;
     }
@@ -185,9 +179,7 @@ class Core
 
     public function jwsVerifierDecoratorFactory(): JwsVerifierDecoratorFactory
     {
-        if (is_null($this->jwsVerifierDecoratorFactory)) {
-            $this->jwsVerifierDecoratorFactory = new JwsVerifierDecoratorFactory();
-        }
+        $this->jwsVerifierDecoratorFactory ??= new JwsVerifierDecoratorFactory();
 
         return $this->jwsVerifierDecoratorFactory;
     }
@@ -201,9 +193,7 @@ class Core
 
     public function dateIntervalDecoratorFactory(): DateIntervalDecoratorFactory
     {
-        if (is_null($this->dateIntervalDecoratorFactory)) {
-            $this->dateIntervalDecoratorFactory = new DateIntervalDecoratorFactory();
-        }
+        $this->dateIntervalDecoratorFactory ??= new DateIntervalDecoratorFactory();
 
         return $this->dateIntervalDecoratorFactory;
     }
@@ -211,10 +201,8 @@ class Core
 
     public function jwsSerializerManagerDecorator(): JwsSerializerManagerDecorator
     {
-        if (is_null($this->jwsSerializerManagerDecorator)) {
-            $this->jwsSerializerManagerDecorator = $this->jwsSerializerManagerDecoratorFactory()
-                ->build($this->supportedSerializers);
-        }
+        $this->jwsSerializerManagerDecorator ??= $this->jwsSerializerManagerDecoratorFactory()
+            ->build($this->supportedSerializers);
 
         return $this->jwsSerializerManagerDecorator;
     }
@@ -222,13 +210,11 @@ class Core
 
     public function jwsDecoratorBuilder(): JwsDecoratorBuilder
     {
-        if (is_null($this->jwsDecoratorBuilder)) {
-            $this->jwsDecoratorBuilder = $this->jwsDecoratorBuilderFactory()->build(
-                $this->jwsSerializerManagerDecorator(),
-                $this->algorithmManagerDecorator(),
-                $this->helpers(),
-            );
-        }
+        $this->jwsDecoratorBuilder ??= $this->jwsDecoratorBuilderFactory()->build(
+            $this->jwsSerializerManagerDecorator(),
+            $this->algorithmManagerDecorator(),
+            $this->helpers(),
+        );
 
         return $this->jwsDecoratorBuilder;
     }
@@ -236,11 +222,9 @@ class Core
 
     public function jwsVerifierDecorator(): JwsVerifierDecorator
     {
-        if (is_null($this->jwsVerifierDecorator)) {
-            $this->jwsVerifierDecorator = $this->jwsVerifierDecoratorFactory()->build(
-                $this->algorithmManagerDecorator(),
-            );
-        }
+        $this->jwsVerifierDecorator ??= $this->jwsVerifierDecoratorFactory()->build(
+            $this->algorithmManagerDecorator(),
+        );
 
         return $this->jwsVerifierDecorator;
     }

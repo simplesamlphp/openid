@@ -80,9 +80,7 @@ class Arr
                 );
             }
 
-            if (!isset($nested[$key])) {
-                $nested[$key] = [];
-            }
+            $nested[$key] ??= [];
 
             $nested = &$nested[$key];
         }

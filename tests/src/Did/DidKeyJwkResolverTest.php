@@ -10,11 +10,13 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Did\DidKeyJwkResolver;
+use SimpleSAML\OpenID\Did\MultibaseKeyDecoder;
 use SimpleSAML\OpenID\Exceptions\DidException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Helpers\Base64Url;
 
 #[CoversClass(DidKeyJwkResolver::class)]
+#[UsesClass(MultibaseKeyDecoder::class)]
 #[UsesClass(Helpers::class)]
 #[UsesClass(Helpers\Json::class)]
 #[UsesClass(Helpers\Base64Url::class)]

@@ -232,9 +232,7 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
         $validFrom = $this->getPayloadClaim(ClaimsEnum::ValidFrom->value);
 
-        if (is_null($validFrom)) {
-            $validFrom = $this->getPayloadClaim(ClaimsEnum::Issuance_Date->value);
-        }
+        $validFrom ??= $this->getPayloadClaim(ClaimsEnum::Issuance_Date->value);
 
         if (is_null($validFrom)) {
             $nbf = $this->getNotBefore() ?? $this->getIssuedAt();
@@ -295,9 +293,7 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
 
         $validUntil = $this->getPayloadClaim(ClaimsEnum::ValidUntil->value);
 
-        if (is_null($validUntil)) {
-            $validUntil = $this->getPayloadClaim(ClaimsEnum::Expiration_Date->value);
-        }
+        $validUntil ??= $this->getPayloadClaim(ClaimsEnum::Expiration_Date->value);
 
         if (is_null($validUntil)) {
             $exp = $this->getExpirationTime();

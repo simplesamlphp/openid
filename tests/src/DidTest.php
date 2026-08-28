@@ -8,10 +8,12 @@ use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Did;
 use SimpleSAML\OpenID\Did\DidJwkResolver;
 use SimpleSAML\OpenID\Did\DidKeyJwkResolver;
+use SimpleSAML\OpenID\Did\MultibaseKeyDecoder;
 use SimpleSAML\OpenID\Helpers;
 
 #[\PHPUnit\Framework\Attributes\CoversClass(Did::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Did\DidKeyJwkResolver::class)]
+#[\PHPUnit\Framework\Attributes\UsesClass(Did\MultibaseKeyDecoder::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Did\DidJwkResolver::class)]
 #[\PHPUnit\Framework\Attributes\UsesClass(Helpers::class)]
 final class DidTest extends TestCase
@@ -38,6 +40,11 @@ final class DidTest extends TestCase
         $this->assertInstanceOf(
             DidJwkResolver::class,
             $this->sut()->didJwkResolver(),
+        );
+
+        $this->assertInstanceOf(
+            MultibaseKeyDecoder::class,
+            $this->sut()->multibaseKeyDecoder(),
         );
 
         $this->assertInstanceOf(

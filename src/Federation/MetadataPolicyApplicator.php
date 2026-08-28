@@ -90,11 +90,7 @@ class MetadataPolicyApplicator
                         $policyParameterName,
                     );
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::Default) {
-                    // If the metadata parameter is absent, it MUST be set to the value of the operator. If the metadata
-                    // parameter is present, this operator has no effect.
-                    if (!isset($metadata[$policyParameterName])) {
-                        $metadata[$policyParameterName] = $operatorValue;
-                    }
+                    $metadata[$policyParameterName] ??= $operatorValue;
                 } elseif ($metadataPolicyOperatorEnum === MetadataPolicyOperatorsEnum::OneOf) {
                     // If the metadata parameter is present, its value MUST be one of those listed in the operator
                     // value.
