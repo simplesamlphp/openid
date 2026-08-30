@@ -19,6 +19,9 @@ use SimpleSAML\OpenID\Exceptions\DidException;
  */
 class DidUrl
 {
+    /** Every DID begins with this, so that the scheme is named in one place rather than concatenated. */
+    public const PREFIX = 'did:';
+
     /** Method names are lowercase alphanumeric. */
     protected const METHOD_NAME = '[a-z0-9]+';
 
@@ -133,7 +136,7 @@ class DidUrl
      */
     public function getDid(): string
     {
-        return 'did:' . $this->method . ':' . $this->methodSpecificId;
+        return self::PREFIX . $this->method . ':' . $this->methodSpecificId;
     }
 
 

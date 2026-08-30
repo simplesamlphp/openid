@@ -19,6 +19,7 @@ use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Decorators\HttpClientDecorator;
+use SimpleSAML\OpenID\Did\AbstractDidResolver;
 use SimpleSAML\OpenID\Did\DidDocument;
 use SimpleSAML\OpenID\Did\DidUrl;
 use SimpleSAML\OpenID\Did\DidWebResolver;
@@ -32,6 +33,7 @@ use SimpleSAML\OpenID\Network\AddressValidator;
 use SimpleSAML\OpenID\Network\DestinationPolicy;
 
 #[CoversClass(DidWebResolver::class)]
+#[UsesClass(AbstractDidResolver::class)]
 #[UsesClass(DidUrl::class)]
 #[UsesClass(DestinationPolicy::class)]
 #[UsesClass(AddressResolver::class)]

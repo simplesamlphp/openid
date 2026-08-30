@@ -38,7 +38,7 @@ use Throwable;
  * @see https://w3c-ccg.github.io/did-method-web/
  * @see \SimpleSAML\Test\OpenID\Did\DidWebResolverTest
  */
-class DidWebResolver
+class DidWebResolver extends AbstractDidResolver
 {
     /** The DID method this resolver handles. */
     public const METHOD = 'web';
@@ -171,13 +171,7 @@ class DidWebResolver
         array $allowedHosts = [],
         array $allowedCidrs = [],
     ): DestinationPolicy {
-        if ($addressPinningMode === AddressPinningModeEnum::Preferred) {
-            throw new DidException(
-                'DID resolution can not run under preferred address pinning, since that proceeds unpinned ' .
-                'where the connection can not be pinned. Use required, or disabled where egress is ' .
-                'controlled by other means.',
-            );
-        }
+        self::assertAddressPinningModeIsUsable($addressPinningMode);
 
         if ($allowedHosts !== [] || $allowedCidrs !== []) {
             // Worth a line in the log of any deployment that has one: an exemption here is a destination a
@@ -200,15 +194,30 @@ class DidWebResolver
 
 
     /**
-     * Whether this resolver handles the given DID's method.
+     * Refuse a pinning mode DID resolution can not run under.
+     *
+     * Preferred proceeds unpinned wherever the cURL handler is missing, which leaves the DNS rebinding
+     * window open on exactly the fetches that are driven from outside. Checked here rather than only in
+     * {@see buildDestinationPolicy()}, so that a caller assembling a DestinationPolicy of its own does not
+     * walk around the rule by not using the helper.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    public function supports(string $did): bool
+    public static function assertAddressPinningModeIsUsable(AddressPinningModeEnum $addressPinningMode): void
     {
-        try {
-            return (new DidUrl($did))->getMethod() === self::METHOD;
-        } catch (DidException) {
-            return false;
+        if ($addressPinningMode === AddressPinningModeEnum::Preferred) {
+            throw new DidException(
+                'DID resolution can not run under preferred address pinning, since that proceeds unpinned ' .
+                'where the connection can not be pinned. Use required, or disabled where egress is ' .
+                'controlled by other means.',
+            );
         }
+    }
+
+
+    public function methodName(): string
+    {
+        return self::METHOD;
     }
 
 
@@ -269,17 +278,7 @@ class DidWebResolver
      */
     public function buildDocumentUrl(string $did): string
     {
-        $didUrl = new DidUrl($did);
-
-        if ($didUrl->getMethod() !== self::METHOD) {
-            throw new DidException(
-                sprintf('DID method "%s" is not one this resolver handles.', $didUrl->getMethod()),
-            );
-        }
-
-        if (!$didUrl->isBareDid()) {
-            throw new DidException('A DID document can only be resolved for a bare DID.');
-        }
+        $didUrl = $this->requireBareDid($did);
 
         // Step 1 of the method's transform: every colon becomes a slash, so the segments between them are the
         // authority followed by the path the document sits under.
