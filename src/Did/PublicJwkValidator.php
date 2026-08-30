@@ -240,7 +240,10 @@ class PublicJwkValidator
     {
         $error = sprintf('JWK member "%s" must be base64url encoded.', $member);
 
-        if (preg_match('/^[A-Za-z0-9_-]+$/', $value) !== 1) {
+        // $D rather than $: without it PCRE matches before a trailing newline, and base64_decode tolerates
+        // whitespace even in strict mode, so a coordinate ending in one would pass this check, decode to the
+        // right bytes, satisfy the length check, and carry the newline into the key we then verify against.
+        if (preg_match('/^[A-Za-z0-9_-]+$/D', $value) !== 1) {
             throw new DidException($error);
         }
 

@@ -18,6 +18,16 @@ use SimpleSAML\OpenID\Helpers;
  */
 class MultibaseKeyDecoder
 {
+    /**
+     * Longest base58 value this decoder will decode.
+     *
+     * Nothing legitimate comes close. The largest key it produces is a JSON JWK carried under multicodec
+     * 0xeb51, and even an RSA-4096 one is under a thousand base58 characters; every curve key is a few dozen.
+     * The bound exists because decoding is superlinear in the length of the input, so a value the size of a
+     * whole DID document costs seconds of CPU on a value that could never have been a key.
+     */
+    public const MAX_BASE58_LENGTH = 2048;
+
     /** Both Ed25519 and X25519 public keys are 32 bytes. */
     protected const OKP_PUBLIC_KEY_LENGTH = 32;
 
@@ -100,9 +110,25 @@ class MultibaseKeyDecoder
 
     /**
      * Decode a base58 encoded string.
+     *
+     * @throws \InvalidArgumentException When the value is longer than any supported key needs, or carries a
+     *         character the base58 alphabet does not define.
      */
     public function base58BtcDecode(string $base58encodedString): string
     {
+        // Decoding is superlinear in the length of the input: the bignum below accumulates, and both byte
+        // loops build their result by prepending. A value the size of a whole DID document therefore costs
+        // seconds of CPU, and both the multibase inside a fetched document and the one in a did:key proof
+        // are chosen by whoever is being authenticated, so the length has to be refused up front.
+        if (strlen($base58encodedString) > self::MAX_BASE58_LENGTH) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Base58 value is longer than the %d characters any supported key needs.',
+                    self::MAX_BASE58_LENGTH,
+                ),
+            );
+        }
+
         $alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
         $base = strlen($alphabet);
 
@@ -112,7 +138,12 @@ class MultibaseKeyDecoder
             $pos = strpos($alphabet, $char);
 
             if ($pos === false) {
-                throw new \InvalidArgumentException('Invalid character in base58 string: ' . $char);
+                // The offending byte is reported in hex rather than as itself. Indexing a string yields one
+                // byte, so a multibyte character here would put half a sequence into the message, and that
+                // message travels on into a cache, a log and a JSON encoder that will refuse it.
+                throw new \InvalidArgumentException(
+                    sprintf('Invalid character in base58 string at offset %d: 0x%02x.', $i, ord($char)),
+                );
             }
 
             $num = gmp_add(gmp_mul($num, $base), $pos);

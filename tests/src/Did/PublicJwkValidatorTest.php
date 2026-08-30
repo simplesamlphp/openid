@@ -209,6 +209,16 @@ final class PublicJwkValidatorTest extends TestCase
             ['kty' => 'EC', 'crv' => 'P-256', 'x' => '!!!!', 'y' => self::Y],
             'JWK member "x" must be base64url encoded.',
         ];
+        // base64_decode tolerates whitespace even in strict mode, and PCRE lets $ match before a trailing
+        // newline, so without the D modifier this decoded to the right bytes and passed every later check.
+        yield 'x with a trailing line feed' => [
+            ['kty' => 'EC', 'crv' => 'P-256', 'x' => self::X . "\n", 'y' => self::Y],
+            'JWK member "x" must be base64url encoded.',
+        ];
+        yield 'n with a trailing line feed' => [
+            ['kty' => 'RSA', 'n' => "sXchDaQe1Nqm0dnAAKPTQrfC1QIDAQAB\n", 'e' => 'AQAB'],
+            'JWK member "n" must be base64url encoded.',
+        ];
         yield 'Ed25519 x decodes to the wrong length' => [
             ['kty' => 'OKP', 'crv' => 'Ed25519', 'x' => 'AA'],
             'JWK member "x" must decode to 32 bytes for curve Ed25519, but it decoded to 1.',

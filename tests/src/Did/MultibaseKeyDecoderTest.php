@@ -166,6 +166,46 @@ final class MultibaseKeyDecoderTest extends TestCase
     }
 
 
+    /**
+     * Decoding grows superlinearly with the length of the input, and that input arrives from whoever is being
+     * authenticated: either inside a fetched DID document or as the multibase of a did:key proof. A value the
+     * size of a whole document costs seconds of CPU, so the length is refused before any of that work begins.
+     */
+    public function testBase58BtcDecodeRefusesAValueLongerThanAnyKeyNeeds(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('longer than the 2048 characters any supported key needs');
+
+        $this->sut()->base58BtcDecode(str_repeat('1', MultibaseKeyDecoder::MAX_BASE58_LENGTH + 1));
+    }
+
+
+    /**
+     * Indexing a string yields one byte, so reporting the offending character as itself put half a multibyte
+     * sequence into the message. That message travels into a cache, a log and a JSON encoder that refuses it.
+     */
+    public function testBase58BtcDecodeReportsAnInvalidByteWithoutEmbeddingIt(): void
+    {
+        try {
+            $this->sut()->base58BtcDecode('€');
+            $this->fail('Expected a multibyte character to be refused.');
+        } catch (\InvalidArgumentException $invalidArgumentException) {
+            $this->assertTrue(mb_check_encoding($invalidArgumentException->getMessage(), 'UTF-8'));
+            $this->assertIsString(json_encode($invalidArgumentException->getMessage(), JSON_THROW_ON_ERROR));
+            $this->assertStringContainsString('0xe2', $invalidArgumentException->getMessage());
+        }
+    }
+
+
+    public function testBase58BtcDecodeAcceptsTheLongestValueAllowed(): void
+    {
+        $decoded = $this->sut()->base58BtcDecode(str_repeat('1', MultibaseKeyDecoder::MAX_BASE58_LENGTH));
+
+        // Every leading '1' is one leading zero byte, so the boundary value decodes rather than being refused.
+        $this->assertSame(MultibaseKeyDecoder::MAX_BASE58_LENGTH, strlen($decoded));
+    }
+
+
     public static function base58DecodeInvalidCharDataProvider(): \Iterator
     {
         yield 'invalid char "0" (zero)' => ['0'];

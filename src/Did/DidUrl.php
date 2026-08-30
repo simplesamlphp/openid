@@ -66,7 +66,11 @@ class DidUrl
         // The delimiter belongs to the path itself, since path-abempty is *( "/" segment ).
         $this->path = $path === null ? null : '/' . $path;
 
-        $didPattern = '/^did:(' . self::METHOD_NAME . '):((?:' . self::ID_CHAR . '*:)*' . self::ID_CHAR . '+)$/';
+        // Every pattern here ends in $D rather than $. Without the D, PCRE lets $ match before a trailing
+        // newline, so "did:web:example.org\n" would parse as the DID without it while getValue() kept the
+        // newline - and that value travels on as a verification method id, into a cache key, into a log
+        // context, and eventually into an issued credential's cnf.kid.
+        $didPattern = '/^did:(' . self::METHOD_NAME . '):((?:' . self::ID_CHAR . '*:)*' . self::ID_CHAR . '+)$/D';
 
         if (preg_match($didPattern, $remainder, $matches) !== 1) {
             throw new DidException('DID URL does not contain a syntactically valid DID.');
@@ -76,10 +80,10 @@ class DidUrl
         $this->methodSpecificId = $matches[2];
 
         // path-abempty is *( "/" segment ), where segment is *pchar.
-        $this->assertMatches($this->path, '/^(?:\/' . self::P_CHAR . '*)*$/', 'path');
+        $this->assertMatches($this->path, '/^(?:\/' . self::P_CHAR . '*)*$/D', 'path');
         // Both query and fragment are *( pchar / "/" / "?" ).
-        $this->assertMatches($this->query, '/^(?:' . self::P_CHAR . '|[\/?])*$/', 'query');
-        $this->assertMatches($this->fragment, '/^(?:' . self::P_CHAR . '|[\/?])*$/', 'fragment');
+        $this->assertMatches($this->query, '/^(?:' . self::P_CHAR . '|[\/?])*$/D', 'query');
+        $this->assertMatches($this->fragment, '/^(?:' . self::P_CHAR . '|[\/?])*$/D', 'fragment');
     }
 
 
