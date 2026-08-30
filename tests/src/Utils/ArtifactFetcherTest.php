@@ -45,6 +45,8 @@ final class ArtifactFetcherTest extends TestCase
         ?HttpClientDecorator $httpClientDecorator = null,
         ?CacheDecorator $cacheDecorator = null,
         ?LoggerInterface $logger = null,
+        bool $logArtifacts = false,
+        int $maxLoggedArtifactLength = ArtifactFetcher::DEFAULT_MAX_LOGGED_ARTIFACT_LENGTH,
     ): ArtifactFetcher {
         $httpClientDecorator ??= $this->httpClientDecoratorMock;
         $cacheDecorator ??= $this->cacheDecoratorMock;
@@ -54,7 +56,151 @@ final class ArtifactFetcherTest extends TestCase
             $httpClientDecorator,
             $cacheDecorator,
             $logger,
+            $logArtifacts,
+            $maxLoggedArtifactLength,
         );
+    }
+
+
+    public function testKeepsTheArtifactOutOfTheLogByDefault(): void
+    {
+        $this->cacheDecoratorMock->method('get')->willReturn('the artifact body');
+
+        $this->loggerMock->expects($this->once())->method('debug')
+            ->with(
+                $this->stringContains('found in cache'),
+                $this->logicalNot($this->arrayHasKey('artifact')),
+            );
+
+        $this->assertSame('the artifact body', $this->sut()->fromCacheAsString('key'));
+    }
+
+
+    public function testLogsTheArtifactWhenAskedTo(): void
+    {
+        $this->cacheDecoratorMock->method('get')->willReturn('the artifact body');
+
+        $this->loggerMock->expects($this->once())->method('debug')
+            ->with(
+                $this->stringContains('found in cache'),
+                $this->arrayHasKey('artifact'),
+            );
+
+        $this->assertSame('the artifact body', $this->sut(logArtifacts: true)->fromCacheAsString('key'));
+    }
+
+
+    public function testCapsTheLoggedArtifact(): void
+    {
+        $artifact = str_repeat('a', 100);
+        $this->cacheDecoratorMock->method('get')->willReturn($artifact);
+
+        $loggedContext = [];
+        $this->loggerMock->expects($this->once())->method('debug')
+            ->willReturnCallback(function (string $message, array $context) use (&$loggedContext): void {
+                $loggedContext = $context;
+            });
+
+        $this->sut(logArtifacts: true, maxLoggedArtifactLength: 10)->fromCacheAsString('key');
+
+        $this->assertSame(str_repeat('a', 10), $loggedContext['artifact']);
+        $this->assertSame(100, $loggedContext['artifactLength']);
+        $this->assertTrue($loggedContext['artifactTruncated']);
+    }
+
+
+    public function testRaisesAnUnusableLoggedArtifactLength(): void
+    {
+        $this->cacheDecoratorMock->method('get')->willReturn('abc');
+
+        $loggedContext = [];
+        $this->loggerMock->expects($this->once())->method('debug')
+            ->willReturnCallback(function (string $message, array $context) use (&$loggedContext): void {
+                $loggedContext = $context;
+            });
+
+        // Zero would otherwise mean an empty string in the log rather than the shortest useful one.
+        $this->sut(logArtifacts: true, maxLoggedArtifactLength: 0)->fromCacheAsString('key');
+
+        $this->assertSame('a', $loggedContext['artifact']);
+    }
+
+
+    public function testReportsTheTypeOfAnUnusableCachedArtifactWithoutLoggingIt(): void
+    {
+        $this->cacheDecoratorMock->method('get')->willReturn(['artifact-in-array']);
+
+        $this->loggerMock->expects($this->once())->method('warning')
+            ->with(
+                $this->stringContains('nexpected'),
+                $this->logicalAnd(
+                    $this->arrayHasKey('artifactType'),
+                    $this->logicalNot($this->arrayHasKey('artifact')),
+                ),
+            );
+
+        $this->assertNull($this->sut()->fromCacheAsString('key'));
+    }
+
+
+    public function testNeverLogsTheValueOfANonStringArtifact(): void
+    {
+        // Nothing but a string can be bounded by the length cap, so an oversized cached array must not be
+        // handed to the logger even when artifact logging was asked for.
+        $this->cacheDecoratorMock->method('get')->willReturn([str_repeat('a', 100000)]);
+
+        $this->loggerMock->expects($this->once())->method('warning')
+            ->with($this->anything(), $this->logicalNot($this->arrayHasKey('artifact')));
+
+        $this->assertNull($this->sut(logArtifacts: true)->fromCacheAsString('key'));
+    }
+
+
+    public function testHoldsTheByteCapEvenWhenRepairingWidensTheArtifact(): void
+    {
+        $previousSubstitute = mb_substitute_character();
+        // U+FFFD costs three bytes for every one-byte sequence it replaces, so repairing can push the
+        // result back over the limit the cut brought it under.
+        mb_substitute_character(0xFFFD);
+
+        try {
+            $this->cacheDecoratorMock->method('get')->willReturn(str_repeat("\xE2", 40));
+
+            $loggedContext = [];
+            $this->loggerMock->expects($this->once())->method('debug')
+                ->willReturnCallback(function (string $message, array $context) use (&$loggedContext): void {
+                    $loggedContext = $context;
+                });
+
+            $this->sut(logArtifacts: true, maxLoggedArtifactLength: 40)->fromCacheAsString('key');
+
+            $this->assertLessThanOrEqual(40, strlen($loggedContext['artifact']));
+            $this->assertTrue(mb_check_encoding($loggedContext['artifact'], 'UTF-8'));
+            // Replaced bytes mean what is logged is not what was fetched, so it is reported as such.
+            $this->assertTrue($loggedContext['artifactTruncated']);
+        } finally {
+            mb_substitute_character($previousSubstitute);
+        }
+    }
+
+
+    public function testKeepsATruncatedLoggedArtifactEncodable(): void
+    {
+        // Cutting 'a€' at two bytes lands inside the multibyte character, and a record a JSON formatter
+        // cannot encode would turn a successful cache read into a logging failure.
+        $this->cacheDecoratorMock->method('get')->willReturn('a€');
+
+        $loggedContext = [];
+        $this->loggerMock->expects($this->once())->method('debug')
+            ->willReturnCallback(function (string $message, array $context) use (&$loggedContext): void {
+                $loggedContext = $context;
+            });
+
+        $this->sut(logArtifacts: true, maxLoggedArtifactLength: 2)->fromCacheAsString('key');
+
+        $this->assertIsString($loggedContext['artifact']);
+        $this->assertTrue(mb_check_encoding($loggedContext['artifact'], 'UTF-8'));
+        $this->assertIsString(json_encode($loggedContext['artifact'], JSON_THROW_ON_ERROR));
     }
 
 
