@@ -8,11 +8,14 @@ use ArrayObject;
 use JsonSerializable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use SimpleSAML\OpenID\Codebooks\UriPattern;
 use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Helpers\Type;
 
 #[CoversClass(Type::class)]
+#[UsesClass(UriPattern::class)]
 final class TypeTest extends TestCase
 {
     protected function sut(): Type
@@ -301,6 +304,33 @@ final class TypeTest extends TestCase
     public function testCanEnforceUri(): void
     {
         $this->assertSame('https://example.com', $this->sut()->enforceUri('https://example.com'));
+    }
+
+
+    /**
+     * PCRE lets $ match immediately before a trailing newline unless the pattern says otherwise, so a URI
+     * ending in one used to pass and keep the newline. These values reach a fetch, a log line and the `id`
+     * of an issued credential, depending on which caller was validating.
+     */
+    public function testEnforceUriThrowsForATrailingNewline(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('URI');
+
+        $this->sut()->enforceUri("did:web:example.org\n");
+    }
+
+
+    public function testEnforceUriThrowsForATrailingNewlineOnAnHttpUri(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('URI');
+
+        $this->sut()->enforceUri(
+            "https://example.com/issuer\n",
+            null,
+            UriPattern::HttpNoQueryNoFragment->value,
+        );
     }
 
 
