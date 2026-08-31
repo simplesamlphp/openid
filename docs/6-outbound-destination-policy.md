@@ -217,6 +217,26 @@ One exception to that: `JwksFetcher::fromJwksUri()` and
 `jwks_uri` pointing inward into a protocol error, check it when the client
 registers, as above.
 
+## DID resolution uses a policy of its own
+
+Resolving a `did:web` identifier fetches a URL derived from an identifier
+supplied by whoever is being authenticated, so it is the same class of problem
+this page describes. It does **not** run under the policy configured here.
+
+`\SimpleSAML\OpenID\Did` builds a separate policy, with public destinations
+only, `https` only, and address pinning `Required` rather than `Preferred`.
+`AddressPinningModeEnum::Preferred` is refused outright there rather than
+defaulted away from.
+
+The separation is the point, and it runs in one direction in particular: the
+hosts and ranges a deployment allows here were allowed so it could reach
+addresses it operates itself, for federation. Giving that same list to DID
+resolution lets whoever supplies a DID name any of them, which is an allowlist
+being used for something it was never granted for. DID resolution takes
+exemptions of its own, empty by default.
+
+See [Decentralized Identifier (DID) Tools](7-did.md).
+
 ## Notes on upgrading
 
 - Non-public destinations are refused by default. A deployment that fetches from
@@ -228,6 +248,8 @@ registers, as above.
   not bound it; a slow resolver shows up as slow fetches.
 - A pre-built client is not guarded; push the middleware onto it, or let the
   library build the client.
+- DID resolution does not use this policy. It builds its own, and the
+  exemptions configured here are deliberately not carried over to it.
 - Raw `curl` request options remain an escape hatch below the policy. The ones
   that matter for where a request goes are recognised and named above, but the
   list is an enumeration rather than a guarantee: a deployment setting raw cURL

@@ -6,3 +6,5 @@
 3. [OpenID for Verifiable Credential Issuance (OpenID4VCI) Tools](4-vci.md)
 4. [Token Status List (TSL) Tools](5-token-status-list.md)
 5. [Outbound Destination Policy](6-outbound-destination-policy.md)
+6. [Decentralized Identifier (DID) Tools](7-did.md)
+7. [Upgrading](8-upgrading.md)
