@@ -29,11 +29,15 @@
         "ext-zlib": "*",
 
         "guzzlehttp/guzzle": "^7.8 || ^8.0",
+        "guzzlehttp/psr7": "^2.7 || ^3.0",
         "psr/http-client": "^1",
         "psr/http-message": "^2",
         "psr/log": "^3",
         "psr/simple-cache": "^3",
-        "web-token/jwt-library": "^3.4 || ^4.0.2"
+        "web-token/jwt-library": "^3.4.10 || ^4.1.7"
+    },
+    "suggest": {
+        "ext-curl": "Needed for outbound address pinning. Without it a destination policy that requires pinning, which is what DID resolution uses, refuses every request."
     },
     "require-dev": {
         "phpstan/phpstan": "^2.1",
@@ -46,6 +50,9 @@
         "rector/rector": "2.3.0"
     },
     "config": {
+        "audit": {
+            "abandoned": "report"
+        },
         "sort-packages": true,
         "cache-dir": "build/composer",
         "allow-plugins": {
@@ -62,10 +69,10 @@
         "pre-commit": [
             "vendor/bin/phpcbf -pn",
             "vendor/bin/phpcs -p",
-            "composer update web-token/jwt-framework --with web-token/jwt-framework:^3.0",
+            "composer update web-token/jwt-framework --with web-token/jwt-framework:^3.4.10",
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit --no-coverage",
-            "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.0",
+            "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.1.7",
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit",
             "vendor/bin/rector",
@@ -73,10 +80,10 @@
         ],
         "on-commit": [
             "vendor/bin/phpcs -p",
-            "composer update web-token/jwt-framework --with web-token/jwt-framework:^3.0",
+            "composer update web-token/jwt-framework --with web-token/jwt-framework:^3.4.10",
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit --no-coverage",
-            "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.0",
+            "composer update web-token/jwt-framework --with web-token/jwt-framework:^4.1.7",
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit",
             "vendor/bin/rector --dry-run",

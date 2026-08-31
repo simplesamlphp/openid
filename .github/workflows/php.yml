@@ -55,7 +55,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         php-versions: ['8.2', '8.3', '8.4', '8.5', '8.6']
-        jwt-version: ['^3.4', '^4.0.2']
+        jwt-version: ['^3.4.10', '^4.1.7']
 
     steps:
       - name: Setup PHP, with composer and extensions
@@ -98,7 +98,7 @@ jobs:
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Run unit tests with coverage
-        if: ${{ matrix.php-versions == '8.5' && matrix.jwt-version == '^4.0.2' }}
+        if: ${{ matrix.php-versions == '8.5' && matrix.jwt-version == '^4.1.7' }}
         run: vendor/bin/phpunit
 
       - name: Run unit tests (no coverage)
@@ -106,7 +106,7 @@ jobs:
         run: vendor/bin/phpunit --no-coverage
 
       - name: Save coverage data
-        if: ${{ matrix.php-versions == '8.5' && matrix.jwt-version == '^4.0.2' }}
+        if: ${{ matrix.php-versions == '8.5' && matrix.jwt-version == '^4.1.7' }}
         uses: actions/upload-artifact@v7
         with:
           name: coverage-data
@@ -121,7 +121,7 @@ jobs:
       matrix:
         operating-system: [windows-latest]
         php-versions: ['8.2', '8.4', '8.5', '8.6']
-        jwt-version: ['^4.0.2']
+        jwt-version: ['^4.1.7']
 
     steps:
       - name: Setup PHP, with composer and extensions
