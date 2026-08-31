@@ -19,7 +19,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.3', '8.4', '8.5', '8.6']
+        # 8.6 is deliberately absent. The reusable workflow pinned below accepts
+        # 8.3 to 8.5 and runs `exit 1` for anything else, so asking it for 8.6
+        # fails the job outright - and because the unit test jobs need this one,
+        # that failure skipped the entire suite rather than just the linter.
+        # Syntax on 8.6 is exercised by the unit test matrices below, which call
+        # PHP directly. Re-add it only alongside a bump to the v2 reusable
+        # workflow, whose supported list is 8.5 and 8.6 and drops 8.3 and 8.4.
+        php-version: ['8.3', '8.4', '8.5']
 
     uses: simplesamlphp/simplesamlphp-test-framework/.github/workflows/reusable_phplinter.yml@v1
     secrets: inherit
