@@ -326,6 +326,24 @@ final class DestinationGuardMiddlewareTest extends TestCase
 
 
     /**
+     * A refusal that only says pinning was unavailable leaves an operator unable to tell whether to
+     * install an extension, route around a proxy, or accept that this deployment pins nothing.
+     */
+    public function testRefusalNamesWhyPinningWasUnavailable(): void
+    {
+        $client = $this->client(
+            $this->sut($this->policy(AddressPinningModeEnum::Required), $this->unsupportedPinner()),
+            [new Response(200, [], 'ok')],
+        );
+
+        $this->expectException(DestinationPolicyException::class);
+        $this->expectExceptionMessage('because the cURL extension is not loaded');
+
+        $client->request('GET', 'https://first.example.org/start');
+    }
+
+
+    /**
      * Redirect following handed to libcurl happens underneath this middleware, so the hops it takes would
      * never be seen here. Guzzle 8 rejects the option itself; Guzzle 7 passes it through.
      */
@@ -428,6 +446,8 @@ final class DestinationGuardMiddlewareTest extends TestCase
     {
         $addressPinnerMock = $this->createMock(AddressPinner::class);
         $addressPinnerMock->method('isSupported')->willReturn(false);
+        $addressPinnerMock->method('unsupportedReason')
+            ->willReturn('the cURL extension is not loaded');
         $addressPinnerMock->expects($this->never())->method('pin');
 
         return $addressPinnerMock;

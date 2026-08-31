@@ -30,6 +30,7 @@ Every argument is optional, and every one of them exists for `did:web`:
 
 ```php
 use DateInterval;
+use SimpleSAML\OpenID\Codebooks\AddressPinningModeEnum;
 use SimpleSAML\OpenID\Did;
 
 $didTools = new Did(
@@ -46,6 +47,10 @@ $didTools = new Did(
     maxFetchSizeBytes: 102400,
     // Where did:web fetches may be sent. See "Where a did:web fetch may go".
     destinationPolicy: null,
+    // How strictly a validated address is held to the connection. Required by
+    // default. Only relevant when no destinationPolicy is supplied, since one
+    // carries its own mode.
+    addressPinningMode: AddressPinningModeEnum::Required,
 );
 ```
 
@@ -239,6 +244,66 @@ rebinding window open on exactly the fetches that are driven from outside. A
 deployment that controls egress by other means may say so with `Disabled`. The
 refusal applies to a policy assembled directly as well as to one built by the
 helper, so there is no way around it.
+
+### When the address cannot be pinned
+
+An address is held to a connection with `CURLOPT_RESOLVE`, so pinning needs the
+cURL extension, a cURL handler, and a connection this library is the one making.
+Where any of those is missing, a policy that requires pinning **refuses the
+request** rather than proceeding unpinned - and since that is the default here,
+did:web resolution stops working rather than quietly weakening. The refusal
+names which of the causes applies.
+
+Two situations reach it, and they do not deserve the same answer.
+
+**No cURL extension.** Nothing else is checking where the request goes, so
+turning pinning off here really would leave the deployment open to the DNS
+rebinding this exists to close. Install `ext-curl`. The oidc module already
+requires it, so this case is mostly confined to using this library on its own.
+
+**A forward proxy.** A proxy set through request options, or through
+`http_proxy` / `https_proxy` / `all_proxy` in the environment, means the proxy
+resolves the destination and makes the connection. There is nothing for this
+library to pin - but the proxy is itself an egress control, usually a stronger
+one than any application-layer check, which is what the
+[outbound destination policy](6-outbound-destination-policy.md) page says in its
+opening. Such a deployment is not unprotected; it has moved the enforcement
+somewhere better. It says so explicitly:
+
+```php
+use SimpleSAML\OpenID\Codebooks\AddressPinningModeEnum;
+use SimpleSAML\OpenID\Did;
+
+$didTools = new Did(
+    logger: $logger,
+    addressPinningMode: AddressPinningModeEnum::Disabled,
+);
+```
+
+**Check that the proxy really carries the DID fetches before doing this.**
+`Disabled` applies to every did:web fetch this instance makes, while a proxy may
+carry only some of them. Two ways it carries fewer than it looks:
+
+- An exclusion list - a `no` entry in the proxy option, or `NO_PROXY` in the
+  environment - sends matching hosts direct. This library does not read one, so
+  such a deployment is still treated as unpinnable even though those requests
+  could have been pinned.
+- `http_proxy` alone does not proxy an https request, and did:web is always
+  https. This library counts it anyway, so setting only `http_proxy` makes DID
+  resolution unpinnable without a single fetch actually going through a proxy.
+
+In both cases the connection is made directly, by this deployment, to a host
+whoever supplied the DID chose - which is exactly the situation pinning exists
+for. Turning pinning off there does not delegate the protection to the proxy; it
+removes it. So `Disabled` is right only when the proxy genuinely carries every DID
+destination: a proxy configured for https (`https_proxy` or `all_proxy`), with no
+exclusion matching the hosts DIDs resolve to. Where that does not hold, fix the
+proxy configuration so it does, rather than reaching for `Disabled`.
+
+`Disabled` is a claim about the deployment, not a convenience: it says something
+else is deciding where requests may go, for every destination this resolves.
+`Preferred` remains refused, because it would proceed unpinned precisely where
+pinning is unavailable, which is the case this whole section is about.
 
 The policy in force can be read back, so the same rules can be applied to a
 destination before anything is fetched:

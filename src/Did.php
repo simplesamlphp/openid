@@ -7,6 +7,7 @@ namespace SimpleSAML\OpenID;
 use DateInterval;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use SimpleSAML\OpenID\Codebooks\AddressPinningModeEnum;
 use SimpleSAML\OpenID\Codebooks\VerificationRelationshipEnum;
 use SimpleSAML\OpenID\Decorators\CacheDecorator;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
@@ -94,6 +95,18 @@ class Did
      *        resolution alone, and never the deployment's federation ones - those were granted so it could
      *        reach addresses it operates itself, and handing them to DID resolution would let whoever
      *        supplies a DID name any of them.
+     * @param \SimpleSAML\OpenID\Codebooks\AddressPinningModeEnum $addressPinningMode How strictly the
+     *        validated address has to be held to the connection that is then made. Required by default,
+     *        and Preferred is refused outright rather than defaulted away from.
+     *
+     *        Disabled exists for the deployment that can not pin and is not thereby unprotected: one
+     *        reaching the internet through a forward proxy. The proxy resolves the destination itself,
+     *        so there is nothing for this library to pin, and the proxy is doing the egress control that
+     *        pinning approximates. Such a deployment says so here rather than finding every did:web
+     *        resolution refused. A deployment that simply lacks the cURL extension is NOT that case:
+     *        nothing else is checking where its requests go, so it should install the extension instead.
+     *
+     *        Ignored when $destinationPolicy is supplied, since that policy carries its own mode.
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
     public function __construct(
@@ -102,6 +115,7 @@ class Did
         protected readonly ?LoggerInterface $logger = null,
         int $maxFetchSizeBytes = HttpClientDecorator::DEFAULT_MAX_FETCH_SIZE_BYTES,
         ?DestinationPolicy $destinationPolicy = null,
+        AddressPinningModeEnum $addressPinningMode = AddressPinningModeEnum::Required,
     ) {
         $this->maxCacheDurationDecorator = $this->dateIntervalDecoratorFactory()->build($maxCacheDuration);
         $this->cacheDecorator = is_null($cache) ? null : $this->cacheDecoratorFactory()->build($cache);
@@ -114,7 +128,10 @@ class Did
         }
 
         $this->destinationPolicy = $destinationPolicy ??
-        DidWebResolver::buildDestinationPolicy(logger: $this->logger);
+        DidWebResolver::buildDestinationPolicy(
+            logger: $this->logger,
+            addressPinningMode: $addressPinningMode,
+        );
     }
 
 

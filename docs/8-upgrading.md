@@ -25,6 +25,27 @@ runs under its own destination policy rather than the one described in
 allows non-public hosts or ranges for federation, **those exemptions do not
 apply to DID resolution and must not be copied into it.**
 
+### The minimum web-token/jwt-library version has been raised
+
+`web-token/jwt-library` moved from `^3.4 || ^4.0.2` to `^3.4.10 || ^4.1.7`.
+
+The versions the old constraint allowed carry four security advisories, fixed
+in 3.4.10, 4.0.7 and 4.1.7:
+
+- `JWSVerifier` takes the algorithm from the unprotected header, which allows
+  algorithm confusion. This library verifies a JWS on nearly every path it has,
+  so this is the one that matters most here.
+- RSA1_5 decryption lacks implicit rejection, exposing a Bleichenbacher padding
+  oracle.
+- The Chacha20Poly1305 key encryption algorithm discards the Poly1305 tag, so it
+  authenticates nothing.
+- PBES2 key unwrapping accepts an unbounded `p2c` iteration count, which is a
+  CPU-amplification denial of service.
+
+The 4.0 line is dropped rather than pinned at 4.0.7, because `^4.0.7` would also
+match 4.1.0 to 4.1.6, which are affected. A deployment on 4.0.x has to move to
+4.1.7 or later.
+
 ### Fetched artifacts no longer appear in debug logs
 
 `ArtifactFetcher` used to write the whole fetched artifact into a debug log
@@ -77,6 +98,21 @@ JWKS documents and subordinate listings in `Federation`, Status List Tokens in
 `TokenStatusList`, request objects in `RequestObject`, and DID documents. Anything
 matching on the old message text needs updating; the response body was never a
 reliable thing to match on in any case.
+
+### Unpinnable outbound requests now say why
+
+Where a validated address could not be pinned to the connection, the refusal
+under required pinning said only that it could not be pinned, and the warning
+under preferred pinning asserted a single cause - that the request was not made
+through the cURL handler - which was one of several and often the wrong one.
+
+Both now name the actual reason: no cURL handler, no cURL extension, a proxy
+making the connection, a cURL option overriding the routing, or a streaming
+request. `AddressPinner::unsupportedReason()` is the single answer both that and
+`isSupported()` are derived from.
+
+Only the message text changed; which requests are refused is unchanged. Anything
+matching on the old wording needs updating.
 
 ### A trailing newline is no longer accepted in a URI
 

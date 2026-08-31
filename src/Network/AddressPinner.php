@@ -64,7 +64,8 @@ class AddressPinner
      *
      * - the handler has to be a known cURL one, and the option has to exist to be set;
      * - a streaming request is handed to the stream handler wherever Guzzle can, cURL present or not;
-     * - a proxied request has its destination resolved by the proxy, out of reach of a cURL option;
+     * - a proxy configured at all counts, since a request it applies to is resolved by the proxy and
+     *   the exclusion list that might send this one direct is not read here;
      * - no cURL option may be in play that decides the connection over the resolver cache.
      *
      * A false answer is never fatal in itself: it is what the pinning mode is then applied to.
@@ -73,21 +74,57 @@ class AddressPinner
      */
     public function isSupported(array $options = []): bool
     {
-        if (!$this->handlerIsCurl || is_null($this->resolveOption())) {
-            return false;
+        return is_null($this->unsupportedReason($options));
+    }
+
+
+    /**
+     * Why a request made with these options can not be pinned, or null when it can.
+     *
+     * Kept as the single answer that {@see isSupported()} is derived from, so the two can not come to
+     * disagree. The phrasing completes a sentence of the form "the address can not be pinned because ...",
+     * and it exists because an operator told only that pinning was unavailable can not tell whether to
+     * install an extension, route around a proxy, or accept that the deployment pins nothing.
+     *
+     * @param array<mixed> $options Request options, as the middleware has them.
+     */
+    public function unsupportedReason(array $options = []): ?string
+    {
+        // The missing extension is asked about first, and deliberately. Without it Guzzle picks its
+        // stream handler, so handlerIsCurl is false as well, and answering with that would send an
+        // operator looking at their client configuration instead of at the extension they need to
+        // install - which is the one cause here that has an obvious remedy.
+        if (is_null($this->resolveOption())) {
+            return 'the cURL extension is not loaded, so there is no CURLOPT_RESOLVE to pin with';
         }
 
+        if (!$this->handlerIsCurl) {
+            return 'the HTTP client is not known to use the cURL handler, which is the only one that can be ' .
+            'told where to connect';
+        }
+
+        // Deliberately hedged. Neither check reads the proxy exclusion list against the destination, so a
+        // request that NO_PROXY or a "no" entry would send direct still counts as proxied here. Refusing
+        // to claim a pin that may not hold is the safe direction to be wrong in, but the reason has to say
+        // that it is a configuration this can not see through, not that the request was certainly proxied.
         if ($this->hasProxyOption($options) || $this->hasProxyEnvironment()) {
-            return false;
+            return 'a proxy is configured for outbound requests, so the connection may be made by the ' .
+            'proxy rather than to an address resolved here, and any exclusion list that would send ' .
+            'this destination direct is not read';
         }
 
         if ($this->hasRoutingOverride($options)) {
-            return false;
+            return 'a cURL request option is in play that decides the connection over the resolver cache';
         }
 
         // Guzzle decides which handler a request goes to on whether "stream" is empty, so anything it reads
         // as streaming has to count as not pinnable, not only a literal true.
-        return empty($options[RequestOptions::STREAM]);
+        if (!empty($options[RequestOptions::STREAM])) {
+            return 'the request is a streaming one, which Guzzle hands to the stream handler wherever it ' .
+            'can, cURL present or not';
+        }
+
+        return null;
     }
 
 

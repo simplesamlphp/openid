@@ -105,6 +105,40 @@ final class AddressPinnerTest extends TestCase
      * a handler that ignores cURL options would be a guarantee that was never made, so assuming nothing is
      * the default.
      */
+    /**
+     * The reason is what an operator acts on, so the distinct causes have to stay distinguishable
+     * rather than collapsing into one message.
+     */
+    public function testNamesWhyPinningIsUnsupported(): void
+    {
+        $this->assertNull($this->sut()->unsupportedReason());
+
+        $this->assertStringContainsString(
+            'not known to use the cURL handler',
+            (string)(new AddressPinner())->unsupportedReason(),
+        );
+
+        $this->assertStringContainsString(
+            'a proxy is configured',
+            (string)$this->sut()->unsupportedReason(
+                [RequestOptions::PROXY => 'http://proxy.example:3128'],
+            ),
+        );
+
+        $this->assertStringContainsString(
+            'streaming one',
+            (string)$this->sut()->unsupportedReason([RequestOptions::STREAM => true]),
+        );
+
+        $this->assertStringContainsString(
+            'decides the connection over the resolver cache',
+            (string)$this->sut()->unsupportedReason(
+                [RequestOptions::CURL => [CURLOPT_PORT => 8443]],
+            ),
+        );
+    }
+
+
     public function testIsNotSupportedForATransportNothingIsKnownAbout(): void
     {
         $this->assertFalse((new AddressPinner())->isSupported());

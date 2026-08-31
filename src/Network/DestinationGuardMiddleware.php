@@ -139,18 +139,21 @@ class DestinationGuardMiddleware
             return $this->addressPinner->pin($options, $destination);
         }
 
+        $unpinnableReason = $this->unpinnableReason($destination, $options);
+
         if ($addressPinningMode === AddressPinningModeEnum::Required) {
             throw new DestinationPolicyException(
                 sprintf(
                     'Outbound request to host %s refused: the addresses it was validated against can not be ' .
-                    'pinned to the connection, so the host would be resolved a second time. Address pinning ' .
-                    'is required by configuration.',
+                    'pinned to the connection, because %s, so the host would be resolved a second time. ' .
+                    'Address pinning is required by configuration.',
                     $destination->host,
+                    $unpinnableReason,
                 ),
             );
         }
 
-        $this->reportUnavailablePinning($destination);
+        $this->reportUnavailablePinning($destination, $unpinnableReason);
 
         return $options;
     }
@@ -161,12 +164,12 @@ class DestinationGuardMiddleware
      * connection resolves the host again, so a name whose answer changes between the two can still be
      * followed inward.
      */
-    protected function reportUnavailablePinning(ValidatedDestination $destination): void
+    protected function reportUnavailablePinning(ValidatedDestination $destination, string $reason): void
     {
         if ($this->hasReportedUnavailablePinning) {
             $this->logger?->debug(
                 'Outbound destination validated without pinning the address.',
-                ['host' => $destination->host],
+                ['host' => $destination->host, 'reason' => $reason],
             );
 
             return;
@@ -175,12 +178,35 @@ class DestinationGuardMiddleware
         $this->hasReportedUnavailablePinning = true;
 
         $this->logger?->warning(
-            'Outbound destinations are being validated without pinning the validated address, because the ' .
-            'requests are not made through the cURL handler. The host is resolved again when the connection ' .
-            'is made, so a destination whose DNS answer changes between the check and the connection can ' .
-            'still be reached. Install the cURL extension, or set the address pinning mode to required to ' .
-            'refuse such requests instead. This is reported once.',
-            ['host' => $destination->host],
+            sprintf(
+                'Outbound destinations are being validated without pinning the validated address, because ' .
+                '%s. The host is resolved again when the connection is made, so a destination whose DNS ' .
+                'answer changes between the check and the connection can still be reached. Address the ' .
+                'reason given, or set the address pinning mode to required to refuse such requests ' .
+                'instead. This is reported once.',
+                $reason,
+            ),
+            ['host' => $destination->host, 'reason' => $reason],
         );
+    }
+
+
+    /**
+     * Why the validated addresses can not be pinned to the connection.
+     *
+     * Two different things reach this point: a destination with nothing to pin, and a transport that can
+     * not be told what to pin to. Only the second is something an operator can act on, so they are named
+     * apart rather than reported as one.
+     *
+     * @param array<mixed> $options
+     */
+    protected function unpinnableReason(ValidatedDestination $destination, array $options): string
+    {
+        if (!$destination->isPinnable()) {
+            return 'the validated destination carries no address and port to pin to';
+        }
+
+        return $this->addressPinner->unsupportedReason($options) ??
+        'the connection can not be pinned';
     }
 }

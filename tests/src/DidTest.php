@@ -293,6 +293,32 @@ final class DidTest extends TestCase
     }
 
 
+    /**
+     * Disabled is for the deployment that can not pin and is not thereby unprotected: one behind a forward
+     * proxy, where the proxy resolves the destination and is doing the egress control pinning approximates.
+     * Without a way to say so, such a deployment finds every did:web resolution refused and its only way
+     * out is constructing the resolver by hand, which skips every other guarantee the facade makes.
+     */
+    public function testHonoursTheAddressPinningMode(): void
+    {
+        $sut = new Did(addressPinningMode: AddressPinningModeEnum::Disabled);
+
+        $this->assertSame(
+            AddressPinningModeEnum::Disabled,
+            $sut->destinationPolicy()->getAddressPinningMode(),
+        );
+    }
+
+
+    public function testRefusesPreferredPinningPassedAsAnArgument(): void
+    {
+        $this->expectException(DidException::class);
+        $this->expectExceptionMessage('preferred address pinning');
+
+        new Did(addressPinningMode: AddressPinningModeEnum::Preferred);
+    }
+
+
     public function testKeepsASuppliedDestinationPolicy(): void
     {
         $destinationPolicy = new DestinationPolicy(
