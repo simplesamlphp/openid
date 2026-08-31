@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID\Decorators;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use GuzzleHttp\RequestOptions;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -82,6 +88,142 @@ final class HttpClientDecoratorTest extends TestCase
         $this->clientMock->method('request')->willThrowException(new \Exception('error'));
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage('HTTP request');
+
+        $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+    }
+
+
+    /**
+     * Guzzle describes a non-2xx response by appending a summary of the response body, and that body is
+     * chosen by whoever the request was sent to. For a destination somebody else named, repeating it puts
+     * remote-chosen text into this deployment's log by way of the exception message.
+     *
+     * The real Guzzle exception is built here rather than a stub, so that this notices if Guzzle ever
+     * changes how it composes that message.
+     */
+    public function testRequestDoesNotRepeatTheResponseBodyOfAFailedRequest(): void
+    {
+        $marker = 'REMOTE-CHOSEN-BODY-TEXT';
+
+        $requestException = RequestException::create(
+            new Request('GET', 'https://example.com'),
+            new Response(404, [], $marker),
+        );
+
+        // Guzzle really does put it there; if this stops holding the test below proves nothing.
+        $this->assertStringContainsString($marker, $requestException->getMessage());
+
+        $this->clientMock->method('request')->willThrowException($requestException);
+
+        try {
+            $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+            $this->fail('Expected an HttpException.');
+        } catch (HttpException $httpException) {
+            $this->assertStringNotContainsString($marker, $httpException->getMessage());
+            $this->assertStringContainsString('Status code: 404', $httpException->getMessage());
+        }
+    }
+
+
+    /**
+     * Guzzle adds the body summary in one place only: the http_errors middleware, which raises a
+     * ClientException or a ServerException. Every OTHER response bearing exception writes its own message
+     * and must keep it, or the wrong cause gets reported. TooManyRedirectsException is the clearest case -
+     * it names the redirect limit, which a status line would replace with a meaningless 302.
+     */
+    public function testRequestKeepsTheMessageOfAResponseBearingFailureThatIsNotABadResponse(): void
+    {
+        $this->clientMock->method('request')->willThrowException(
+            new TooManyRedirectsException(
+                'Will not follow more than 3 redirects',
+                new Request('GET', 'https://example.com'),
+                new Response(302, [], 'body'),
+            ),
+        );
+
+        try {
+            $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+            $this->fail('Expected an HttpException.');
+        } catch (HttpException $httpException) {
+            $this->assertStringContainsString('more than 3 redirects', $httpException->getMessage());
+            $this->assertStringNotContainsString('Status code', $httpException->getMessage());
+        }
+    }
+
+
+    /**
+     * RFC 9110 lets a reason phrase carry HTAB and obs-text - any byte from 0x80 to 0xFF - so it can
+     * arrive with a tab in it or as invalid UTF-8. Guzzle escapes it inside its own message; this branch
+     * builds its own message and has to do the same, or a UTF-8 log formatter is handed malformed bytes.
+     */
+    public function testRequestEscapesARemoteSuppliedReasonPhrase(): void
+    {
+        $this->clientMock->method('request')->willThrowException(
+            new ClientException(
+                'Client error',
+                new Request('GET', 'https://example.com'),
+                new Response(404, [], null, '1.1', "Not\t\x80\xC3Found"),
+            ),
+        );
+
+        try {
+            $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+            $this->fail('Expected an HttpException.');
+        } catch (HttpException $httpException) {
+            $message = $httpException->getMessage();
+
+            $this->assertSame(
+                0,
+                preg_match('/[^\x20-\x7E]/', $message),
+                'The message carries bytes outside printable ASCII.',
+            );
+            $this->assertStringContainsString('Status code: 404', $message);
+        }
+    }
+
+
+    /**
+     * The redirect middleware throws a BadResponseException directly, with the 3xx response and a message
+     * naming why the redirect was refused. Since this library allows redirects over https alone, a
+     * redirect to plain http produces exactly this, and it is the only thing that says so - rewriting it
+     * from the status line would report a bare 302 and lose the refusal.
+     */
+    public function testRequestKeepsTheMessageOfARefusedRedirect(): void
+    {
+        $this->clientMock->method('request')->willThrowException(
+            new BadResponseException(
+                'Redirect URI, http://example.com, does not use one of the allowed redirect protocols: https',
+                new Request('GET', 'https://example.com'),
+                new Response(302, [], 'body'),
+            ),
+        );
+
+        try {
+            $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
+            $this->fail('Expected an HttpException.');
+        } catch (HttpException $httpException) {
+            $this->assertStringContainsString(
+                'allowed redirect protocols',
+                $httpException->getMessage(),
+            );
+            $this->assertStringNotContainsString('Status code', $httpException->getMessage());
+        }
+    }
+
+
+    /**
+     * A failure carrying no response - a refused connection, a timeout, a name that does not resolve -
+     * keeps the message it came with. There is no body involved, and the reason is the whole diagnostic
+     * value.
+     */
+    public function testRequestKeepsTheMessageOfAFailureWithoutAResponse(): void
+    {
+        $this->clientMock->method('request')->willThrowException(
+            RequestException::create(new Request('GET', 'https://example.com')),
+        );
+
+        $this->expectException(HttpException::class);
+        $this->expectExceptionMessage('Error sending HTTP request');
 
         $this->sut()->request(HttpMethodsEnum::GET, 'https://example.com');
     }

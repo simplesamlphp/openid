@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace SimpleSAML\OpenID\Decorators;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use SimpleSAML\OpenID\Codebooks\HttpMethodsEnum;
@@ -56,6 +58,12 @@ class HttpClientDecorator
     public const DEFAULT_MAX_FETCH_SIZE_BYTES = 102400;
 
     protected const BODY_READ_CHUNK_SIZE_BYTES = 8192;
+
+    /**
+     * How much of a remote supplied reason phrase is repeated in an exception message. RFC 9110 puts no
+     * useful bound on one, and nothing meaningful is longer than this.
+     */
+    protected const MAX_REASON_PHRASE_LENGTH = 100;
 
     /**
      * Floor for a computed timeout ceiling. Guzzle reads 0 as "no timeout", so a budget that has run down to
@@ -303,12 +311,11 @@ class HttpClientDecorator
                 );
             }
 
-            $message = sprintf(
-                'Error sending HTTP request to %s. Error was: %s',
-                $uri,
-                $throwable->getMessage(),
+            throw new HttpException(
+                $this->describeRequestFailure($uri, $throwable),
+                (int)$throwable->getCode(),
+                $throwable,
             );
-            throw new HttpException($message, (int)$throwable->getCode(), $throwable);
         }
 
         if ($response->getStatusCode() < 200 || $response->getStatusCode() > 299) {
@@ -316,12 +323,73 @@ class HttpClientDecorator
                 'Unexpected HTTP response for URI %s. Status code: %s, reason: %s.',
                 $uri,
                 $response->getStatusCode(),
-                $response->getReasonPhrase(),
+                $this->escapeForMessage($response->getReasonPhrase()),
             );
             throw new HttpException($message);
         }
 
         return $response;
+    }
+
+
+    /**
+     * Describe a failed request without repeating what the remote said in its body.
+     *
+     * Guzzle builds the message for a non-2xx response by appending a summary of that response body, and
+     * the body belongs to whoever the request was sent to. For a fetch whose destination was named by
+     * somebody else - an entity statement naming the next endpoint, a wallet naming a did:web host - that
+     * is remote-chosen text, newlines and all, travelling into this deployment's log by way of the
+     * exception message. So a failure that carries a response is described from its status line instead,
+     * which is the same description the non-2xx branch above produces when http_errors is off.
+     *
+     * A failure with no response - a connection refused, a timeout, a DNS failure - keeps the message it
+     * came with, since there is no body involved and the reason is the whole diagnostic value.
+     */
+    protected function describeRequestFailure(string $uri, Throwable $throwable): string
+    {
+        // These two classes exactly. The body summary is added in one place only - Guzzle's http_errors
+        // middleware, which calls RequestException::create() and only for a status of 400 or more, so a
+        // ClientException or a ServerException is the whole of what carries one.
+        //
+        // Their common parent BadResponseException is deliberately NOT used, tempting though it looks:
+        // the redirect middleware throws one directly, with a 3xx response and a message naming why the
+        // redirect was refused - an invalid Location, or a scheme outside the allowed protocols. Since
+        // this library allows redirects over https alone, that second one is a real diagnostic about a
+        // real refusal, and rewriting it as "Status code: 302" would report nothing at all. The same
+        // goes for TooManyRedirectsException, ResponseTransferException and ResponseTimeoutException,
+        // which carry a response and write their own messages.
+        $response = ($throwable instanceof ClientException || $throwable instanceof ServerException) ?
+        $throwable->getResponse() :
+        null;
+
+        if ($response instanceof ResponseInterface) {
+            return sprintf(
+                'Unexpected HTTP response for URI %s. Status code: %s, reason: %s.',
+                $uri,
+                $response->getStatusCode(),
+                $this->escapeForMessage($response->getReasonPhrase()),
+            );
+        }
+
+        return sprintf('Error sending HTTP request to %s. Error was: %s', $uri, $throwable->getMessage());
+    }
+
+
+    /**
+     * Reduce a remote supplied string to bounded printable ASCII.
+     *
+     * RFC 9110 lets a reason phrase carry HTAB and obs-text - any byte from 0x80 to 0xFF - so it can
+     * arrive with a tab in it or as invalid UTF-8, and it travels into a message this library hands to
+     * a logger, where it can break a formatter that expects UTF-8. It can not carry CR or LF without
+     * the response failing to parse as HTTP, so a forged log line is not the worry; malformed bytes
+     * are. Guzzle 8 escapes this inside its own exception messages and Guzzle 7 does not, so it is done
+     * here rather than relied upon.
+     */
+    protected function escapeForMessage(string $value): string
+    {
+        $printable = (string)preg_replace('/[^\x20-\x7E]/', '?', $value);
+
+        return substr($printable, 0, self::MAX_REASON_PHRASE_LENGTH);
     }
 
 
