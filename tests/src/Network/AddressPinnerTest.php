@@ -30,6 +30,22 @@ final class AddressPinnerTest extends TestCase
      */
     protected const CLOSED_PORT = 1;
 
+    /**
+     * cURL error numbers that show the request got past name resolution and tried to connect.
+     *
+     * Which of the two comes back is the platform's business rather than this library's. A connection
+     * to a closed port is refused outright on Linux and gives CURLE_COULDNT_CONNECT; on Windows the
+     * attempt is left to run out instead and gives CURLE_OPERATION_TIMEDOUT. Either answers the
+     * question these tests ask, which is whether an address came from the pin at all - the failure
+     * that would say it did not is CURLE_COULDNT_RESOLVE_HOST.
+     *
+     * @var list<int>
+     */
+    protected const CONNECTION_ATTEMPTED_ERROR_NUMBERS = [
+        CURLE_COULDNT_CONNECT,
+        CURLE_OPERATION_TIMEDOUT,
+    ];
+
 
     /**
      * Proxy variables the environment may already carry, and their values, so that they can be put back.
@@ -321,9 +337,9 @@ final class AddressPinnerTest extends TestCase
             new ValidatedDestination(self::UNRESOLVABLE_HOST, self::CLOSED_PORT, ['127.0.0.1']),
         );
 
-        $this->assertSame(
-            CURLE_COULDNT_CONNECT,
+        $this->assertContains(
             $this->attemptRequestAndGetCurlErrorNumber($pinnedOptions),
+            self::CONNECTION_ATTEMPTED_ERROR_NUMBERS,
             'The request should have reached the connection stage, which needs an address the pin supplied.',
         );
     }
@@ -353,9 +369,9 @@ final class AddressPinnerTest extends TestCase
             ),
         );
 
-        $this->assertSame(
-            CURLE_COULDNT_CONNECT,
+        $this->assertContains(
             $this->attemptRequestAndGetCurlErrorNumber($pinnedOptions, $dottedHost),
+            self::CONNECTION_ATTEMPTED_ERROR_NUMBERS,
             'The request should have reached the connection stage, which needs an address the pin supplied.',
         );
     }

@@ -1,0 +1,17 @@
+# Analyses src as the highest supported PHP version sees it, whatever PHP the run itself uses.
+#
+# A phpVersion range would look like the way to cover 8.2 through 8.5 at once, and it is not: PHPStan
+# takes the core function signature map from the range MINIMUM, so a signature that tightens in a later
+# version is never checked. Setting a range here would have silenced exactly the finding this exists to
+# catch - chr() typed as int<0, 255> from 8.5 - and would have silenced it in CI too, which runs on the
+# newest runtime it can get.
+#
+# So this pins the maximum instead, and is run alongside the ordinary analysis rather than replacing it:
+# that one covers the version the developer or the CI job is actually on, this one covers the newest.
+# Raise the version when PHPStan learns about a newer one; it refuses a value above 80599 today.
+includes:
+	- phpstan.neon
+
+parameters:
+	phpVersion: 80500
+	tmpDir: build/phpstan/highest

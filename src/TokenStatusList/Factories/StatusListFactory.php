@@ -133,8 +133,12 @@ class StatusListFactory
             $byteIndex = intdiv($idx, $entriesPerByte);
             $shift = ($idx % $entriesPerByte) * $bits;
 
+            // Masked to a byte for the analyser as much as for the reader. ord() gives 0-255, AND only
+            // ever clears bits of it, and what is shifted in is bounded by the status mask, so this can
+            // not leave the byte - but that is not something the expression states on its own, and from
+            // PHP 8.5 chr() is typed as taking int<0, 255>.
             $bytes[$byteIndex] = chr(
-                (ord($bytes[$byteIndex]) & ~($statusMask << $shift)) | ($value << $shift),
+                ((ord($bytes[$byteIndex]) & ~($statusMask << $shift)) | ($value << $shift)) & 0xFF,
             );
         }
 

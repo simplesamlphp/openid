@@ -76,7 +76,8 @@
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit",
             "vendor/bin/rector",
-            "vendor/bin/phpstan analyze -c phpstan-dev.neon --memory-limit=1024M"
+            "vendor/bin/phpstan analyze -c phpstan-dev.neon --memory-limit=1024M",
+            "vendor/bin/phpstan analyze -c phpstan-highest.neon --memory-limit=1024M"
         ],
         "on-commit": [
             "vendor/bin/phpcs -p",
@@ -87,7 +88,8 @@
             "vendor/bin/phpstan --memory-limit=1024M",
             "vendor/bin/phpunit",
             "vendor/bin/rector --dry-run",
-            "vendor/bin/phpstan analyze -c phpstan-dev.neon --memory-limit=1024M"
+            "vendor/bin/phpstan analyze -c phpstan-dev.neon --memory-limit=1024M",
+            "vendor/bin/phpstan analyze -c phpstan-highest.neon --memory-limit=1024M"
         ]
     }
 }
