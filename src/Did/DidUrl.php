@@ -123,6 +123,39 @@ class DidUrl
 
 
     /**
+     * Percent encode a value so that it can be carried as a DID URL fragment.
+     *
+     * A fragment naming a verification method is minted from a key identifier, and a key identifier is
+     * whatever the deployment configured - which is not necessarily anything a fragment can carry. Encoding
+     * rather than refusing keeps an ordinary identifier readable, since only the characters a fragment can
+     * not carry are touched, and it is preferred to hashing because the result stays reversible: whoever
+     * reads a fragment out of a published document can tell which key it names.
+     *
+     * The mapping is injective, `%` being encoded along with everything else, so two distinct key
+     * identifiers can never produce the same fragment.
+     */
+    public static function encodeFragment(string $value): string
+    {
+        return (string)preg_replace_callback(
+            // pchar without pct-encoded: unreserved / sub-delims / ":" / "@". The "/" and "?" that a
+            // fragment may also carry are left out, so that a minted fragment can not look like a path.
+            '/[^A-Za-z0-9._~!$&\'()*+,;=:@-]/',
+            self::encodeFragmentCharacter(...),
+            $value,
+        );
+    }
+
+
+    /**
+     * @param array<array-key, string> $matches
+     */
+    protected static function encodeFragmentCharacter(array $matches): string
+    {
+        return sprintf('%%%02X', ord($matches[0] ?? ''));
+    }
+
+
+    /**
      * The DID URL exactly as given.
      */
     public function getValue(): string

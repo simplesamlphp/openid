@@ -11,14 +11,17 @@ use SimpleSAML\OpenID\Codebooks\VerificationRelationshipEnum;
 use SimpleSAML\OpenID\Did\DidDocument;
 use SimpleSAML\OpenID\Did\DidJwkResolver;
 use SimpleSAML\OpenID\Did\DidUrl;
+use SimpleSAML\OpenID\Did\DidWebResolver;
 use SimpleSAML\OpenID\Did\MultibaseKeyDecoder;
 use SimpleSAML\OpenID\Did\PublicJwkValidator;
 use SimpleSAML\OpenID\Did\VerificationMethod;
 use SimpleSAML\OpenID\Exceptions\DidException;
+use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPair;
+use SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPairBag;
 
 /**
- * Builds DID documents, either by parsing one that was retrieved, or by constructing the document a self
- * describing DID implies.
+ * Builds DID documents: by parsing one that was retrieved, by constructing the document a self describing DID
+ * implies, or by assembling the one a deployment publishes for its own did:web identity.
  *
  * Parsing is deliberately strict. The documents this is pointed at are supplied by whoever controls the DID
  * being resolved, so anything ambiguous is refused rather than guessed at.
@@ -27,6 +30,9 @@ use SimpleSAML\OpenID\Exceptions\DidException;
  */
 class DidDocumentFactory
 {
+    /** The context every DID document declares, defining the members DID Core itself specifies. */
+    public const DID_CORE_CONTEXT = 'https://www.w3.org/ns/did/v1';
+
     /**
      * Methods whose document is derived from the identifier itself. A document for one of these is never
      * supplied by anyone, so accepting supplied data for one would let a different key be resolved under an
@@ -180,6 +186,163 @@ class DidDocumentFactory
 
 
     /**
+     * Build the DID document a deployment publishes for its own did:web identity.
+     *
+     * Every key pair given becomes a verification method and is placed in every relationship asked for.
+     * Which keys those are is the caller's decision and a consequential one: a key that signed something
+     * still being verified has to stay in the document, and in the relationship a verifier looks under,
+     * long after it has stopped signing. Dropping a retired signer makes everything it signed
+     * unverifiable, while the key merely remaining under `verificationMethod` does not help a verifier
+     * that checks the relationship.
+     *
+     * @param \SimpleSAML\OpenID\Did\DidUrl $did The did:web identity this document is published under.
+     * @param \SimpleSAML\OpenID\ValueAbstracts\SignatureKeyPairBag $signatureKeyPairBag The signers to
+     * publish. Only the public half of each pair is read.
+     * @param list<\SimpleSAML\OpenID\Codebooks\VerificationRelationshipEnum> $relationships The
+     * relationships every published key is placed in. Signing credentials and status tokens is asserting,
+     * so assertionMethod is the default; nothing authenticates as an issuer.
+     * @param \SimpleSAML\OpenID\Codebooks\VerificationMethodTypeEnum $type How each verification method
+     * declares its key material. JsonWebKey2020 by default: the DID Specification Registries deprecate it
+     * in favour of JsonWebKey, but it remains the more widely understood of the two.
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public function forDidWeb(
+        DidUrl $did,
+        SignatureKeyPairBag $signatureKeyPairBag,
+        array $relationships = [VerificationRelationshipEnum::AssertionMethod],
+        VerificationMethodTypeEnum $type = VerificationMethodTypeEnum::JsonWebKey2020,
+    ): DidDocument {
+        if ($did->getMethod() !== 'web') {
+            throw new DidException('A did:web document can only be built from a did:web value.');
+        }
+
+        if (!$did->isBareDid()) {
+            throw new DidException(
+                'A DID document can only be built for a bare DID, carrying no path, query or fragment.',
+            );
+        }
+
+        // Beyond being syntactically a DID, the identifier has to be one this library could resolve, or the
+        // document is published under a name nothing can look up - an IP literal host, a single label one, a
+        // percent encoded segment. The resolver owns those rules, so they are asked for rather than restated.
+        DidWebResolver::assertIdentifierIsResolvable($did->getDid());
+
+        if ($relationships === []) {
+            throw new DidException(
+                'A DID document must place its verification methods under at least one verification ' .
+                'relationship, since a key belonging to none of them can not be used for anything.',
+            );
+        }
+
+        if (!in_array($type, VerificationMethodTypeEnum::withPublicKeyJwk(), true)) {
+            throw new DidException(
+                sprintf(
+                    'Verification method type %s does not carry publicKeyJwk, so it can not declare key ' .
+                    'material published as a JWK.',
+                    $type->value,
+                ),
+            );
+        }
+
+        if ($signatureKeyPairBag->getAll() === []) {
+            throw new DidException('A DID document must publish at least one verification method.');
+        }
+
+        /** @var array<string, true> $seenIds */
+        $seenIds = [];
+        $verificationMethods = [];
+
+        foreach ($signatureKeyPairBag->getAll() as $signatureKeyPair) {
+            $publicJwk = $this->publicJwkFor($signatureKeyPair);
+            $publishableUnder = $this->relationshipsFor($publicJwk);
+
+            foreach ($relationships as $relationship) {
+                if (in_array($relationship, $publishableUnder, true)) {
+                    continue;
+                }
+
+                throw new DidException(
+                    sprintf(
+                        'A DID document can not list this key under the %s relationship, since what the ' .
+                        'key is for - its "use", or the curve it is on where it declares none - says ' .
+                        'otherwise.',
+                        $relationship->value,
+                    ),
+                );
+            }
+
+            // The pair's own key id rather than the key it is filed under: a bag keys by that same value,
+            // but PHP turns a numeric string array key into an integer on the way in.
+            $verificationMethod = new VerificationMethod(
+                $this->verificationMethodIdFor($did, $signatureKeyPair->getKeyPair()->getKeyId()),
+                $type,
+                $did->getDid(),
+                $publicJwk,
+            );
+
+            $this->claimId($seenIds, $verificationMethod);
+            $verificationMethods[$verificationMethod->getId()->getValue()] = $verificationMethod;
+        }
+
+        $relationshipMethods = [];
+
+        foreach ($relationships as $relationship) {
+            // Referenced rather than embedded when this is serialised, since every one of them is also a
+            // document wide method. See DidDocument::serializeRelationship().
+            $relationshipMethods[$relationship->value] = $verificationMethods;
+        }
+
+        return new DidDocument(
+            $did->getDid(),
+            $verificationMethods,
+            $relationshipMethods,
+            [self::DID_CORE_CONTEXT, $type->jsonLdContext()],
+        );
+    }
+
+
+    /**
+     * The absolute DID URL naming one key within a DID document.
+     *
+     * A published document and the signed artifacts naming keys in it have to agree on these ids, so this
+     * is the one place a key identifier becomes a fragment. A caller emitting a `kid` for a key it also
+     * publishes asks here rather than assembling the id itself, since two spellings of that mapping is how
+     * a signature comes to name a verification method its own document does not contain.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public function verificationMethodIdFor(DidUrl $did, string $keyId): DidUrl
+    {
+        $fragment = DidUrl::encodeFragment($keyId);
+
+        if ($fragment === '') {
+            throw new DidException('A verification method id needs a key identifier to name the key by.');
+        }
+
+        return new DidUrl($did->getDid() . '#' . $fragment);
+    }
+
+
+    /**
+     * The public key a pair publishes, checked by the same rules a retrieved document's key material is.
+     *
+     * A DID document must carry no private key material, and this is the one document where we are the
+     * party who could put it there, so the check runs on the way out as well as on the way in.
+     *
+     * @return array<array-key, mixed>
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    protected function publicJwkFor(SignatureKeyPair $signatureKeyPair): array
+    {
+        $publicJwk = $signatureKeyPair->getKeyPair()->getPublicKey()->jsonSerialize();
+
+        $this->publicJwkValidator->validate($publicJwk);
+
+        return $publicJwk;
+    }
+
+
+    /**
      * @param array<array-key, mixed> $publicJwk
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
@@ -195,12 +358,35 @@ class DidDocumentFactory
             $id->getValue() => new VerificationMethod($id, $type, $subject, $publicJwk),
         ];
 
+        $relationshipMethods = [];
+
+        foreach ($this->relationshipsFor($publicJwk) as $relationship) {
+            $relationshipMethods[$relationship->value] = $verificationMethods;
+        }
+
+        return new DidDocument($subject, $verificationMethods, $relationshipMethods);
+    }
+
+
+    /**
+     * The relationships a key may be listed under in a document this library is the author of.
+     *
+     * Unlike a retrieved document, where the author chose the relationships and an absent `use` contradicts
+     * nothing, here we are the ones asserting them. Granting every relationship would be us claiming an
+     * X25519 key authenticates, so an absent `use` is inferred from the curve instead.
+     *
+     * This is why {@see assertUsableFor()} is not what the building paths ask. That one is the rule for a
+     * document somebody else wrote, and it deliberately lets an absent `use` through.
+     *
+     * @param array<array-key, mixed> $publicJwk
+     * @return list<\SimpleSAML\OpenID\Codebooks\VerificationRelationshipEnum>
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    protected function relationshipsFor(array $publicJwk): array
+    {
         $use = $publicJwk[ClaimsEnum::Use->value] ?? null;
 
-        // Unlike a retrieved document, where the author chose the relationships and an absent use contradicts
-        // nothing, here we are the ones asserting them. Granting every relationship would be us claiming an
-        // X25519 key authenticates, so an absent use is inferred from the curve instead.
-        $relationships = match (true) {
+        return match (true) {
             $use === PublicKeyUseEnum::Encryption->value => VerificationRelationshipEnum::forEncryptionUse(),
             $use === PublicKeyUseEnum::Signature->value => VerificationRelationshipEnum::forSignatureUse(),
             $use !== null => throw new DidException(
@@ -211,14 +397,6 @@ class DidDocumentFactory
             VerificationRelationshipEnum::forEncryptionUse(),
             default => VerificationRelationshipEnum::forSignatureUse(),
         };
-
-        $relationshipMethods = [];
-
-        foreach ($relationships as $relationship) {
-            $relationshipMethods[$relationship->value] = $verificationMethods;
-        }
-
-        return new DidDocument($subject, $verificationMethods, $relationshipMethods);
     }
 
 

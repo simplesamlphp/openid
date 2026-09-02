@@ -24,6 +24,24 @@ enum VerificationMethodTypeEnum: string
 
 
     /**
+     * The JSON-LD context defining this type.
+     *
+     * A published document declares the contexts its members come from, and the verification method type is
+     * the member whose definition varies between documents, so the context follows from the type rather than
+     * being chosen alongside it.
+     */
+    public function jsonLdContext(): string
+    {
+        return match ($this) {
+            self::Ed25519VerificationKey2020 => 'https://w3id.org/security/suites/ed25519-2020/v1',
+            self::JsonWebKey => 'https://w3id.org/security/jwk/v1',
+            self::JsonWebKey2020 => 'https://w3id.org/security/suites/jws-2020/v1',
+            self::Multikey => 'https://w3id.org/security/multikey/v1',
+        };
+    }
+
+
+    /**
      * The curve a suite specific type pins its key material to, or null where the type is a generic one.
      *
      * Without this, a method could name Ed25519VerificationKey2020 and supply an X25519 key, which would then

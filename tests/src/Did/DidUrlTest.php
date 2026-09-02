@@ -169,4 +169,56 @@ final class DidUrlTest extends TestCase
         yield 'illegal character in path' => ['did:web:example.org/pa<th', 'path'];
         yield 'malformed percent encoding in fragment' => ['did:web:example.org#key%zz', 'fragment'];
     }
+
+
+    #[DataProvider('fragmentEncodingDataProvider')]
+    public function testEncodesAFragment(string $value, string $expected): void
+    {
+        $this->assertSame($expected, DidUrl::encodeFragment($value));
+    }
+
+
+    public static function fragmentEncodingDataProvider(): \Iterator
+    {
+        yield 'an ordinary key id is left alone' => ['ec-vci-signing-key-01', 'ec-vci-signing-key-01'];
+        yield 'a JWK thumbprint is left alone' => [
+            'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs',
+            'NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs',
+        ];
+        yield 'sub-delims and the two extra pchars are left alone' => ['a!$&\'()*+,;=:@b', 'a!$&\'()*+,;=:@b'];
+        // The module's own sample configuration offers one of these as a key id.
+        yield 'a did:jwk key id keeps its colons and loses its fragment delimiter' => [
+            'did:jwk:eyJrdHkiOiJFQyJ9#0',
+            'did:jwk:eyJrdHkiOiJFQyJ9%230',
+        ];
+        yield 'a percent is encoded, which is what keeps the mapping injective' => ['a%41', 'a%2541'];
+        yield 'a space is encoded' => ['key 1', 'key%201'];
+        yield 'a slash and a question mark are encoded' => ['a/b?c', 'a%2Fb%3Fc'];
+        yield 'a newline is encoded' => ["key\n", 'key%0A'];
+        yield 'non ascii is encoded byte by byte' => ['kľúč', 'k%C4%BE%C3%BA%C4%8D'];
+        yield 'an empty value stays empty' => ['', ''];
+    }
+
+
+    /**
+     * Encoding is reversible, so a fragment read out of a published document names the key it was minted
+     * from, and two distinct key ids can not collide into one fragment.
+     */
+    #[DataProvider('fragmentEncodingDataProvider')]
+    public function testAnEncodedFragmentDecodesBackToWhatItWasMintedFrom(string $value): void
+    {
+        $this->assertSame($value, rawurldecode(DidUrl::encodeFragment($value)));
+    }
+
+
+    public function testAnEncodedFragmentIsAcceptedAsOne(): void
+    {
+        $keyId = 'did:jwk:eyJrdHkiOiJFQyJ9#0';
+
+        $sut = $this->sut('did:web:example.org#' . DidUrl::encodeFragment($keyId));
+
+        $this->assertTrue($sut->hasFragment());
+        $this->assertSame('did:jwk:eyJrdHkiOiJFQyJ9%230', $sut->getFragment());
+        $this->assertSame('did:web:example.org', $sut->getDid());
+    }
 }

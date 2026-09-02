@@ -278,14 +278,30 @@ class DidWebResolver extends AbstractDidResolver
      */
     public function buildDocumentUrl(string $did): string
     {
-        $didUrl = $this->requireBareDid($did);
+        return self::documentUrlFor($did);
+    }
+
+
+    /**
+     * The same transform, reachable without a resolver.
+     *
+     * Building a resolver means building the HTTP client a did:web fetch runs under, and the two callers who
+     * want the transform alone are not fetching anything: a deployment checking that the DID it was
+     * configured with resolves to the URL it serves, and {@see Factories\DidDocumentFactory::forDidWeb()},
+     * which must not publish a document under an identifier this library could not resolve.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public static function documentUrlFor(string $did): string
+    {
+        $didUrl = self::requireBareDidOfMethod($did, self::METHOD);
 
         // Step 1 of the method's transform: every colon becomes a slash, so the segments between them are the
         // authority followed by the path the document sits under.
         $segments = explode(':', $didUrl->getMethodSpecificId());
-        $authority = $this->buildAuthority(array_shift($segments));
+        $authority = self::buildAuthority(array_shift($segments));
 
-        $pathSegments = array_map($this->requireLiteralPathSegment(...), $segments);
+        $pathSegments = array_map(self::requireLiteralPathSegment(...), $segments);
 
         // With no path of its own, the document lives in the well-known location for the host.
         if ($pathSegments === []) {
@@ -297,11 +313,25 @@ class DidWebResolver extends AbstractDidResolver
 
 
     /**
+     * Refuse a did:web identifier this resolver could not resolve.
+     *
+     * Named for what a caller wants when it has no use for the URL itself, so that the call is not mistaken
+     * for a result being discarded and removed.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    public static function assertIdentifierIsResolvable(string $did): void
+    {
+        self::documentUrlFor($did);
+    }
+
+
+    /**
      * The host, and the port where one was encoded into the identifier.
      *
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    protected function buildAuthority(string $rawAuthority): string
+    protected static function buildAuthority(string $rawAuthority): string
     {
         if ($rawAuthority === '') {
             throw new DidException('did:web identifier does not name a host.');
@@ -315,22 +345,22 @@ class DidWebResolver extends AbstractDidResolver
             throw new DidException('did:web host and port must be separated by a single encoded colon.');
         }
 
-        $host = $this->requireHost($parts[0]);
+        $host = self::requireHost($parts[0]);
 
         if (!isset($parts[1])) {
             return $host;
         }
 
-        return $host . ':' . $this->requirePort($parts[1]);
+        return $host . ':' . self::requirePort($parts[1]);
     }
 
 
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    protected function requireHost(string $host): string
+    protected static function requireHost(string $host): string
     {
-        $this->assertNotPercentEncoded($host, 'host');
+        self::assertNotPercentEncoded($host, 'host');
 
         if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
             throw new DidException('did:web does not permit an IP address as the host.');
@@ -344,7 +374,7 @@ class DidWebResolver extends AbstractDidResolver
             throw new DidException('did:web host is not a syntactically valid domain name.');
         }
 
-        if (preg_match(self::NUMERIC_TOP_LABEL_PATTERN, $host) === 1 || $this->isIpLikeHost($host)) {
+        if (preg_match(self::NUMERIC_TOP_LABEL_PATTERN, $host) === 1 || self::isIpLikeHost($host)) {
             throw new DidException('did:web does not permit an IP address as the host.');
         }
 
@@ -360,7 +390,7 @@ class DidWebResolver extends AbstractDidResolver
      * the only one. It is here because the method specification prohibits an IP literal host outright, and a
      * prohibition worth stating is worth enforcing on more than the one spelling.
      */
-    protected function isIpLikeHost(string $host): bool
+    protected static function isIpLikeHost(string $host): bool
     {
         foreach (explode('.', $host) as $label) {
             if (preg_match(self::IP_LIKE_LABEL_PATTERN, $label) !== 1) {
@@ -375,7 +405,7 @@ class DidWebResolver extends AbstractDidResolver
     /**
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    protected function requirePort(string $port): string
+    protected static function requirePort(string $port): string
     {
         if (preg_match(self::PORT_PATTERN, $port) !== 1 || (int)$port > self::MAX_PORT) {
             throw new DidException('did:web port is not a valid port number.');
@@ -390,7 +420,7 @@ class DidWebResolver extends AbstractDidResolver
      *
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    protected function requireLiteralPathSegment(string $segment): string
+    protected static function requireLiteralPathSegment(string $segment): string
     {
         if ($segment === '') {
             throw new DidException('did:web identifier contains an empty path segment.');
@@ -400,7 +430,7 @@ class DidWebResolver extends AbstractDidResolver
             throw new DidException('did:web path segments must not be relative references.');
         }
 
-        $this->assertNotPercentEncoded($segment, 'path segment');
+        self::assertNotPercentEncoded($segment, 'path segment');
 
         return $segment;
     }
@@ -414,7 +444,7 @@ class DidWebResolver extends AbstractDidResolver
      *
      * @throws \SimpleSAML\OpenID\Exceptions\DidException
      */
-    protected function assertNotPercentEncoded(string $value, string $context): void
+    protected static function assertNotPercentEncoded(string $value, string $context): void
     {
         if (str_contains($value, '%')) {
             throw new DidException(

@@ -8,6 +8,36 @@ it moves.
 Purely additive API — a new class, a new optional argument with a default that
 preserves the old behaviour — is not listed here.
 
+## 0.8.0
+
+### The did:web identifier transform is static
+
+DID document generation is new and additive, and documented in
+[Decentralized Identifier (DID) Tools](7-did.md#publishing-a-document). One part
+of it is not additive.
+
+`DidWebResolver::buildDocumentUrl()` keeps its signature and its behaviour, but
+the transform behind it moved into a new public static `documentUrlFor()`, and
+the six protected helpers it uses — `buildAuthority()`, `requireHost()`,
+`isIpLikeHost()`, `requirePort()`, `requireLiteralPathSegment()` and
+`assertNotPercentEncoded()` — became `protected static`.
+
+**A subclass that overrides any of those will now fail to load**, since PHP
+forbids overriding a static method with a non-static one. Nothing else changes:
+every refusal is the same refusal, with the same message.
+
+The reason is that constructing a `DidWebResolver` constructs the HTTP client a
+did:web fetch runs under, and two callers want the identifier rules while
+fetching nothing: a deployment checking that the DID it was configured with
+transforms to the URL it actually serves, and document publication, which must
+not publish a document under an identifier this library could not resolve.
+
+Adding `static` to such an override restores loading but not its effect — the
+transform reaches these through `self::`, so it uses this class's
+implementations. That is deliberate. There is one implementation of the rules
+deciding where a did:web document may be fetched from, and a second one reachable
+by subclassing would be a way around them rather than an extension point.
+
 ## 0.7.0
 
 ### Decentralized Identifier resolution

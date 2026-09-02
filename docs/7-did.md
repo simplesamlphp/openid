@@ -16,7 +16,9 @@ third points at a web server, so resolving one is a fetch — and the identifier
 that decides where that fetch goes is supplied by whoever is being
 authenticated. Most of what follows is about that difference.
 
-Generating a DID document for publication is not implemented yet.
+Resolution is most of what follows, but not all of it. A deployment identified by
+a `did:web` has to *serve* the document that identifier resolves to, and
+[Publishing a document](#publishing-a-document) builds that one.
 
 To use these tools, create an instance of the `\SimpleSAML\OpenID\Did` class.
 
@@ -424,9 +426,122 @@ object rather than its message — Monolog with `['exception' => $e]`, or an unc
 handler stringifying the chain — will print it. This is the same rule as below:
 render the message, not the chain.
 
+## Publishing a document
+
+Everything above is about documents somebody else published. This is the other
+direction: the document a deployment identified by a `did:web` has to serve at
+the URL its own identifier transforms to.
+
+```php
+use SimpleSAML\OpenID\Did\DidUrl;
+
+$document = $didTools->didDocumentFactory()->forDidWeb(
+    new DidUrl('did:web:example.org:oidc'),
+    $signatureKeyPairBag,
+);
+
+$body = json_encode($document);
+```
+
+```json
+{
+    "@context": [
+        "https://www.w3.org/ns/did/v1",
+        "https://w3id.org/security/suites/jws-2020/v1"
+    ],
+    "id": "did:web:example.org:oidc",
+    "verificationMethod": [
+        {
+            "id": "did:web:example.org:oidc#ec-signing-key-01",
+            "type": "JsonWebKey2020",
+            "controller": "did:web:example.org:oidc",
+            "publicKeyJwk": {
+                "kty": "EC", "crv": "P-256", "x": "…", "y": "…",
+                "use": "sig", "alg": "ES256", "kid": "ec-signing-key-01"
+            }
+        }
+    ],
+    "assertionMethod": ["did:web:example.org:oidc#ec-signing-key-01"]
+}
+```
+
+Only `did:web` has a document to publish. A `did:jwk` or `did:key` document is
+derived from the identifier by whoever resolves it, so there is nothing to serve.
+
+### Which keys to pass
+
+Every pair in the bag becomes a verification method, and this decision is more
+consequential than it looks: a key that signed something still being verified has
+to stay in the document, in the relationship a verifier looks under, long after
+it has stopped signing. Dropping a retired signer makes everything it signed
+unverifiable — and leaving it under `verificationMethod` alone does not help a
+verifier that checks the relationship. Pass every signer that is still valid, not
+only the active one, and include any key used to sign something else the
+deployment publishes, such as a Status List Token.
+
+Only the public half of each pair is read, and it goes through the same validator
+a retrieved document's key material does. A DID document must carry no private
+key material, and this is the one document where *this* library is the party that
+could put it there, so the check runs on the way out as well as on the way in.
+
+A key pair is nonetheless what this takes, so a retired signer has to remain
+configured as a pair for as long as it stays published — its private half cannot
+be discarded first. In practice a deployment is keeping it anyway: re-signing
+anything that key originally signed, such as a Status List Token, needs the
+private half regardless of what the DID document says. A public-only input would
+be the more natural shape for publication alone, and can be added when something
+actually has one.
+
+### Identifiers
+
+The fragment naming each key is derived from its key identifier, percent-encoding
+whatever a fragment cannot carry — so `ec-signing-key-01` is left as it is, while
+a key identifier that is itself a DID URL keeps its colons and loses its `#`.
+Encoding rather than refusing means any configured key identifier can be
+published; the mapping is injective, so two of them can never collide, and it is
+reversible, so a fragment read out of a published document still names its key.
+
+Whatever emits a `kid` for one of these keys must ask for it here rather than
+assembling the id itself:
+
+```php
+$didTools->didDocumentFactory()->verificationMethodIdFor(
+    new DidUrl('did:web:example.org:oidc'),
+    'ec-signing-key-01',
+); // did:web:example.org:oidc#ec-signing-key-01
+```
+
+Two spellings of that mapping is how a signature comes to name a verification
+method its own document does not contain.
+
+### Relationships and type
+
+`assertionMethod` by default, because signing a credential or a status token is
+asserting something and nothing authenticates *as* an issuer. Pass a `list` of
+`VerificationRelationshipEnum` cases to place the keys in others as well. A key
+whose own `use` rules out a relationship — `enc` under a signature relationship —
+is refused rather than published there.
+
+The verification method type defaults to `JsonWebKey2020`. The DID Specification
+Registries deprecate it in favour of `JsonWebKey`, which is also accepted here,
+but it remains the more widely understood of the two. The `@context` follows from
+whichever is chosen, so the two cannot disagree.
+
+### What it refuses
+
+An identifier that is not a bare `did:web`, **or is one this library could not
+resolve** — an IP-literal or single-label host, a percent-encoded segment, a
+relative path segment. Those are the resolver's own rules, asked for rather than
+restated, because a document published under an identifier that does not
+transform to a URL sits somewhere nothing can look it up.
+
+Then: an empty key bag; an empty relationship list, since a key belonging to no
+relationship can be used for nothing; a verification method type that carries
+`publicKeyMultibase` rather than a JWK; an empty key identifier; a key whose
+`use` names neither purpose; and any JWK member that is not public.
+
 ## What is deliberately not supported
 
-- **Generating a DID document** for publication. Resolution only, for now.
 - **Relative DID URLs**, anywhere. The did:web specification requires every DID
   URL inside a document to be absolute, including inside embedded key material,
   precisely to prevent key confusion, and DID Core's general permission for
@@ -447,5 +562,13 @@ render the message, not the chain.
   compressed one for these curves, so a NIST-curve `did:key` produced by another
   implementation is likely to be refused. Ed25519, X25519 and secp256k1 are
   unaffected, as is a key carried as a raw JSON JWK under multicodec `0xeb51`.
-- **`@context`.** It is neither parsed nor validated, since it does not affect
-  key selection.
+- **`@context` in a document being read.** It is neither parsed nor validated,
+  since it does not affect key selection. A document this library *builds*
+  declares one; a document it parsed therefore serialises without any, rather
+  than with one it never saw.
+- **Round-tripping a parsed document.** Serialisation exists for the documents
+  this library builds. A parsed one keeps only what resolution needs, so members
+  that decide nothing about which key resolves — `@context`, `service`,
+  `alsoKnownAs` — cannot come back out of it, and a verification method that
+  arrived as `publicKeyMultibase` refuses to serialise at all rather than being
+  emitted under a type that disagrees with its key material.

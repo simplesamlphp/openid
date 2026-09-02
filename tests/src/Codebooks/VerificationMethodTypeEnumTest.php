@@ -38,6 +38,27 @@ final class VerificationMethodTypeEnumTest extends TestCase
     }
 
 
+    public function testEveryTypeNamesTheContextDefiningIt(): void
+    {
+        $this->assertSame(
+            'https://w3id.org/security/jwk/v1',
+            VerificationMethodTypeEnum::JsonWebKey->jsonLdContext(),
+        );
+        $this->assertSame(
+            'https://w3id.org/security/suites/jws-2020/v1',
+            VerificationMethodTypeEnum::JsonWebKey2020->jsonLdContext(),
+        );
+        $this->assertSame(
+            'https://w3id.org/security/multikey/v1',
+            VerificationMethodTypeEnum::Multikey->jsonLdContext(),
+        );
+        $this->assertSame(
+            'https://w3id.org/security/suites/ed25519-2020/v1',
+            VerificationMethodTypeEnum::Ed25519VerificationKey2020->jsonLdContext(),
+        );
+    }
+
+
     public function testEveryTypeCarriesExactlyOneKindOfKeyMaterial(): void
     {
         $jwkTypes = VerificationMethodTypeEnum::withPublicKeyJwk();

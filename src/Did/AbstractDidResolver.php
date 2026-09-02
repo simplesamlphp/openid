@@ -35,9 +35,24 @@ abstract class AbstractDidResolver implements DidResolverInterface
      */
     protected function requireBareDid(string $did): DidUrl
     {
+        return self::requireBareDidOfMethod($did, $this->methodName());
+    }
+
+
+    /**
+     * The same two checks, for a method reached without an instance of its resolver.
+     *
+     * A method whose identifier rules are worth applying before anything is fetched - did:web's transform,
+     * which a deployment publishing its own document needs - exposes them statically, and makes these two
+     * checks from here rather than restating them.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\DidException
+     */
+    protected static function requireBareDidOfMethod(string $did, string $methodName): DidUrl
+    {
         $didUrl = new DidUrl($did);
 
-        if ($didUrl->getMethod() !== $this->methodName()) {
+        if ($didUrl->getMethod() !== $methodName) {
             throw new DidException(
                 sprintf('DID method "%s" is not one this resolver handles.', $didUrl->getMethod()),
             );

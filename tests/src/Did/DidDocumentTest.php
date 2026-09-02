@@ -18,6 +18,7 @@ use SimpleSAML\OpenID\Exceptions\DidException;
 #[CoversClass(DidDocument::class)]
 #[UsesClass(DidUrl::class)]
 #[UsesClass(VerificationMethod::class)]
+#[UsesClass(VerificationMethodTypeEnum::class)]
 #[UsesClass(ResolvedVerificationMethod::class)]
 final class DidDocumentTest extends TestCase
 {
@@ -153,5 +154,112 @@ final class DidDocumentTest extends TestCase
         $this->expectExceptionMessage('DID document does not contain the requested verification method.');
 
         $sut->resolveVerificationMethod(new DidUrl('did:web:example.org#embedded'));
+    }
+
+
+    public function testCarriesNoContextsUnlessGivenThem(): void
+    {
+        $this->assertSame([], $this->sut()->getContexts());
+        $this->assertArrayNotHasKey('@context', $this->sut()->jsonSerialize());
+    }
+
+
+    public function testSerializesWhatItWasBuiltWith(): void
+    {
+        $verificationMethod = $this->verificationMethod();
+
+        $sut = new DidDocument(
+            self::SUBJECT,
+            [self::METHOD_ID => $verificationMethod],
+            [
+                VerificationRelationshipEnum::AssertionMethod->value => [
+                    self::METHOD_ID => $verificationMethod,
+                ],
+            ],
+            ['https://www.w3.org/ns/did/v1'],
+        );
+
+        $this->assertSame(['https://www.w3.org/ns/did/v1'], $sut->getContexts());
+        $this->assertSame(
+            [
+                '@context' => ['https://www.w3.org/ns/did/v1'],
+                'id' => self::SUBJECT,
+                'verificationMethod' => [
+                    [
+                        'id' => self::METHOD_ID,
+                        'type' => 'JsonWebKey2020',
+                        'controller' => self::SUBJECT,
+                        'publicKeyJwk' => self::PUBLIC_JWK,
+                    ],
+                ],
+                'assertionMethod' => [self::METHOD_ID],
+            ],
+            $sut->jsonSerialize(),
+        );
+    }
+
+
+    public function testSerializesRelationshipsInTheOrderTheyAreDefinedIn(): void
+    {
+        $members = [self::METHOD_ID => $this->verificationMethod()];
+
+        $sut = new DidDocument(
+            self::SUBJECT,
+            $members,
+            [
+                VerificationRelationshipEnum::Authentication->value => $members,
+                VerificationRelationshipEnum::AssertionMethod->value => $members,
+            ],
+        );
+
+        $this->assertSame(
+            ['id', 'verificationMethod', 'assertionMethod', 'authentication'],
+            array_keys($sut->jsonSerialize()),
+        );
+    }
+
+
+    /**
+     * A method the document also defines can be named, and is. One it does not - which is only ever a method
+     * a parsed document embedded under a relationship - has to be emitted inline again, since a reference to
+     * it would name something the document does not contain.
+     */
+    public function testSerializesAnEmbeddedMethodInlineAndADefinedOneByReference(): void
+    {
+        $defined = $this->verificationMethod();
+        $embedded = $this->verificationMethod('did:web:example.org#embedded');
+
+        $sut = new DidDocument(
+            self::SUBJECT,
+            [self::METHOD_ID => $defined],
+            [
+                VerificationRelationshipEnum::Authentication->value => [
+                    self::METHOD_ID => $defined,
+                    'did:web:example.org#embedded' => $embedded,
+                ],
+            ],
+        );
+
+        $this->assertSame(
+            [
+                self::METHOD_ID,
+                [
+                    'id' => 'did:web:example.org#embedded',
+                    'type' => 'JsonWebKey2020',
+                    'controller' => self::SUBJECT,
+                    'publicKeyJwk' => self::PUBLIC_JWK,
+                ],
+            ],
+            $sut->jsonSerialize()['authentication'],
+        );
+    }
+
+
+    public function testSerializesADocumentWithNoMethodsWithoutEmptyMembers(): void
+    {
+        $this->assertSame(
+            ['id' => self::SUBJECT],
+            (new DidDocument(self::SUBJECT, []))->jsonSerialize(),
+        );
     }
 }
