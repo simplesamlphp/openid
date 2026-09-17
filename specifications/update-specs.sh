@@ -34,6 +34,7 @@ URLS=(
     "https://www.rfc-editor.org/rfc/rfc6749.html" # RFC 6749 OAuth 2.0 Authorization Framework
     "https://www.rfc-editor.org/rfc/rfc9126.html" # RFC 9126 OAuth 2.0 Pushed Authorization Requests
     "https://www.rfc-editor.org/rfc/rfc9101.html" # RFC 9101 The OAuth 2.0 Authorization Framework: JWT-Secured Authorization Request (JAR)
+    "https://www.rfc-editor.org/rfc/rfc9068.html" # RFC 9068 JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens
     "https://openid.net/specs/oauth-v2-multiple-response-types-1_0.html" # OAuth 2.0 Multiple Response Type Encoding Practices
     "https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html" # OAuth 2.0 Form Post Response Mode
     # IETF specifications

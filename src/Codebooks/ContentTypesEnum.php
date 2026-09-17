@@ -6,6 +6,9 @@ namespace SimpleSAML\OpenID\Codebooks;
 
 enum ContentTypesEnum: string
 {
+    // JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens, RFC 9068 section 7.1.
+    case ApplicationAtJwt = 'application/at+jwt';
+
     case ApplicationDcSdJwt = 'application/dc+sd-jwt';
 
     case ApplicationEntityStatementJwt = 'application/entity-statement+jwt';
