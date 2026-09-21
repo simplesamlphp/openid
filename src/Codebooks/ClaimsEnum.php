@@ -198,6 +198,10 @@ enum ClaimsEnum: string
 
     case EntityTypes = 'entity_types';
 
+    // The Issuer's OpenID Federation Entity Identifier, carried by an SD-JWT VC under OpenID Fed DCP
+    // (DIIP v5, Appendix B).
+    case Fed = 'fed';
+
     case FederationCollectionEndpoint = 'federation_collection_endpoint';
 
     case FederationFetchEndpoint = 'federation_fetch_endpoint';
@@ -336,6 +340,9 @@ enum ClaimsEnum: string
     case Path = 'path';
 
     case PeerTrustChain = 'peer_trust_chain';
+
+    // Of a W3C VCDM `termsOfUse` entry; under OpenID Fed DCP it carries the Issuer's Entity Identifier.
+    case Policy_Id = 'policyId';
 
     case PolicyUri = 'policy_uri';
 
