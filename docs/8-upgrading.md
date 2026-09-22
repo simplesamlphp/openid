@@ -8,7 +8,7 @@ it moves.
 Purely additive API — a new class, a new optional argument with a default that
 preserves the old behaviour — is not listed here.
 
-## Unreleased
+## 0.9.0
 
 ### A token is expired the second its `exp` is reached
 
