@@ -8,6 +8,25 @@ it moves.
 Purely additive API — a new class, a new optional argument with a default that
 preserves the old behaviour — is not listed here.
 
+## Unreleased
+
+### A token is expired the second its `exp` is reached
+
+`ParsedJws::getExpirationTime()` used to accept a token during the very second
+named by `exp` plus the timestamp validation leeway, and reject it from the next
+second on. RFC 7519 section 4.1.4 (and RFC 9068 section 4 for access tokens)
+has the current time strictly *before* the expiration time, so that second now
+counts as expired too. This affects every token type the library parses; a
+deployment will only notice it if it presents tokens within one second of their
+deadline.
+
+### A Status List Token may not carry the `b64` header parameter
+
+`StatusListToken` now refuses a token whose protected header carries RFC 7797's
+`b64`, as `JwtAccessToken` does: RFC 7797 section 7 keeps the unencoded payload
+option out of JWTs, and the JWS verifier would otherwise honour it. A token that
+carried `b64` together with `crit` was already refused.
+
 ## 0.8.0
 
 ### The did:web identifier transform is static

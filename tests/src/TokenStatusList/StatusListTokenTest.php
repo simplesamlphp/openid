@@ -17,11 +17,13 @@ use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Exceptions\StatusListException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jws\JwsDecorator;
+use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\TokenStatusList\Factories\StatusListFactory;
 use SimpleSAML\OpenID\TokenStatusList\StatusList;
 use SimpleSAML\OpenID\TokenStatusList\StatusListToken;
 
 #[CoversClass(StatusListToken::class)]
+#[UsesClass(ParsedJws::class)]
 #[UsesClass(StatusList::class)]
 #[UsesClass(StatusListFactory::class)]
 #[UsesClass(Helpers::class)]
@@ -324,6 +326,9 @@ final class StatusListTokenTest extends TestCase
         // Present and null is a malformed declaration, not an omitted one, as RFC 7515 requires a `crit` that is
         // there to be a non-empty array.
         yield 'crit that is null' => [['alg' => 'ES256', 'crit' => null, 'typ' => 'statuslist+jwt']];
+        // RFC 7797 section 7 keeps the unencoded payload option out of JWTs, and the verifier would honour it.
+        yield 'b64 false' => [['alg' => 'ES256', 'b64' => false, 'typ' => 'statuslist+jwt']];
+        yield 'b64 true' => [['alg' => 'ES256', 'b64' => true, 'typ' => 'statuslist+jwt']];
         // RFC 7515 has `kid` be a string. It is not required here, the specification mandating no key
         // resolution method, but a malformed one still makes this an invalid JWS.
         yield 'kid as an array' => [['alg' => 'ES256', 'kid' => ['12'], 'typ' => 'statuslist+jwt']];

@@ -41,12 +41,7 @@ class RequestObject extends ParsedJws
      */
     protected function validateSubject(): void
     {
-        if (
-            array_key_exists(
-                ClaimsEnum::Sub->value,
-                $this->getPayload(),
-            )
-        ) {
+        if ($this->hasPayloadClaim(ClaimsEnum::Sub->value)) {
             throw new RequestObjectException('Subject claim must not be present.');
         }
     }

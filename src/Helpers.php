@@ -9,6 +9,7 @@ use SimpleSAML\OpenID\Helpers\Base64Url;
 use SimpleSAML\OpenID\Helpers\DateTime;
 use SimpleSAML\OpenID\Helpers\Hash;
 use SimpleSAML\OpenID\Helpers\Json;
+use SimpleSAML\OpenID\Helpers\MediaType;
 use SimpleSAML\OpenID\Helpers\Random;
 use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Helpers\Url;
@@ -33,6 +34,8 @@ class Helpers
     protected static ?Hash $hash = null;
 
     protected static ?Random $random = null;
+
+    protected static ?MediaType $mediaType = null;
 
 
     public function url(): Url
@@ -80,5 +83,11 @@ class Helpers
     public function random(): Random
     {
         return self::$random ??= new Random();
+    }
+
+
+    public function mediaType(): MediaType
+    {
+        return self::$mediaType ??= new MediaType();
     }
 }

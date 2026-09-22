@@ -65,6 +65,9 @@ enum ClaimsEnum: string
     // Authorized party
     case Azp = 'azp';
 
+    // JWS unencoded payload option, RFC 7797 section 3.
+    case B64 = 'b64';
+
     case BackChannelLogoutSessionRequired = 'backchannel_logout_session_required';
 
     case BackChannelLogoutSessionSupported = 'backchannel_logout_session_supported';
@@ -198,6 +201,9 @@ enum ClaimsEnum: string
 
     case EntityTypes = 'entity_types';
 
+    // RFC 7643 User attribute, registered as a JWT claim by RFC 9068 section 7.2.1.3.
+    case Entitlements = 'entitlements';
+
     // The Issuer's OpenID Federation Entity Identifier, carried by an SD-JWT VC under OpenID Fed DCP
     // (DIIP v5, Appendix B).
     case Fed = 'fed';
@@ -219,6 +225,9 @@ enum ClaimsEnum: string
     case GrantTypes = 'grant_types';
 
     case GrantTypesSupported = 'grant_types_supported';
+
+    // RFC 7643 User attribute, registered as a JWT claim by RFC 9068 section 7.2.1.2.
+    case Groups = 'groups';
 
     case HomepageUri = 'homepage_uri';
 
@@ -421,6 +430,9 @@ enum ClaimsEnum: string
     case RevocationEndpointAuthMethodsSupported = 'revocation_endpoint_auth_methods_supported';
 
     case RevocationEndpointAuthSigningAlgValuesSupported = 'revocation_endpoint_auth_signing_alg_values_supported';
+
+    // RFC 7643 User attribute, registered as a JWT claim by RFC 9068 section 7.2.1.1.
+    case Roles = 'roles';
 
     case Scope = 'scope';
 

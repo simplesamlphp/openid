@@ -60,7 +60,7 @@ class RequestObject extends ParsedJws
     protected function validateForbiddenRequestObjectParams(): void
     {
         foreach ([ParamsEnum::Request, ParamsEnum::RequestUri] as $param) {
-            if (array_key_exists($param->value, $this->getPayload())) {
+            if ($this->hasPayloadClaim($param->value)) {
                 throw new RequestObjectException(
                     sprintf('Request Object must not contain %s.', $param->value),
                 );

@@ -68,13 +68,11 @@ class VcSdJwt extends SdJwt implements VerifiableCredentialInterface
     {
         parent::validate();
 
-        $payload = $this->getPayload();
-
-        if (array_key_exists(ClaimsEnum::Vc->value, $payload)) {
+        if ($this->hasPayloadClaim(ClaimsEnum::Vc->value)) {
             throw new VcDataModelException('SD-JWT VC MUST NOT contain a "vc" claim.');
         }
 
-        if (array_key_exists('vp', $payload)) {
+        if ($this->hasPayloadClaim('vp')) {
             throw new VcDataModelException('SD-JWT VC MUST NOT contain a "vp" claim.');
         }
 

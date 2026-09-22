@@ -12,6 +12,7 @@ use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -98,6 +99,113 @@ class ParsedJws
 
 
     /**
+     * Rejects a token whose protected header marks any parameter as critical. For a subclass to call from its
+     * validate() when its token type defines no JWS extensions.
+     *
+     * RFC 7515 section 4.1.11: "If any of the listed extension Header Parameters are not understood and supported
+     * by the recipient, then the JWS is invalid." and "This Header Parameter MUST be understood and processed by
+     * implementations." This library implements no JWS extension, so whatever "crit" lists is by construction
+     * something the code here does not understand; verifying the signature and reading the claims out anyway
+     * would be skipping semantics the producer said were mandatory.
+     *
+     * Presence is what is checked, not the value: the section forbids the empty list, and a "crit" present with
+     * any other malformed value is a declaration that can not be honoured either.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    protected function enforceNoCriticalHeaderParameters(): void
+    {
+        $claimKey = ClaimsEnum::Crit->value;
+
+        if (!$this->hasHeaderClaim($claimKey)) {
+            return;
+        }
+
+        $crit = $this->getHeaderClaim($claimKey);
+
+        throw new JwsException(
+            sprintf(
+                'Token marks header parameters as critical, and none are supported: %s.',
+                implode(
+                    ', ',
+                    array_map(
+                        static fn(mixed $value): string => var_export($value, true),
+                        is_array($crit) ? $crit : [$crit],
+                    ),
+                ),
+            ),
+        );
+    }
+
+
+    /**
+     * Rejects a token whose protected header carries the RFC 7797 "b64" parameter. For a subclass to call from
+     * its validate() when its token type is a JWT.
+     *
+     * RFC 7797 section 7: "For interoperability reasons, JSON Web Tokens [JWT] MUST NOT use "b64" with a "false"
+     * value." and section 6: "The "crit" Header Parameter MUST be included with "b64" in its set of values when
+     * using the "b64" Header Parameter to cause implementations not implementing "b64" to reject the JWS (instead
+     * of it being misinterpreted)." A "b64" that comes with "crit" falls to enforceNoCriticalHeaderParameters();
+     * one that comes without it is a header the producer was not allowed to write, and the underlying verifier
+     * would honour it all the same, accepting a raw, unencoded payload under a valid signature. So it is refused
+     * whatever its value: section 7 also has a producer omit it when it would be "true".
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    protected function enforceNoUnencodedPayloadOption(): void
+    {
+        $claimKey = ClaimsEnum::B64->value;
+
+        if (!$this->hasHeaderClaim($claimKey)) {
+            return;
+        }
+
+        throw new JwsException(
+            sprintf(
+                'Token carries the %s header parameter, which a JWT may not use: %s.',
+                $claimKey,
+                var_export($this->getHeaderClaim($claimKey), true),
+            ),
+        );
+    }
+
+
+    /**
+     * Enforces that the given optional claims are optional by being absent, rather than by being present with a
+     * null value. For a subclass to call from its validate() with the claims its token type treats as optional.
+     *
+     * The getters read a claim with `??` and return null for one that is missing, which makes an explicit null
+     * indistinguishable from an omission and would let it pass for a claim that was never there. Checked once
+     * here, so that after construction the getters only ever see an absent claim or a valid one.
+     *
+     * @param string[] $payloadClaimKeys
+     * @param string[] $headerClaimKeys
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    protected function enforceNoNullOptionalClaims(array $payloadClaimKeys, array $headerClaimKeys = []): void
+    {
+        $payload = $this->getPayload();
+        $header = $this->getHeader();
+
+        foreach ($payloadClaimKeys as $claimKey) {
+            if (array_key_exists($claimKey, $payload) && is_null($payload[$claimKey])) {
+                throw new JwsException(
+                    sprintf('Claim %s is present and null, which is not a value it may take.', $claimKey),
+                );
+            }
+        }
+
+        foreach ($headerClaimKeys as $claimKey) {
+            if (array_key_exists($claimKey, $header) && is_null($header[$claimKey])) {
+                throw new JwsException(
+                    sprintf('Claim %s is present and null, which is not a value it may take.', $claimKey),
+                );
+            }
+        }
+    }
+
+
+    /**
      * @return array<string,mixed>
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      */
@@ -127,6 +235,29 @@ class ParsedJws
     public function getPayloadClaim(string $key): mixed
     {
         return $this->getPayload()[$key] ?? null;
+    }
+
+
+    /**
+     * Whether the payload carries the claim at all, as distinct from carrying it with a null value, which
+     * getPayloadClaim() cannot tell from an absent one.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function hasPayloadClaim(string $key): bool
+    {
+        return array_key_exists($key, $this->getPayload());
+    }
+
+
+    /**
+     * Whether the protected header carries the parameter at all, as distinct from carrying it with a null value.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     */
+    public function hasHeaderClaim(string $key): bool
+    {
+        return array_key_exists($key, $this->getHeader());
     }
 
 
@@ -295,13 +426,26 @@ class ParsedJws
             return null;
         }
 
+        // A NumericDate may carry a fraction of a second; the comparison keeps it, the returned value does not.
+        // A float the integer conversion below cannot represent (infinite, or beyond 2 ** 53) is refused first:
+        // it would compare as a far-future deadline and then be returned as 0.
+        if (is_float($exp) && (!is_finite($exp) || abs($exp) > Type::MAX_NUMERIC_DATE)) {
+            throw new JwsException(
+                sprintf('Expiration Time claim is not a usable NumericDate: %s.', var_export($exp, true)),
+            );
+        }
+
+        $deadline = is_float($exp) ? $exp : $this->helpers->type()->ensureInt($exp);
         $exp = $this->helpers->type()->ensureInt($exp);
 
+        // RFC 7519 section 4.1.4 has the current time strictly before the expiration time (RFC 9068 section 4
+        // repeats it for access tokens: "The current time MUST be before the time represented by the "exp"
+        // claim."), so the second the deadline is reached, leeway included, the token is already expired.
         if (
             $this->shouldValidateExpirationTime() &&
-            $exp + $this->timestampValidationLeeway->getInSeconds() < time()
+            $deadline + $this->timestampValidationLeeway->getInSeconds() <= time()
         ) {
-            throw new JwsException(sprintf('Expiration Time claim (%d) is lesser than current time.', $exp));
+            throw new JwsException(sprintf('Expiration Time claim (%d) is not after current time.', $exp));
         }
 
         return $exp;

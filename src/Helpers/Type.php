@@ -16,6 +16,14 @@ use Traversable;
 class Type
 {
     /**
+     * Largest magnitude of an RFC 7519 NumericDate that a JSON number carries exactly and that survives the
+     * conversion to a PHP integer, being 2 ** 53. Some 285 million years of seconds, so no legitimate timestamp
+     * comes near it.
+     */
+    public const MAX_NUMERIC_DATE = 9007199254740992;
+
+
+    /**
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
     public function ensureString(mixed $value, ?string $context = null): string
@@ -257,6 +265,127 @@ class Type
         );
 
         throw new InvalidValueException($error);
+    }
+
+
+    /**
+     * Enforces that the value is a JSON string, as distinct from ensureString(), which casts a number, a boolean
+     * or a Stringable into one. Use this wherever a value is acted on as an identifier a producer signed: a
+     * subject of `true` is not the subject "1", and a client identifier of 42 is not the client "42".
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceString(mixed $value, ?string $context = null): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        $error = $this->prepareErrorMessage(
+            'Value is not a string, aborting.',
+            $value,
+            $context,
+        );
+
+        throw new InvalidValueException($error);
+    }
+
+
+    /**
+     * @return non-empty-string
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNonEmptyString(mixed $value, ?string $context = null): string
+    {
+        return $this->ensureNonEmptyString($this->enforceString($value, $context), $context);
+    }
+
+
+    /**
+     * Enforces that the value is a JSON array, which decodes into a PHP list, as distinct from ensureArray(),
+     * which also accepts what a JSON object decodes into. Note that the distinction only goes as far as the
+     * decoding does: a JSON object whose keys happen to be the sequence 0, 1, 2 … decodes into a list as well.
+     *
+     * @return list<mixed>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceList(mixed $value, ?string $context = null): array
+    {
+        if (is_array($value) && array_is_list($value)) {
+            return $value;
+        }
+
+        $error = $this->prepareErrorMessage(
+            'Value is not a list, aborting.',
+            $value,
+            $context,
+        );
+
+        throw new InvalidValueException($error);
+    }
+
+
+    /**
+     * @return list<non-empty-string>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceListOfNonEmptyStrings(mixed $value, ?string $context = null): array
+    {
+        $list = $this->enforceList($value, $context);
+
+        return array_map(
+            fn(mixed $entry): string => $this->enforceNonEmptyString($entry, $context),
+            $list,
+        );
+    }
+
+
+    /**
+     * @return non-empty-list<non-empty-string>
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNonEmptyListOfNonEmptyStrings(mixed $value, ?string $context = null): array
+    {
+        $list = $this->enforceListOfNonEmptyStrings($value, $context);
+
+        if ($list === []) {
+            $error = $this->prepareErrorMessage(
+                'Empty list encountered, aborting.',
+                $value,
+                $context,
+            );
+
+            throw new InvalidValueException($error);
+        }
+
+        return $list;
+    }
+
+
+    /**
+     * Enforces that the value is an RFC 7519 NumericDate: a JSON number (ensureNumber(), so a numeric string does
+     * not satisfy it) whose magnitude a PHP integer can hold exactly. The bound is what stops a nonsensical value
+     * from becoming a plausible one: casting a float beyond the integer range yields 0 rather than saturating, so
+     * an `exp` of 1e100 would otherwise read as the epoch. A fraction of a second is accepted, as RFC 7519 allows
+     * one; whether it is kept or truncated is the caller's to decide.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function enforceNumericDate(mixed $value, ?string $context = null): int|float
+    {
+        $number = $this->ensureNumber($value, $context);
+
+        if ($number < -self::MAX_NUMERIC_DATE || $number > self::MAX_NUMERIC_DATE) {
+            $error = $this->prepareErrorMessage(
+                'Value is not a usable NumericDate, it is outside the representable range, aborting.',
+                $value,
+                $context,
+            );
+
+            throw new InvalidValueException($error);
+        }
+
+        return $number;
     }
 
 

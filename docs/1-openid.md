@@ -7,4 +7,5 @@
 4. [Token Status List (TSL) Tools](5-token-status-list.md)
 5. [Outbound Destination Policy](6-outbound-destination-policy.md)
 6. [Decentralized Identifier (DID) Tools](7-did.md)
-7. [Upgrading](8-upgrading.md)
+7. [OAuth 2.0 Tools](9-oauth2.md)
+8. [Upgrading](8-upgrading.md)

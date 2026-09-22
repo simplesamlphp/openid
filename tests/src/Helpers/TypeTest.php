@@ -286,6 +286,182 @@ final class TypeTest extends TestCase
     }
 
 
+    public function testCanEnforceString(): void
+    {
+        $this->assertSame('a', $this->sut()->enforceString('a'));
+        $this->assertSame('', $this->sut()->enforceString(''));
+        $this->assertSame('0', $this->sut()->enforceString('0'));
+    }
+
+
+    /**
+     * A value ensureString() would cast is not a string to enforceString().
+     *
+     * @return \Iterator<string, array{mixed}>
+     */
+    public static function nonStringProvider(): \Iterator
+    {
+        yield 'int' => [1];
+        yield 'float' => [1.5];
+        yield 'true' => [true];
+        yield 'false' => [false];
+        yield 'null' => [null];
+        yield 'array' => [['a']];
+        yield 'stringable' => [new class () implements \Stringable {
+            public function __toString(): string
+            {
+                return 'a';
+            }
+        }];
+    }
+
+
+    #[DataProvider('nonStringProvider')]
+    public function testEnforceStringThrowsForNonString(mixed $value): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('not a string');
+
+        $this->sut()->enforceString($value, 'context');
+    }
+
+
+    public function testCanEnforceNonEmptyString(): void
+    {
+        $this->assertSame('a', $this->sut()->enforceNonEmptyString('a'));
+        $this->assertSame('0', $this->sut()->enforceNonEmptyString('0'));
+    }
+
+
+    public function testEnforceNonEmptyStringThrowsForEmptyString(): void
+    {
+        $this->expectException(InvalidValueException::class);
+
+        $this->sut()->enforceNonEmptyString('');
+    }
+
+
+    public function testEnforceNonEmptyStringThrowsForNonString(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('not a string');
+
+        $this->sut()->enforceNonEmptyString(1);
+    }
+
+
+    public function testCanEnforceList(): void
+    {
+        $this->assertSame([], $this->sut()->enforceList([]));
+        $this->assertSame(['a', 1, null], $this->sut()->enforceList(['a', 1, null]));
+        // The distinction goes as far as the JSON decoding does: sequential numeric keys decode into a list.
+        $this->assertSame(['a', 'b'], $this->sut()->enforceList([0 => 'a', 1 => 'b']));
+    }
+
+
+    /**
+     * @return \Iterator<string, array{mixed}>
+     */
+    public static function nonListProvider(): \Iterator
+    {
+        yield 'object' => [['a' => 'b']];
+        yield 'non-sequential keys' => [[1 => 'a']];
+        yield 'string' => ['a'];
+        yield 'null' => [null];
+        yield 'int' => [1];
+    }
+
+
+    #[DataProvider('nonListProvider')]
+    public function testEnforceListThrowsForNonList(mixed $value): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('not a list');
+
+        $this->sut()->enforceList($value, 'context');
+    }
+
+
+    public function testCanEnforceListOfNonEmptyStrings(): void
+    {
+        $this->assertSame([], $this->sut()->enforceListOfNonEmptyStrings([]));
+        $this->assertSame(['a', '0'], $this->sut()->enforceListOfNonEmptyStrings(['a', '0']));
+    }
+
+
+    /**
+     * @return \Iterator<string, array{mixed}>
+     */
+    public static function nonListOfNonEmptyStringsProvider(): \Iterator
+    {
+        yield 'object' => [['a' => 'b']];
+        yield 'a number in the list' => [['a', 1]];
+        yield 'an empty string in the list' => [['a', '']];
+        yield 'null in the list' => [['a', null]];
+        yield 'string' => ['a'];
+    }
+
+
+    #[DataProvider('nonListOfNonEmptyStringsProvider')]
+    public function testEnforceListOfNonEmptyStringsThrows(mixed $value): void
+    {
+        $this->expectException(InvalidValueException::class);
+
+        $this->sut()->enforceListOfNonEmptyStrings($value, 'context');
+    }
+
+
+    public function testCanEnforceNonEmptyListOfNonEmptyStrings(): void
+    {
+        $this->assertSame(['a'], $this->sut()->enforceNonEmptyListOfNonEmptyStrings(['a']));
+    }
+
+
+    public function testEnforceNonEmptyListOfNonEmptyStringsThrowsForEmptyList(): void
+    {
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Empty list');
+
+        $this->sut()->enforceNonEmptyListOfNonEmptyStrings([], 'context');
+    }
+
+
+    public function testCanEnforceNumericDate(): void
+    {
+        $this->assertSame(1731175727, $this->sut()->enforceNumericDate(1731175727));
+        $this->assertEqualsWithDelta(1731175727.5, $this->sut()->enforceNumericDate(1731175727.5), PHP_FLOAT_EPSILON);
+        $this->assertSame(0, $this->sut()->enforceNumericDate(0));
+        $this->assertSame(-1, $this->sut()->enforceNumericDate(-1));
+        $this->assertSame(Type::MAX_NUMERIC_DATE, $this->sut()->enforceNumericDate(Type::MAX_NUMERIC_DATE));
+        $this->assertSame(Type::MAX_NUMERIC_DATE, 2 ** 53);
+    }
+
+
+    /**
+     * @return \Iterator<string, array{mixed}>
+     */
+    public static function nonNumericDateProvider(): \Iterator
+    {
+        yield 'numeric string' => ['1731175727'];
+        yield 'beyond the representable range' => [1e100];
+        yield 'beyond the representable range, negative' => [-1e100];
+        yield 'one past the bound' => [Type::MAX_NUMERIC_DATE + 1];
+        yield 'infinite' => [INF];
+        yield 'not a number' => [NAN];
+        yield 'null' => [null];
+        yield 'bool' => [true];
+    }
+
+
+    #[DataProvider('nonNumericDateProvider')]
+    public function testEnforceNumericDateThrows(mixed $value): void
+    {
+        $this->expectException(InvalidValueException::class);
+
+        $this->sut()->enforceNumericDate($value, 'context');
+    }
+
+
     public function testCanEnforceRegex(): void
     {
         $this->assertSame('a', $this->sut()->enforceRegex('a', '/^a$/'));

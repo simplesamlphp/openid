@@ -7,6 +7,7 @@ namespace SimpleSAML\Test\OpenID\Jws;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -430,6 +431,45 @@ final class ParsedJwsTest extends TestCase
 
         $this->expectException(JwsException::class);
         $this->expectExceptionMessage('Expiration');
+
+        $this->sut()->getExpirationTime();
+    }
+
+
+    /**
+     * RFC 7519 section 4.1.4 has the current time strictly before the expiration time, so the second the
+     * deadline (plus leeway, zero here) is reached the token is expired.
+     */
+    public function testThrowsWhenTheExpirationTimeIsReached(): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn(['exp' => time()]);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Expiration');
+
+        $this->sut()->getExpirationTime();
+    }
+
+
+    /**
+     * @return \Iterator<string, array{float}>
+     */
+    public static function unusableExpirationProvider(): \Iterator
+    {
+        yield 'beyond the representable range' => [1e100];
+        yield 'infinite' => [INF];
+    }
+
+
+    #[DataProvider('unusableExpirationProvider')]
+    public function testThrowsIfExpirationIsNotAUsableNumericDate(float $exp): void
+    {
+        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn(['exp' => $exp]);
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('not a usable NumericDate');
 
         $this->sut()->getExpirationTime();
     }
