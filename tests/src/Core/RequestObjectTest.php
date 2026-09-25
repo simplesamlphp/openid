@@ -12,6 +12,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Core\RequestObject;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Exceptions\RequestObjectException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
@@ -23,6 +24,8 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(RequestObject::class)]
 #[UsesClass(ParsedJws::class)]
+#[UsesClass(Helpers::class)]
+#[UsesClass(Helpers\Type::class)]
 final class RequestObjectTest extends TestCase
 {
     protected MockObject $signatureMock;
@@ -85,6 +88,7 @@ final class RequestObjectTest extends TestCase
 
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
     }
@@ -156,5 +160,20 @@ final class RequestObjectTest extends TestCase
         $this->expectExceptionMessage('Alg');
 
         $this->sut()->isProtected();
+    }
+
+
+    /**
+     * RFC 7515 section 4.1.1 has "alg" be a string; a number is refused rather than cast into one.
+     */
+    public function testAlgorithmWhichIsNotAStringIsRefused(): void
+    {
+        $header = $this->sampleHeader;
+        $header['alg'] = 256;
+        $this->signatureMock->method('getProtectedHeader')->willReturn($header);
+
+        $this->expectException(InvalidValueException::class);
+
+        $this->sut(helpers: new Helpers())->getAlgorithm();
     }
 }

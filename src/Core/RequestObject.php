@@ -31,7 +31,7 @@ class RequestObject extends ParsedJws
             throw new RequestObjectException('Missing Algorithm header claim.');
         }
 
-        $alg = $this->helpers->type()->ensureNonEmptyString($alg, $claimKey);
+        $alg = $this->helpers->type()->enforceNonEmptyString($alg, $claimKey);
 
         SignatureAlgorithmEnum::tryFrom($alg) ?? throw new RequestObjectException(
             'Invalid Algorithm header claim.',

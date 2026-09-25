@@ -13,7 +13,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\EntityStatementException;
+use SimpleSAML\OpenID\Exceptions\InvalidValueException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Exceptions\JwsParseException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
@@ -24,6 +27,9 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJws::class)]
 #[UsesClass(SignatureAlgorithmEnum::class)]
+#[UsesClass(Helpers::class)]
+#[UsesClass(Helpers\Json::class)]
+#[UsesClass(Helpers\Type::class)]
 final class ParsedJwsTest extends TestCase
 {
     protected MockObject $jwsDecoratorMock;
@@ -140,6 +146,7 @@ final class ParsedJwsTest extends TestCase
         $this->helpersMock->method('arr')->willReturn($this->arrHelperMock);
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
@@ -437,6 +444,24 @@ final class ParsedJwsTest extends TestCase
 
 
     /**
+     * A token which parsed and then fails a check is not reported as one which could not be parsed, so a caller
+     * can tell the two apart.
+     */
+    public function testAFailedCheckIsNotAParseFailure(): void
+    {
+        $this->jwsMock->method('getPayload')->willReturn('payload-json');
+        $this->jsonHelperMock->method('decode')->willReturn($this->expiredPayload);
+
+        try {
+            $this->sut();
+            $this->fail('An expired token was accepted.');
+        } catch (JwsException $jwsException) {
+            $this->assertNotInstanceOf(JwsParseException::class, $jwsException);
+        }
+    }
+
+
+    /**
      * RFC 7519 section 4.1.4 has the current time strictly before the expiration time, so the second the
      * deadline (plus leeway, zero here) is reached the token is expired.
      */
@@ -521,5 +546,104 @@ final class ParsedJwsTest extends TestCase
         $this->expectExceptionMessage('none');
 
         $this->sut()->getAlgorithm();
+    }
+
+
+    public function testUnknownAlgorithmIsAJwsException(): void
+    {
+        $this->sampleHeader['alg'] = 'HS1024';
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        try {
+            $this->sut()->getAlgorithm();
+            $this->fail('An unknown algorithm was accepted.');
+        } catch (JwsException $jwsException) {
+            $this->assertNotInstanceOf(EntityStatementException::class, $jwsException);
+            $this->assertStringContainsString('Invalid Algorithm', $jwsException->getMessage());
+        }
+    }
+
+
+    public function testStringGettersReturnTheStringsAsCarried(): void
+    {
+        $payload = $this->validPayload;
+        $payload['jti'] = 'jti-1';
+        $payload['id'] = 'id-1';
+
+        $sut = $this->sutWithRealHelpers($this->sampleHeader, $payload);
+
+        $this->assertSame($payload['iss'], $sut->getIssuer());
+        $this->assertSame($payload['sub'], $sut->getSubject());
+        $this->assertSame('jti-1', $sut->getJwtId());
+        $this->assertSame('id-1', $sut->getIdentifier());
+        $this->assertSame($this->sampleHeader['kid'], $sut->getKeyId());
+        $this->assertSame($this->sampleHeader['typ'], $sut->getType());
+        $this->assertSame($this->sampleHeader['alg'], $sut->getAlgorithm());
+    }
+
+
+    /**
+     * @return iterable<string, array{string, bool, string, mixed}>
+     */
+    public static function valueWhichIsNotAStringProvider(): iterable
+    {
+        $getters = [
+            'getIssuer' => [false, 'iss'],
+            'getSubject' => [false, 'sub'],
+            'getJwtId' => [false, 'jti'],
+            'getIdentifier' => [false, 'id'],
+            'getKeyId' => [true, 'kid'],
+            'getType' => [true, 'typ'],
+            'getAlgorithm' => [true, 'alg'],
+        ];
+        $values = ['an integer' => 42, 'a float' => 4.2, 'true' => true, 'a list' => ['RS256']];
+
+        foreach ($getters as $getter => [$inHeader, $claimKey]) {
+            foreach ($values as $label => $value) {
+                yield sprintf('%s, %s', $getter, $label) => [$getter, $inHeader, $claimKey, $value];
+            }
+        }
+    }
+
+
+    /**
+     * RFC 7519 section 2 has a StringOrURI be "A JSON string value", and RFC 7515 sections 4.1.4 and 4.1.9 have
+     * "kid" and "typ" be strings. A number or a boolean is refused rather than cast into one.
+     */
+    #[DataProvider('valueWhichIsNotAStringProvider')]
+    public function testStringGettersRefuseAValueWhichIsNotAString(
+        string $getter,
+        bool $inHeader,
+        string $claimKey,
+        mixed $value,
+    ): void {
+        $header = $this->sampleHeader;
+        $payload = $this->validPayload;
+
+        if ($inHeader) {
+            $header[$claimKey] = $value;
+        } else {
+            $payload[$claimKey] = $value;
+        }
+
+        $sut = $this->sutWithRealHelpers($header, $payload);
+
+        $this->expectException(InvalidValueException::class);
+        $this->expectExceptionMessage('Context: ' . $claimKey);
+
+        $sut->$getter();
+    }
+
+
+    /**
+     * @param array<string,mixed> $header
+     * @param array<string,mixed> $payload
+     */
+    protected function sutWithRealHelpers(array $header, array $payload): ParsedJws
+    {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($header);
+        $this->jwsMock->method('getPayload')->willReturn(json_encode($payload, JSON_THROW_ON_ERROR));
+
+        return $this->sut(helpers: new Helpers());
     }
 }

@@ -111,6 +111,7 @@ final class OpenId4VciProofFactoryTest extends TestCase
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);

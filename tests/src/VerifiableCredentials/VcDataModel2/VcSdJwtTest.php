@@ -122,6 +122,7 @@ final class VcSdJwtTest extends TestCase
             );
 
         $this->typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $this->typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureInt')->willReturnArgument(0);
         $this->typeHelperMock->method('ensureArray')->willReturnArgument(0);
         $this->typeHelperMock->method('enforceUri')->willReturnArgument(0);

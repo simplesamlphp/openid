@@ -8,7 +8,6 @@ use JsonException;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
-use SimpleSAML\OpenID\Exceptions\EntityStatementException;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
@@ -19,6 +18,10 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 use Throwable;
 
 /**
+ * The getters for claims and header parameters that are strings by definition (iss, sub, jti, id, kid, typ, alg)
+ * take a JSON string only, and refuse a number or a boolean rather than cast it into a string the token never
+ * carried.
+ *
  * @see \SimpleSAML\Test\OpenID\Jws\ParsedJwsTest
  */
 class ParsedJws
@@ -341,6 +344,10 @@ class ParsedJws
 
 
     /**
+     * RFC 7519 section 4.1.1: "The "iss" value is a case-sensitive string containing a StringOrURI value." Section
+     * 2 defines a StringOrURI as "A JSON string value, with the additional requirement that while arbitrary string
+     * values MAY be used, any value containing a ":" character MUST be a URI [RFC3986]."
+     *
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -351,13 +358,13 @@ class ParsedJws
 
         $iss = $this->getPayloadClaim($claimKey);
 
-        return is_null($iss) ?
-        null :
-        $this->helpers->type()->ensureNonEmptyString($iss, ClaimsEnum::Iss->value);
+        return is_null($iss) ? null : $this->helpers->type()->enforceNonEmptyString($iss, $claimKey);
     }
 
 
     /**
+     * RFC 7519 section 4.1.2: "The "sub" value is a case-sensitive string containing a StringOrURI value."
+     *
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
@@ -368,7 +375,7 @@ class ParsedJws
 
         $sub = $this->getPayloadClaim($claimKey);
 
-        return is_null($sub) ? null : $this->helpers->type()->ensureNonEmptyString($sub, $claimKey);
+        return is_null($sub) ? null : $this->helpers->type()->enforceNonEmptyString($sub, $claimKey);
     }
 
 
@@ -399,6 +406,8 @@ class ParsedJws
 
 
     /**
+     * RFC 7519 section 4.1.7: "The "jti" value is a case-sensitive string."
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\ClientAssertionException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -410,7 +419,7 @@ class ParsedJws
 
         $jti = $this->getPayloadClaim($claimKey);
 
-        return is_null($jti) ? null : $this->helpers->type()->ensureNonEmptyString($jti, $claimKey);
+        return is_null($jti) ? null : $this->helpers->type()->enforceNonEmptyString($jti, $claimKey);
     }
 
 
@@ -507,13 +516,14 @@ class ParsedJws
 
         $id = $this->getPayloadClaim($claimKey);
 
-        return is_null($id) ?
-        null :
-        $this->helpers->type()->ensureNonEmptyString($id, $claimKey);
+        return is_null($id) ? null : $this->helpers->type()->enforceNonEmptyString($id, $claimKey);
     }
 
 
     /**
+     * RFC 7515 section 4.1.4: "The structure of the "kid" value is unspecified. Its value MUST be a case-sensitive
+     * string."
+     *
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -524,11 +534,13 @@ class ParsedJws
 
         $kid = $this->getHeaderClaim($claimKey);
 
-        return is_null($kid) ? null : $this->helpers->type()->ensureNonEmptyString($kid, $claimKey);
+        return is_null($kid) ? null : $this->helpers->type()->enforceNonEmptyString($kid, $claimKey);
     }
 
 
     /**
+     * RFC 7515 section 4.1.9: a media type, which is a string.
+     *
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -539,11 +551,14 @@ class ParsedJws
 
         $typ = $this->getHeaderClaim($claimKey);
 
-        return is_null($typ) ? null : $this->helpers->type()->ensureNonEmptyString($typ, $claimKey);
+        return is_null($typ) ? null : $this->helpers->type()->enforceNonEmptyString($typ, $claimKey);
     }
 
 
     /**
+     * RFC 7515 section 4.1.1: "The "alg" value is a case-sensitive ASCII string containing a StringOrURI value."
+     * One this library does not know, and "none", are refused.
+     *
      * @return ?non-empty-string
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
@@ -558,9 +573,9 @@ class ParsedJws
             return null;
         }
 
-        $alg = $this->helpers->type()->ensureNonEmptyString($alg, $claimKey);
+        $alg = $this->helpers->type()->enforceNonEmptyString($alg, $claimKey);
 
-        $algEnum = SignatureAlgorithmEnum::tryFrom($alg) ?? throw new EntityStatementException(
+        $algEnum = SignatureAlgorithmEnum::tryFrom($alg) ?? throw new JwsException(
             'Invalid Algorithm header claim.',
         );
 

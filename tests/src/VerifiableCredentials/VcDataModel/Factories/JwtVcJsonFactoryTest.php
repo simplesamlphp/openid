@@ -127,6 +127,7 @@ final class JwtVcJsonFactoryTest extends TestCase
         $this->helpersMock->method('arr')->willReturn(new Helpers\Arr());
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);

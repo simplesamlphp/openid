@@ -8,6 +8,49 @@ it moves.
 Purely additive API — a new class, a new optional argument with a default that
 preserves the old behaviour — is not listed here.
 
+## 0.10.0
+
+### String claims and header parameters are no longer cast into strings
+
+`ParsedJws::getIssuer()`, `getSubject()`, `getJwtId()`, `getIdentifier()`,
+`getKeyId()`, `getType()` and `getAlgorithm()` used to cast a scalar into a
+string: `"iss": 42` came back as `"42"`, `"kid": true` as `"1"`. They now take
+a JSON string only, and throw `InvalidValueException` for anything else, as
+`JwtAccessToken` already did. RFC 7519 section 2 defines a StringOrURI (what
+`iss` and `sub` are) as "A JSON string value", section 4.1.7 has `jti` be a
+string, and RFC 7515 has `alg` (section 4.1.1), `kid` (4.1.4) and `typ` (4.1.9)
+be strings. The same goes for `Core\RequestObject::getAlgorithm()`.
+
+This affects every token type built on `ParsedJws`: entity statements, trust
+marks, ID Tokens, Logout Tokens, client assertions, request objects,
+credentials and proofs. A token that carried one of these as a number or a
+boolean was malformed all along; it is refused now instead of being read as a
+string it never contained.
+
+### An unknown `alg` is a `JwsException`
+
+`ParsedJws::getAlgorithm()` threw `EntityStatementException` for an algorithm
+this library does not know, whatever kind of token it was reading. It now throws
+`JwsException`, the parent class, as it already did for `none`. Code which
+catches `JwsException` or `OpenIdException` is unaffected. Code which catches
+`EntityStatementException` to handle this case has to catch `JwsException`
+instead, for entity statements too, whose `getAlgorithm()` makes the same check.
+An entity statement without an `alg` still throws `EntityStatementException`.
+
+### Telling a value that is not a JWS from a JWS that fails a check
+
+This part is additive, and is listed so a caller knows it can rely on it.
+`JwsDecoratorBuilder::fromToken()` throws the new `JwsParseException` when the
+value can not be parsed as a JWS at all, and so does every `fromToken()` factory
+method built on it but one: `StatusListTokenFactory::fromToken()` refuses
+anything but a JWS Compact Serialization itself, before parsing, with
+`StatusListTokenException` as before. `JwsParseException` extends
+`JwsException`, so existing `catch` blocks still catch it. A token that parses
+and then fails a check on construction (its lifetime, a claim) throws a plain
+`JwsException`, as before. A caller that has to route a value by whether it is
+a JWS, such as with `ParsedJwsFactory::fromToken()`, can now do so with a single
+parse.
+
 ## 0.9.0
 
 ### A token is expired the second its `exp` is reached

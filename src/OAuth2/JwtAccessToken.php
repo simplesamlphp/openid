@@ -81,38 +81,7 @@ class JwtAccessToken extends ParsedJws
     {
         // Section 2.1: "JWT access tokens MUST be signed." and "JWT access tokens MUST NOT use "none" as the
         // signing algorithm." The inherited getter refuses "none" and any algorithm this library does not know.
-        $claimKey = ClaimsEnum::Alg->value;
-
-        $this->helpers->type()->enforceString(
-            $this->getHeaderClaim($claimKey) ?? throw new JwtAccessTokenException('No Algorithm header claim found.'),
-            $claimKey,
-        );
-
         return parent::getAlgorithm() ?? throw new JwtAccessTokenException('No Algorithm header claim found.');
-    }
-
-
-    /**
-     * @return ?non-empty-string
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getKeyId(): ?string
-    {
-        // Not one the profile names, but section 4 has the resource server pick a verification key from those the
-        // authorization server publishes, and "kid" is how a key is pointed at; a non-string one would be cast into
-        // a key identifier that was never in the header.
-        $claimKey = ClaimsEnum::Kid->value;
-
-        $kid = $this->getHeaderClaim($claimKey);
-
-        if (is_null($kid)) {
-            return null;
-        }
-
-        $this->helpers->type()->enforceString($kid, $claimKey);
-
-        return parent::getKeyId();
     }
 
 
@@ -127,13 +96,6 @@ class JwtAccessToken extends ParsedJws
         // is all that is asked of its shape. Section 4 has the resource server compare it: "The issuer identifier
         // for the authorization server (which is typically obtained during discovery) MUST exactly match the value
         // of the "iss" claim." That comparison is the caller's, since only it knows which issuer it expects.
-        $claimKey = ClaimsEnum::Iss->value;
-
-        $this->helpers->type()->enforceString(
-            $this->getPayloadClaim($claimKey) ?? throw new JwtAccessTokenException('No Issuer claim found.'),
-            $claimKey,
-        );
-
         return parent::getIssuer() ?? throw new JwtAccessTokenException('No Issuer claim found.');
     }
 
@@ -151,13 +113,6 @@ class JwtAccessToken extends ParsedJws
         // tokens obtained through grants where no resource owner is involved, such as the client credentials
         // grant, the value of "sub" SHOULD correspond to an identifier the authorization server uses to indicate
         // the client application."
-        $claimKey = ClaimsEnum::Sub->value;
-
-        $this->helpers->type()->enforceString(
-            $this->getPayloadClaim($claimKey) ?? throw new JwtAccessTokenException('No Subject claim found.'),
-            $claimKey,
-        );
-
         return parent::getSubject() ?? throw new JwtAccessTokenException('No Subject claim found.');
     }
 
@@ -278,13 +233,6 @@ class JwtAccessToken extends ParsedJws
     public function getJwtId(): string
     {
         // Section 2.2: "jti REQUIRED - as defined in Section 4.1.7 of [RFC7519]."
-        $claimKey = ClaimsEnum::Jti->value;
-
-        $this->helpers->type()->enforceString(
-            $this->getPayloadClaim($claimKey) ?? throw new JwtAccessTokenException('No JWT ID claim found.'),
-            $claimKey,
-        );
-
         return parent::getJwtId() ?? throw new JwtAccessTokenException('No JWT ID claim found.');
     }
 

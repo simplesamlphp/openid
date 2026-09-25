@@ -33,7 +33,9 @@ class ParsedJwsFactory
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsParseException When the token is not a JWS in any supported
+     * serialization.
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException When it is one, and fails a check on construction.
      */
     public function fromToken(string $token): ParsedJws
     {

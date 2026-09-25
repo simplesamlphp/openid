@@ -97,6 +97,7 @@ final class OpenId4VciProofTest extends TestCase
         $this->helpersMock->method('arr')->willReturn($this->createStub(Helpers\Arr::class));
 
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
         $typeHelperMock->method('ensureArray')->willReturnArgument(0);
 

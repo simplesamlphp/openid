@@ -146,6 +146,7 @@ final class EntityStatementTest extends TestCase
 
         $typeHelperMock->method('ensureString')->willReturnArgument(0);
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
         $typeHelperMock->method('ensureArrayWithValuesAsNonEmptyStrings')->willReturnArgument(0);
 

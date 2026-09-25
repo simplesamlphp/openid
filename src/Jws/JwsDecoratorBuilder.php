@@ -8,6 +8,7 @@ use Jose\Component\Signature\JWSBuilder;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Codebooks\ClaimsEnum;
 use SimpleSAML\OpenID\Exceptions\JwsException;
+use SimpleSAML\OpenID\Exceptions\JwsParseException;
 use SimpleSAML\OpenID\Helpers;
 use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -27,14 +28,15 @@ class JwsDecoratorBuilder
 
 
     /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsParseException When the token is not a JWS in any supported
+     * serialization.
      */
     public function fromToken(string $token): JwsDecorator
     {
         try {
             return $this->serializerManagerDecorator->unserialize($token);
         } catch (Throwable $throwable) {
-            throw new JwsException('Unable to parse token.', (int)$throwable->getCode(), $throwable);
+            throw new JwsParseException('Unable to parse token.', (int)$throwable->getCode(), $throwable);
         }
     }
 

@@ -571,10 +571,28 @@ final class JwtAccessTokenTest extends TestCase
      */
     public function testAFractionOfASecondBeforeExpirationIsNotExpired(): void
     {
-        $exp = time();
-        $this->samplePayload['exp'] = $exp + 0.9;
+        // Holds only within the second the expiry is set in. When the clock ticks before the token is read, it
+        // has rightly expired, so that attempt proves nothing and is made again.
+        for ($attempt = 0; $attempt < 3; ++$attempt) {
+            $exp = time();
+            $this->samplePayload['exp'] = $exp + 0.9;
 
-        $this->assertSame($exp, $this->sut()->getExpirationTime());
+            try {
+                $expirationTime = $this->sut()->getExpirationTime();
+            } catch (JwsException $jwsException) {
+                if (time() !== $exp) {
+                    continue;
+                }
+
+                throw $jwsException;
+            }
+
+            $this->assertSame($exp, $expirationTime);
+
+            return;
+        }
+
+        $this->fail('The clock moved on to the next second during every attempt.');
     }
 
 
