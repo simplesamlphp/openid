@@ -58,6 +58,8 @@ enum ClaimsEnum: string
 
     case AuthorizationEndpoint = 'authorization_endpoint';
 
+    case AuthorizationResponseIssParameterSupported= 'authorization_response_iss_parameter_supported';
+
     case AuthorizationServer = 'authorization_server';
 
     case AuthorizationServers = 'authorization_servers';
