@@ -78,6 +78,7 @@ final class LogoutTokenTest extends TestCase
         $typeHelperMock->method('ensureNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNumericDate')->willReturnArgument(0);
         $typeHelperMock->method('enforceUri')->willReturnArgument(0);
         $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
 

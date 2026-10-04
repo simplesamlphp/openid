@@ -111,6 +111,55 @@ final class JwtAccessTokenTest extends TestCase
     }
 
 
+    /**
+     * The sample token held against a clock fixed at $now.
+     */
+    protected function sutAt(float $now): JwtAccessToken
+    {
+        $this->jwsMock->method('getPayload')->willReturn(json_encode($this->samplePayload));
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+
+        return new class (
+            $now,
+            $this->jwsDecoratorMock,
+            $this->createStub(JwsVerifierDecorator::class),
+            $this->createStub(JwksDecoratorFactory::class),
+            $this->createStub(JwsSerializerManagerDecorator::class),
+            // The stub's leeway is zero seconds.
+            $this->createStub(DateIntervalDecorator::class),
+            $this->helpers,
+            $this->createStub(ClaimFactory::class),
+        ) extends JwtAccessToken {
+            public function __construct(
+                private readonly float $fixedNow,
+                JwsDecorator $jwsDecorator,
+                JwsVerifierDecorator $jwsVerifierDecorator,
+                JwksDecoratorFactory $jwksDecoratorFactory,
+                JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
+                DateIntervalDecorator $timestampValidationLeeway,
+                Helpers $helpers,
+                ClaimFactory $claimFactory,
+            ) {
+                parent::__construct(
+                    $jwsDecorator,
+                    $jwsVerifierDecorator,
+                    $jwksDecoratorFactory,
+                    $jwsSerializerManagerDecorator,
+                    $timestampValidationLeeway,
+                    $helpers,
+                    $claimFactory,
+                );
+            }
+
+
+            protected function currentTime(): float
+            {
+                return $this->fixedNow;
+            }
+        };
+    }
+
+
     public function testCanCreateInstance(): void
     {
         $this->assertInstanceOf(JwtAccessToken::class, $this->sut());
@@ -566,33 +615,27 @@ final class JwtAccessTokenTest extends TestCase
 
 
     /**
-     * The fraction is kept for the expiry comparison, so a token which expires later this second is not yet
-     * expired, and only the returned value is truncated.
+     * The fraction is kept for the expiry comparison, the claim's and the clock's, so a token which expires later
+     * this second is not yet expired, and only the returned value is truncated.
      */
     public function testAFractionOfASecondBeforeExpirationIsNotExpired(): void
     {
-        // Holds only within the second the expiry is set in. When the clock ticks before the token is read, it
-        // has rightly expired, so that attempt proves nothing and is made again.
-        for ($attempt = 0; $attempt < 3; ++$attempt) {
-            $exp = time();
-            $this->samplePayload['exp'] = $exp + 0.9;
+        $this->samplePayload['exp'] = 1_700_000_000.9;
+        $this->samplePayload['iat'] = 1_699_999_940;
 
-            try {
-                $expirationTime = $this->sut()->getExpirationTime();
-            } catch (JwsException $jwsException) {
-                if (time() !== $exp) {
-                    continue;
-                }
+        $this->assertSame(1_700_000_000, $this->sutAt(1_700_000_000.5)->getExpirationTime());
+    }
 
-                throw $jwsException;
-            }
 
-            $this->assertSame($exp, $expirationTime);
+    public function testAFractionOfASecondAfterExpirationIsExpired(): void
+    {
+        $this->samplePayload['exp'] = 1_700_000_000.5;
+        $this->samplePayload['iat'] = 1_699_999_940;
 
-            return;
-        }
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Expiration Time');
 
-        $this->fail('The clock moved on to the next second during every attempt.');
+        $this->sutAt(1_700_000_000.9);
     }
 
 

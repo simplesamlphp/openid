@@ -172,13 +172,6 @@ class JwtAccessToken extends ParsedJws
         // MUST be before the time represented by the "exp" claim. Implementers MAY provide for some small leeway,
         // usually no more than a few minutes, to account for clock skew." The inherited getter applies the
         // configured leeway.
-        $claimKey = ClaimsEnum::Exp->value;
-
-        $this->helpers->type()->enforceNumericDate(
-            $this->getPayloadClaim($claimKey) ?? throw new JwtAccessTokenException('No Expiration Time claim found.'),
-            $claimKey,
-        );
-
         return parent::getExpirationTime() ?? throw new JwtAccessTokenException('No Expiration Time claim found.');
     }
 
@@ -191,37 +184,7 @@ class JwtAccessToken extends ParsedJws
     {
         // Section 2.2: "iat REQUIRED - as defined in Section 4.1.6 of [RFC7519]. This claim identifies the time at
         // which the JWT access token was issued."
-        $claimKey = ClaimsEnum::Iat->value;
-
-        $this->helpers->type()->enforceNumericDate(
-            $this->getPayloadClaim($claimKey) ?? throw new JwtAccessTokenException('No Issued At claim found.'),
-            $claimKey,
-        );
-
         return parent::getIssuedAt() ?? throw new JwtAccessTokenException('No Issued At claim found.');
-    }
-
-
-    /**
-     * Not one the profile names, but a token may carry it and the inherited validation acts on it when it is
-     * there, so it is held to the same NumericDate shape as the timestamps that are named.
-     *
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getNotBefore(): ?int
-    {
-        $claimKey = ClaimsEnum::Nbf->value;
-
-        $nbf = $this->getPayloadClaim($claimKey);
-
-        if (is_null($nbf)) {
-            return null;
-        }
-
-        $this->helpers->type()->enforceNumericDate($nbf, $claimKey);
-
-        return parent::getNotBefore();
     }
 
 

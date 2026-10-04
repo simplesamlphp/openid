@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\OpenID\Jws;
 
+use DateInterval;
 use Jose\Component\Signature\JWS;
 use Jose\Component\Signature\Signature;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -27,11 +28,18 @@ use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 #[CoversClass(ParsedJws::class)]
 #[UsesClass(SignatureAlgorithmEnum::class)]
+#[UsesClass(DateIntervalDecorator::class)]
 #[UsesClass(Helpers::class)]
 #[UsesClass(Helpers\Json::class)]
 #[UsesClass(Helpers\Type::class)]
 final class ParsedJwsTest extends TestCase
 {
+    /**
+     * A whole second to fix the clock at, for the tests which hold timestamps against it.
+     */
+    protected const NOW = 1_700_000_000;
+
+
     protected MockObject $jwsDecoratorMock;
 
     protected MockObject $jwsVerifierDecoratorMock;
@@ -149,6 +157,7 @@ final class ParsedJwsTest extends TestCase
         $typeHelperMock->method('enforceNonEmptyString')->willReturnArgument(0);
         $typeHelperMock->method('ensureArrayWithValuesAsStrings')->willReturnArgument(0);
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNumericDate')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 
@@ -477,29 +486,6 @@ final class ParsedJwsTest extends TestCase
     }
 
 
-    /**
-     * @return \Iterator<string, array{float}>
-     */
-    public static function unusableExpirationProvider(): \Iterator
-    {
-        yield 'beyond the representable range' => [1e100];
-        yield 'infinite' => [INF];
-    }
-
-
-    #[DataProvider('unusableExpirationProvider')]
-    public function testThrowsIfExpirationIsNotAUsableNumericDate(float $exp): void
-    {
-        $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
-        $this->jsonHelperMock->expects($this->once())->method('decode')->willReturn(['exp' => $exp]);
-
-        $this->expectException(JwsException::class);
-        $this->expectExceptionMessage('not a usable NumericDate');
-
-        $this->sut()->getExpirationTime();
-    }
-
-
     public function testThrowsIfIssuedAtInTheFuture(): void
     {
         $this->jwsMock->expects($this->once())->method('getPayload')->willReturn('payload-json');
@@ -525,6 +511,189 @@ final class ParsedJwsTest extends TestCase
         $this->expectExceptionMessage('Not Before');
 
         $this->sut()->getNotBefore();
+    }
+
+
+    /**
+     * @return \Iterator<string, array{string, string, string}>
+     */
+    public static function valueWhichIsNotANumericDateProvider(): \Iterator
+    {
+        $values = [
+            'a numeric string' => ['"1700000000"', 'Value is not a number'],
+            'a numeric string with a fraction' => ['"1700000000.5"', 'Value is not a number'],
+            'a boolean' => ['true', 'Value is not a number'],
+            'a list' => ['[1700000000]', 'Value is not a number'],
+            // A number too large for a double is read as infinity.
+            'infinite' => ['1e400', 'Value is not a number'],
+            // Beyond 2 ** 53 either way, the bound Type::enforceNumericDate() sets.
+            'an integer beyond the representable range' => ['99999999999999999999', 'not a usable NumericDate'],
+            'beyond the representable range' => ['1e100', 'not a usable NumericDate'],
+            'negative beyond the representable range' => ['-1e100', 'not a usable NumericDate'],
+        ];
+
+        foreach (['exp', 'nbf', 'iat'] as $claimKey) {
+            foreach ($values as $label => [$json, $message]) {
+                yield sprintf('%s, %s', $claimKey, $label) => [$claimKey, $json, $message];
+            }
+        }
+    }
+
+
+    /**
+     * RFC 7519 sections 4.1.4 to 4.1.6: "Its value MUST be a number containing a NumericDate value." A numeric
+     * string is refused rather than cast into one, and so is a number beyond 2 ** 53 either way.
+     */
+    #[DataProvider('valueWhichIsNotANumericDateProvider')]
+    public function testTimestampsRefuseAValueWhichIsNotANumericDate(
+        string $claimKey,
+        string $json,
+        string $message,
+    ): void {
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessageMatches(
+            sprintf('/%s[^;]* Context: %s /', preg_quote($message, '/'), $claimKey),
+        );
+
+        $this->sutAt(self::NOW, sprintf('{"%s":%s}', $claimKey, $json));
+    }
+
+
+    /**
+     * @return \Iterator<string, array{float, int, int|float, bool}>
+     */
+    public static function expirationTimeProvider(): \Iterator
+    {
+        yield 'ahead' => [self::NOW, 0, self::NOW + 30, true];
+        yield 'reached' => [self::NOW, 0, self::NOW, false];
+        yield 'half a second ahead, which a truncation would have reached' => [self::NOW, 0, self::NOW + 0.5, true];
+        yield "passed within the clock's second" => [self::NOW + 0.75, 0, self::NOW + 0.5, false];
+        yield 'passed by less than the leeway' => [self::NOW, 60, self::NOW - 59.5, true];
+        yield 'passed by exactly the leeway' => [self::NOW, 60, self::NOW - 60, false];
+        yield 'passed by the leeway and a fraction' => [self::NOW, 60, self::NOW - 60.25, false];
+    }
+
+
+    /**
+     * The claim and the clock are compared with their fractions, and RFC 7519 section 4.1.4 has the token expire
+     * the moment its "exp" is reached, leeway included.
+     */
+    #[DataProvider('expirationTimeProvider')]
+    public function testHoldsTheExpirationTimeAgainstTheClockWithItsFraction(
+        float $now,
+        int $leewaySeconds,
+        int|float $exp,
+        bool $accepted,
+    ): void {
+        if (!$accepted) {
+            $this->expectException(JwsException::class);
+            $this->expectExceptionMessage('Expiration Time claim');
+        }
+
+        $sut = $this->sutAt($now, json_encode(['exp' => $exp], JSON_THROW_ON_ERROR), $leewaySeconds);
+
+        $this->assertSame($exp, $sut->getExpirationTimeNumericDate());
+        $this->assertSame((int)$exp, $sut->getExpirationTime());
+    }
+
+
+    /**
+     * @return \Iterator<string, array{string, float, int, int|float, bool}>
+     */
+    public static function notAheadProvider(): \Iterator
+    {
+        $cases = [
+            'in the past' => [self::NOW, 0, self::NOW - 10, true],
+            'now' => [self::NOW, 0, self::NOW, true],
+            'half a second ahead, which a truncation would let through' => [self::NOW, 0, self::NOW + 0.5, false],
+            "ahead by less than the clock's fraction" => [self::NOW + 0.75, 0, self::NOW + 0.5, true],
+            'as far ahead as the leeway allows' => [self::NOW, 60, self::NOW + 60, true],
+            'half a second further' => [self::NOW, 60, self::NOW + 60.5, false],
+            'a second further' => [self::NOW, 60, self::NOW + 61, false],
+        ];
+
+        foreach (['nbf', 'iat'] as $claimKey) {
+            foreach ($cases as $label => $case) {
+                yield sprintf('%s, %s', $claimKey, $label) => [$claimKey, ...$case];
+            }
+        }
+    }
+
+
+    /**
+     * Neither "nbf" nor "iat" may lie further ahead than the leeway, compared with the fractions of the claim and
+     * of the clock: truncated, "now + leeway + 0.5" would pass.
+     */
+    #[DataProvider('notAheadProvider')]
+    public function testHoldsNotBeforeAndIssuedAtAgainstTheClockWithTheirFractions(
+        string $claimKey,
+        float $now,
+        int $leewaySeconds,
+        int|float $value,
+        bool $accepted,
+    ): void {
+        [$numericDateGetter, $getter, $message] = match ($claimKey) {
+            'nbf' => ['getNotBeforeNumericDate', 'getNotBefore', 'Not Before claim'],
+            default => ['getIssuedAtNumericDate', 'getIssuedAt', 'Issued At claim'],
+        };
+
+        if (!$accepted) {
+            $this->expectException(JwsException::class);
+            $this->expectExceptionMessage($message);
+        }
+
+        $sut = $this->sutAt($now, json_encode([$claimKey => $value], JSON_THROW_ON_ERROR), $leewaySeconds);
+
+        $this->assertSame($value, $sut->$numericDateGetter());
+        $this->assertSame((int)$value, $sut->$getter());
+    }
+
+
+    /**
+     * The clock keeps its fraction: an "exp" read off it a moment earlier has passed, where a whole-second clock
+     * would hold it until its second ends.
+     */
+    public function testTheClockKeepsItsFraction(): void
+    {
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Expiration Time claim');
+
+        $this->sutWithRealHelpers($this->sampleHeader, ['exp' => microtime(true)]);
+    }
+
+
+    /**
+     * A token type used after its expiry (shouldValidateExpirationTime()) skips the clock, and only the clock.
+     */
+    public function testAnExpirationTimeNotHeldAgainstTheClockIsReturned(): void
+    {
+        $sut = $this->sutAt(self::NOW, '{"exp":1600000000.5}', 0, false);
+
+        $this->assertEqualsWithDelta(1600000000.5, $sut->getExpirationTimeNumericDate(), PHP_FLOAT_EPSILON);
+        $this->assertSame(1600000000, $sut->getExpirationTime());
+    }
+
+
+    public function testAnExpirationTimeNotHeldAgainstTheClockIsStillANumericDate(): void
+    {
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Value is not a number');
+
+        $this->sutAt(self::NOW, '{"exp":"1600000000"}', 0, false);
+    }
+
+
+    /**
+     * The base class reads a timestamp that is present and null as one that is absent. A token type which may not
+     * carry a null says so with enforceNoNullOptionalClaims().
+     */
+    public function testReadsATimestampThatIsNullAsAbsent(): void
+    {
+        $sut = $this->sutAt(self::NOW, '{"exp":null,"nbf":null,"iat":null}');
+
+        $this->assertNull($sut->getExpirationTimeNumericDate());
+        $this->assertNull($sut->getNotBeforeNumericDate());
+        $this->assertNull($sut->getIssuedAtNumericDate());
     }
 
 
@@ -645,5 +814,65 @@ final class ParsedJwsTest extends TestCase
         $this->jwsMock->method('getPayload')->willReturn(json_encode($payload, JSON_THROW_ON_ERROR));
 
         return $this->sut(helpers: new Helpers());
+    }
+
+
+    /**
+     * A token with real helpers, read from the given payload JSON and held against a clock fixed at $now.
+     */
+    protected function sutAt(
+        float $now,
+        string $payloadJson,
+        int $leewaySeconds = 0,
+        bool $validateExpirationTime = true,
+    ): ParsedJws {
+        $this->signatureMock->method('getProtectedHeader')->willReturn($this->sampleHeader);
+        $this->jwsMock->method('getPayload')->willReturn($payloadJson);
+
+        return new class (
+            $now,
+            $validateExpirationTime,
+            $this->jwsDecoratorMock,
+            $this->jwsVerifierDecoratorMock,
+            $this->jwksDecoratorFactoryMock,
+            $this->jwsSerializerManagerDecoratorMock,
+            new DateIntervalDecorator(new DateInterval(sprintf('PT%dS', $leewaySeconds))),
+            new Helpers(),
+            $this->claimFactoryMock,
+        ) extends ParsedJws {
+            public function __construct(
+                private readonly float $fixedNow,
+                private readonly bool $validateExpirationTime,
+                JwsDecorator $jwsDecorator,
+                JwsVerifierDecorator $jwsVerifierDecorator,
+                JwksDecoratorFactory $jwksDecoratorFactory,
+                JwsSerializerManagerDecorator $jwsSerializerManagerDecorator,
+                DateIntervalDecorator $timestampValidationLeeway,
+                Helpers $helpers,
+                ClaimFactory $claimFactory,
+            ) {
+                parent::__construct(
+                    $jwsDecorator,
+                    $jwsVerifierDecorator,
+                    $jwksDecoratorFactory,
+                    $jwsSerializerManagerDecorator,
+                    $timestampValidationLeeway,
+                    $helpers,
+                    $claimFactory,
+                );
+            }
+
+
+            protected function shouldValidateExpirationTime(): bool
+            {
+                return $this->validateExpirationTime;
+            }
+
+
+            protected function currentTime(): float
+            {
+                return $this->fixedNow;
+            }
+        };
     }
 }

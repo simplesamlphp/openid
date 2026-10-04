@@ -110,50 +110,7 @@ class StatusListToken extends ParsedJws
      */
     public function getIssuedAt(): int
     {
-        $claimKey = ClaimsEnum::Iat->value;
-
-        $iat = $this->getPayloadClaim($claimKey) ?? throw new StatusListTokenException('No Issued At claim found.');
-
-        $this->helpers->type()->enforceNumericDate($iat, $claimKey);
-
         return parent::getIssuedAt() ?? throw new StatusListTokenException('No Issued At claim found.');
-    }
-
-
-    /**
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getExpirationTime(): ?int
-    {
-        $claimKey = ClaimsEnum::Exp->value;
-
-        // Optional, but only by being absent. Present and null is a malformed claim, not an omitted one.
-        if ($this->hasPayloadClaim($claimKey)) {
-            $this->helpers->type()->enforceNumericDate($this->getPayloadClaim($claimKey), $claimKey);
-        }
-
-        return parent::getExpirationTime();
-    }
-
-
-    /**
-     * The Not Before claim is not one the specification asks a Status List Token to carry, but a token may carry
-     * it, and the inherited validation acts on it when it is there. It therefore gets the same NumericDate
-     * treatment as the claims that are specified, rather than the laxer inherited handling.
-     *
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getNotBefore(): ?int
-    {
-        $claimKey = ClaimsEnum::Nbf->value;
-
-        if ($this->hasPayloadClaim($claimKey)) {
-            $this->helpers->type()->enforceNumericDate($this->getPayloadClaim($claimKey), $claimKey);
-        }
-
-        return parent::getNotBefore();
     }
 
 
@@ -320,11 +277,18 @@ class StatusListToken extends ParsedJws
             $this->getAudience(...),
             $this->getJwtId(...),
             $this->getKeyId(...),
-            // Optional by being absent, not by being present and null; the same rule `exp`, `nbf`, `ttl` and
-            // `crit` get above, applied to the registered claims this token type does not itself require.
+            // Optional by being absent, not by being present and null; the same rule `ttl` and `crit` get above,
+            // applied to the registered claims this token type does not itself require. `nbf` is not one the
+            // specification asks for either, but a token may carry it, and the inherited validation acts on it.
             function (): void {
                 $this->enforceNoNullOptionalClaims(
-                    [ClaimsEnum::Iss->value, ClaimsEnum::Aud->value, ClaimsEnum::Jti->value],
+                    [
+                        ClaimsEnum::Exp->value,
+                        ClaimsEnum::Nbf->value,
+                        ClaimsEnum::Iss->value,
+                        ClaimsEnum::Aud->value,
+                        ClaimsEnum::Jti->value,
+                    ],
                     [ClaimsEnum::Kid->value],
                 );
             },

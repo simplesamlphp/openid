@@ -8,6 +8,37 @@ it moves.
 Purely additive API — a new class, a new optional argument with a default that
 preserves the old behaviour — is not listed here.
 
+## 0.11.0
+
+### Timestamps are held to the NumericDate type
+
+`ParsedJws::getExpirationTime()`, `getNotBefore()` and `getIssuedAt()` used to
+cast a numeric string into an integer: `"exp": "1700000000"` was read as
+`1700000000`. RFC 7519 sections 4.1.4 to 4.1.6 have each of these claims be "a
+number containing a NumericDate value", and section 2 defines a NumericDate as a
+JSON numeric value. A numeric string is now refused with
+`InvalidValueException`, and so is a number beyond 2^53 either way, the bound
+`Helpers\Type::enforceNumericDate()` sets; construction reports either in its
+`JwsException`. `JwtAccessToken` and `StatusListToken` already did this. It now
+holds for every token type built on `ParsedJws`: entity statements, trust marks,
+ID Tokens, Logout Tokens, client assertions, request objects, credentials and
+proofs.
+
+The fraction of a second a NumericDate may carry is now kept when the claim is
+compared with the clock, and so is the clock's own: the comparison is with
+`microtime(true)` rather than `time()`. `nbf` and `iat` used to be truncated
+first, so a value of `now + leeway + 0.5` passed; it is refused now. `exp`
+already kept its fraction, but `time()` rounds the present down, so a token
+whose `exp` was 10.5 still passed at 10.7; it is expired now. For timestamps in
+whole seconds, which is what most issuers write, the verdicts are the same as
+before.
+
+The getters still return whole seconds, truncated. The new
+`getExpirationTimeNumericDate()`, `getNotBeforeNumericDate()` and
+`getIssuedAtNumericDate()` return the claim as carried, and the clock is the
+new protected `currentTime(): float`. A subclass which already declares a method
+of one of these names now overrides it, and has to match its signature.
+
 ## 0.10.0
 
 ### String claims and header parameters are no longer cast into strings

@@ -40,7 +40,8 @@ use Throwable;
  *   token is bound to;
  * - the replay check of section 11.1, on getJwtId() "in the context of the target URI".
  *
- * A failed check surfaces as a DpopProofException from the getter concerned, or as an InvalidValueException for
+ * A failed check surfaces as a DpopProofException from the getter concerned (as a JwsException for the clock
+ * checks on the timestamps, which the base class makes for every token type), or as an InvalidValueException for
  * a value of the wrong shape; validate() runs them all in one pass, so the constructor reports every failure at
  * once in one JwsException.
  *
@@ -201,20 +202,8 @@ class DpopProof extends ParsedJws
      */
     public function getIssuedAtNumericDate(): int|float
     {
-        // Section 4.2: "iat: Creation timestamp of the JWT (Section 4.1.6 of [RFC7519])." A NumericDate, so a JSON
-        // number, which may have a fraction. Compared with it: truncated, "now + leeway + 0.5" would pass.
-        $claimKey = ClaimsEnum::Iat->value;
-
-        $iat = $this->helpers->type()->enforceNumericDate(
-            $this->getPayloadClaim($claimKey) ?? throw new DpopProofException('No Issued At claim found.'),
-            $claimKey,
-        );
-
-        if ($iat - $this->timestampValidationLeeway->getInSeconds() > $this->currentTime()) {
-            throw new DpopProofException(sprintf('Issued At claim (%s) is greater than current time.', $iat));
-        }
-
-        return $iat;
+        // Section 4.2: "iat: Creation timestamp of the JWT (Section 4.1.6 of [RFC7519])." Required.
+        return parent::getIssuedAtNumericDate() ?? throw new DpopProofException('No Issued At claim found.');
     }
 
 
@@ -227,63 +216,6 @@ class DpopProof extends ParsedJws
     public function getIssuedAt(): int
     {
         return (int)$this->getIssuedAtNumericDate();
-    }
-
-
-    /**
-     * Not a claim section 4.2 names, but a proof may carry it, and it is held to what the other timestamps are.
-     *
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getNotBefore(): ?int
-    {
-        $claimKey = ClaimsEnum::Nbf->value;
-
-        $nbf = $this->getPayloadClaim($claimKey);
-
-        if (is_null($nbf)) {
-            return null;
-        }
-
-        $nbf = $this->helpers->type()->enforceNumericDate($nbf, $claimKey);
-
-        if ($nbf - $this->timestampValidationLeeway->getInSeconds() > $this->currentTime()) {
-            throw new DpopProofException(sprintf('Not Before claim (%s) is higher than current time.', $nbf));
-        }
-
-        return (int)$nbf;
-    }
-
-
-    /**
-     * Not a claim section 4.2 names, but a proof may carry it, and it is held to what the other timestamps are.
-     * Expired the moment "exp" plus the leeway is reached, as RFC 7519 section 4.1.4 has the current time strictly
-     * before the expiration time, the way the base class has it.
-     *
-     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
-     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
-     */
-    public function getExpirationTime(): ?int
-    {
-        $claimKey = ClaimsEnum::Exp->value;
-
-        $exp = $this->getPayloadClaim($claimKey);
-
-        if (is_null($exp)) {
-            return null;
-        }
-
-        $exp = $this->helpers->type()->enforceNumericDate($exp, $claimKey);
-
-        if (
-            $this->shouldValidateExpirationTime() &&
-            $exp + $this->timestampValidationLeeway->getInSeconds() <= $this->currentTime()
-        ) {
-            throw new DpopProofException(sprintf('Expiration Time claim (%s) is not after current time.', $exp));
-        }
-
-        return (int)$exp;
     }
 
 
@@ -416,15 +348,6 @@ class DpopProof extends ParsedJws
         $ath = $this->getAccessTokenHash();
 
         return $accessToken !== '' && !is_null($ath) && hash_equals(self::accessTokenHash($accessToken), $ath);
-    }
-
-
-    /**
-     * The clock the timestamps are held against, in seconds with a fraction, since they may carry one.
-     */
-    protected function currentTime(): float
-    {
-        return microtime(true);
     }
 
 

@@ -112,6 +112,7 @@ final class RequestObjectFactoryTest extends TestCase
         $this->helpersMock->method('type')->willReturn($typeHelperMock);
 
         $typeHelperMock->method('ensureInt')->willReturnArgument(0);
+        $typeHelperMock->method('enforceNumericDate')->willReturnArgument(0);
 
         $this->claimFactoryMock = $this->createStub(ClaimFactory::class);
 

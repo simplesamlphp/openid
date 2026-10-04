@@ -261,6 +261,7 @@ final class StatusListTokenTest extends TestCase
         yield 'iat as a numeric string' => [['iat' => '1686920170'] + $base];
         yield 'iat as a boolean' => [['iat' => true] + $base];
         yield 'exp as a numeric string' => [['exp' => '2291720170'] + $base];
+        yield 'nbf as a numeric string' => [['nbf' => '1686920170'] + $base];
         yield 'missing status_list' => [array_diff_key($base, ['status_list' => null])];
         yield 'status_list not an object' => [['status_list' => 'nope'] + $base];
         yield 'missing bits' => [['status_list' => ['lst' => self::EXAMPLE_LST]] + $base];
@@ -291,6 +292,8 @@ final class StatusListTokenTest extends TestCase
         yield 'iss that is null' => [['iss' => null] + $base];
         yield 'aud that is null' => [['aud' => null] + $base];
         yield 'jti that is null' => [['jti' => null] + $base];
+        yield 'exp that is null' => [['exp' => null] + $base];
+        yield 'nbf that is null' => [['nbf' => null] + $base];
     }
 
 

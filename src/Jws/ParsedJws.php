@@ -11,7 +11,6 @@ use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
 use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Helpers;
-use SimpleSAML\OpenID\Helpers\Type;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
@@ -21,6 +20,11 @@ use Throwable;
  * The getters for claims and header parameters that are strings by definition (iss, sub, jti, id, kid, typ, alg)
  * take a JSON string only, and refuse a number or a boolean rather than cast it into a string the token never
  * carried.
+ *
+ * The timestamp getters (exp, nbf, iat) take an RFC 7519 NumericDate only, a JSON number, and refuse a numeric
+ * string rather than cast it. They hold the claim against the clock with the fraction of a second it may carry,
+ * and the clock's own fraction (currentTime()). The get*NumericDate() getters return the claim as carried, the
+ * others in whole seconds, truncated.
  *
  * @see \SimpleSAML\Test\OpenID\Jws\ParsedJwsTest
  */
@@ -77,6 +81,19 @@ class ParsedJws
     protected function shouldValidateExpirationTime(): bool
     {
         return true;
+    }
+
+
+    /**
+     * The clock the timestamps are held against: the current time in seconds, with a fraction, since a NumericDate
+     * may carry one. A whole-second clock such as time() rounds the present down, so within its second an "exp"
+     * of 10.5 would still pass at 10.7, and an "iat" of 10.5 with no leeway would be refused at 10.7 as lying
+     * ahead. For whole-second claims and a whole-second leeway the two clocks give the same verdicts. Tests
+     * override it to pin the time.
+     */
+    protected function currentTime(): float
+    {
+        return microtime(true);
     }
 
 
@@ -424,37 +441,34 @@ class ParsedJws
 
 
     /**
+     * The Expiration Time claim as the token carries it, a fraction of a second included.
+     *
+     * RFC 7519 section 4.1.4: "Its value MUST be a number containing a NumericDate value.", which section 2 has
+     * be a JSON numeric value for which "non-integer values can be represented".
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function getExpirationTime(): ?int
+    public function getExpirationTimeNumericDate(): int|float|null
     {
-        $exp = $this->getPayloadClaim(ClaimsEnum::Exp->value);
+        $claimKey = ClaimsEnum::Exp->value;
+
+        $exp = $this->getPayloadClaim($claimKey);
 
         if (is_null($exp)) {
             return null;
         }
 
-        // A NumericDate may carry a fraction of a second; the comparison keeps it, the returned value does not.
-        // A float the integer conversion below cannot represent (infinite, or beyond 2 ** 53) is refused first:
-        // it would compare as a far-future deadline and then be returned as 0.
-        if (is_float($exp) && (!is_finite($exp) || abs($exp) > Type::MAX_NUMERIC_DATE)) {
-            throw new JwsException(
-                sprintf('Expiration Time claim is not a usable NumericDate: %s.', var_export($exp, true)),
-            );
-        }
-
-        $deadline = is_float($exp) ? $exp : $this->helpers->type()->ensureInt($exp);
-        $exp = $this->helpers->type()->ensureInt($exp);
+        $exp = $this->helpers->type()->enforceNumericDate($exp, $claimKey);
 
         // RFC 7519 section 4.1.4 has the current time strictly before the expiration time (RFC 9068 section 4
         // repeats it for access tokens: "The current time MUST be before the time represented by the "exp"
-        // claim."), so the second the deadline is reached, leeway included, the token is already expired.
+        // claim."), so the moment the deadline is reached, leeway included, the token is already expired.
         if (
             $this->shouldValidateExpirationTime() &&
-            $deadline + $this->timestampValidationLeeway->getInSeconds() <= time()
+            $exp + $this->timestampValidationLeeway->getInSeconds() <= $this->currentTime()
         ) {
-            throw new JwsException(sprintf('Expiration Time claim (%d) is not after current time.', $exp));
+            throw new JwsException(sprintf('Expiration Time claim (%s) is not after current time.', $exp));
         }
 
         return $exp;
@@ -462,21 +476,43 @@ class ParsedJws
 
 
     /**
+     * The Expiration Time claim in whole seconds, truncated; getExpirationTimeNumericDate() has it as carried.
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function getNotBefore(): ?int
+    public function getExpirationTime(): ?int
     {
-        $nbf = $this->getPayloadClaim(ClaimsEnum::Nbf->value);
+        $exp = $this->getExpirationTimeNumericDate();
+
+        return is_null($exp) ? null : (int)$exp;
+    }
+
+
+    /**
+     * The Not Before claim as the token carries it, a fraction of a second included.
+     *
+     * RFC 7519 section 4.1.5: "Its value MUST be a number containing a NumericDate value."
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getNotBeforeNumericDate(): int|float|null
+    {
+        $claimKey = ClaimsEnum::Nbf->value;
+
+        $nbf = $this->getPayloadClaim($claimKey);
 
         if (is_null($nbf)) {
             return null;
         }
 
-        $nbf = $this->helpers->type()->ensureInt($nbf);
+        $nbf = $this->helpers->type()->enforceNumericDate($nbf, $claimKey);
 
-        if ($nbf - $this->timestampValidationLeeway->getInSeconds() > time()) {
-            throw new JwsException(sprintf('Not Before claim (%d) is higher than current time.', $nbf));
+        // Section 4.1.5 has the current time "after or equal to" the not-before time, so the token is refused only
+        // while that time, less the leeway, still lies ahead.
+        if ($nbf - $this->timestampValidationLeeway->getInSeconds() > $this->currentTime()) {
+            throw new JwsException(sprintf('Not Before claim (%s) is higher than current time.', $nbf));
         }
 
         return $nbf;
@@ -484,24 +520,59 @@ class ParsedJws
 
 
     /**
+     * The Not Before claim in whole seconds, truncated; getNotBeforeNumericDate() has it as carried.
+     *
      * @throws \SimpleSAML\OpenID\Exceptions\JwsException
      * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
      */
-    public function getIssuedAt(): ?int
+    public function getNotBefore(): ?int
     {
-        $iat = $this->getPayloadClaim(ClaimsEnum::Iat->value);
+        $nbf = $this->getNotBeforeNumericDate();
+
+        return is_null($nbf) ? null : (int)$nbf;
+    }
+
+
+    /**
+     * The Issued At claim as the token carries it, a fraction of a second included.
+     *
+     * RFC 7519 section 4.1.6: "Its value MUST be a number containing a NumericDate value." A token issued further
+     * ahead than the leeway allows is refused.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getIssuedAtNumericDate(): int|float|null
+    {
+        $claimKey = ClaimsEnum::Iat->value;
+
+        $iat = $this->getPayloadClaim($claimKey);
 
         if (is_null($iat)) {
             return null;
         }
 
-        $iat = $this->helpers->type()->ensureInt($iat);
+        $iat = $this->helpers->type()->enforceNumericDate($iat, $claimKey);
 
-        if ($iat - $this->timestampValidationLeeway->getInSeconds() > time()) {
-            throw new JwsException(sprintf('Issued At claim (%d) is greater than current time.', $iat));
+        if ($iat - $this->timestampValidationLeeway->getInSeconds() > $this->currentTime()) {
+            throw new JwsException(sprintf('Issued At claim (%s) is greater than current time.', $iat));
         }
 
         return $iat;
+    }
+
+
+    /**
+     * The Issued At claim in whole seconds, truncated; getIssuedAtNumericDate() has it as carried.
+     *
+     * @throws \SimpleSAML\OpenID\Exceptions\JwsException
+     * @throws \SimpleSAML\OpenID\Exceptions\InvalidValueException
+     */
+    public function getIssuedAt(): ?int
+    {
+        $iat = $this->getIssuedAtNumericDate();
+
+        return is_null($iat) ? null : (int)$iat;
     }
 
 
