@@ -11,6 +11,9 @@ enum JwtTypesEnum: string
 
     case DcSdJwt = 'dc+sd-jwt';
 
+    // OAuth 2.0 Demonstrating Proof of Possession (DPoP), RFC 9449 section 4.2.
+    case DpopJwt = 'dpop+jwt';
+
     case EntityStatementJwt = 'entity-statement+jwt';
 
     case ExampleSdJwt = 'example+sd-jwt';

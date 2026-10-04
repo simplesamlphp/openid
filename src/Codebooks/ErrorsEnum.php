@@ -12,6 +12,9 @@ enum ErrorsEnum: string
 
     case InvalidClientMetadata = 'invalid_client_metadata';
 
+    // RFC 9449 sections 5 and 7.1
+    case InvalidDpopProof = 'invalid_dpop_proof';
+
     case InvalidIssuer = 'invalid_issuer';
 
     case InvalidMetadata = 'invalid_metadata';
@@ -31,4 +34,7 @@ enum ErrorsEnum: string
     case TemporarilyUnavailable = 'temporarily_unavailable';
 
     case UnsupportedParameter = 'unsupported_parameter';
+
+    // RFC 9449 sections 8 and 9
+    case UseDpopNonce = 'use_dpop_nonce';
 }

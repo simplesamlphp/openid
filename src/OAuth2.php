@@ -16,11 +16,12 @@ use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\OAuth2\Factories\DpopProofFactory;
 use SimpleSAML\OpenID\OAuth2\Factories\JwtAccessTokenFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerManagerDecorator;
 
 /**
- * Entry point for the OAuth 2.0 tools: the JWT access token profile of RFC 9068.
+ * Entry point for the OAuth 2.0 tools: the JWT access token profile of RFC 9068, and the DPoP proofs of RFC 9449.
  *
  * @see \SimpleSAML\Test\OpenID\OAuth2Test
  */
@@ -29,6 +30,8 @@ class OAuth2
     protected ?DateIntervalDecoratorFactory $dateIntervalDecoratorFactory = null;
 
     protected ?JwtAccessTokenFactory $jwtAccessTokenFactory = null;
+
+    protected ?DpopProofFactory $dpopProofFactory = null;
 
     protected ?JwsSerializerManagerDecorator $jwsSerializerManagerDecorator = null;
 
@@ -173,6 +176,41 @@ class OAuth2
             $this->jwksDecoratorFactory(),
             $this->jwsSerializerManagerDecorator(),
             $this->timestampValidationLeewayDecorator(),
+            $this->helpers(),
+            $this->claimFactory(),
+        );
+    }
+
+
+    /**
+     * The factory for DPoP proofs. Their timestamps are held against the leeway given here when there is one,
+     * rather than the one this instance was built with: how far into the future a proof's "iat" may lie is a
+     * choice of its own (RFC 9449 section 11.1 has a server "MAY accept DPoP proofs that carry an iat time in the
+     * reasonably near future"), which a deployment may want fixed whatever leeway its other tokens get. Without
+     * one, the factory is built once and kept, as the others are.
+     */
+    public function dpopProofFactory(?DateInterval $timestampValidationLeeway = null): DpopProofFactory
+    {
+        if (is_null($timestampValidationLeeway)) {
+            return $this->dpopProofFactory ??= $this->buildDpopProofFactory(
+                $this->timestampValidationLeewayDecorator(),
+            );
+        }
+
+        return $this->buildDpopProofFactory(
+            $this->dateIntervalDecoratorFactory()->build($timestampValidationLeeway),
+        );
+    }
+
+
+    protected function buildDpopProofFactory(DateIntervalDecorator $timestampValidationLeeway): DpopProofFactory
+    {
+        return new DpopProofFactory(
+            $this->jwsDecoratorBuilder(),
+            $this->jwsVerifierDecorator(),
+            $this->jwksDecoratorFactory(),
+            $this->jwsSerializerManagerDecorator(),
+            $timestampValidationLeeway,
             $this->helpers(),
             $this->claimFactory(),
         );

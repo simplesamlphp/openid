@@ -13,6 +13,7 @@ use SimpleSAML\OpenID\Helpers\Base64Url;
 use SimpleSAML\OpenID\Helpers\DateTime;
 use SimpleSAML\OpenID\Helpers\Hash;
 use SimpleSAML\OpenID\Helpers\Json;
+use SimpleSAML\OpenID\Helpers\Jwk;
 use SimpleSAML\OpenID\Helpers\MediaType;
 use SimpleSAML\OpenID\Helpers\Random;
 use SimpleSAML\OpenID\Helpers\Type;
@@ -50,5 +51,6 @@ final class HelpersTest extends TestCase
         $this->assertInstanceOf(Hash::class, $sut->hash());
         $this->assertInstanceOf(Random::class, $sut->random());
         $this->assertInstanceOf(MediaType::class, $sut->mediaType());
+        $this->assertInstanceOf(Jwk::class, $sut->jwk());
     }
 }

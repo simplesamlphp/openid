@@ -49,6 +49,9 @@ enum ClaimsEnum: string
     // Access Token hash
     case ATHash = 'at_hash';
 
+    // Access token hash of a DPoP proof, RFC 9449 section 4.2
+    case Ath = 'ath';
+
     // Audience
     case Aud = 'aud';
 
@@ -58,7 +61,7 @@ enum ClaimsEnum: string
 
     case AuthorizationEndpoint = 'authorization_endpoint';
 
-    case AuthorizationResponseIssParameterSupported= 'authorization_response_iss_parameter_supported';
+    case AuthorizationResponseIssParameterSupported = 'authorization_response_iss_parameter_supported';
 
     case AuthorizationServer = 'authorization_server';
 
@@ -181,6 +184,15 @@ enum ClaimsEnum: string
 
     case DotDotDot = '...';
 
+    // Client metadata, RFC 9449 section 5.2
+    case DpopBoundAccessTokens = 'dpop_bound_access_tokens';
+
+    // Authorization request parameter, RFC 9449 section 10
+    case DpopJkt = 'dpop_jkt';
+
+    // Authorization server metadata, RFC 9449 section 5.1
+    case DpopSigningAlgValuesSupported = 'dpop_signing_alg_values_supported';
+
     case EndSessionEndpoint = 'end_session_endpoint';
 
     case EncryptionRequired = 'encryption_required';
@@ -233,6 +245,12 @@ enum ClaimsEnum: string
 
     case HomepageUri = 'homepage_uri';
 
+    // HTTP method of a DPoP proof, RFC 9449 section 4.2
+    case Htm = 'htm';
+
+    // HTTP target URI of a DPoP proof, RFC 9449 section 4.2
+    case Htu = 'htu';
+
     // IssuedAt
     case Iat = 'iat';
 
@@ -275,6 +293,9 @@ enum ClaimsEnum: string
     case Issuer = 'issuer';
 
     case IssuerState = 'issuer_state';
+
+    // JWK SHA-256 Thumbprint confirmation method, RFC 9449 section 6.1
+    case Jkt = 'jkt';
 
     // JWT ID
     case Jti = 'jti';

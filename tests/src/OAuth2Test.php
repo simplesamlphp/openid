@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\OpenID;
 
 use DateInterval;
+use Jose\Component\KeyManagement\JWKFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
@@ -12,17 +13,25 @@ use SimpleSAML\OpenID\Algorithms\AlgorithmManagerDecorator;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmBag;
 use SimpleSAML\OpenID\Algorithms\SignatureAlgorithmEnum;
 use SimpleSAML\OpenID\Decorators\DateIntervalDecorator;
+use SimpleSAML\OpenID\Exceptions\JwsException;
 use SimpleSAML\OpenID\Factories\AlgorithmManagerDecoratorFactory;
 use SimpleSAML\OpenID\Factories\ClaimFactory;
 use SimpleSAML\OpenID\Factories\DateIntervalDecoratorFactory;
 use SimpleSAML\OpenID\Factories\JwsSerializerManagerDecoratorFactory;
 use SimpleSAML\OpenID\Helpers;
+use SimpleSAML\OpenID\Jwk\JwkDecorator;
 use SimpleSAML\OpenID\Jwks\Factories\JwksDecoratorFactory;
+use SimpleSAML\OpenID\Jwks\JwksDecorator;
 use SimpleSAML\OpenID\Jws\Factories\JwsDecoratorBuilderFactory;
 use SimpleSAML\OpenID\Jws\Factories\JwsVerifierDecoratorFactory;
+use SimpleSAML\OpenID\Jws\Factories\ParsedJwsFactory;
+use SimpleSAML\OpenID\Jws\JwsDecorator;
 use SimpleSAML\OpenID\Jws\JwsDecoratorBuilder;
 use SimpleSAML\OpenID\Jws\JwsVerifierDecorator;
+use SimpleSAML\OpenID\Jws\ParsedJws;
 use SimpleSAML\OpenID\OAuth2;
+use SimpleSAML\OpenID\OAuth2\DpopProof;
+use SimpleSAML\OpenID\OAuth2\Factories\DpopProofFactory;
 use SimpleSAML\OpenID\OAuth2\Factories\JwtAccessTokenFactory;
 use SimpleSAML\OpenID\Serializers\JwsSerializerBag;
 use SimpleSAML\OpenID\Serializers\JwsSerializerEnum;
@@ -47,6 +56,18 @@ use SimpleSAML\OpenID\SupportedSerializers;
 #[UsesClass(JwksDecoratorFactory::class)]
 #[UsesClass(ClaimFactory::class)]
 #[UsesClass(JwtAccessTokenFactory::class)]
+#[UsesClass(DpopProofFactory::class)]
+#[UsesClass(ParsedJwsFactory::class)]
+#[UsesClass(DpopProof::class)]
+#[UsesClass(ParsedJws::class)]
+#[UsesClass(JwsDecorator::class)]
+#[UsesClass(JwkDecorator::class)]
+#[UsesClass(JwksDecorator::class)]
+#[UsesClass(Helpers\Json::class)]
+#[UsesClass(Helpers\Jwk::class)]
+#[UsesClass(Helpers\MediaType::class)]
+#[UsesClass(Helpers\Type::class)]
+#[UsesClass(Helpers\Url::class)]
 #[UsesClass(SignatureAlgorithmBag::class)]
 #[UsesClass(SignatureAlgorithmEnum::class)]
 #[UsesClass(JwsSerializerBag::class)]
@@ -88,6 +109,7 @@ final class OAuth2Test extends TestCase
         $this->assertInstanceOf(DateIntervalDecorator::class, $oAuth2->timestampValidationLeewayDecorator());
         $this->assertInstanceOf(ClaimFactory::class, $oAuth2->claimFactory());
         $this->assertInstanceOf(JwtAccessTokenFactory::class, $oAuth2->jwtAccessTokenFactory());
+        $this->assertInstanceOf(DpopProofFactory::class, $oAuth2->dpopProofFactory());
     }
 
 
@@ -112,6 +134,40 @@ final class OAuth2Test extends TestCase
         $this->assertSame($oAuth2->timestampValidationLeewayDecorator(), $oAuth2->timestampValidationLeewayDecorator());
         $this->assertSame($oAuth2->claimFactory(), $oAuth2->claimFactory());
         $this->assertSame($oAuth2->jwtAccessTokenFactory(), $oAuth2->jwtAccessTokenFactory());
+        $this->assertSame($oAuth2->dpopProofFactory(), $oAuth2->dpopProofFactory());
+    }
+
+
+    public function testADpopProofFactoryWithItsOwnLeewayIsNotTheKeptOne(): void
+    {
+        $oAuth2 = $this->sut();
+
+        $this->assertNotSame($oAuth2->dpopProofFactory(), $oAuth2->dpopProofFactory(new DateInterval('PT10S')));
+    }
+
+
+    public function testADpopProofFactoryHoldsProofsToItsOwnLeeway(): void
+    {
+        // The default algorithm, RS256, and the default leeway, a minute.
+        $oAuth2 = $this->sut();
+        $signingKey = new JwkDecorator(JWKFactory::createRSAKey(2048));
+        $payload = [
+            'jti' => '-BwC3ESc6acc2lTc',
+            'htm' => 'POST',
+            'htu' => 'https://server.example.com/token',
+            'iat' => time() + 30,
+        ];
+
+        $this->assertInstanceOf(
+            DpopProof::class,
+            $oAuth2->dpopProofFactory()->fromData($signingKey, SignatureAlgorithmEnum::RS256, $payload),
+        );
+
+        $this->expectException(JwsException::class);
+        $this->expectExceptionMessage('Issued At claim');
+
+        $oAuth2->dpopProofFactory(new DateInterval('PT10S'))
+            ->fromData($signingKey, SignatureAlgorithmEnum::RS256, $payload);
     }
 
 
