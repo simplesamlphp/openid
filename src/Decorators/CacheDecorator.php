@@ -29,9 +29,9 @@ class CacheDecorator
     /**
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function set(mixed $value, int|DateInterval $ttl, string $keyElement, string ...$keyElements): void
+    public function set(mixed $value, int|DateInterval $ttl, string $keyElement, string ...$keyElements): bool
     {
-        $this->cache->set(self::keyFor($keyElement, ...$keyElements), $value, $ttl);
+        return $this->cache->set(self::keyFor($keyElement, ...$keyElements), $value, $ttl);
     }
 
 
